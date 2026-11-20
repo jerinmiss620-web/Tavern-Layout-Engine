@@ -11,3 +11,7 @@
 - Expose status through console, optional Tavern toast and `window.__TLE_REMOTE_LOADER_DIAGNOSTICS__`; no Loader UI is created.
 
 - Add a final safety gate: when a TLE is already active, its version must match the verified LKG before replacement; otherwise the loader refuses the update rather than backing up a different version.
+
+- Correct the v0.3.193 test manifest's truncated 39-character source commit to the verified 40-character Git commit. The Loader trust policy remains strict; malformed metadata is fixed rather than accepted.
+- Add `loader/verify-test-channel.mjs` as a dependency-free publication guard for commit lengths, immutable URLs, SHA-256/byte-size metadata, installer synchronization and the diagnostic Top Layer regression contract.
+- Document how to confirm that v0.3.193 actually loaded before evaluating its diagnostic-button behavior.
