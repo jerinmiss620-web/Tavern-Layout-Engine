@@ -17,6 +17,12 @@
 - A successful syntax check is **not** runtime verification. The CSS pseudo-element mirror may differ from the original DOM mirror in stacking, sticky behavior, clipping, backdrop-filter and scroll performance.
 - The test manifest currently still points to v0.3.193. Testing v0.3.195 requires explicitly loading the test branch source; no automatic channel rollout has occurred.
 
+## Additional observer audit
+
+- Avoid redundant writes to TLE-owned inline CSS variables on `#chat` and `body` when their values have not changed. This reduces unnecessary mutation records during wallpaper and floor-clearance refreshes.
+- Retain detection of theme-originated `#chat` inline style changes; do not suppress these records just because fade is active.
+- These optimizations are static source changes, not measured FPS improvements.
+
 ## Known limitations / required tests
 
 1. Confirm TT's bounded ChatSurface stays running after toggling fade, switching chats and scrolling across mount/unmount boundaries.
