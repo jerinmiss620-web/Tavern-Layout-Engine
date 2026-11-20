@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.193",
     "source_path": "releases/v0.3.193/TLE.js",
-    "source_commit": "edac70c28769ed2cda646bdaac916b81da2ef427",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/edac70c28769ed2cda646bdaac916b81da2ef427/releases/v0.3.193/TLE.js",
+    "source_commit": "ddb8da7b2e55759fbb2fa4807ff7d6f9d629309",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ddb8da7b2e55759fbb2fa4807ff7d6f9d629309/releases/v0.3.193/TLE.js",
     "changelog_path": "releases/v0.3.193/CHANGELOG.md",
-    "sha256": "21d6a0f8cc1f4a8014e40186d581a98fcd19f99274870992ffce6833c63874a7",
-    "size_bytes": 440811
+    "sha256": "41705ccd4f8746889b141c2a653a16b581a648a02434ec564f3bb673f90995bc",
+    "size_bytes": 440734
   },
   "status": "test-only; TLE v0.3.193 Host Diagnostics 2.0 mobile top-layer regression fix; headless Remote Loader v0.3.0; not a stable release",
   "recommended_loader_version": "0.3.0",
