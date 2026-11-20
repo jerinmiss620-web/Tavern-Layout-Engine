@@ -30,7 +30,7 @@ function verifyPinnedRelease(release, expectedPath, expectedUrlPattern) {
   assert.equal(url.hash, '');
 
   const match = url.pathname.match(expectedUrlPattern);
-  assert.ok(match, `Untrusted immutable source URL: ${release.source_url}`);
+  assert.ok(match, 'Untrusted immutable source URL: ' + release.source_url);
   assert.equal(match[1], release.source_commit, 'URL commit and manifest source_commit differ');
   assert.equal(match[2], release.version, 'URL release version and manifest version differ');
 
@@ -41,10 +41,11 @@ function verifyPinnedRelease(release, expectedPath, expectedUrlPattern) {
   return source;
 }
 
+const tlePath = 'releases/v' + manifest.release.version + '/TLE.js';
 const tle = verifyPinnedRelease(
   manifest.release,
-  `releases/v${manifest.release.version}/TLE.js`,
-  /^\\/jerinmiss620-web\\/Tavern-Layout-Engine\\/([a-f0-9]{40})\\/releases\\/v(\\d+\\.\\d+\\.\\d+)\\/TLE\\.js$/
+  tlePath,
+  /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/releases\/v(\d+\.\d+\.\d+)\/TLE\.js$/
 );
 
 const loaderRelease = manifest.loader_release;
@@ -52,27 +53,29 @@ assert.ok(loaderRelease);
 const loader = verifyPinnedRelease(
   loaderRelease,
   'loader/TLE-Remote-Loader-Test-0.3.0.js',
-  /^\\/jerinmiss620-web\\/Tavern-Layout-Engine\\/([a-f0-9]{40})\\/loader\\/TLE-Remote-Loader-Test-0\\.3\\.0\\.js$/
+  /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/loader\/TLE-Remote-Loader-Test-0\.3\.0\.js$/
 );
 assert.equal(loaderRelease.version, '0.3.0');
-assert.match(loader, /const LOADER_VERSION = '0\\.3\\.0'/);
+assert.match(loader, /const LOADER_VERSION = '0\.3\.0'/);
 
 const installer = JSON.parse(read(loaderRelease.installer_path));
 assert.equal(installer.type, 'script');
 assert.equal(installer.id, '8f994fad-ea17-49f8-93af-ebe8ba4f6c67');
 assert.equal(installer.content, loader, 'Tavern Helper installer content is out of sync with Loader source');
 
-assert.match(tle, /if \\(action === 'open-debugger'\\) openMobileDebugger\\(\\);/);
-assert.match(tle, /function handleDiagnosticButtonClick\\(event\\)/);
-assert.match(tle, /HOST_WIN\\.addEventListener\\('click', handleDiagnosticButtonClick, \\{/);
-assert.match(tle, /event\\.stopImmediatePropagation\\(\\)/);
-assert.match(tle, /button\\.removeAttribute\\('popover'\\)/);
-assert.match(tle, /HOST_DOC\\.documentElement\\.appendChild\\(button\\)/);
+assert.match(tle, /if \(action === 'open-debugger'\) openMobileDebugger\(\);/);
+assert.match(tle, /function handleDiagnosticButtonClick\(event\)/);
+assert.match(tle, /HOST_WIN\.addEventListener\('click', handleDiagnosticButtonClick, \{/);
+assert.match(tle, /event\.stopImmediatePropagation\(\)/);
+assert.match(tle, /button\.removeAttribute\('popover'\)/);
+assert.match(tle, /HOST_DOC\.documentElement\.appendChild\(button\)/);
 assert.match(tle, /data-tle-positioning="fixed-document-root-fallback"/);
-assert.match(tle, /function watchDiagnosticButton\\(\\)/);
+assert.match(tle, /function watchDiagnosticButton\(\)/);
 assert.match(tle, /diagnosticButtonObserver/);
 assert.match(tle, /buttonDisplayPriority/);
 assert.match(tle, /buttonReceivesHit/);
-assert.doesNotMatch(tle, /if \\(target\\.closest\\('#' \\+ ID\\.diagnosticButton\\)\\)/);
+assert.match(tle, /top: calc\(env\(safe-area-inset-top, 0px\) \+ 52px\) !important;/);
+assert.doesNotMatch(tle, /inset:\s*auto 12px calc\(env\(safe-area-inset-bottom/);
+assert.doesNotMatch(tle, /if \(target\.closest\('#' \+ ID\.diagnosticButton\)\)/);
 
-console.log(`TLE test-channel regression checks passed: TLE v${manifest.release.version}, Loader v${loaderRelease.version}.`);
+console.log('TLE test-channel regression checks passed: TLE v' + manifest.release.version + ', Loader v' + loaderRelease.version + '.');
