@@ -7784,7 +7784,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         HOST_WIN.addEventListener('unhandledrejection', event => {
           const reason = event.reason;
           rememberDiagnosticError('unhandledrejection',
-            reason?.message || String(reason || 'Unhandled Promise rejection'));
+            typeof reason?.message === 'string' ? reason.message : (typeof reason === 'string' ? '[string rejection omitted for privacy]' : 'Unhandled Promise rejection'));
         }, { signal: state.diagnosticAbort.signal });
       }
       // Enabling diagnostic mode must create the floating entry immediately.
@@ -8970,6 +8970,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         const map = { '10.0': '10/11 family', '6.3': '8.1', '6.2': '8', '6.1': '7' };
         return { name: 'Windows', version: map[m[1]] || m[1], source: 'userAgent', confidence: 'medium' };
       }
+      if (/Macintosh/i.test(ua) && Number(nav.maxTouchPoints || 0) > 1) return { name: 'iPadOS/macOS touch-capable UA (ambiguous)', version: null, source: 'userAgent + maxTouchPoints', confidence: 'low' };
       if ((m = ua.match(/Mac OS X\s([\d_]+)/i))) return { name: 'macOS', version: m[1].replace(/_/g, '.'), source: 'userAgent', confidence: 'medium' };
       if (/CrOS/i.test(ua)) return { name: 'ChromeOS', version: null, source: 'userAgent', confidence: 'low' };
       if (/Linux/i.test(ua)) return { name: 'Linux', version: null, source: 'userAgent', confidence: 'low' };
@@ -9145,6 +9146,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       reasoningResolverResult: diagnosticSafe(() => selectedText('#reasoning_select'), null),
     };
 
+    const quickGroupSummary = diagnosticSafe(() => {
+      const raw = JSON.parse(HOST_WIN.localStorage.getItem(QUICK_GROUP_KEY) || 'null');
+      if (!raw || raw.schema !== 2 || !raw.groupsByModule) return { status: raw ? 'unrecognized-schema' : 'not-configured', groupCounts: {}, assignmentCounts: {} };
+      const groupCounts = {};
+      const assignmentCounts = {};
+      for (const item of QUICK_MODULES) {
+        groupCounts[item.id] = Array.isArray(raw.groupsByModule[item.id]) ? raw.groupsByModule[item.id].length : 0;
+        assignmentCounts[item.id] = raw.assignments?.[item.id] && typeof raw.assignments[item.id] === 'object' ? Object.keys(raw.assignments[item.id]).length : 0;
+      }
+      return { status: 'schema-v2', groupCounts, assignmentCounts, legacyV1Present: HOST_WIN.localStorage.getItem(QUICK_GROUP_LEGACY_KEY) !== null };
+    }, { status: 'unavailable', groupCounts: {}, assignmentCounts: {} });
     const hostName = ttRuntime ? 'TauriTavern' : (typeof stApi?.getContext === 'function' ? 'SillyTavern' : 'Unknown');
     const slashContextAvailable = Boolean(context && typeof context === 'object');
     const slashExecutorAvailable = typeof context?.executeSlashCommandsWithOptions === 'function';
@@ -9181,12 +9193,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       remoteLoaderTestVersion: diagnosticSafe(() => HOST_WIN.__TLE_REMOTE_LOADER_TEST_V1__?.version || null, null),
       active: state.active,
       destroyed: state.destroyed,
-      navigation: { mode: navigationMode, docked: state.mobileNav.docked, mobileNavOpen: state.mobileNav.open, pcHamburgerEnabled, desktopNavLabels: getDesktopNavLabelsEnabled(), globalSearchEnabled, globalSearchOpen: state.globalSearchOpen, searchPanelPresent: Boolean(state.globalSearchPanel?.isConnected), navEntryPresent: Boolean(state.navEntry?.isConnected) },
+      navigation: { mode: navigationMode, docked: state.mobileNav.docked, mobileNavOpen: state.mobileNav.open, pcHamburgerEnabled, desktopNavLabels: getDesktopNavLabelsEnabled(), globalSearchEnabled, globalSearchOpen: state.globalSearchOpen, searchPanelPresent: Boolean(state.globalSearchPanel?.isConnected), navEntryPresent: Boolean(state.navEntry?.isConnected), searchObserverPresent: Boolean(search.observer), searchControlCount: search.controls?.size || 0, searchResultCount: search.matches?.length || 0 },
       workspace: { presetApplied: state.preset.applied, presetRootPresent: Boolean(state.preset.root?.isConnected), characterApplied: state.character.applied, characterRootPresent: Boolean(state.character.root?.isConnected) },
       informationStation: infoStationDiagnostic,
-      quickSwitch: { moduleIds: QUICK_MODULES.map(item => item.id), groupManagerOpen: Boolean(HOST_DOC.querySelector('#tle-quick-group-manager')), pickerOpen: Boolean(HOST_DOC.querySelector('#tle-quick-picker')) },
+      quickSwitch: { moduleIds: QUICK_MODULES.map(item => item.id), groups: quickGroupSummary, groupManagerOpen: Boolean(HOST_DOC.querySelector('#tle-quick-group-manager')), pickerOpen: Boolean(HOST_DOC.querySelector('#tle-quick-picker')) },
       optionalFolds: { enabled: foldConfig.enabled, options: { ...foldConfig.options }, activeFoldCount: foldRecords.size, observerPresent: Boolean(state.presetFoldObserver) },
-      chatTools: { enabled: chatToolsEnabled, open: state.chatTools.open, buttonPresent: Boolean(state.chatTools.button?.isConnected), panelPresent: Boolean(state.chatTools.panel?.isConnected), recentLoading: state.chatTools.recent.loading, actions: CHAT_ACTIONS.map(item => item.id) },
+      chatTools: { enabled: chatToolsEnabled, open: state.chatTools.open, buttonPresent: Boolean(state.chatTools.button?.isConnected), panelPresent: Boolean(state.chatTools.panel?.isConnected), recentLoading: state.chatTools.recent.loading, recentItemCount: state.chatTools.recent.items?.length || 0, currentChatFilter: state.chatTools.recent.onlyCurrent, actions: CHAT_ACTIONS.map(item => item.id) },
       chatShortcut: { present: Boolean(state.chatShortcut?.isConnected), destination: chatShortcutDestination },
       chatFade: { enabled: chatFadeEnabled, active: state.chatFade.active, bottomPaddingEnabled: chatFadeBottomPaddingEnabled, anchorObserverPresent: Boolean(state.chatFade.anchorObserver), wallpaperObserverPresent: Boolean(state.chatFade.wallpaperObserver), parentObserverPresent: Boolean(state.chatFade.wallpaperParentObserver), mirrorPresent: Boolean(HOST_DOC.getElementById(ID.chatFadeMirror)?.isConnected) },
       scrollBottom: { enabled: scrollBottomEnabled, buttonPresent: Boolean(state.scrollBottom.button?.isConnected), generating: state.scrollBottom.generating, eventSourcePresent: Boolean(state.scrollBottom.eventSource), listenerCount: state.scrollBottom.eventListeners?.length || 0 },
