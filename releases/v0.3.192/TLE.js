@@ -8929,9 +8929,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       return null;
     };
-    const hostVersion = readVersion(ttRuntime, ['version', 'appVersion', 'buildVersion', 'versionString'])
-      || readVersion(stApi, ['version', 'appVersion', 'buildVersion', 'versionString'])
-      || readVersion(context, ['version', 'appVersion', 'buildVersion', 'versionString']);
+    const hostVersion = [
+      ['TauriTavern runtime', ttRuntime],
+      ['SillyTavern API', stApi],
+      ['SillyTavern context', context],
+    ].map(([label, object]) => {
+      const found = readVersion(object, ['version', 'appVersion', 'buildVersion', 'versionString']);
+      return found ? { ...found, source: `${label}.${found.source}` } : null;
+    }).find(Boolean);
     const helperGlobals = (() => {
       try { return Object.getOwnPropertyNames(HOST_WIN).filter(name => /tavern.*helper|helper.*tavern/i.test(name)).slice(0, 20); }
       catch { return []; }
@@ -8940,7 +8945,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       try { return HOST_WIN.TavernHelper || HOST_WIN.tavernHelper || HOST_WIN.TAVERN_HELPER || null; }
       catch { return null; }
     })();
-    const helperVersion = readVersion(helperObject, ['version', 'VERSION', 'appVersion', 'buildVersion']);
+    const helperVersionRaw = readVersion(helperObject, ['version', 'VERSION', 'appVersion', 'buildVersion']);
+    const helperVersion = helperVersionRaw ? { ...helperVersionRaw, source: `TavernHelper.${helperVersionRaw.source}` } : null;
 
     const clientHints = diagnosticClientHints || { status: 'unavailable' };
     const browserFromUA = (() => {
