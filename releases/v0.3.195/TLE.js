@@ -10284,7 +10284,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   state.reasoningFormatObserver = reasoningFormatObserver;
   state.abort.signal.addEventListener('abort', () => reasoningFormatObserver.disconnect(), { once: true });
   HOST_WIN.addEventListener('chat_changed', queueInfoRefresh, { signal: state.abort.signal });
-  HOST_WIN.addEventListener('chat_changed', queueFloorZeroSpacerSync, { signal: state.abort.signal });
+  HOST_WIN.addEventListener('chat_changed', queueFloorZeroClearanceSync, { signal: state.abort.signal });
   HOST_WIN.addEventListener('chat_changed', queueChatShortcutRefresh, { signal: state.abort.signal });
   HOST_WIN.addEventListener('chat_changed', scheduleChatFadeRefresh, { signal: state.abort.signal });
   HOST_WIN.addEventListener('character_selected', queueInfoRefresh, { signal: state.abort.signal });
@@ -10299,7 +10299,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (event.target?.id === 'your_name') updateWorkspaceHeader();
   }, { signal: state.abort.signal });
   HOST_WIN.addEventListener('preset_changed', queueInfoRefresh, { signal: state.abort.signal });
-  HOST_WIN.addEventListener('resize', queueFloorZeroSpacerSync, { passive: true, signal: state.abort.signal });
+  HOST_WIN.addEventListener('resize', queueFloorZeroClearanceSync, { passive: true, signal: state.abort.signal });
 
   queueInfoRefresh();
   SCRIPT_WIN.addEventListener('pagehide', destroy, { once: true, signal: state.abort.signal });
