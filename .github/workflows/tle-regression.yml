@@ -1,0 +1,29 @@
+name: TLE release regression checks
+
+on:
+  push:
+    paths:
+      - 'channels/test.json'
+      - 'loader/**'
+      - 'releases/**'
+      - 'tests/**'
+      - '.github/workflows/tle-regression.yml'
+  pull_request:
+    paths:
+      - 'channels/test.json'
+      - 'loader/**'
+      - 'releases/**'
+      - 'tests/**'
+      - '.github/workflows/tle-regression.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify pinned releases and diagnostic regressions
+        run: node tests/tle-regression.test.mjs
