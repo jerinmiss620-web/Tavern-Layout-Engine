@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.192",
     "source_path": "releases/v0.3.192/TLE.js",
-    "source_commit": "824db7a0ad3c63e7f9c61b9496461f092b8aedd8",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/824db7a0ad3c63e7f9c61b9496461f092b8aedd8/releases/v0.3.192/TLE.js",
+    "source_commit": "2473bae73d1038bc27bcd2e16e1217fda76777f7",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2473bae73d1038bc27bcd2e16e1217fda76777f7/releases/v0.3.192/TLE.js",
     "changelog_path": "releases/v0.3.192/CHANGELOG.md",
-    "sha256": "d0168e1e877c03c4e9617cc462c572e42879603a2f63f1ce10686286b34e6736",
-    "size_bytes": 432923
+    "sha256": "178f0fa8cb66ebeb2b79f67f12e4ada5f3f2f42b2fe5e82acb3a45b2726e64ca",
+    "size_bytes": 433144
   },
   "status": "test-only; TLE Host Diagnostics 2.0; not a stable release",
   "recommended_loader_version": "0.2.0"
