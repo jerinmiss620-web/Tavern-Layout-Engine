@@ -1091,7 +1091,9 @@ body[data-tle-compat-panel-bg][data-tle-compat-panel-bg-mode="custom"] #${ID.pan
 body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   padding-block-start: calc(
     var(--tle-floor-zero-padding-base, 0px) +
-    max(0px, env(safe-area-inset-top, 0px) + 48px - var(--tle-floor-zero-message-margin, 0px))
+    max(0px, env(safe-area-inset-top, 0px) + 48px
+      - var(--tle-floor-zero-message-margin, 0px)
+      - var(--tle-floor-zero-row-gap, 0px))
   ) !important;
 }
 
@@ -6000,12 +6002,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   const FLOOR_ZERO_MEASURING_ATTRIBUTE = 'data-tle-floor-zero-measuring';
   const FLOOR_ZERO_PADDING_BASE_VAR = '--tle-floor-zero-padding-base';
   const FLOOR_ZERO_MESSAGE_MARGIN_VAR = '--tle-floor-zero-message-margin';
+  const FLOOR_ZERO_ROW_GAP_VAR = '--tle-floor-zero-row-gap';
 
   function clearFloorZeroClearance() {
     const body = HOST_DOC.body;
     body?.removeAttribute(FLOOR_ZERO_MEASURING_ATTRIBUTE);
     body?.style.removeProperty(FLOOR_ZERO_PADDING_BASE_VAR);
     body?.style.removeProperty(FLOOR_ZERO_MESSAGE_MARGIN_VAR);
+    body?.style.removeProperty(FLOOR_ZERO_ROW_GAP_VAR);
     state.floorZeroClearanceChat = null;
   }
 
@@ -6040,9 +6044,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       : '0';
     const parsedMargin = Number.parseFloat(rawMargin);
     const messageMargin = Number.isFinite(parsedMargin) ? parsedMargin : 0;
+    const display = chatStyle.display || '';
+    const isGrid = display === 'grid' || display === 'inline-grid';
+    const isFlexColumn = display.includes('flex') && chatStyle.flexDirection.startsWith('column');
+    const parsedRowGap = Number.parseFloat(chatStyle.rowGap || chatStyle.gap || '0');
+    const rowGap = (isGrid || isFlexColumn) && Number.isFinite(parsedRowGap) ? parsedRowGap : 0;
 
     body.style.setProperty(FLOOR_ZERO_PADDING_BASE_VAR, basePadding + 'px');
     body.style.setProperty(FLOOR_ZERO_MESSAGE_MARGIN_VAR, messageMargin + 'px');
+    body.style.setProperty(FLOOR_ZERO_ROW_GAP_VAR, rowGap + 'px');
     state.floorZeroClearanceChat = chat;
   }
 
@@ -7309,25 +7319,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
   const SCROLL_BOTTOM_THRESHOLD = 100;
 
-  function getChatSurfaceContext() {
-    try {
-      return HOST_WIN.SillyTavern?.getContext?.() || null;
-    } catch {
-      return null;
-    }
-  }
-
-  function isTauriTavernChatSurfaceHost() {
-    try {
-      return Boolean(
-        HOST_WIN.__TAURITAVERN__?.api?.chatSurface
-        || HOST_WIN.__TAURITAVERN_PANEL_RUNTIME__
-      );
-    } catch {
-      return false;
-    }
-  }
-
   function queueScrollBottomUpdate() {
     const scroll = state.scrollBottom;
     if (state.destroyed || scroll.frame) return;
@@ -7351,9 +7342,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const isGenerating = Boolean(scroll.generating && hasMessages);
     const shouldShow = hasMessages && (isAwayFromBottom || isGenerating);
     const mode = isGenerating ? 'generating' : 'return';
-    const scrollContext = getChatSurfaceContext();
-    const scrollApiAvailable = typeof scrollContext?.scrollChatSurfaceTo === 'function';
-    const ttScrollUnavailable = isTauriTavernChatSurfaceHost() && !scrollApiAvailable;
 
     if (button.dataset.mode !== mode) {
       button.dataset.mode = mode;
@@ -7363,16 +7351,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     button.dataset.visible = String(shouldShow);
-    button.disabled = !isAwayFromBottom || ttScrollUnavailable;
+    button.disabled = !isAwayFromBottom;
     button.setAttribute('aria-hidden', String(!shouldShow));
     button.setAttribute('aria-label', isGenerating
       ? (isAwayFromBottom ? 'AI 正在回复，点击回到底部' : 'AI 正在回复')
       : '回到底部');
-    button.title = ttScrollUnavailable
-      ? '当前 TT 未提供 ChatSurface 滚动接口'
-      : (isGenerating
-        ? (isAwayFromBottom ? 'AI 正在回复 · 点击回到底部' : 'AI 正在回复')
-        : '回到底部');
+    button.title = isGenerating
+      ? (isAwayFromBottom ? 'AI 正在回复 · 点击回到底部' : 'AI 正在回复')
+      : '回到底部';
   }
 
   function onScrollBottomClick(event) {
@@ -7383,30 +7369,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (!chat?.isConnected || !state.scrollBottom.button || state.scrollBottom.button.disabled) return;
 
     const reducedMotion = HOST_WIN.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-    const options = {
-      top: chat.scrollHeight,
-      behavior: reducedMotion ? 'auto' : 'smooth',
-    };
-    const context = getChatSurfaceContext();
-
-    if (typeof context?.scrollChatSurfaceTo === 'function') {
-      try {
-        context.scrollChatSurfaceTo(options);
-      } catch (error) {
-        console.warn('[Tavern Layout Engine] TT ChatSurface 滚动请求失败。', error);
-        return;
-      }
-    } else if (isTauriTavernChatSurfaceHost()) {
-      console.warn('[Tavern Layout Engine] 当前 TT 未提供 scrollChatSurfaceTo；已阻止直接写入 #chat.scrollTop。');
-      return;
-    } else {
-      try {
-        chat.scrollTo(options);
-      } catch {
-        chat.scrollTop = chat.scrollHeight;
-      }
+    try {
+      chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: reducedMotion ? 'auto' : 'smooth',
+      });
+    } catch {
+      chat.scrollTop = chat.scrollHeight;
     }
-
     queueScrollBottomUpdate();
   }
 
@@ -9544,7 +9514,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           tag: child.tagName.toLowerCase(),
           id: child.id || '',
           className: typeof child.className === 'string' ? child.className.slice(0, 120) : '',
-          allowedByBoundedLayout: child.matches('.mes, tt-chat-spacer[data-tt-chat-spacer], .style-pins'),
+          isMessageRoot: child.matches('.mes'),
         })) : [];
         return {
           apiPresent: Boolean(api),
@@ -9552,7 +9522,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           managedOwnershipRequired: diagnosticSafe(() => api?.isManagedOwnershipRequired?.() === true, null),
           scrollChatSurfaceToAvailable: typeof context?.scrollChatSurfaceTo === 'function',
           directChildCount: root?.children.length ?? 0,
-          unexpectedDirectChildren: api ? children.filter(child => !child.allowedByBoundedLayout) : [],
           directChildren: children,
         };
       })(),
