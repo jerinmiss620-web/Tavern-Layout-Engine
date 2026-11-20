@@ -13,7 +13,7 @@
     "sha256": "41705ccd4f8746889b141c2a653a16b581a648a02434ec564f3bb673f90995bc",
     "size_bytes": 440734
   },
-  "status": "test-only; TLE v0.3.193 Host Diagnostics 2.0 mobile top-layer regression fix; headless Remote Loader v0.3.0; not a stable release",
+  "status": "test-only; manifest source commit corrected to verified 40-character Git SHA; publication guard added; TLE v0.3.193 mobile Top Layer fix still requires ST/TT/iPhone runtime validation",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
