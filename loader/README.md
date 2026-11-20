@@ -18,7 +18,7 @@ The TLE source is a self-executing classic-script IIFE, not an ES module. Runnin
 - IndexedDB database `TLE_Remote_Loader_Test_Cache`, object store `records`, slots `lkg` and `previous`.
 - Existing localStorage keys `tle.loader.test.lastKnownGood.v1`, `tle.loader.test.previousKnownGood.v1` and `tle.loader.test.autoRestore.v1`.
 - One-time migration of legacy full-source localStorage records after IndexedDB readback and SHA-256/byte-size verification.
-- Verified Previous backup before replacing a healthy current TLE.
+- Verified Previous backup before replacing a healthy current TLE. The cached LKG version must also match the active TLE version; a mismatch is treated as an unsafe state and the loader refuses replacement.
 - Automatic rollback only when the candidate itself fails execution/health checks.
 - Cache persistence and auto-restore authorization failures after a healthy startup are warnings; they do not destroy the healthy TLE.
 - Existing user auto-restore authorization. New version changes still require an explicit native browser confirmation.
