@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project": "Tavern Layout Engine",
+  "channel": "test",
+  "latest_version": "0.3.191",
+  "minimum_loader_version": "0.1.0",
+  "release": {
+    "version": "0.3.191",
+    "source_path": "releases/v0.3.191/TLE.js",
+    "source_commit": "a41ef63a4cb04bb5e5d84172f21835f6fa36e698",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a41ef63a4cb04bb5e5d84172f21835f6fa36e698/releases/v0.3.191/TLE.js",
+    "changelog_path": "releases/v0.3.191/CHANGELOG.md",
+    "sha256": "b218756491706ab1f716045ba958d2f92e0cb8b9582379a8d01336ef9e1fe423",
+    "size_bytes": 412037
+  },
+  "status": "test-only; not a stable release"
+}
