@@ -667,6 +667,8 @@
         const lkg = await readLastKnownGood();
         if (active && !lkg) {
           setStatus('发现远程版本 v' + record.version + '，但当前 TLE v' + activeVersion + ' 没有可验证的 Last Known Good 回滚缓存。为保护正在运行的版本，本次不自动替换。', 'warning');
+        } else if (active && lkg && compareVersions(active.version, lkg.version) !== 0) {
+          setStatus('当前运行 TLE v' + activeVersion + ' 与 Last Known Good 缓存 v' + lkg.version + ' 不一致。无法证明回滚备份对应当前实例，因此拒绝自动替换；请先统一当前实例与缓存版本。', 'warning');
         } else {
           shouldLoad = promptUpdate;
           setStatus(
@@ -685,7 +687,11 @@
     }
     if (shouldLoad && candidate) {
       const active = getActiveInstance();
-      await loadRecord(candidate, active ? '远程更新' : '首次远程安装', { preferRemote: true });
+      try {
+        await loadRecord(candidate, active ? '远程更新' : '首次远程安装', { preferRemote: true });
+      } catch (loadError) {
+        setStatus('远程版本已校验，但本次未能安全加载：' + (loadError?.message || loadError), 'warning');
+      }
     }
     return candidate;
   }
@@ -709,6 +715,9 @@
     const lkg = await readLastKnownGood();
     if (previous && !lkg && !isHealthy(previous, record.version)) {
       throw new Error('当前已有 TLE 运行，但没有可验证的 Last Known Good 回滚缓存。为保护唯一可用实例，已拒绝升级。');
+    }
+    if (previous && lkg && compareVersions(previous.version, lkg.version) !== 0) {
+      throw new Error('当前运行 TLE v' + previous.version + ' 与 Last Known Good 缓存 v' + lkg.version + ' 不一致，无法确认回滚备份对应当前实例，已拒绝升级。');
     }
     if (isHealthy(previous, record.version)) {
       setStatus('当前已经运行 TLE v' + record.version + '，无需再次加载。', 'success');
