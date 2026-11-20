@@ -2,7 +2,7 @@
 
 ## Diagnostic floating button
 
-- Restore the diagnostic escape hatch to the top-right viewport region; the mobile position is offset below the existing top-right chat controls.
+- Restore the diagnostic escape hatch to the top-right viewport region at every viewport size; the 52px top offset keeps it below existing top-right chat controls.
 - Promote the button with the browser Popover API `showPopover()`, placing it in the browser Top Layer so transformed roots, zero-height containing blocks, clipping and ordinary stacking contexts cannot move it behind the Tavern UI.
 - Recalculate top/right offsets from `VisualViewport` resize/scroll events, with safe-area insets.
 - Keep an absolute top-right fallback for browsers without Popover API support.
