@@ -3,7 +3,7 @@
   "project": "Tavern Layout Engine",
   "channel": "test",
   "latest_version": "0.3.192",
-  "minimum_loader_version": "0.2.0",
+  "minimum_loader_version": "0.2.1",
   "release": {
     "version": "0.3.192",
     "source_path": "releases/v0.3.192/TLE.js",
@@ -13,6 +13,6 @@
     "sha256": "178f0fa8cb66ebeb2b79f67f12e4ada5f3f2f42b2fe5e82acb3a45b2726e64ca",
     "size_bytes": 433144
   },
-  "status": "test-only; TLE Host Diagnostics 2.0; not a stable release",
-  "recommended_loader_version": "0.2.0"
+  "status": "test-only; TLE Host Diagnostics 2.0; requires Remote Loader 0.2.1; not a stable release",
+  "recommended_loader_version": "0.2.1"
 }
