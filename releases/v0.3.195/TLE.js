@@ -6026,8 +6026,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const wasMeasuring = body.hasAttribute(FLOOR_ZERO_MEASURING_ATTRIBUTE);
     body.setAttribute(FLOOR_ZERO_MEASURING_ATTRIBUTE, '');
     let basePadding = 0;
+    const chatStyle = HOST_WIN.getComputedStyle(chat);
     try {
-      const chatStyle = HOST_WIN.getComputedStyle(chat);
       const rawPadding = chatStyle.paddingBlockStart || chatStyle.paddingTop || '0';
       const parsedPadding = Number.parseFloat(rawPadding);
       basePadding = Number.isFinite(parsedPadding) ? parsedPadding : 0;
