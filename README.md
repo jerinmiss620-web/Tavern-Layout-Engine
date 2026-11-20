@@ -16,9 +16,9 @@ TLE enhances the Tavern interface with customizable navigation, workspace layout
 
 ## Distribution
 
-The project is preparing a versioned remote-update system based on Tavern Helper scripts.
+A versioned remote-update system based on Tavern Helper scripts is now in test.
 
-Users will eventually be able to install the loader once and receive future updates without repeatedly importing script JSON files.
+The Remote Loader TEST 0.2.0 supports user-authorized startup restoration from a verified Last Known Good cache and manual-confirmed updates. It is not a stable release; the production installation remains unchanged until ST and TT validation is complete.
 
 ## Repository Structure
 
@@ -32,6 +32,6 @@ Tavern-Layout-Engine/
 
 ## Development Status
 
-Remote update infrastructure is under development.
+Remote update infrastructure is in test validation. See `loader/README.md` for the 0.2.0 test protocol.
 
 The existing stable installation remains unchanged until the new loader passes compatibility tests.
