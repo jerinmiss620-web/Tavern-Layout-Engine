@@ -11,6 +11,12 @@
 - **Diagnostics:** include TT ChatSurface API presence, protocol version, ownership status, scroll API availability and a bounded sample of actual direct children; report the fade rendering mode.
 - **回底侠:** preserve the v0.3.194 click and scroll behavior. TT's official `scrollChatSurfaceTo` is documented but not yet used by this test build; it requires a separate, targeted runtime regression.
 
+## Additional code review
+
+- Fixed a real `ReferenceError` in `syncFloorZeroClearance`: `chatStyle` was originally scoped inside a `try` block but used afterward to calculate grid/flex row gaps. This would break the clearance calculation at runtime even though JS syntax checking passed. Corrected in commit `c969ea088c1681aace7f626fbd8f9a8265cf33fc`.
+- A successful syntax check is **not** runtime verification. The CSS pseudo-element mirror may differ from the original DOM mirror in stacking, sticky behavior, clipping, backdrop-filter and scroll performance.
+- The test manifest currently still points to v0.3.193. Testing v0.3.195 requires explicitly loading the test branch source; no automatic channel rollout has occurred.
+
 ## Known limitations / required tests
 
 1. Confirm TT's bounded ChatSurface stays running after toggling fade, switching chats and scrolling across mount/unmount boundaries.
