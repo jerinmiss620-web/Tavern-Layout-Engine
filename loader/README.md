@@ -1,41 +1,65 @@
-# TLE Remote Loader — Test Build 0.2.2
+# TLE Remote Loader — Headless Test Build 0.3.0
 
-This is a **test-only** Tavern Helper `type: script` loader. It retains the 0.2.1 storage and rollback fixes and adds a mobile-safe, CSS-isolated control panel.
+This is a test-only Tavern Helper `type: script` bootstrapper. It has no panel, launcher, Shadow DOM, CSS, floating button or viewport positioning code.
 
-## What changed in 0.2.2
+## Architecture
 
-The 0.2.1 panel was a generic `section` appended directly to `document.body`. Although it used fixed positioning and a high z-index, SillyTavern themes and mobile media queries could still target the element and its descendants. The user reproduced the panel disappearing both on iPhone and in desktop Chrome's mobile viewport emulation, while it remained visible in fullscreen desktop layout.
+1. Tavern Helper runs the small bootstrapper in its script realm.
+2. The bootstrapper reads the test manifest from GitHub.
+3. It fetches the immutable release source and verifies UTF-8 byte size and SHA-256.
+4. For the remote candidate, it injects a classic `<script src="immutable-raw-github-url">` element into the same Tavern Helper script document. The browser applies a matching `sha256-...` Subresource Integrity value with `crossorigin="anonymous"`.
+5. If the external script request fails (network/CORS/SRI), the loader uses a classic Blob script built from the already verified source. This is a compatibility/recovery fallback, not an ES module import.
+6. The loader checks the TLE instance, host references and destroy interface before accepting the candidate.
 
-Version 0.2.2 changes the UI mount:
+The TLE source is a self-executing classic-script IIFE, not an ES module. Running the injected script in the Tavern Helper script realm preserves the existing TLE contract where `window.parent` is the Tavern host window.
 
-- Creates a dedicated `tle-remote-loader-root` host and mounts it under `document.documentElement`, rather than inside the theme-controlled body layout.
-- Uses an open Shadow DOM for panel contents. Host-page theme selectors cannot select or restyle nodes inside the shadow tree; the Loader supplies its own compact stylesheet.
-- Hardens the host's fixed positioning, display, visibility, opacity, pointer events, stacking level, dimensions and overflow behavior.
-- Uses a responsive width and viewport-constrained panel height, with iOS safe-area insets.
-- Tracks `VisualViewport` resize/scroll changes and adjusts the bottom offset when the visual viewport shrinks (for example, when a software keyboard appears).
-- The close control now collapses the panel rather than destroying the Loader. A small **TLE** floating launcher remains available to reopen it.
-- Exposes `window.__TLE_REMOTE_LOADER_DIAGNOSTICS__` with Loader version, mount mode, mounted/visible/rendered flags, mount error, geometry, computed host style, viewport snapshot, module-probe status and last status. A console message is emitted at startup.
+## What is retained
 
-## Storage and rollback behavior retained from 0.2.1
+- IndexedDB database `TLE_Remote_Loader_Test_Cache`, object store `records`, slots `lkg` and `previous`.
+- Existing localStorage keys `tle.loader.test.lastKnownGood.v1`, `tle.loader.test.previousKnownGood.v1` and `tle.loader.test.autoRestore.v1`.
+- One-time migration of legacy full-source localStorage records after IndexedDB readback and SHA-256/byte-size verification.
+- Verified Previous backup before replacing a healthy current TLE.
+- Automatic rollback only when the candidate itself fails execution/health checks.
+- Cache persistence and auto-restore authorization failures after a healthy startup are warnings; they do not destroy the healthy TLE.
+- Existing user auto-restore authorization. New version changes still require an explicit native browser confirmation.
 
-- Full TLE source records remain in IndexedDB (`TLE_Remote_Loader_Test_Cache`, object store `records`).
-- `localStorage` retains only small metadata pointers when IndexedDB is available.
-- Legacy full-source records are migrated only after IndexedDB readback and SHA-256/UTF-8 byte-size verification.
-- A verified previous-version backup is required before replacing a healthy current TLE.
-- Once the candidate TLE passes its health check, a later cache-write failure is a warning and does not destroy the healthy candidate.
-- Only the two Loader-owned cache keys are migrated/replaced. No unrelated storage is cleared or enumerated.
+## Status and control
 
-## Upgrade from 0.2.1
+There is no Loader UI. Status is written to the browser console and, when available, Tavern's toast service. Inspect:
 
-1. Disable Remote Loader 0.2.1. Do not run both Loader versions at once.
-2. Import `TLE-Remote-Loader-Test-0.2.2.json` into Tavern Helper. The script ID is unchanged: `8f994fad-ea17-49f8-93af-ebe8ba4f6c67`.
-3. Enable Loader 0.2.2 and confirm that its panel appears at both desktop and narrow/mobile widths.
-4. Close the panel once; confirm the small **TLE** launcher remains and reopens it.
-5. Check that the panel reports Loader 0.2.2, module probe passes, and the current TLE remains healthy.
-6. Then test the TLE v0.3.192 update through the normal manual-confirmation flow.
+```js
+window.__TLE_REMOTE_LOADER_DIAGNOSTICS__
+```
 
-Keep the original local TLE recovery script disabled but do not delete it.
+The Loader API is available at:
 
-## Runtime validation
+```js
+window.__TLE_REMOTE_LOADER_TEST_V1__
+```
 
-The source passes JavaScript syntax validation and the Tavern Helper JSON wrapper parses successfully. The Shadow DOM and responsive mount have not been executed inside the user's ST/TT runtime in this build environment. Verify both desktop narrow viewport emulation and the actual iPhone client before promoting the loader beyond TEST.
+Useful methods:
+
+- `checkRemote()`: fetch/verify the test manifest and prompt before loading a new candidate.
+- `loadRemote()`: load the already verified candidate, with confirmation.
+- `rollback()`: restore the Previous Known Good cache, with confirmation.
+- `setAutoRestore(false)`: disable startup restoration without deleting cached source.
+- `destroy()`: stop the bootstrapper; it does not destroy the active TLE instance.
+
+## Upgrade from Loader 0.2.2
+
+1. Disable Loader 0.2.2 first. Do not run two Loader versions at the same time.
+2. Import `TLE-Remote-Loader-Test-0.3.0.json`. The Tavern Helper script ID is preserved: `8f994fad-ea17-49f8-93af-ebe8ba4f6c67`.
+3. Enable Loader 0.3.0 and refresh the Tavern page.
+4. It reads the same IndexedDB database and existing LKG/Previous slots. No manual storage clearing or migration is required.
+5. If auto-restore was previously authorized, it restores the verified LKG from IndexedDB. If not, it leaves the current page untouched until you confirm the first load.
+6. It checks the test manifest and asks before installing/updating TLE v0.3.193.
+7. Keep the original local TLE script disabled but do not delete it.
+
+## Safety and limits
+
+- No silent updates. A new TLE version always requires a native browser confirmation.
+- If a healthy current TLE exists but no verified LKG is available, the loader refuses to replace it.
+- If both IndexedDB and legacy localStorage cannot safely preserve a rollback copy, the update is refused.
+- If the candidate passes health checks but final cache persistence fails, it remains running for the current session and a warning is reported.
+- SHA-256 and SRI detect byte mismatch; they do not constitute a publisher signature. The pinned GitHub repository/commit remains the trust root.
+- The external script-src + SRI path and Blob fallback require runtime validation in ST and TT. Do not promote this test build until both hosts are checked.
