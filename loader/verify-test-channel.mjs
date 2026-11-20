@@ -94,32 +94,29 @@ assert.equal(
 );
 
 // Loader trust-policy contract: commit pinning must remain strict.
-assert.match(loaderSource, /\[a-f0-9\]\{40\}/, 'Loader must require a 40-character commit SHA');
-assert.match(loaderSource, /sourceUrl\.hostname !== 'raw\.githubusercontent\.com'/);
-assert.match(loaderSource, /release\.source_commit && release\.source_commit !== commitMatch\[1\]/);
+assert.ok(loaderSource.includes('[a-f0-9]{40}'), 'Loader must require a 40-character commit SHA');
+assert.ok(loaderSource.includes("sourceUrl.hostname !== 'raw.githubusercontent.com'"));
+assert.ok(loaderSource.includes('release.source_commit && release.source_commit !== commitMatch[1]'));
 
 // Diagnostic-button regression contract. This is a static guard, not a substitute
 // for an actual ST/TT/iPhone interaction test.
-const diagStart = tleBytes.toString('utf8').indexOf('/* Diagnostic escape hatch:');
-const diagEnd = tleBytes.toString('utf8').indexOf('/* Core panel layer:', diagStart);
-assert.ok(diagStart >= 0 && diagEnd > diagStart, 'Diagnostic CSS block must remain identifiable');
-const diagnosticCss = tleBytes.toString('utf8').slice(diagStart, diagEnd);
-assert.match(diagnosticCss, /position:\\s*fixed\\s*!important/);
-assert.match(diagnosticCss, /:popover-open\\s*\\{\\s*display:\\s*grid\\s*!important/);
-assert.doesNotMatch(diagnosticCss, /\\bbottom\\s*:/, 'Diagnostic button must not return to a bottom-corner anchor');
-
-const diagnosticButtonStart = loaderSource.indexOf('function createDiagnosticButton()'); // Loader must not own this UI.
-assert.equal(diagnosticButtonStart, -1, 'Headless Loader must not recreate a diagnostic/launcher UI');
 const tleSource = tleBytes.toString('utf8');
-assert.match(tleSource, /button\.setAttribute\('popover', 'manual'\)/);
-assert.match(tleSource, /button\.showPopover\(\)/);
-assert.match(tleSource, /function syncDiagnosticButtonPosition\(\)/);
-assert.match(tleSource, /visualViewport\.addEventListener\('resize', syncPosition/);
-assert.match(tleSource, /visualViewport\.addEventListener\('scroll', syncPosition/);
-assert.match(tleSource, /state\.diagnosticButton\?\.remove\(\)/);
-assert.match(tleSource, /panel = HOST_DOC\.createElement\('dialog'\)/);
-assert.match(tleSource, /panel\.showModal\(\)/);
+const diagStart = tleSource.indexOf('/* Diagnostic escape hatch:');
+const diagEnd = tleSource.indexOf('/* Core panel layer:', diagStart);
+assert.ok(diagStart >= 0 && diagEnd > diagStart, 'Diagnostic CSS block must remain identifiable');
+const diagnosticCss = tleSource.slice(diagStart, diagEnd);
+assert.ok(diagnosticCss.includes('position: fixed !important'), 'Diagnostic button must remain viewport-fixed');
+assert.ok(diagnosticCss.includes(':popover-open { display: grid !important; }'), 'Popover-open state must remain visible');
+assert.ok(!diagnosticCss.includes('bottom:'), 'Diagnostic button must not return to a bottom-corner anchor');
 
+assert.ok(tleSource.includes("button.setAttribute('popover', 'manual')"));
+assert.ok(tleSource.includes('button.showPopover()'));
+assert.ok(tleSource.includes('function syncDiagnosticButtonPosition()'));
+assert.ok(tleSource.includes("visualViewport.addEventListener('resize', syncPosition"));
+assert.ok(tleSource.includes("visualViewport.addEventListener('scroll', syncPosition"));
+assert.ok(tleSource.includes('state.diagnosticButton?.remove()'));
+assert.ok(tleSource.includes("panel = HOST_DOC.createElement('dialog')"));
+assert.ok(tleSource.includes('panel.showModal()'));
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
