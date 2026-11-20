@@ -63,3 +63,42 @@ Useful methods:
 - If the candidate passes health checks but final cache persistence fails, it remains running for the current session and a warning is reported.
 - SHA-256 and SRI detect byte mismatch; they do not constitute a publisher signature. The pinned GitHub repository/commit remains the trust root.
 - The external script-src + SRI path and Blob fallback require runtime validation in ST and TT. Do not promote this test build until both hosts are checked.
+
+
+## Publication guard and immutable source validation
+
+Before publishing a test-channel change, run from the repository root:
+
+```sh
+node loader/verify-test-channel.mjs
+node loader/verify-test-channel.mjs --remote
+```
+
+The guard verifies:
+- The TLE and Loader commit pins are exactly 40 lowercase hexadecimal characters.
+- Each immutable raw URL matches the expected repository, commit and file path exactly.
+- Local source byte sizes and SHA-256 values match the test manifest.
+- The importable Tavern Helper JSON contains exactly the pinned Loader source.
+- The Loader keeps its strict raw-GitHub/commit trust checks.
+- The diagnostic button keeps its Top Layer, top-right, VisualViewport and native-dialog regression contract, and does not return to a bottom-corner anchor.
+- With `--remote`, the pinned GitHub artifacts and installer are downloaded and checked again.
+
+### Corrected v0.3.193 manifest failure
+
+The first v0.3.193 test manifest accidentally omitted one hexadecimal character from the TLE source commit, leaving a 39-character value. Loader 0.3.0 correctly rejected it before downloading or modifying the running TLE. The manifest now points to the verified 40-character commit:
+
+`ddb8da7b2e55759fbb2bfa4807ff7d6f9d629309`
+
+Do not weaken the Loader's 40-character commit validation to work around a malformed manifest.
+
+## Confirm the TLE version actually running
+
+After Loader reports a successful update, run this in the host page console:
+
+```js
+window.__TAVERN_LAYOUT_ENGINE_V02__?.version
+```
+
+The diagnostic Top Layer change is in TLE v0.3.193. If the returned value is still an older version, the new diagnostic-button implementation has not yet been loaded.
+
+If the floating button is still missing or cannot be clicked after v0.3.193 is confirmed, use the TLE panel's existing **复制诊断报告** action. Host Diagnostics 2.0 records the button's Popover support/open state, computed position, bounding rectangle, hit-test target, and the debugger dialog's open/mount state. This distinguishes a rendering/positioning failure from an input interception or event-routing failure.
