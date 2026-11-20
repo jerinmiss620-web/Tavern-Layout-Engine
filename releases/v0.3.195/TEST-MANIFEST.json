@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "project": "Tavern Layout Engine",
+  "channel": "isolated-test",
+  "latest_version": "0.3.195",
+  "release": {
+    "version": "0.3.195",
+    "source_path": "releases/v0.3.195/TLE.js",
+    "source_commit": "84b6fbee411083a11736780551243567d27947dc",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/84b6fbee411083a11736780551243567d27947dc/releases/v0.3.195/TLE.js",
+    "sha256": "57df9530b9c3de7b2ab6798fde8a309db202ca3a0ad134b8eab835c5b699ed8f",
+    "size_bytes": 453458
+  },
+  "installer": {
+    "path": "releases/v0.3.195/TLE-0.3.195-TEST-import.json",
+    "commit": "209632a97b50d7cfb37850e70c8432cca5e27569",
+    "enabled_by_default": false
+  },
+  "status": "manual-import only; not promoted to channels/test.json; requires live ST/TT/iPhone verification"
+}
