@@ -106,8 +106,12 @@ const diagEnd = tleSource.indexOf('/* Core panel layer:', diagStart);
 assert.ok(diagStart >= 0 && diagEnd > diagStart, 'Diagnostic CSS block must remain identifiable');
 const diagnosticCss = tleSource.slice(diagStart, diagEnd);
 assert.ok(diagnosticCss.includes('position: fixed !important'), 'Diagnostic button must remain viewport-fixed');
+assert.ok(diagnosticCss.includes('top: calc(env(safe-area-inset-top, 0px) + 52px) !important;'), 'Diagnostic button must remain top-anchored');
+assert.ok(diagnosticCss.includes('right: calc(env(safe-area-inset-right, 0px) + 12px) !important;'), 'Diagnostic button must remain right-anchored');
+assert.ok(diagnosticCss.includes('bottom: auto !important;'), 'Diagnostic button must explicitly clear bottom anchoring');
+assert.ok(!diagnosticCss.includes('bottom: 12px'), 'Diagnostic button must not return to a bottom-corner anchor');
 assert.ok(diagnosticCss.includes(':popover-open { display: grid !important; }'), 'Popover-open state must remain visible');
-assert.ok(!diagnosticCss.includes('bottom:'), 'Diagnostic button must not return to a bottom-corner anchor');
+assert.ok(diagnosticCss.includes('[data-tle-positioning="fixed-document-root-fallback"] { display: grid !important; }'), 'Non-Popover fallback must remain visible');
 
 assert.ok(tleSource.includes("button.setAttribute('popover', 'manual')"));
 assert.ok(tleSource.includes('button.showPopover()'));
@@ -123,7 +127,16 @@ assert.ok(tleSource.includes('popoverOpen: Boolean(button?.matches?.(\':popover-
 assert.ok(tleSource.includes('buttonReceivesHit: Boolean(hit && (hit === button || button?.contains(hit)))'));
 assert.ok(tleSource.includes('debuggerPanel: {'));
 assert.ok(tleSource.includes("setDiagnosticMode(diagnosticMode);"));
-assert.ok(tleSource.includes("absolute-top-right-fallback"));
+assert.ok(tleSource.includes("if (action === 'open-debugger') openMobileDebugger();"));
+assert.ok(tleSource.includes("HOST_WIN.addEventListener('click', handleDiagnosticButtonClick, {"));
+assert.ok(tleSource.includes('event.stopImmediatePropagation()'));
+assert.ok(tleSource.includes("button.removeAttribute('popover')"));
+assert.ok(tleSource.includes('HOST_DOC.documentElement.appendChild(button)'));
+assert.ok(tleSource.includes('data-tle-positioning="fixed-document-root-fallback"'));
+assert.ok(tleSource.includes('function watchDiagnosticButton()'));
+assert.ok(tleSource.includes('diagnosticButtonObserver'));
+assert.ok(tleSource.includes('buttonDisplayPriority'));
+assert.ok(tleSource.includes('buttonReceivesHit'));
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
