@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.192",
+  "latest_version": "0.3.193",
   "minimum_loader_version": "0.3.0",
   "release": {
     "version": "0.3.193",
