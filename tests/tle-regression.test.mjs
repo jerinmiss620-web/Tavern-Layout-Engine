@@ -52,7 +52,7 @@ const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
 const loader = verifyPinnedRelease(
   loaderRelease,
-  'loader/TLE-Remote-Loader-Test-0.3.0.js',
+  /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/loader\/TLE-Remote-Loader-Test-(\d+\.\d+\.\d+)\.js$/
   /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/loader\/TLE-Remote-Loader-Test-0\.3\.0\.js$/
 );
 assert.equal(loaderRelease.version, '0.3.0');
