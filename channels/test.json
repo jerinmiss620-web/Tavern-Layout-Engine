@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.193",
+  "latest_version": "0.3.194",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.193",
-    "source_path": "releases/v0.3.193/TLE.js",
-    "source_commit": "ddb8da7b2e55759fbb2bfa4807ff7d6f9d629309",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ddb8da7b2e55759fbb2bfa4807ff7d6f9d629309/releases/v0.3.193/TLE.js",
-    "changelog_path": "releases/v0.3.193/CHANGELOG.md",
-    "sha256": "41705ccd4f8746889b141c2a653a16b581a648a02434ec564f3bb673f90995bc",
-    "size_bytes": 440734
+    "version": "0.3.194",
+    "source_path": "releases/v0.3.194/TLE.js",
+    "source_commit": "440a42746e17ff33fbc5297ba36b3eea3a06d802",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/440a42746e17ff33fbc5297ba36b3eea3a06d802/releases/v0.3.194/TLE.js",
+    "changelog_path": "releases/v0.3.194/CHANGELOG.md",
+    "sha256": "2d21d1c219d9e14fbdadc83950a019ce20359a88e40192febb6097deb8f226cd",
+    "size_bytes": 444731
   },
-  "status": "test-only; manifest source commit corrected to verified 40-character Git SHA; publication guard added; TLE v0.3.193 mobile Top Layer fix still requires ST/TT/iPhone runtime validation",
+  "status": "test-only; TLE v0.3.194 fixes Loader commit-path rejection, diagnostic click interception, missing debugger action, Popover fallback visibility and button lifecycle recovery; PC/ST/TT/iPhone runtime validation pending",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
