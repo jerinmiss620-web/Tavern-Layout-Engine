@@ -9,3 +9,5 @@
 - Keep new-version replacement behind a browser-native confirmation; only previously authorized Last Known Good restoration runs automatically.
 - Keep post-start cache persistence separate from TLE health so a cache warning cannot destroy a healthy running instance.
 - Expose status through console, optional Tavern toast and `window.__TLE_REMOTE_LOADER_DIAGNOSTICS__`; no Loader UI is created.
+
+- Add a final safety gate: when a TLE is already active, its version must match the verified LKG before replacement; otherwise the loader refuses the update rather than backing up a different version.
