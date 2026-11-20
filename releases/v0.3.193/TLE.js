@@ -935,7 +935,7 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
    - VisualViewport offsets are supplied by syncDiagnosticButtonPosition(). */
 #${ID.diagnosticButton} {
   position: fixed !important;
-  inset: calc(env(safe-area-inset-top, 0px) + var(--tle-diagnostic-vv-top, 0px) + var(--tle-diagnostic-top-gap, 12px))
+  inset: calc(env(safe-area-inset-top, 0px) + var(--tle-diagnostic-vv-top, 0px) + var(--tle-diagnostic-top-gap, 52px))
          calc(env(safe-area-inset-right, 0px) + var(--tle-diagnostic-vv-right, 0px) + 12px)
          auto auto !important;
   z-index: 2147483646 !important;
@@ -7709,7 +7709,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const rightGap = Math.max(0, layoutWidth - visualLeft - visualWidth);
     button.style.setProperty('--tle-diagnostic-vv-top', Math.max(0, visualTop) + 'px');
     button.style.setProperty('--tle-diagnostic-vv-right', rightGap + 'px');
-    button.style.setProperty('--tle-diagnostic-top-gap', (HOST_WIN.innerWidth <= 1000 ? 52 : 12) + 'px');
+    button.style.setProperty('--tle-diagnostic-top-gap', '52px');
   }
 
   function createDiagnosticButton() {
@@ -7739,7 +7739,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     } catch (error) {
       button.dataset.tlePositioning = 'absolute-top-right-fallback';
       button.style.setProperty('position', 'absolute', 'important');
-      button.style.setProperty('top', (Math.max(0, HOST_WIN.scrollY || 0) + (HOST_WIN.innerWidth <= 1000 ? 52 : 12)) + 'px', 'important');
+      button.style.setProperty('top', (Math.max(0, HOST_WIN.scrollY || 0) + 52) + 'px', 'important');
       button.style.setProperty('right', '12px', 'important');
       rememberDiagnosticError('diagnostic-button-top-layer-fallback', error?.message || error);
     }
