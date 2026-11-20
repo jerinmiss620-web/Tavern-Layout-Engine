@@ -3,27 +3,27 @@
   "project": "Tavern Layout Engine",
   "channel": "test",
   "latest_version": "0.3.192",
-  "minimum_loader_version": "0.2.1",
+  "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.192",
-    "source_path": "releases/v0.3.192/TLE.js",
-    "source_commit": "2473bae73d1038bc27bcd2e16e1217fda76777f7",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2473bae73d1038bc27bcd2e16e1217fda76777f7/releases/v0.3.192/TLE.js",
-    "changelog_path": "releases/v0.3.192/CHANGELOG.md",
-    "sha256": "178f0fa8cb66ebeb2b79f67f12e4ada5f3f2f42b2fe5e82acb3a45b2726e64ca",
-    "size_bytes": 433144
+    "version": "0.3.193",
+    "source_path": "releases/v0.3.193/TLE.js",
+    "source_commit": "edac70c28769ed2cda646bdaac916b81da2ef427",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/edac70c28769ed2cda646bdaac916b81da2ef427/releases/v0.3.193/TLE.js",
+    "changelog_path": "releases/v0.3.193/CHANGELOG.md",
+    "sha256": "21d6a0f8cc1f4a8014e40186d581a98fcd19f99274870992ffce6833c63874a7",
+    "size_bytes": 440811
   },
-  "status": "test-only; TLE Host Diagnostics 2.0; recommends Remote Loader 0.2.2; not a stable release",
-  "recommended_loader_version": "0.2.2",
+  "status": "test-only; TLE v0.3.193 Host Diagnostics 2.0 mobile top-layer regression fix; headless Remote Loader v0.3.0; not a stable release",
+  "recommended_loader_version": "0.3.0",
   "loader_release": {
-    "version": "0.2.2",
-    "source_path": "loader/TLE-Remote-Loader-Test-0.2.2.js",
-    "source_commit": "48656eede814d134d019f22c276a15978e82ed56",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/48656eede814d134d019f22c276a15978e82ed56/loader/TLE-Remote-Loader-Test-0.2.2.js",
-    "sha256": "6a285e6a074b91af75b04efd40b8d6e0b544d0b7715fee5edc26121d47504550",
-    "size_bytes": 50330,
-    "installer_path": "loader/TLE-Remote-Loader-Test-0.2.2.json",
-    "installer_commit": "14f4240fce266b1a6dc49ce55693baa9a2a5004b",
-    "installer_url": "https://github.com/jerinmiss620-web/Tavern-Layout-Engine/blob/14f4240fce266b1a6dc49ce55693baa9a2a5004b/loader/TLE-Remote-Loader-Test-0.2.2.json"
+    "version": "0.3.0",
+    "source_path": "loader/TLE-Remote-Loader-Test-0.3.0.js",
+    "source_commit": "86d197d516bba4986b5dab15bb3e034668d31173",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/86d197d516bba4986b5dab15bb3e034668d31173/loader/TLE-Remote-Loader-Test-0.3.0.js",
+    "sha256": "d8c71ef66027aaad1cc1499ecf54ff2d11362e3f6d0d6aa939a2bc63e3added4",
+    "size_bytes": 39014,
+    "installer_path": "loader/TLE-Remote-Loader-Test-0.3.0.json",
+    "installer_commit": "4a47454cf742088eaf8789db0fdc772348cb1182",
+    "installer_url": "https://github.com/jerinmiss620-web/Tavern-Layout-Engine/blob/4a47454cf742088eaf8789db0fdc772348cb1182/loader/TLE-Remote-Loader-Test-0.3.0.json"
   }
 }
