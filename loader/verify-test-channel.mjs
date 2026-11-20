@@ -117,6 +117,13 @@ assert.ok(tleSource.includes("visualViewport.addEventListener('scroll', syncPosi
 assert.ok(tleSource.includes('state.diagnosticButton?.remove()'));
 assert.ok(tleSource.includes("panel = HOST_DOC.createElement('dialog')"));
 assert.ok(tleSource.includes('panel.showModal()'));
+assert.ok(tleSource.includes('positioningMode: button?.dataset.tlePositioning'));
+assert.ok(tleSource.includes('popoverSupported: Boolean(button && typeof button.showPopover'));
+assert.ok(tleSource.includes('popoverOpen: Boolean(button?.matches?.(\':popover-open\'))'));
+assert.ok(tleSource.includes('buttonReceivesHit: Boolean(hit && (hit === button || button?.contains(hit)))'));
+assert.ok(tleSource.includes('debuggerPanel: {'));
+assert.ok(tleSource.includes("setDiagnosticMode(diagnosticMode);"));
+assert.ok(tleSource.includes("absolute-top-right-fallback"));
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
