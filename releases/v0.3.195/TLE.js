@@ -10172,13 +10172,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (state.destroyed) return;
     const floorZeroStyleChanged = records.some(record => {
       const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
-      if (target?.id === 'chat') {
-        // Fade mirrors write only TLE-owned CSS variables to #chat. Re-measuring
-        // floor-zero padding for each wallpaper refresh would be wasted work.
-        if (record.type === 'attributes' && record.attributeName === 'style'
-            && chatFadeEnabled && state.chatFade.active) return false;
-        return true;
-      }
+      if (target?.id === 'chat') return true;
       return Boolean(target?.matches?.('.mes') && target.parentElement?.id === 'chat');
     });
     if (floorZeroStyleChanged) queueFloorZeroClearanceSync();
