@@ -18,7 +18,7 @@ TLE enhances the Tavern interface with customizable navigation, workspace layout
 
 A versioned remote-update system based on Tavern Helper scripts is now in test.
 
-The Remote Loader TEST 0.2.0 supports user-authorized startup restoration from a verified Last Known Good cache and manual-confirmed updates. It is not a stable release; the production installation remains unchanged until ST and TT validation is complete.
+The Remote Loader TEST 0.2.0 supports user-authorized startup restoration from a verified Last Known Good cache and manual-confirmed updates. The test channel now offers TLE v0.3.192 with Host Diagnostics 2.0: one-click pre-interaction environment/layout capture and clipboard export. Both remain test-only; the stable release pointer is unchanged until ST and TT validation is complete.
 
 ## Repository Structure
 
@@ -32,6 +32,6 @@ Tavern-Layout-Engine/
 
 ## Development Status
 
-Remote update infrastructure is in test validation. See `loader/README.md` for the 0.2.0 test protocol.
+Remote update infrastructure and TLE Host Diagnostics 2.0 are in test validation. See `loader/README.md` and `releases/v0.3.192/CHANGELOG.md` for details.
 
 The existing stable installation remains unchanged until the new loader passes compatibility tests.
