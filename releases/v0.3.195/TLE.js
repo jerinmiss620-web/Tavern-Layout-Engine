@@ -6050,9 +6050,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const parsedRowGap = Number.parseFloat(chatStyle.rowGap || chatStyle.gap || '0');
     const rowGap = (isGrid || isFlexColumn) && Number.isFinite(parsedRowGap) ? parsedRowGap : 0;
 
-    body.style.setProperty(FLOOR_ZERO_PADDING_BASE_VAR, basePadding + 'px');
-    body.style.setProperty(FLOOR_ZERO_MESSAGE_MARGIN_VAR, messageMargin + 'px');
-    body.style.setProperty(FLOOR_ZERO_ROW_GAP_VAR, rowGap + 'px');
+    for (const [property, value] of [
+      [FLOOR_ZERO_PADDING_BASE_VAR, basePadding + 'px'],
+      [FLOOR_ZERO_MESSAGE_MARGIN_VAR, messageMargin + 'px'],
+      [FLOOR_ZERO_ROW_GAP_VAR, rowGap + 'px'],
+    ]) {
+      if (body.style.getPropertyValue(property) !== value) {
+        body.style.setProperty(property, value);
+      }
+    }
     state.floorZeroClearanceChat = chat;
   }
 
@@ -6512,7 +6518,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       ['--tle-chat-fade-clip-left', clipLeft + 'px'],
     ];
     for (const [property, value] of values) {
-      chat.style.setProperty(property, String(value));
+      const nextValue = String(value);
+      if (chat.style.getPropertyValue(property) !== nextValue) {
+        chat.style.setProperty(property, nextValue);
+      }
     }
   }
 
@@ -10163,8 +10172,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (state.destroyed) return;
     const floorZeroStyleChanged = records.some(record => {
       const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
-      return target?.id === 'chat'
-        || Boolean(target?.matches?.('.mes') && target.parentElement?.id === 'chat');
+      if (target?.id === 'chat') {
+        // Fade mirrors write only TLE-owned CSS variables to #chat. Re-measuring
+        // floor-zero padding for each wallpaper refresh would be wasted work.
+        if (record.type === 'attributes' && record.attributeName === 'style'
+            && chatFadeEnabled && state.chatFade.active) return false;
+        return true;
+      }
+      return Boolean(target?.matches?.('.mes') && target.parentElement?.id === 'chat');
     });
     if (floorZeroStyleChanged) queueFloorZeroClearanceSync();
     const relevant = records.some(record => {
