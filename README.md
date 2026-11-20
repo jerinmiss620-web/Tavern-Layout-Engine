@@ -18,7 +18,7 @@ TLE enhances the Tavern interface with customizable navigation, workspace layout
 
 A versioned remote-update system based on Tavern Helper scripts is now in test.
 
-The Remote Loader TEST 0.2.2 retains the IndexedDB cache and verified rollback fixes from 0.2.1, and adds a top-level Shadow DOM panel that remains available at mobile viewport widths. The test channel recommends Loader 0.2.2 and offers TLE v0.3.192 with Host Diagnostics 2.0: one-click pre-interaction environment/layout capture and clipboard export. Both remain test-only; the stable release pointer is unchanged until ST and TT validation is complete.
+The Remote Loader TEST 0.3.0 is headless: it loads TLE through an immutable classic script URL with Subresource Integrity, retains IndexedDB rollback caches, and uses native confirmation for updates. The test channel offers TLE v0.3.193 with a restored top-right Top Layer diagnostic control and native-dialog mobile debugger. Critical mobile controls must never be placed in unverified bottom-corner or host-controlled dead zones. Both remain test-only; the stable release pointer is unchanged until ST and TT validation is complete.
 
 ## Repository Structure
 
@@ -32,6 +32,6 @@ Tavern-Layout-Engine/
 
 ## Development Status
 
-Remote update infrastructure (Loader 0.2.2) and TLE Host Diagnostics 2.0 are in test validation. See `loader/README.md` and `releases/v0.3.192/CHANGELOG.md` for details.
+Remote update infrastructure (headless Loader 0.3.0) and TLE Host Diagnostics 2.0 mobile overlay regression fix are in test validation. See `loader/README.md`, `loader/CHANGELOG-0.3.0.md` and `releases/v0.3.193/CHANGELOG.md` for details.
 
 The existing stable installation remains unchanged until the new loader passes compatibility tests.
