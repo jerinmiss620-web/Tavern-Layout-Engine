@@ -41,3 +41,8 @@ Existing TLE settings keys are not changed.
 ## Recovery
 
 If auto-restore fails, the loader tries the previous verified slot. If both cached sources fail, re-enable the original local TLE script and refresh the Tavern page. Keep that recovery script until the loader has been validated in both ST and TT.
+
+
+## TLE v0.3.192 test update
+
+The test channel points to TLE v0.3.192. Keep the local v0.3.191 recovery script disabled, not deleted. In Loader 0.2.0, check the remote version, verify the source, then manually confirm **Load remote TLE**. The v0.3.192 floating diagnostic button copies the complete Host Diagnostics 2.0 report in one click. Rollback to the previous known-good version remains available from the Loader panel.
