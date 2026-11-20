@@ -2,17 +2,17 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.191",
+  "latest_version": "0.3.192",
   "minimum_loader_version": "0.2.0",
   "release": {
-    "version": "0.3.191",
-    "source_path": "releases/v0.3.191/TLE.js",
-    "source_commit": "a41ef63a4cb04bb5e5d84172f21835f6fa36e698",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a41ef63a4cb04bb5e5d84172f21835f6fa36e698/releases/v0.3.191/TLE.js",
-    "changelog_path": "releases/v0.3.191/CHANGELOG.md",
-    "sha256": "b218756491706ab1f716045ba958d2f92e0cb8b9582379a8d01336ef9e1fe423",
-    "size_bytes": 412037
+    "version": "0.3.192",
+    "source_path": "releases/v0.3.192/TLE.js",
+    "source_commit": "9f12c347f481182cb102409cbe2776e706c66438",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/9f12c347f481182cb102409cbe2776e706c66438/releases/v0.3.192/TLE.js",
+    "changelog_path": "releases/v0.3.192/CHANGELOG.md",
+    "sha256": "671f31193a48ee252232968c142ec04b79c5ba166a7ad94d9e896e3beb55ed00",
+    "size_bytes": 431414
   },
-  "status": "test-only; loader 0.2.0 required for automatic LKG restoration; not a stable release",
+  "status": "test-only; TLE Host Diagnostics 2.0; not a stable release",
   "recommended_loader_version": "0.2.0"
 }
