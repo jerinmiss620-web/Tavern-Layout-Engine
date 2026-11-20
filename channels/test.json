@@ -3,7 +3,7 @@
   "project": "Tavern Layout Engine",
   "channel": "test",
   "latest_version": "0.3.191",
-  "minimum_loader_version": "0.1.0",
+  "minimum_loader_version": "0.2.0",
   "release": {
     "version": "0.3.191",
     "source_path": "releases/v0.3.191/TLE.js",
@@ -13,5 +13,6 @@
     "sha256": "b218756491706ab1f716045ba958d2f92e0cb8b9582379a8d01336ef9e1fe423",
     "size_bytes": 412037
   },
-  "status": "test-only; not a stable release"
+  "status": "test-only; loader 0.2.0 required for automatic LKG restoration; not a stable release",
+  "recommended_loader_version": "0.2.0"
 }
