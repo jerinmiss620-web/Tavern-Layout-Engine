@@ -60,7 +60,7 @@ function compatRules(text) {
 }
 assert.equal(compatRules(source), compatRules(prevSource), 'existing opt-in navigation repair behavior must remain unchanged');
 const helpStart = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-range-help {');
-const helpBlock = source.slice(helpStart, source.indexOf('}', helpStart) + 1);
+const helpBlock = source.slice(helpStart, source.indexOf('\n}', helpStart) + 2);
 assert.match(helpBlock, /grid-column: 1 \/ -1;/, 'range hint must span both input grid columns');
 assert.doesNotMatch(helpBlock, /grid-column: 2 \/ -1;/);
 
