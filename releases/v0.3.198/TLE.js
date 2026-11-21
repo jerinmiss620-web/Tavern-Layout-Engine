@@ -10002,7 +10002,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             iconVisible: Boolean(iconStyle && iconStyle.display !== 'none' && iconStyle.visibility !== 'hidden' && Number(iconStyle.opacity) !== 0),
             iconCenterReceivesHit: hitTests.find(item => item.name === 'icon-center')?.iconReceivesHit ?? null,
             iconCenterButtonReceivesHit: hitTests.find(item => item.name === 'icon-center')?.buttonReceivesHit ?? null,
-            labelCenterButtonReceivesHit: hitTests.find(item => item.name === 'label-center')?.buttonReceivesHit ?? null,
+            labelCenterReceivesHit: hitTests.find(item => item.name === 'label-center')?.labelReceivesHit ?? null,
           },
           likelyCssBlockers: {
             selfPointerEventsNone: buttonStyle?.pointerEvents === 'none',
