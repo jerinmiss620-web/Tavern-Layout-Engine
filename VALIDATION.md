@@ -57,3 +57,9 @@
 - 冷安装 CDN 优先，已运行健康实例优先短时核对 GitHub Raw；CDN 只承担传输，Source URL 固定 Commit、SHA-256、UTF-8 校验保留。
 - Bootstrap 首次加载超过 500ms 展示非阻塞提示，成功自动清除，失败沿用独立诊断。
 - 通过 CI 模拟下载/回退/缓存后才能宣布代码验证通过；Android SillyTavern 与 iPhone TT 需要实机访问新线路并观察通知位置与启动耗时。
+
+## 2026-11-22 · IndexedDB 断连兼容（候选 v1.0.6 / v0.3.6）
+
+- 回归验证：即时启动提示、至少可见 1.2 秒、成功后自动消失；失败的原诊断保持不变。
+- 回归验证：WebKit `Connection to Indexed Database server lost` 单次重连成功、连续失败中止、配额异常不重试、重读校验仍执行。
+- iPhone TT 真机和 Android Pad 真机验证仍需另行完成；自动化通过不能称为设备实测。

@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable-loader",
-  "latest_version": "0.3.5",
+  "latest_version": "0.3.6",
   "minimum_bootstrap_version": "1.0.0",
   "release": {
-    "version": "0.3.5",
-    "source_path": "loader/runtime/v0.3.5/TLE-Remote-Loader.js",
-    "source_commit": "ef144c80db7035fb2ad745cd741100053e8f7806",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ef144c80db7035fb2ad745cd741100053e8f7806/loader/runtime/v0.3.5/TLE-Remote-Loader.js",
-    "changelog_path": "loader/runtime/v0.3.5/CHANGELOG.md",
-    "sha256": "94fd4092e4dcfc0c03b02998fcc45cdbaa16d95b36a6c574c96e0088921796dd",
-    "size_bytes": 51471
+    "version": "0.3.6",
+    "source_path": "loader/runtime/v0.3.6/TLE-Remote-Loader.js",
+    "source_commit": "d4d60c0cab257c0b31d5fe9637bd61ef4c4f6fcb",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d4d60c0cab257c0b31d5fe9637bd61ef4c4f6fcb/loader/runtime/v0.3.6/TLE-Remote-Loader.js",
+    "changelog_path": "loader/runtime/v0.3.6/CHANGELOG.md",
+    "sha256": "344df210747a2d9813f948ebed672fc9ad6004649a5be14ea49978f21dcfa48d",
+    "size_bytes": 52840
   },
-  "notes": "Bootstrap 1.0.5 + Loader 0.3.5 mirror fallback; full-source CI pending. Real Android ST/iPhone TT required."
+  "notes": "Bootstrap 1.0.6 / Loader 0.3.6: IndexedDB reconnect and immediate progress notice; CI simulation required; iPhone TT/WebKit runtime test pending."
 }
