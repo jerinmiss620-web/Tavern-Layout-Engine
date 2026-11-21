@@ -9189,8 +9189,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const status = panel?.querySelector('[data-tle-loader-status]');
     const dot = state.navEntry?.querySelector('[data-tle-engine-update]');
     const hasUpdate = Boolean(info?.updateAvailable && info.availableVersion);
-    const needsAdoption = Boolean(info && !info.hasLastKnownGood
-      && !info.autoRestoreAuthorized && info.availableVersion === runningVersion);
+    // A verified LKG may have been prefetched by a silent check, but that
+    // never constitutes user approval to auto-restore on the next refresh.
+    const needsAdoption = Boolean(info && !info.autoRestoreAuthorized
+      && info.availableVersion === runningVersion);
     if (update) {
       update.hidden = !hasUpdate;
       update.disabled = Boolean(info?.busy);
