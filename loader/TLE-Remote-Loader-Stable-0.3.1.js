@@ -16,7 +16,7 @@
       throw new Error('无法访问酒馆宿主页面');
     }
   } catch (error) {
-    console.error('[TLE Loader TEST] 无法访问宿主页面。', error);
+    console.error('[TLE Loader STABLE] 无法访问宿主页面。', error);
     return;
   }
 
@@ -37,6 +37,13 @@
   let cacheDbPromise = null;
   const cacheFlags = { lkg: false, previous: false };
 
+  // Running Test and Stable Loaders together creates competing update checks.
+  // Do not silently take over another Loader's active session.
+  const oldTestLoader = HOST_WIN.__TLE_REMOTE_LOADER_TEST_V1__;
+  if (oldTestLoader && !oldTestLoader.diagnostics?.destroyed) {
+    console.warn('[TLE Remote Loader STABLE] 检测到 Test Loader 仍在运行。请先禁用旧 Loader 并刷新；Stable Loader 本次不启动。');
+    return;
+  }
   const previousLoader = HOST_WIN[LOADER_KEY];
   previousLoader?.destroy?.();
 
@@ -78,7 +85,7 @@
     diagnosticState.lastStatus = { message: text.slice(0, 1600), kind, at: new Date().toISOString() };
     notifyHostState();
     const method = kind === 'error' ? 'error' : (kind === 'warning' ? 'warn' : 'info');
-    try { HOST_WIN.console?.[method]?.('[TLE Remote Loader TEST] ' + text); } catch {}
+    try { HOST_WIN.console?.[method]?.('[TLE Remote Loader STABLE] ' + text); } catch {}
     if (kind !== 'info') {
       try {
         const toast = HOST_WIN.toastr?.[kind === 'warning' ? 'warning' : kind];
@@ -179,7 +186,7 @@
         const digest = await subtle.digest('SHA-256', bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
         return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join('');
       } catch (error) {
-        console.warn('[TLE Loader TEST] WebCrypto 不可用，切换纯 JS SHA-256。', error);
+        console.warn('[TLE Loader STABLE] WebCrypto 不可用，切换纯 JS SHA-256。', error);
       }
     }
     return sha256Fallback(bytes);
@@ -375,7 +382,7 @@
       return true;
     } catch (error) {
       // The IndexedDB record is already durable and verified; a tiny pointer is best-effort only.
-      console.warn('[TLE Loader TEST] IndexedDB 缓存已验证，但 localStorage 索引写入失败。', error);
+      console.warn('[TLE Loader STABLE] IndexedDB 缓存已验证，但 localStorage 索引写入失败。', error);
       return false;
     }
   }
@@ -425,7 +432,7 @@
       const readback = JSON.parse(storage.getItem(key) || 'null');
       await verifySource(readback);
       cacheFlags[slot] = true;
-      console.warn('[TLE Loader TEST] IndexedDB 无法打开，已回退到 localStorage 源码缓存。', openError);
+      console.warn('[TLE Loader STABLE] IndexedDB 无法打开，已回退到 localStorage 源码缓存。', openError);
       return true;
     } catch (storageError) {
       throw new Error(`IndexedDB 无法打开：${openError?.message || openError}；localStorage 回退也失败：${storageError?.message || storageError}`);
@@ -445,7 +452,7 @@
         return indexedRecord;
       }
     } catch (error) {
-      console.warn(`[TLE Loader TEST] ${label} IndexedDB 读取失败，尝试兼容缓存。`, error);
+      console.warn(`[TLE Loader STABLE] ${label} IndexedDB 读取失败，尝试兼容缓存。`, error);
     }
 
     const storage = getStorage();
@@ -468,12 +475,12 @@
         writeCachePointer(key, slot, migrated);
         return migrated;
       } catch (migrationError) {
-        console.warn(`[TLE Loader TEST] ${label} 迁移到 IndexedDB 失败，暂时保留原始 localStorage 缓存。`, migrationError);
+        console.warn(`[TLE Loader STABLE] ${label} 迁移到 IndexedDB 失败，暂时保留原始 localStorage 缓存。`, migrationError);
         return payload;
       }
     } catch (error) {
       cacheFlags[slot] = false;
-      console.warn(`[TLE Loader TEST] ${label} 缓存校验失败。`, error);
+      console.warn(`[TLE Loader STABLE] ${label} 缓存校验失败。`, error);
       return null;
     }
   }
@@ -589,7 +596,7 @@
         return method;
       } catch (error) {
         diagnosticState.remoteScriptError = String(error?.message || error).slice(0, 400);
-        console.warn('[TLE Remote Loader TEST] 远程 script-src 不可用；改用已通过 SHA-256 校验的本地缓存源码。', error);
+        console.warn('[TLE Remote Loader STABLE] 远程 script-src 不可用；改用已通过 SHA-256 校验的本地缓存源码。', error);
       }
     }
     if (!SCRIPT_WIN.Blob || !SCRIPT_WIN.URL?.createObjectURL) {
@@ -672,7 +679,7 @@
           if (!currentLkg || currentLkg.sha256 !== record.sha256) await saveLastKnownGood(record);
         } catch (cacheError) {
           cacheWarning = '；当前 TLE 健康运行，但缓存维护失败：' + (cacheError?.message || cacheError);
-          console.warn('[TLE Remote Loader TEST] 当前实例健康；缓存维护失败，不影响运行。', cacheError);
+          console.warn('[TLE Remote Loader STABLE] 当前实例健康；缓存维护失败，不影响运行。', cacheError);
         }
         setStatus('远程源码校验通过：v' + record.version + '。当前运行版本已经是最新版本，无需重新加载。' + cacheWarning, cacheWarning ? 'warning' : 'success');
       } else {
@@ -685,14 +692,14 @@
           shouldLoad = promptUpdate;
           setStatus(
             (activeVersion ? '发现可用更新：v' + activeVersion + ' → v' + record.version + '。' : '发现可安装版本：v' + record.version + '。') +
-            '源码校验通过。将使用浏览器原生确认框征求加载许可。',
+            (promptUpdate ? '源码校验通过。将请求用户确认安装。' : '源码校验通过；等待用户在 TLE 面板点击安装。'),
             'info'
           );
         }
       }
     } catch (error) {
       setStatus('检查失败：' + (error?.message || error) + '。现有 TLE 不会被修改。', 'error');
-      console.error('[TLE Remote Loader TEST] 远程检查失败。', error);
+      console.error('[TLE Remote Loader STABLE] 远程检查失败。', error);
     } finally {
       setBusy(false);
       refreshButtons();
@@ -769,11 +776,11 @@
       await loadScriptRecord(record, { preferRemote: options.preferRemote !== false });
       if (!isHealthy(getActiveInstance(), record.version)) throw new Error('script 已加载，但 TLE 实例、宿主引用或卸载接口健康检查未通过');
     } catch (error) {
-      console.error('[TLE Remote Loader TEST] 远程脚本启动或健康检查失败。', error);
+      console.error('[TLE Remote Loader STABLE] 远程脚本启动或健康检查失败。', error);
       const current = getActiveInstance();
       if (current && current !== previous) {
         try { current.destroy?.(); }
-        catch (destroyError) { console.error('[TLE Remote Loader TEST] 清理失败实例时发生错误。', destroyError); }
+        catch (destroyError) { console.error('[TLE Remote Loader STABLE] 清理失败实例时发生错误。', destroyError); }
       }
       const previousStillRunning = previous && HOST_WIN[INSTANCE_KEY] === previous && previous.state?.destroyed === false;
       if (previousStillRunning) {
@@ -788,13 +795,13 @@
             await loadScriptRecord(fallback, { preferRemote: false });
             if (!isHealthy(getActiveInstance(), fallback.version)) throw new Error('缓存版本健康检查未通过');
             try { await saveLastKnownGood(fallback); }
-            catch (cacheError) { console.warn('[TLE Remote Loader TEST] 已恢复，但无法提升 LKG 缓存。', cacheError); }
+            catch (cacheError) { console.warn('[TLE Remote Loader STABLE] 已恢复，但无法提升 LKG 缓存。', cacheError); }
             setStatus('新版本启动失败，已自动恢复到 TLE v' + fallback.version + '。\n原始错误：' + (error?.message || error), 'warning');
             recovered = true;
             break;
           } catch (rollbackError) {
             rollbackErrors.push('v' + fallback.version + ': ' + (rollbackError?.message || rollbackError));
-            console.error('[TLE Remote Loader TEST] 尝试缓存回滚失败。', rollbackError);
+            console.error('[TLE Remote Loader STABLE] 尝试缓存回滚失败。', rollbackError);
           }
         }
         if (!recovered) setStatus('远程加载与自动回滚均失败。\n加载错误：' + (error?.message || error) + '\n回滚错误：' + (rollbackErrors.join('；') || '没有不同于候选版本的缓存源码') + '\n请重新启用原始 TLE 脚本并刷新酒馆。', 'error');
@@ -808,19 +815,19 @@
     try { await saveLastKnownGood(record); }
     catch (cacheError) {
       cacheWarnings.push('新版源码缓存未能更新：' + (cacheError?.message || cacheError));
-      console.warn('[TLE Remote Loader TEST] 新版 TLE 已健康运行，但 LKG 缓存写入失败。', cacheError);
+      console.warn('[TLE Remote Loader STABLE] 新版 TLE 已健康运行，但 LKG 缓存写入失败。', cacheError);
     }
     try { if (!isAutoRestoreEnabled()) setAutoRestoreEnabled(true); }
     catch (authError) {
       cacheWarnings.push('自动恢复授权未能保存：' + (authError?.message || authError));
-      console.warn('[TLE Remote Loader TEST] 新版 TLE 已健康运行，但自动恢复授权写入失败。', authError);
+      console.warn('[TLE Remote Loader STABLE] 新版 TLE 已健康运行，但自动恢复授权写入失败。', authError);
     }
     if (cacheWarnings.length) {
       setStatus('远程加载成功：TLE v' + record.version + '。实例健康检查通过。\n缓存维护警告：' + cacheWarnings.join('；') + '\n当前新版不会被销毁；刷新前请先处理缓存问题。', 'warning');
     } else {
       setStatus('远程加载成功：TLE v' + record.version + '。实例、宿主引用与卸载接口均通过检查。\n上一版本备份已验证；Last Known Good 已更新；自动恢复已授权。', 'success');
     }
-    console.info('[TLE Remote Loader TEST] 远程加载成功：v' + record.version + '，方式：' + (diagnosticState.lastLoadMethod || 'unknown'));
+    console.info('[TLE Remote Loader STABLE] 远程加载成功：v' + record.version + '，方式：' + (diagnosticState.lastLoadMethod || 'unknown'));
     setBusy(false);
     refreshButtons();
     return true;
@@ -872,7 +879,7 @@
       setStatus('自动恢复成功：TLE v' + record.version + '。正在检查远程更新；新版本仍需手动确认。', 'success');
       return true;
     } catch (error) {
-      console.error('[TLE Remote Loader TEST] 自动恢复失败。', error);
+      console.error('[TLE Remote Loader STABLE] 自动恢复失败。', error);
       try { getActiveInstance()?.destroy?.(); } catch {}
       const fallback = await readPreviousKnownGood();
       if (fallback && fallback.sha256 !== record.sha256) {
@@ -880,10 +887,10 @@
           setStatus('主缓存启动失败，正在尝试上一版本 v' + fallback.version + '……', 'warning');
           await loadScriptRecord(fallback, { preferRemote: false });
           if (!isHealthy(getActiveInstance(), fallback.version)) throw new Error('上一版本健康检查未通过');
-          try { await saveLastKnownGood(fallback); } catch (cacheError) { console.warn('[TLE Remote Loader TEST] 已恢复上一版本，但无法更新 LKG 缓存。', cacheError); }
+          try { await saveLastKnownGood(fallback); } catch (cacheError) { console.warn('[TLE Remote Loader STABLE] 已恢复上一版本，但无法更新 LKG 缓存。', cacheError); }
           setStatus('已从上一版本恢复：TLE v' + fallback.version + '。主缓存错误：' + (error?.message || error), 'warning');
           return true;
-        } catch (fallbackError) { console.error('[TLE Remote Loader TEST] 上一版本自动恢复也失败。', fallbackError); }
+        } catch (fallbackError) { console.error('[TLE Remote Loader STABLE] 上一版本自动恢复也失败。', fallbackError); }
       }
       setStatus('自动恢复失败：' + (error?.message || error) + '。请重新启用原始 TLE 脚本并刷新酒馆。', 'error');
       return false;
@@ -899,7 +906,7 @@
       scriptInjectionAvailable = false;
       diagnosticState.scriptInjectionAvailable = false;
       setStatus('经典 script 引入环境检查失败：' + (error?.message || error) + '。当前不会替换 TLE。', 'error');
-      console.error('[TLE Remote Loader TEST] 启动环境检查或自动恢复失败。', error);
+      console.error('[TLE Remote Loader STABLE] 启动环境检查或自动恢复失败。', error);
     } finally {
       setBusy(false);
       refreshButtons();
