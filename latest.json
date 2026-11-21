@@ -10,8 +10,8 @@
     "source_commit": "5dde2ca7ff2c0b9992be458cf3f802807b8397bf",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5dde2ca7ff2c0b9992be458cf3f802807b8397bf/releases/v0.3.195/TLE.js",
     "changelog_path": "releases/v0.3.195/CHANGELOG.md",
-    "sha256": "4d8bc235360c59f68838590631db00e9fa7abcbf02a9b366d5e2502c30d6b4eb",
+    "sha256": "8baaf1b92be312eb93e7454787d15a8c7d08627920f2efe64aecf1b4e1aa1f52",
     "size_bytes": 454562
   },
-  "update_system_status": "stable-release-v0.3.195-published; TT ChatSurface virtualized-chat compatibility and Fade Engine manually verified by maintainer; cross-version ST/iPhone coverage not exhaustively certified"
+  "update_system_status": "stable-release-v0.3.195-published; stable manifest SHA-256 corrected on 2026-11-21 after successful browser Web Crypto and UTF-8 byte-size verification; no-refresh Blob bootstrap manually validated; TT ChatSurface virtualized-chat compatibility and Fade Engine manually verified by maintainer; cross-version ST/iPhone coverage not exhaustively certified"
 }
