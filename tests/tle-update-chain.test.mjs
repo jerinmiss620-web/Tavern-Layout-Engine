@@ -84,7 +84,18 @@ function assertSingle() {
   const panel = host.document.querySelector('#tle-control-panel');
   assert.equal(panel.querySelector('[data-tle-runtime-version]').textContent, 'v' + host[C].version);
   assert.ok(panel.querySelector('[data-tle-loader-available-version]').textContent.includes(host[L].version));
-  assert.equal(panel.querySelector('details[data-tle-update-details]').open, false);
+  const updateSection = panel.querySelector('section.tle-section[data-tle-update-details]');
+  assert.ok(updateSection, 'update settings must use the same tle-section as other engine settings');
+  const nativeDrawer = updateSection.querySelector(':scope > .inline-drawer');
+  const nativeToggle = nativeDrawer?.querySelector(':scope > .inline-drawer-toggle.inline-drawer-header.interactable');
+  const nativeContent = nativeDrawer?.querySelector(':scope > .inline-drawer-content');
+  assert.ok(nativeToggle, 'update section must reuse the original Tavern drawer heading');
+  assert.ok(nativeContent, 'update section must reuse the original Tavern drawer content');
+  assert.equal(nativeContent.style.display, 'none', 'update controls are collapsed by default');
+  assert.equal(nativeToggle.getAttribute('aria-expanded'), 'false');
+  assert.ok(nativeToggle.querySelector('.inline-drawer-icon.fa-circle-chevron-down'), 'the same native arrow icon is used');
+  assert.ok(nativeToggle.querySelector('[data-tle-update-summary]'), 'version is visible while collapsed');
+  assert.ok(nativeToggle.querySelector('[data-tle-update-alert]'), 'green update state remains in the header');
   assert.ok(host.document.querySelector('#tle-diagnostic-float'), 'diagnostic button retained');
 }
 async function boot({ empty = false } = {}) {
