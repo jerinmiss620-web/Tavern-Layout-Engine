@@ -118,6 +118,7 @@
   const navigationInteractionProbe = {
     lastPointerDown: null,
     lastClickCapture: null,
+    activeClickEvent: null,
   };
   function getDiagnosticMode() {
     try { return HOST_WIN.localStorage.getItem(DIAGNOSTIC_MODE_KEY) === 'true'; }
@@ -9500,10 +9501,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     };
   }
 
+  function getNavigationControlParts(button) {
+    const drawer = button?.parentElement || null;
+    const icon = button?.querySelector(':scope > .drawer-icon') ||
+      button?.querySelector('.drawer-icon, i, svg, [class*="icon"]') ||
+      (button?.matches?.('.drawer-icon') ? button : null);
+    const label = drawer?.querySelector(':scope > .tle-drawer-label') || null;
+    const content = drawer?.querySelector(':scope > .drawer-content') || null;
+    return { drawer, icon, label, content };
+  }
+
+  function rectContainsPoint(rect, x, y) {
+    return Boolean(rect && Number.isFinite(x) && Number.isFinite(y) &&
+      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom);
+  }
+
   function findNavigationControlForEvent(event) {
     const target = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
-    const direct = target?.closest?.('#top-settings-holder > .drawer > .drawer-toggle');
+    const direct = target?.closest?.(NATIVE_TOGGLE_SELECTOR);
     if (direct) return direct;
+
+    // Labels are siblings of the native toggle. Map them to the same control so
+    // their programmatic-click path can be compared with a physical icon click.
+    const label = target?.closest?.(NAV_LABEL_SELECTOR);
+    if (label) return label.parentElement?.querySelector(':scope > .drawer-toggle') || null;
+
     const x = Number(event.clientX);
     const y = Number(event.clientY);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
@@ -9512,10 +9534,62 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     for (const drawer of root.children) {
       if (!drawer.matches?.('.drawer')) continue;
       const button = drawer.querySelector(':scope > .drawer-toggle');
-      const rect = button?.getBoundingClientRect?.();
-      if (rect && x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return button;
+      const parts = getNavigationControlParts(button);
+      const buttonRect = button?.getBoundingClientRect?.();
+      const iconRect = parts.icon?.getBoundingClientRect?.();
+      const labelRect = parts.label?.getBoundingClientRect?.();
+      if (rectContainsPoint(buttonRect, x, y) ||
+          rectContainsPoint(iconRect, x, y) ||
+          rectContainsPoint(labelRect, x, y)) return button;
     }
     return null;
+  }
+
+  function getNavigationEventDetails(button, event) {
+    const target = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
+    const { icon, label } = getNavigationControlParts(button);
+    const x = Number(event.clientX);
+    const y = Number(event.clientY);
+    const iconRect = diagnosticSafe(() => icon?.getBoundingClientRect?.(), null);
+    const buttonRect = diagnosticSafe(() => button.getBoundingClientRect(), null);
+    const labelRect = diagnosticSafe(() => label?.getBoundingClientRect?.(), null);
+    const targetInsideIcon = Boolean(target && icon && (target === icon || icon.contains(target)));
+    const targetInsideButton = Boolean(target && (target === button || button.contains(target)));
+    const targetInsideLabel = Boolean(target && label && (target === label || label.contains(target)));
+    let targetArea = 'unclassified';
+    if (targetInsideIcon) targetArea = 'icon';
+    else if (targetInsideButton) targetArea = 'toggle-wrapper';
+    else if (targetInsideLabel) targetArea = 'label';
+    else if (rectContainsPoint(iconRect, x, y)) targetArea = 'icon-region-hit-target-outside-icon';
+    else if (rectContainsPoint(buttonRect, x, y)) targetArea = 'toggle-region-hit-target-outside-toggle';
+    else if (rectContainsPoint(labelRect, x, y)) targetArea = 'label-region-hit-target-outside-label';
+
+    const hitNodes = Number.isFinite(x) && Number.isFinite(y)
+      ? diagnosticSafe(() => HOST_DOC.elementsFromPoint(x, y), []).slice(0, 8)
+      : [];
+    const topNode = Number.isFinite(x) && Number.isFinite(y)
+      ? diagnosticSafe(() => HOST_DOC.elementFromPoint(x, y), null)
+      : null;
+    const containsHit = (node, parent) => Boolean(node && parent && (node === parent || parent.contains(node)));
+
+    return {
+      targetArea,
+      targetInsideIcon,
+      targetInsideButton,
+      targetInsideLabel,
+      iconRect: iconRect ? { x: Math.round(iconRect.x), y: Math.round(iconRect.y), width: Math.round(iconRect.width), height: Math.round(iconRect.height) } : null,
+      labelRect: labelRect ? { x: Math.round(labelRect.x), y: Math.round(labelRect.y), width: Math.round(labelRect.width), height: Math.round(labelRect.height) } : null,
+      hitTest: {
+        topHit: describeNavigationEventNode(topNode),
+        iconReceivesHit: containsHit(topNode, icon),
+        buttonReceivesHit: containsHit(topNode, button),
+        labelReceivesHit: containsHit(topNode, label),
+        iconPresentInHitStack: hitNodes.some(node => containsHit(node, icon)),
+        buttonPresentInHitStack: hitNodes.some(node => containsHit(node, button)),
+        stack: hitNodes.map(describeNavigationEventNode),
+      },
+      eventPath: diagnosticSafe(() => event.composedPath?.().slice(0, 8).map(describeNavigationEventNode), []),
+    };
   }
 
   function recordNavigationPointerDown(event) {
@@ -9527,10 +9601,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       at: new Date().toISOString(),
       pointerType: event.pointerType || null,
       isTrusted: Boolean(event.isTrusted),
-      label: button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '',
+      label: getNavigationControlParts(button).label?.textContent?.trim().slice(0, 80) || '',
       point: { x: Number.isFinite(event.clientX) ? Math.round(event.clientX) : null, y: Number.isFinite(event.clientY) ? Math.round(event.clientY) : null },
       target: describeNavigationEventNode(target),
-      targetInsideControl: Boolean(target && (target === button || button.contains(target))),
+      ...getNavigationEventDetails(button, event),
       controlRect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
     };
   }
@@ -9538,17 +9612,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function recordNavigationClickCapture(event) {
     const button = findNavigationControlForEvent(event);
     if (!button) return;
-    const target = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
     const rect = button.getBoundingClientRect();
+    const parts = getNavigationControlParts(button);
     const record = {
       at: new Date().toISOString(),
       isTrusted: Boolean(event.isTrusted),
-      label: button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '',
+      label: parts.label?.textContent?.trim().slice(0, 80) || '',
       point: { x: Number.isFinite(event.clientX) ? Math.round(event.clientX) : null, y: Number.isFinite(event.clientY) ? Math.round(event.clientY) : null },
-      target: describeNavigationEventNode(target),
-      targetInsideControl: Boolean(target && (target === button || button.contains(target))),
+      target: describeNavigationEventNode(event.target?.nodeType === 1 ? event.target : event.target?.parentElement),
+      ...getNavigationEventDetails(button, event),
       controlRect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
-      drawerOpenAtCapture: Boolean(button.parentElement?.querySelector(':scope > .drawer-content')?.classList.contains('openDrawer')),
+      drawerOpenAtCapture: Boolean(parts.content?.classList.contains('openDrawer')),
       drawerOpenAfterDispatch: null,
       defaultPreventedAtWindowCapture: Boolean(event.defaultPrevented),
       defaultPreventedAtDocumentBubble: null,
@@ -9557,30 +9631,29 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       windowBubbleReached: false,
     };
     navigationInteractionProbe.lastClickCapture = record;
+    navigationInteractionProbe.activeClickEvent = event;
     Promise.resolve().then(() => {
       if (navigationInteractionProbe.lastClickCapture === record) {
         record.defaultPreventedAfterDispatch = Boolean(event.defaultPrevented);
-        record.drawerOpenAfterDispatch = Boolean(button.parentElement?.querySelector(':scope > .drawer-content')?.classList.contains('openDrawer'));
+        record.drawerOpenAfterDispatch = Boolean(parts.content?.classList.contains('openDrawer'));
       }
+      if (navigationInteractionProbe.activeClickEvent === event) navigationInteractionProbe.activeClickEvent = null;
     });
   }
 
   function recordNavigationClickDocumentBubble(event) {
     const record = navigationInteractionProbe.lastClickCapture;
-    if (!record || record.isTrusted !== Boolean(event.isTrusted)) return;
-    const button = findNavigationControlForEvent(event);
-    if (!button || record.label !== (button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '')) return;
+    if (!record || navigationInteractionProbe.activeClickEvent !== event) return;
     record.documentBubbleReached = true;
     record.defaultPreventedAtDocumentBubble = Boolean(event.defaultPrevented);
   }
 
   function recordNavigationClickWindowBubble(event) {
     const record = navigationInteractionProbe.lastClickCapture;
-    if (!record || record.isTrusted !== Boolean(event.isTrusted)) return;
-    const button = findNavigationControlForEvent(event);
-    if (!button || record.label !== (button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '')) return;
+    if (!record || navigationInteractionProbe.activeClickEvent !== event) return;
     record.windowBubbleReached = true;
   }
+
 
   function collectDiagnosticReport() {
     const now = new Date();
@@ -9847,8 +9920,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (!button) return { index, status: 'missing-direct-drawer-toggle' };
         const label = drawer.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '';
         const buttonRect = rectOf(button);
-        const icon = button.querySelector('.drawer-icon, i, svg, [class*="icon"]');
+        const parts = getNavigationControlParts(button);
+        const icon = parts.icon;
+        const labelElement = parts.label;
         const iconRect = rectOf(icon);
+        const labelRect = rectOf(labelElement);
         const points = [];
         if (buttonRect && buttonRect.width > 0 && buttonRect.height > 0) {
           points.push({
@@ -9856,13 +9932,20 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             x: Math.round(buttonRect.left + buttonRect.width / 2),
             y: Math.round(buttonRect.top + buttonRect.height / 2),
           });
-          if (iconRect && iconRect.width > 0 && iconRect.height > 0) {
-            points.push({
-              name: 'icon-center',
-              x: Math.round(iconRect.left + iconRect.width / 2),
-              y: Math.round(iconRect.top + iconRect.height / 2),
-            });
-          }
+        }
+        if (iconRect && iconRect.width > 0 && iconRect.height > 0) {
+          points.push({
+            name: 'icon-center',
+            x: Math.round(iconRect.left + iconRect.width / 2),
+            y: Math.round(iconRect.top + iconRect.height / 2),
+          });
+        }
+        if (labelRect && labelRect.width > 0 && labelRect.height > 0) {
+          points.push({
+            name: 'label-center',
+            x: Math.round(labelRect.left + labelRect.width / 2),
+            y: Math.round(labelRect.top + labelRect.height / 2),
+          });
         }
         const hitTests = points.map(point => {
           const hitNodes = diagnosticSafe(() => HOST_DOC.elementsFromPoint(point.x, point.y), []).slice(0, 6);
@@ -9875,6 +9958,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             topHit: top,
             buttonReceivesHit: Boolean(topNode && (topNode === button || button.contains(topNode))),
             buttonPresentInHitStack: hitNodes.some(node => node === button || button.contains(node)),
+            iconReceivesHit: Boolean(topNode && icon && (topNode === icon || icon.contains(topNode))),
+            iconPresentInHitStack: hitNodes.some(node => node === icon || icon?.contains(node)),
+            labelReceivesHit: Boolean(topNode && labelElement && (topNode === labelElement || labelElement.contains(topNode))),
+            labelPresentInHitStack: hitNodes.some(node => node === labelElement || labelElement?.contains(node)),
             stack,
           };
         });
@@ -9882,8 +9969,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         for (let node = button, depth = 0; node && node !== HOST_DOC && depth < 9; node = node.parentElement, depth++) {
           ancestors.push(describeNode(node));
         }
-        const pseudoElements = ['::before', '::after'].map(pseudo => {
-          const style = diagnosticSafe(() => HOST_WIN.getComputedStyle(button, pseudo), null);
+        const readPseudoElements = element => ['::before', '::after'].map(pseudo => {
+          const style = diagnosticSafe(() => HOST_WIN.getComputedStyle(element, pseudo), null);
           return style ? {
             pseudo,
             content: style.content,
@@ -9895,7 +9982,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             zIndex: style.zIndex,
           } : { pseudo, status: 'unavailable' };
         });
+        const pseudoElements = readPseudoElements(button);
+        const iconPseudoElements = icon ? readPseudoElements(icon) : [];
         const buttonStyle = diagnosticSafe(() => HOST_WIN.getComputedStyle(button), null);
+        const iconStyle = diagnosticSafe(() => icon && HOST_WIN.getComputedStyle(icon), null);
         return {
           index,
           label,
@@ -9904,13 +9994,24 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           icon: describeNode(icon),
           marginInline: buttonStyle ? { start: buttonStyle.marginInlineStart, end: buttonStyle.marginInlineEnd } : null,
           pseudoElements,
+          iconPseudoElements,
           ancestors,
           hitTests,
+          clickability: {
+            iconPointerEvents: iconStyle?.pointerEvents || null,
+            iconVisible: Boolean(iconStyle && iconStyle.display !== 'none' && iconStyle.visibility !== 'hidden' && Number(iconStyle.opacity) !== 0),
+            iconCenterReceivesHit: hitTests.find(item => item.name === 'icon-center')?.iconReceivesHit ?? null,
+            iconCenterButtonReceivesHit: hitTests.find(item => item.name === 'icon-center')?.buttonReceivesHit ?? null,
+            labelCenterButtonReceivesHit: hitTests.find(item => item.name === 'label-center')?.buttonReceivesHit ?? null,
+          },
           likelyCssBlockers: {
             selfPointerEventsNone: buttonStyle?.pointerEvents === 'none',
             selfHidden: Boolean(buttonStyle && (buttonStyle.display === 'none' || buttonStyle.visibility === 'hidden' || Number(buttonStyle.opacity) === 0)),
+            iconPointerEventsNone: iconStyle?.pointerEvents === 'none',
+            iconHidden: Boolean(iconStyle && (iconStyle.display === 'none' || iconStyle.visibility === 'hidden' || Number(iconStyle.opacity) === 0)),
             ancestorPointerEventsNone: ancestors.slice(1).some(item => item.pointerEvents === 'none'),
             ancestorHidden: ancestors.slice(1).some(item => item.display === 'none' || item.visibility === 'hidden' || Number(item.opacity) === 0),
+            iconHitTestBlocked: hitTests.some(item => item.name === 'icon-center' && !item.buttonReceivesHit),
             hitTestBlocked: hitTests.some(item => !item.buttonReceivesHit),
           },
         };
