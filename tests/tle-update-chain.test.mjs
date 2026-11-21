@@ -297,7 +297,11 @@ try {
   const retiredCore = host[C], retiredLoader = host[L];
   host[B].destroy();
   await finishFetch(); await pending;
-  assert.equal(retiredCore.state.destroyed, true); assert.equal(retiredLoader.diagnostics.destroyed, true);
+  assert.equal(retiredCore.state.destroyed, true, JSON.stringify({
+    coreManaged: retiredCore.remoteLoaderManaged, loaderManaged: retiredLoader.bootstrapManaged,
+    coreVersion: retiredCore.version, loaderVersion: retiredLoader.version,
+    currentCore: host[C]?.version, currentLoader: host[L]?.version
+  })); assert.equal(retiredLoader.diagnostics.destroyed, true);
   assert.equal(host[B], undefined); assert.equal(host[L], undefined); assert.equal(host[C], undefined);
   assert.equal(timers.size, 0);
   console.log('PASS destruction during pending work cannot resurrect Loader or Core');
