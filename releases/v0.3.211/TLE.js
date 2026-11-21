@@ -1764,7 +1764,7 @@ body.tle-global-search-open { overflow: hidden !important; }
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
-              margin: 2px 0 0;
+        margin: 2px 0 0;
         padding: 2px 0 0;
         box-sizing: border-box;
       }
@@ -2942,7 +2942,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         overflow-x: auto;
         overflow-y: hidden;
         padding: 0 0 2px;
-            }
+      }
       .tle-quick-manager .tle-quick-hint {
         max-width: 100%;
         overflow: hidden;
@@ -3057,7 +3057,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         overflow-x: auto;
         overflow-y: hidden;
         padding-bottom: 2px;
-            }
+      }
       .tle-quick-manager .tle-quick-operations > button {
         flex: 0 0 auto;
       }
