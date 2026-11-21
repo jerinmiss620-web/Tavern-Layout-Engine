@@ -273,9 +273,17 @@ try {
   publish('core', CV[0]); publish('loader', LV[0]);
   await boot();
   if (host[L]?.version === '0.3.3') {
-    assert.ok([...timers.values()].some(t => t.ms === 60000),
-      'pending Loader v0.3.4 must use a 1-minute retry, not six hours');
-    await tick();
+    // boot() may observe the idle gap between cached Loader recovery and
+    // remote manifest verification. Wait for either a prompt upgrade or
+    // a scheduled short retry before asserting the update policy.
+    await waitFor(() => host[L]?.version === LV[0] ||
+      [...timers.values()].some(t => t.ms === 60000),
+      'cached Loader must upgrade or schedule a 1-minute retry');
+    if (host[L]?.version === '0.3.3') {
+      assert.ok([...timers.values()].some(t => t.ms === 60000),
+        'pending Loader v0.3.4 must use a 1-minute retry, not six hours');
+      await tick();
+    }
   }
   await versions(CV[0], LV[0]);
   console.log('PASS PC legacy Loader v0.3.3 + Core v0.3.203 cache upgrades to current versions without waiting six hours');
