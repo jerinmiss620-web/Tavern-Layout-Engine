@@ -23,6 +23,13 @@
 - Retain detection of theme-originated `#chat` inline style changes; do not suppress these records just because fade is active.
 - These optimizations are static source changes, not measured FPS improvements.
 
+## Critical lifecycle correction after first test package
+
+- The first packaged TEST JSON omitted three required fade bottom-padding lifecycle functions: `syncChatFadeBottomPadding`, `clearChatFadeBottomPadding`, and `setChatFadeBottomPaddingEnabled`.
+- This caused enabling fade to throw before renderer initialization, and caused `destroy()` / emergency restore to throw at `clearChatFadeBottomPadding()` before the remaining teardown steps. This directly explains the reported missing fade and failed in-session restoration.
+- Restored all three functions from the v0.3.194 lifecycle contract, adapted to the current CSS-class clearance implementation. Rebuilt the standalone import package and repinned its source checksum.
+- **Do not use the first package commit `209632a97b50d7cfb37850e70c8432cca5e27569`.** Use only the corrected package commit recorded in `TEST-MANIFEST.json`.
+
 ## Known limitations / required tests
 
 1. Confirm TT's bounded ChatSurface stays running after toggling fade, switching chats and scrolling across mount/unmount boundaries.
