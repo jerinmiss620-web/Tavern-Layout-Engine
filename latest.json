@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.208",
+  "latest_version": "0.3.209",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.208",
-    "source_path": "releases/v0.3.208/TLE.js",
-    "source_commit": "67a0fcdfb89c4e12a0e92cea58d5ebb159eda97b",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/67a0fcdfb89c4e12a0e92cea58d5ebb159eda97b/releases/v0.3.208/TLE.js",
-    "changelog_path": "releases/v0.3.208/CHANGELOG.md",
-    "sha256": "534c036a2a87df05fda7180f67d6216c0892d785b67c02c91dd9a9200bb5f907",
-    "size_bytes": 504698
+    "version": "0.3.209",
+    "source_path": "releases/v0.3.209/TLE.js",
+    "source_commit": "d6e2d198cc2707cbf1dd24dfdcb3b22cb2a5a314",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d6e2d198cc2707cbf1dd24dfdcb3b22cb2a5a314/releases/v0.3.209/TLE.js",
+    "changelog_path": "releases/v0.3.209/CHANGELOG.md",
+    "sha256": "ce1e088ca52429d250c95f3a15d3f254f6b8c01aed9c06197d9416db7ff4b4b6",
+    "size_bytes": 505060
   },
-  "notes": "v0.3.208: Floor Tools action labels use intrinsic max-content instead of 5.8em; opt-in navigation repair behavior unchanged."
+  "notes": "v0.3.209: Floor Tools range hint spans both grid columns; Theme Manager group import is displayed only under Current UI Theme category, global backup actions unchanged."
 }
