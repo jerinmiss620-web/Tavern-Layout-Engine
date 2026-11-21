@@ -18,7 +18,7 @@ TLE enhances the Tavern interface with customizable navigation, workspace layout
 
 A versioned remote-update system based on Tavern Helper scripts is now in test.
 
-The Remote Loader TEST 0.3.0 is headless: it loads TLE through an immutable classic script URL with Subresource Integrity, retains IndexedDB rollback caches, and uses native confirmation for updates. The test channel offers TLE v0.3.194 with window-capture diagnostic click handling, a visible non-Popover fallback, a wired mobile debugger action, and a self-repairing button lifecycle. The release manifest is checked for exact 40-character immutable commit paths and source integrity. Critical mobile controls must never be placed in unverified bottom-corner or host-controlled dead zones. The release remains test-only; the stable pointer is unchanged until ST and TT validation is complete.
+The headless Remote Loader 0.3.0 remains a test-channel bootstrapper. Stable TLE v0.3.195 is published through `latest.json` and adds TT ChatSurface-compatible Fade Engine rendering without inserting unmanaged direct-child nodes into `#chat`. The release also replaces the floor-zero spacer node with calculated chat padding and retains the existing quick-return-to-bottom behavior. The maintainer manually verified TT virtualized-chat operation, fade rendering, chat scrolling, message generation, chat/theme switching and layout restoration. The test channel remains separate at v0.3.194; the stable source is pinned to an immutable Git commit and verified by SHA-256 and UTF-8 byte size.
 
 ## Repository Structure
 
@@ -32,6 +32,4 @@ Tavern-Layout-Engine/
 
 ## Development Status
 
-Remote update infrastructure (headless Loader 0.3.0) and TLE Host Diagnostics 2.0 reliability fixes are in test validation. See `loader/README.md`, `loader/CHANGELOG-0.3.0.md`, `releases/v0.3.194/CHANGELOG.md` and `tests/tle-regression.test.mjs` for details.
-
-The existing stable installation remains unchanged until the new loader passes compatibility tests.
+Stable TLE v0.3.195 is available. The headless Remote Loader 0.3.0 remains test-only and is not promoted by this release. See `latest.json`, `releases/v0.3.195/CHANGELOG.md`, `loader/README.md` and `tests/tle-regression.test.mjs` for release details.
