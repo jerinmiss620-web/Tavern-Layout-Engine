@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.203",
-  "minimum_loader_version": "0.1.0",
+  "latest_version": "0.3.206",
+  "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.203",
-    "source_path": "releases/v0.3.203/TLE.js",
-    "source_commit": "65ed78df9d23c12d1d49300f92e2f43c2ee49cdd",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/65ed78df9d23c12d1d49300f92e2f43c2ee49cdd/releases/v0.3.203/TLE.js",
-    "changelog_path": "releases/v0.3.203/CHANGELOG.md",
-    "sha256": "18ec8b806c19edb769bbdfe05517eb593774838e8b812ee134a1cae1ba81d601",
-    "size_bytes": 495304
+    "version": "0.3.206",
+    "source_path": "releases/v0.3.206/TLE.js",
+    "source_commit": "2d2759d8195eba59574b08ffca904c848476e163",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2d2759d8195eba59574b08ffca904c848476e163/releases/v0.3.206/TLE.js",
+    "changelog_path": "releases/v0.3.206/CHANGELOG.md",
+    "sha256": "27a79560d651e5c9ce0f0375d268ace80ab675edc59e712d32dbd83d61e33b3f",
+    "size_bytes": 504548
   },
-  "update_system_status": "stable v0.3.203 published with in-TLE Loader 0.3.1 update UI, no auto-install, immutable commit/SHA-256 checks, headless loader and rollback; static and isolated tests passed; full ST/TT runtime migration still pending."
+  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
 }
