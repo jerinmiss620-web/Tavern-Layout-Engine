@@ -5996,6 +5996,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.205</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
+          <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
           <label class="tle-row tle-update-toggle">
             <span>自动安装更新（默认开启）</span>
             <input type="checkbox" data-tle-setting="auto-update" checked>
@@ -6005,6 +6006,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             <button type="button" class="tle-update-pill" data-tle-action="install-update" hidden>可更新</button>
             <button type="button" class="tle-update-check" data-tle-action="check-update" hidden>检查更新</button>
             <button type="button" class="tle-update-check" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>
+            <button type="button" class="tle-update-check" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>
+            <button type="button" class="tle-update-pill" data-tle-action="install-loader-update" hidden>更新 Loader</button>
           </div>
           <small class="tle-muted" data-tle-loader-status aria-live="polite">正在连接远程更新服务…</small>
         </div>
@@ -9226,6 +9229,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const loader = getStableLoader();
     const legacy = loader ? null : getLegacyTestLoader();
     const info = loader?.getInfo?.();
+    const bootstrap = HOST_WIN.__TLE_REMOTE_BOOTSTRAP_V1__;
+    const bootstrapInfo = bootstrap?.getInfo?.();
     const legacyInfo = legacy?.diagnostics;
     const latest = info?.availableVersion || (legacy && legacyCandidate?.version) || null;
     const hasUpdate = Boolean(latest &&
@@ -9234,6 +9239,24 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const needsAdoption = Boolean(loader && info && !info.autoRestoreAuthorized
       && info.availableVersion === runningVersion);
     const isBusy = Boolean(loader ? info?.busy : legacyInfo?.busy);
+    const hasLoaderUpdate = Boolean(bootstrapInfo?.updateAvailable);
+    const loaderAvailable = panel?.querySelector('[data-tle-loader-available-version]');
+    if (loaderAvailable) loaderAvailable.textContent = bootstrapInfo
+      ? ((bootstrapInfo.currentLoaderVersion ? '当前 v' + bootstrapInfo.currentLoaderVersion : '未运行')
+        + ' · GitHub ' + (bootstrapInfo.availableLoaderVersion ? 'v' + bootstrapInfo.availableLoaderVersion : '尚未获取')
+        + ' · Bootstrap v' + bootstrapInfo.bootstrapVersion)
+      : '尚未安装永久 Bootstrap（旧 Loader 不支持自身远程更新）';
+    const checkLoader = panel?.querySelector('[data-tle-action="check-loader-update"]');
+    const installLoader = panel?.querySelector('[data-tle-action="install-loader-update"]');
+    if (checkLoader) {
+      checkLoader.hidden = !bootstrap;
+      checkLoader.disabled = Boolean(bootstrapInfo?.busy);
+    }
+    if (installLoader) {
+      installLoader.hidden = !hasLoaderUpdate;
+      installLoader.disabled = Boolean(bootstrapInfo?.busy);
+      if (hasLoaderUpdate) installLoader.textContent = '更新 Loader · v' + bootstrapInfo.availableLoaderVersion;
+    }
     const current = panel?.querySelector('[data-tle-runtime-version]');
     if (current) current.textContent = 'v' + runningVersion;
     const remote = panel?.querySelector('[data-tle-available-version]');
@@ -9252,11 +9275,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       ? '默认开启；启动时自动检查并安装经过验证的正式版。关闭后仍可手动更新。没有可靠回滚备份时不会自动替换。'
       : '当前 Loader 不支持自动安装；需要 Stable Loader v0.3.2 或更新版本。现有手动更新仍可使用。';
     const summary = panel?.querySelector('[data-tle-update-summary]');
-    if (summary) summary.textContent = 'v' + runningVersion + ' · '
-      + (isBusy ? '检查中…' : hasUpdate ? '发现 v' + latest
+    if (summary) summary.textContent = 'Core v' + runningVersion + ' · '
+      + (isBusy || bootstrapInfo?.busy ? '检查中…' : hasUpdate ? '发现 Core v' + latest
+        : hasLoaderUpdate ? '发现 Loader v' + bootstrapInfo.availableLoaderVersion
         : info?.checkedAt ? '已是最新或暂无更新' : '等待更新检查');
     const alert = panel?.querySelector('[data-tle-update-alert]');
-    if (alert) alert.hidden = !hasUpdate;
+    if (alert) alert.hidden = !hasUpdate && !hasLoaderUpdate;
     const update = panel?.querySelector('[data-tle-action="install-update"]');
     const check = panel?.querySelector('[data-tle-action="check-update"]');
     const adopt = panel?.querySelector('[data-tle-action="adopt-loader"]');
@@ -9280,10 +9304,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       adopt.hidden = !needsAdoption;
       adopt.disabled = isBusy;
     }
-    if (dot) dot.hidden = !hasUpdate;
+    if (dot) dot.hidden = !hasUpdate && !hasLoaderUpdate;
     const engineButton = state.navEntry?.querySelector(':scope > button');
     if (engineButton) engineButton.title = hasUpdate
       ? 'TLE v' + runningVersion + ' · 可更新至 v' + latest
+      : hasLoaderUpdate ? 'TLE Loader 可更新至 v' + bootstrapInfo.availableLoaderVersion
       : 'Tavern Layout Engine v' + runningVersion;
     if (status) {
       status.textContent = loader
@@ -9301,6 +9326,18 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   async function runLoaderUpdateAction(action) {
+    const bootstrap = HOST_WIN.__TLE_REMOTE_BOOTSTRAP_V1__;
+    if (action === 'check-loader-update' || action === 'install-loader-update') {
+      try {
+        if (action === 'check-loader-update') await bootstrap?.checkRemote?.();
+        else await bootstrap?.loadRemote?.();
+      } catch (error) {
+        console.error('[TLE] Loader 自更新失败', error);
+      } finally {
+        if (!state.destroyed) syncRemoteUpdateUI();
+      }
+      return;
+    }
     const stable = getStableLoader();
     const legacy = stable ? null : getLegacyTestLoader();
     if ((!stable && !legacy) || state.destroyed) {
@@ -10685,7 +10722,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
   function onClick(event) {
     const action = event.target.closest?.('#' + ID.panel + ' [data-tle-action]')?.dataset.tleAction;
-    if (action === 'check-update' || action === 'install-update' || action === 'adopt-loader') {
+    if (action === 'check-update' || action === 'install-update' || action === 'adopt-loader'
+        || action === 'check-loader-update' || action === 'install-loader-update') {
       void runLoaderUpdateAction(action);
       return;
     }
@@ -11047,6 +11085,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   applyEngineHubMode();
   syncRemoteUpdateUI();
   HOST_WIN.addEventListener('tle-loader-state-change', syncRemoteUpdateUI, { signal: state.abort.signal });
+  HOST_WIN.addEventListener('tle-loader-bootstrap-state-change', syncRemoteUpdateUI, { signal: state.abort.signal });
   createGlobalSearch();
   createChatShortcut();
   createChatTools();
