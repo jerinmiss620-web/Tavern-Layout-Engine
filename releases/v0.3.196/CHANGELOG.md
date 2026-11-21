@@ -23,7 +23,7 @@
 - 在「聊天界面功能」设置中增加独立开关，默认关闭。
 - 开启后在会话侠标题栏显示「新建」「关闭」「文件」三个快捷入口。
 - 分别调用 SillyTavern 原生的 `option_start_new_chat`、`option_close_chat`、`option_select_chat`，继续使用酒馆原有确认、历史聊天管理和关闭流程。
-- 对重复的 `option_close_chat` ID 做显式选择，避开带 `displayNone` 的隐藏副本，避免错误触发。
+- 仅从原生 `#options` 菜单中查找操作入口；对重复的 `option_close_chat` ID 做显式选择，避开带 `displayNone` 的隐藏副本，避免误触其他扩展的同名元素。
 - 快捷操作只存在于会话侠弹窗内；没有新增常驻悬浮按钮，不改变欢迎界面和底栏原生菜单。
 
 ## 诊断与维护
