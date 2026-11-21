@@ -3844,7 +3844,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     } else {
       const match = raw.match(/^(\d+)\s*-\s*(\d+)$/);
       if (!match) {
-        chatActionNotify('error', '请输入有效范围，例如 0-100。');
+        chatActionNotify('error', '请输入有效范围，例如 90-90。');
         input.focus();
         return;
       }
