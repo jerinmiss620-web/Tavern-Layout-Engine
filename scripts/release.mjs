@@ -24,7 +24,7 @@ function prepare() {
     const source = read(kind === 'core' ? sourcePath('core') : bootstrapPath + '.js');
     const name = kind === 'core' ? `TLE ${plan.core}（独立备份；常规安装请用 Bootstrap）` : `TLE Permanent Bootstrap ${plan.bootstrap}`;
     const publishedCore = json('latest.json').latest_version;
-    const template = json(kind === 'core' ? `releases/v${publishedCore}/TLE-${publishedCore}-import.json` : 'loader/bootstrap/TLE-Permanent-Bootstrap-1.0.3.json');
+    const template = json(kind === 'core' ? `releases/v${publishedCore}/TLE-${publishedCore}-import.json` : 'loader/bootstrap/TLE-Permanent-Bootstrap-1.0.4.json');
     const output = { ...template, name, enabled: false, info: info(name), content: source };
     // Existing fixed bootstrap packages are never rewritten on a Core/Loader release.
     if (existsSync(path)) {

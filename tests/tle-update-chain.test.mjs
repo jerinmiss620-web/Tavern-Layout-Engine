@@ -51,6 +51,15 @@ async function writeCache(name, slot, value) {
   await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
   database.close();
 }
+async function readBootstrapCache() {
+  const request = db.open('TLE_Remote_Bootstrap_Cache', 1);
+  const database = await new Promise((resolve, reject) => { request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); });
+  const tx = database.transaction('records', 'readonly');
+  const all = tx.objectStore('records').getAll();
+  const records = await new Promise((resolve, reject) => { all.onsuccess = () => resolve(all.result); all.onerror = () => reject(all.error); });
+  database.close();
+  return records;
+}
 function publish(kind, version, suffix = '') {
   const source = (kind === 'loader' ? loaderSource.replaceAll(plan.loader, version) : coreSource.replaceAll(plan.core, version)) + suffix;
   const source_path = kind === 'loader' ? `loader/runtime/v${version}/TLE-Remote-Loader.js` : `releases/v${version}/TLE.js`;
@@ -98,7 +107,7 @@ function assertSingle() {
   assert.ok(nativeToggle.querySelector('[data-tle-update-alert]'), 'green update state remains in the header');
   assert.ok(host.document.querySelector('#tle-diagnostic-float'), 'diagnostic button retained');
 }
-async function boot({ empty = false } = {}) {
+async function boot({ empty = false, transient = null } = {}) {
   errors = []; executed = []; timers = new Map();
   const vc = new VirtualConsole();
   vc.on('jsdomError', err => { if (err.type !== 'css-parsing') errors.push(err.message); });
@@ -120,10 +129,26 @@ async function boot({ empty = false } = {}) {
   let timerID = 100000;
   frame.setTimeout = (fn, ms, ...args) => {
     if (ms === 21600000 || ms === 60000) { const id = ++timerID; timers.set(id, { fn, ms }); return id; }
-    return nativeTimeout(fn, ms === 900 ? 0 : ms, ...args);
+    return nativeTimeout(fn, [500, 900, 1000].includes(ms) ? 0 : ms === 20000 && transient?.type === 'timeout' ? 15 : ms, ...args);
   };
   frame.clearTimeout = id => { timers.delete(id); nativeClear(id); };
-  frame.fetch = async url => {
+  let failedOnce = false;
+  let targetedRequests = 0;
+  frame.fetch = async (url, options) => {
+    const target = transient?.resource === 'source' ? String(url).includes('/loader/runtime/') : String(url).includes('/main/loader/latest.json');
+    if (transient && target) {
+      targetedRequests++;
+      if (!failedOnce) {
+        failedOnce = true;
+        assert.equal(host.document.getElementById('tle-bootstrap-failure-dialog'), null);
+        if (transient.type === 'timeout') {
+          return await new Promise((resolve, reject) => options.signal.addEventListener('abort',
+            () => reject(new frame.DOMException('signal is aborted without reason', 'AbortError')), { once: true }));
+        }
+        if (transient.type === 'interrupted') throw new frame.DOMException('signal is aborted without reason', 'AbortError');
+        throw new TypeError('Failed to fetch');
+      }
+    }
     if (offline) throw Error('simulated offline');
     const manifest = String(url).includes('/main/loader/latest.json') ? loaderManifest : String(url).includes('/main/latest.json') ? coreManifest : null;
     if (manifest) return { ok: true, text: async () => JSON.stringify(manifest) };
@@ -151,6 +176,12 @@ async function boot({ empty = false } = {}) {
   frame.eval(bootstrap);
   if (empty) await waitFor(() => host[B] && !host[B].getInfo().busy, 'offline bootstrap');
   else await settled();
+  if (transient) {
+    assert.equal(targetedRequests, 2, 'first failure must recover on the second request');
+    assert.equal(host[B].getInfo().remoteFailure, null);
+    assert.equal(host.document.getElementById('tle-bootstrap-failure-dialog'), null);
+    assert.equal(host.document.getElementById('tle-bootstrap-retry-progress'), null);
+  }
 }
 function close() {
   storage = new Map(Object.keys(host.localStorage).map(k => [k, host.localStorage.getItem(k)]));
@@ -176,9 +207,42 @@ async function versions(core, loader) {
 
 try {
   publish('core', CV[0]); publish('loader', LV[0]);
+  for (const transient of [
+    { type: 'network', resource: 'manifest' }, { type: 'timeout', resource: 'manifest' },
+    { type: 'interrupted', resource: 'manifest' }, { type: 'network', resource: 'source' },
+    { type: 'timeout', resource: 'source' }
+  ]) {
+    db = new IDBFactory();
+    await boot({ transient }); await versions(CV[0], LV[0]);
+    assert.deepEqual(errors, [], 'automatic recovery executes real sources without exceptions');
+    console.log('PASS first ' + transient.resource + ' ' + transient.type + ' failure automatically starts actual Loader/Core on second attempt');
+    close();
+  }
+  db = new IDBFactory();
   await boot(); await versions(CV[0], LV[0]);
   assert.deepEqual(errors, [], 'real source startup must not throw');
   console.log('PASS Bootstrap-only first install executes actual Loader and Core, UI reflects live APIs');
+
+  const liveLoader = host[L], liveCore = host[C];
+  const durableBefore = await readBootstrapCache();
+  const healthyFetch = frame.fetch;
+  let unavailableCalls = 0;
+  frame.fetch = async (url, options) => {
+    if (String(url).includes('/main/loader/latest.json')) {
+      unavailableCalls++;
+      return { ok: false, status: 503 };
+    }
+    return await healthyFetch(url, options);
+  };
+  await Promise.all([host[B].checkRemote(), host[B].checkRemote(), host[B].checkRemote()]);
+  assert.equal(unavailableCalls, 3, 'overlapping update checks share one bounded retry sequence');
+  assert.equal(host[L], liveLoader); assert.equal(host[C], liveCore);
+  assert.deepEqual(await readBootstrapCache(), durableBefore, 'server failure must not write or clear any cache slot');
+  assert.equal(host.document.getElementById('tle-bootstrap-failure-dialog'), null);
+  assert.equal(host.document.getElementById('tle-bootstrap-retry-progress'), null);
+  assertSingle();
+  frame.fetch = healthyFetch;
+  console.log('PASS three HTTP 503 responses preserve actual healthy Loader/Core and all durable Bootstrap cache slots');
 
   publish('core', CV[1]); await tick(); await versions(CV[1], LV[0]);
   publish('loader', LV[1]); await tick(); await versions(CV[1], LV[1]);
