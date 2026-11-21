@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.207",
+  "latest_version": "0.3.208",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.207",
-    "source_path": "releases/v0.3.207/TLE.js",
-    "source_commit": "d15a4ee4c6462b896fb6042c02f9d02cd8440557",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d15a4ee4c6462b896fb6042c02f9d02cd8440557/releases/v0.3.207/TLE.js",
-    "changelog_path": "releases/v0.3.207/CHANGELOG.md",
-    "sha256": "3bc7fec052b14270492ea09c746430e54def80079a77f83b946175a18f977456",
-    "size_bytes": 504629
+    "version": "0.3.208",
+    "source_path": "releases/v0.3.208/TLE.js",
+    "source_commit": "67a0fcdfb89c4e12a0e92cea58d5ebb159eda97b",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/67a0fcdfb89c4e12a0e92cea58d5ebb159eda97b/releases/v0.3.208/TLE.js",
+    "changelog_path": "releases/v0.3.208/CHANGELOG.md",
+    "sha256": "534c036a2a87df05fda7180f67d6216c0892d785b67c02c91dd9a9200bb5f907",
+    "size_bytes": 504698
   },
-  "notes": "v0.3.207: native inline-drawer update settings and compact Floor Tools on mobile; preserved Recent Chats scrolling; runtime device validation pending."
+  "notes": "v0.3.208: Floor Tools action labels use intrinsic max-content instead of 5.8em; opt-in navigation repair behavior unchanged."
 }
