@@ -7907,7 +7907,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   function getNativeChatMenuActionElement(id) {
-    const candidates = [...HOST_DOC.querySelectorAll(`[id="${id}"]`)];
+    const candidates = [...HOST_DOC.querySelectorAll(`#options [id="${id}"]`)];
     if (!candidates.length) return null;
 
     // ST currently has two option_close_chat anchors. The first is a hidden
