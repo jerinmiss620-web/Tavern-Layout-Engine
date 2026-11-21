@@ -32,6 +32,14 @@
 - 新增的导航兼容 body 标记纳入初始化清理与 destroy 清理。
 - 继续沿用现有样式区与事件委托结构，不追加零散 CSS 覆盖规则。
 
+## 导航间距与 JS 点击诊断
+
+- 在兼容性修复开启时，仅对「图标 + 文字」（`labels`）和「图标 + 文字 + 信息站」（`info`）两种导航模式，将原生 `.drawer-toggle` 的 `margin-inline` 设置为 `15px !important`。
+- 极简纯图标模式不增加该间距；关闭兼容性修复时不生效；普通导航规则不变。
+- Host Diagnostics 新增原生导航按钮的计算样式、`::before / ::after` 伪元素、祖先 `pointer-events`、可见性、几何位置及 `elementsFromPoint()` 命中栈。
+- 新增被动点击追踪：记录按钮区域的 pointerdown / click 实际命中目标、事件是否到达 document/window 冒泡阶段、`defaultPrevented` 状态，以及点击前后抽屉是否真正切换。
+- 诊断只观察，不阻止事件、不模拟点击、不重写第三方 CSS；可据此区分遮挡、`pointer-events` 拦截、事件传播中断和点击处理未生效。
+
 ## 启动注册修复
 
 - 修正实例公开 API 的 `version` 字段：此前文件头与面板显示 v0.3.196，但注册到宿主窗口的实例仍报告 v0.3.195，导致 Remote Loader 的严格健康检查拒绝该实例并触发自动回滚。
