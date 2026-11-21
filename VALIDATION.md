@@ -23,3 +23,11 @@
 发布后的 `node scripts/release.mjs verify --remote` 下载 GitHub 两份清单、Commit 固定源文件和安装包，逐项检查版本、URL、Commit、字节数、SHA-256 和完整源码相等。`node tests/tle-update-chain.test.mjs --remote` 使用从 GitHub 下载并校验的发布字节重放完整运行模拟。
 
 未验证：真实 SillyTavern、TauriTavern、iOS/WebView 的宿主集成、CSP/CORS/SRI 策略、原生 Popover/Top Layer 实际渲染、长期休眠/后台节流和浏览器存储被系统清除。这些模拟不等于真机通过；自动化不能保证 GitHub、网络和浏览器存储永远可用。
+
+## 2026-11-21 · PC 旧缓存升级修复（Bootstrap 1.0.2）
+
+- 在固定安装脚本内修复：旧 Loader v0.3.3 刚恢复且忙碌时，Bootstrap 已验证新版 v0.3.4 却误把下次重试延后六小时。
+- 现在有待安装的较新版本，最迟一分钟重试；旧 Loader 发出空闲状态事件时立即安排重试。
+- 增补真实旧 Loader v0.3.3 / Core v0.3.203 IndexedDB 缓存迁移测试，模拟正式清单 `minimum_loader_version: 0.3.4`，验证最终运行 Loader v0.3.4 / Core v0.3.206。
+- 单独新增 `tests/tle-bootstrap-busy-retry.test.mjs`；再次回归全部历史测试。
+- GitHub 自动回归测试通过不能替代真实 PC Chromium / TT 运行验证。
