@@ -9,3 +9,6 @@
 请使用 [仓库首页](../../../README.md) 的当前 Bootstrap 安装方式。
 
 Bootstrap 1.0.2 的源码与安装包用于保留旧版忙碌重试回归；Bootstrap 1.0.3 的源码与安装包保留原字节，供历史诊断弹窗回归；当前安装版本为 1.0.4。
+
+- `bootstrap-v1.0.4.js/json`：已发布 Bootstrap v1.0.4 原字节样本，验证旧版弹窗行为。
+- `loader-v0.3.4.js`：已发布 Loader Runtime v0.3.4 原字节样本，保留历史对照。

@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable-loader",
-  "latest_version": "0.3.4",
+  "latest_version": "0.3.5",
   "minimum_bootstrap_version": "1.0.0",
   "release": {
-    "version": "0.3.4",
-    "source_path": "loader/runtime/v0.3.4/TLE-Remote-Loader.js",
-    "source_commit": "2d2759d8195eba59574b08ffca904c848476e163",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2d2759d8195eba59574b08ffca904c848476e163/loader/runtime/v0.3.4/TLE-Remote-Loader.js",
-    "changelog_path": "loader/runtime/v0.3.4/CHANGELOG.md",
-    "sha256": "0909785b4fff832c17f1422008e2f781671ed72f0a65b8577672c04eff7afbaa",
-    "size_bytes": 49506
+    "version": "0.3.5",
+    "source_path": "loader/runtime/v0.3.5/TLE-Remote-Loader.js",
+    "source_commit": "ef144c80db7035fb2ad745cd741100053e8f7806",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ef144c80db7035fb2ad745cd741100053e8f7806/loader/runtime/v0.3.5/TLE-Remote-Loader.js",
+    "changelog_path": "loader/runtime/v0.3.5/CHANGELOG.md",
+    "sha256": "94fd4092e4dcfc0c03b02998fcc45cdbaa16d95b36a6c574c96e0088921796dd",
+    "size_bytes": 51471
   },
-  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
+  "notes": "Bootstrap 1.0.5 + Loader 0.3.5 mirror fallback; full-source CI pending. Real Android ST/iPhone TT required."
 }

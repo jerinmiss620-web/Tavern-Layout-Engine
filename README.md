@@ -4,9 +4,9 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.211 / Loader Runtime v0.3.4 / 固定 Bootstrap v1.0.4**。
+正式发布：**Core v0.3.211 / Loader Runtime v0.3.5 / 固定 Bootstrap v1.0.5**。
 
-1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.4.json)，在酒馆助手中导入一次。已安装旧 Bootstrap 的用户也需停用旧版并迁入 1.0.4 一次；以后 Core/Loader 依旧自动更新。
+1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.5.json)，在酒馆助手中导入一次。已安装旧 Bootstrap 的用户也需停用旧版并迁入 1.0.4 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用新 Bootstrap 并刷新。已有缓存和设置会继续使用。
 3. 以后保留 Bootstrap 启用。Core 与 Loader 发布新版本只需更新 GitHub，无需重复导入、下载 Core JSON 或执行控制台命令。
 
@@ -19,10 +19,14 @@
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.211/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.4/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.4.md)
+- [Core 变更日志](releases/v0.3.211/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.5/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.4.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
 - [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；**真实 ST/TT/iOS 环境尚未验证**。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
+
+### 首次加载提示与下载线路
+
+Bootstrap v1.0.5 启动超过约 500ms 仍未出现 Core 时，显示「TLE 正在努力加载中，请稍候…」非阻塞提示；成功后自动消失，失败转交独立诊断弹窗。Loader/Core 均从 jsDelivr、Fastly jsDelivr、GitHub Raw 三线路获取受信任仓库文件；固定 Commit、SHA-256、UTF-8 字节数校验不变。更新检查在已有健康实例时先用短时间核对官方 GitHub Raw 清单，再回退 CDN；CDN @main 清单可能缓存旧内容，不保证绝对实时。旧 Bootstrap 必须一次性重新导入 v1.0.5，Loader/Core 后续自行更新。
