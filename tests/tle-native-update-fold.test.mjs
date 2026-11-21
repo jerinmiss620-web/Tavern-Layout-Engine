@@ -43,4 +43,20 @@ assert.match(recentRule, /flex: 1 1 auto;/);
 assert.match(recentRule, /overflow: hidden;/);
 assert.match(source, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\] \{ height: min\(80dvh, 700px\); \}/);
 assert.match(source, /#\$\{ID\.chatToolsPanel\} \.tle-chat-tools-range-value \{ max-height: 22dvh; \}/);
-console.log('Current Core: native update drawer and content-sized Floor Tools panel regression passed.');
+const floorGridStart = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-action {');
+const floorGridEnd = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-control {', floorGridStart);
+const floorGrid = source.slice(floorGridStart, floorGridEnd);
+assert.match(floorGrid, /grid-template-columns: max-content minmax\(0, 1fr\);/);
+assert.match(floorGrid, /width: max-content;/);
+assert.match(floorGrid, /margin: 0;/);
+assert.doesNotMatch(floorGrid, /5\.8em/);
+assert.match(source, /正常主题不要开启：此修复会强制调整按钮与图标尺寸，可能造成图文错位/);
+const prevSource = read('releases/v0.3.207/TLE.js');
+const compatSelectorStart = 'body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle {';
+const compatSelectorEnd = '/* Optional structural layout repair.';
+function compatRules(text) {
+  const start = text.indexOf(compatSelectorStart);
+  return text.slice(start, text.indexOf(compatSelectorEnd, start));
+}
+assert.equal(compatRules(source), compatRules(prevSource), 'existing opt-in navigation repair behavior must remain unchanged');
+console.log('Core 0.3.208: Floor Tools max-content labels, native update drawer, compatibility guard passed.');
