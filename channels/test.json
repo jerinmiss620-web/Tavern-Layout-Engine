@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.196",
     "source_path": "releases/v0.3.196/TLE.js",
-    "source_commit": "b46053b52e286c3ec40bd33f66408f7b2e2ae46b",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b46053b52e286c3ec40bd33f66408f7b2e2ae46b/releases/v0.3.196/TLE.js",
+    "source_commit": "ca5d3fa3c5aae980d3f97961e30baad14ccea04b",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ca5d3fa3c5aae980d3f97961e30baad14ccea04b/releases/v0.3.196/TLE.js",
     "changelog_path": "releases/v0.3.196/CHANGELOG.md",
-    "sha256": "86262a982d53c1d954905c55e89d4cc36915e59aa178ecbc31baab834827db92",
-    "size_bytes": 466049
+    "sha256": "4107f670b6162d77d42d6ab17436768d9d6ea02513893039608138c2763da3db",
+    "size_bytes": 478258
   },
-  "status": "test-only; v0.3.196 runtime API version registration corrected to match manifest version after Loader health-check failure; two-field Floor tools, optional native navigation repair, and optional chat quick actions included; JavaScript syntax, immutable source integrity, and API-version regression guard verified; ST/TT PC/mobile runtime regression pending",
+  "status": "test-only; v0.3.196 runtime API version registration corrected; compatibility-only 15px inline navigation spacing for labels/info modes; passive JS diagnostics added for native drawer control styles, pseudo-elements, ancestor pointer-events, elementFromPoint hit stacks, and click event propagation/outcome; JavaScript syntax and source integrity verified; ST/TT PC/mobile runtime regression pending",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
