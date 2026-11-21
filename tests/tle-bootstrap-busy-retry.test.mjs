@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const src = readFileSync(new URL('../loader/bootstrap/TLE-Permanent-Bootstrap-1.0.2.js', import.meta.url), 'utf8');
+const src = readFileSync(new URL('../tests/fixtures/legacy/bootstrap-v1.0.2.js', import.meta.url), 'utf8');
 new vm.Script(src);
 const begin = src.indexOf('  async function startup() {');
 const end = src.indexOf('  function destroy() {', begin);

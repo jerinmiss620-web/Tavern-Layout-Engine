@@ -1,6 +1,6 @@
 # 自动更新验证记录 — 2026-11-21
 
-发布组合：Bootstrap 1.0.1 / Loader Runtime 0.3.4 / Core 0.3.206。
+当前发布组合：Bootstrap 1.0.3 / Loader Runtime 0.3.4 / Core 0.3.211。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
 
@@ -31,3 +31,12 @@
 - 增补真实旧 Loader v0.3.3 / Core v0.3.203 IndexedDB 缓存迁移测试，模拟正式清单 `minimum_loader_version: 0.3.4`，验证最终运行 Loader v0.3.4 / Core v0.3.206。
 - 单独新增 `tests/tle-bootstrap-busy-retry.test.mjs`；再次回归全部历史测试。
 - GitHub 自动回归测试通过不能替代真实 PC Chromium / TT 运行验证。
+
+## 2026-11-21 · iPhone TT 启动失败可见性修复（Bootstrap 1.0.3）
+
+- 旧独立 Stable/Test Loader 冲突，之前控制台警告或静默退出，现由 Bootstrap 独立弹窗解释。
+- 首次联网失败、无可恢复 Loader、Loader 已启动但 Core 未运行：等待 Loader ready 后按失败阶段显示原因、可复制状态及 User-Agent。
+- 成功启动不增加悬浮控件，回归健康状态立即清理弹窗；支持手动关闭及刷新重试，不删除缓存、不改现有 SHA-256/Commit 校验。
+- 新增 jsdom iframe 模拟网络失败、旧 Loader 冲突、Core 启动失败、Core 正常的自动化测试；保留原 1.0.2 忙碌重试回归样本。
+- 仅 Bootstrap 自身真正被酒馆助手执行、能够访问宿主 DOM 时可以显示提示；脚本未执行或宿主完全不可访问无法用自身弹窗诊断。
+- 尚未由出问题的 iPhone TT 用户完成实机复测，不能宣称已经解决其设备上的根本故障。
