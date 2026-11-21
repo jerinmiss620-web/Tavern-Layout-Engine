@@ -58,7 +58,9 @@ function publish(kind, version, suffix = '') {
   const source_url = rootURL + source_commit + '/' + source_path;
   sources.set(source_url, source);
   const manifest = { schema_version: 1, project: 'Tavern Layout Engine', channel: kind === 'loader' ? 'stable-loader' : 'stable',
-    latest_version: version, release: { version, source_path, source_commit, source_url,
+    latest_version: version,
+    ...(kind === 'loader' ? { minimum_bootstrap_version: '1.0.0' } : { minimum_loader_version: '0.3.4' }),
+    release: { version, source_path, source_commit, source_url,
       sha256: createHash('sha256').update(source).digest('hex'), size_bytes: Buffer.byteLength(source) } };
   if (kind === 'loader') loaderManifest = manifest; else coreManifest = manifest;
   return manifest;
