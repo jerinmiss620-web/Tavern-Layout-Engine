@@ -94,6 +94,7 @@ assert.match(tle, /quickActionsEnabled: chatQuickActionsEnabled/);
 assert.match(tle, /navigationRepairEnabled: compatibilityNavigationRepair/);
 assert.match(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="labels"\][\s\S]*?margin-inline: 15px !important;/);
 assert.match(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="info"\][\s\S]*?margin-inline: 15px !important;/);
+assert.doesNotMatch(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="icons"\][\s\S]{0,500}margin-inline: 15px !important;/);
 assert.match(tle, /function findNavigationControlForEvent\(event\)/);
 assert.match(tle, /function recordNavigationPointerDown\(event\)/);
 assert.match(tle, /function recordNavigationClickCapture\(event\)/);
