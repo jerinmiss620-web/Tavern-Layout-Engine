@@ -922,7 +922,20 @@
   async function maybeAutoInstallUpdate() {
     if (closed || busy || !isAutoUpdateEnabled() || !candidate) return false;
     const active = getActiveInstance();
-    if (!active?.version || compareVersions(candidate.version, active.version) <= 0) return false;
+    // A first installation does not displace any running Core and therefore needs
+    // no pre-existing rollback copy. The new validated release becomes the LKG.
+    // Existing active Core instances always retain the stricter backup gate below.
+    if (!active) {
+      if (!HOST_WIN.__TLE_REMOTE_BOOTSTRAP_V1__) return false;
+      setStatus('Bootstrap 首次安装：已验证的正式版 TLE v' + candidate.version + '，不会替换已有实例。');
+      try { return await loadRecord(candidate, '首次自动安装正式版 TLE', {
+        preferRemote: true, confirmed: true
+      }); } catch (error) {
+        setStatus('首次自动安装失败：' + (error?.message || error), 'warning');
+        return false;
+      }
+    }
+    if (compareVersions(candidate.version, active.version) <= 0) return false;
     if (!isAutoRestoreEnabled()) {
       setStatus('检测到新版本，但当前 TLE 尚未授权 Loader 自动恢复；为保证首次更新安全，请先手动接管。', 'warning');
       return false;
