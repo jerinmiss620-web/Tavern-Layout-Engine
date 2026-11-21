@@ -9548,6 +9548,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       target: describeNavigationEventNode(target),
       targetInsideControl: Boolean(target && (target === button || button.contains(target))),
       controlRect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
+      drawerOpenAtCapture: Boolean(button.parentElement?.querySelector(':scope > .drawer-content')?.classList.contains('openDrawer')),
+      drawerOpenAfterDispatch: null,
       defaultPreventedAtWindowCapture: Boolean(event.defaultPrevented),
       defaultPreventedAtDocumentBubble: null,
       defaultPreventedAfterDispatch: null,
@@ -9558,6 +9560,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     Promise.resolve().then(() => {
       if (navigationInteractionProbe.lastClickCapture === record) {
         record.defaultPreventedAfterDispatch = Boolean(event.defaultPrevented);
+        record.drawerOpenAfterDispatch = Boolean(button.parentElement?.querySelector(':scope > .drawer-content')?.classList.contains('openDrawer'));
       }
     });
   }
@@ -9862,9 +9865,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           }
         }
         const hitTests = points.map(point => {
-          const stack = diagnosticSafe(() => HOST_DOC.elementsFromPoint(point.x, point.y), [])
-            .slice(0, 6)
-            .map(describeNode);
+          const hitNodes = diagnosticSafe(() => HOST_DOC.elementsFromPoint(point.x, point.y), []).slice(0, 6);
+          const stack = hitNodes.map(describeNode);
           const top = stack[0] || null;
           const topNode = diagnosticSafe(() => HOST_DOC.elementFromPoint(point.x, point.y), null);
           return {
@@ -9872,7 +9874,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             point: { x: point.x, y: point.y },
             topHit: top,
             buttonReceivesHit: Boolean(topNode && (topNode === button || button.contains(topNode))),
-            buttonPresentInHitStack: stack.some(item => item && (item.id === button.id && button.id || item.tag === button.tagName && item.className === String(button.getAttribute('class') || '').slice(0, 160))),
+            buttonPresentInHitStack: hitNodes.some(node => node === button || button.contains(node)),
             stack,
           };
         });
@@ -9897,6 +9899,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         return {
           index,
           label,
+          drawerOpen: Boolean(drawer.querySelector(':scope > .drawer-content')?.classList.contains('openDrawer')),
           element: describeNode(button),
           icon: describeNode(icon),
           marginInline: buttonStyle ? { start: buttonStyle.marginInlineStart, end: buttonStyle.marginInlineEnd } : null,
