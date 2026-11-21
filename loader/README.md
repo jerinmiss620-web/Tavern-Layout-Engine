@@ -102,3 +102,23 @@ window.__TAVERN_LAYOUT_ENGINE_V02__?.version
 The diagnostic Top Layer change is in TLE v0.3.193. If the returned value is still an older version, the new diagnostic-button implementation has not yet been loaded.
 
 If the floating button is still missing or cannot be clicked after v0.3.193 is confirmed, use the TLE panel's existing **复制诊断报告** action. Host Diagnostics 2.0 records the button's Popover support/open state, computed position, bounding rectangle, hit-test target, and the debugger dialog's open/mount state. This distinguishes a rendering/positioning failure from an input interception or event-routing failure.
+
+## Stable channel and no-refresh bootstrap validation
+
+Stable TLE v0.3.195 is published through the repository-root `latest.json`; it is separate from the test-only `channels/test.json`. On 2026-11-21, the maintainer validated a one-time Stable Bootstrap that fetches the immutable v0.3.195 source, verifies its UTF-8 byte size and SHA-256, and executes the verified source as a classic Blob script in the Tavern Helper script realm. The bootstrap completed without refreshing the Tavern page, and enabling/disabling the Tavern Helper script was manually confirmed to control the loaded TLE. This successful bootstrap is a validation milestone, not a promotion of Loader 0.3.0: Loader 0.3.0 remains test-only.
+
+## Tavern Helper script info convention
+
+Every distributed `type: script` JSON package must provide a concise, single-line Markdown `info` value. Include: **script name**, **what it does**, **how to use it**, **important cautions**, and **author**. Do not include actual line breaks or escaped `\\n` sequences in the `info` value. Keep detailed release history in GitHub changelog files instead of packing it into `info`.
+
+## Stable publication guard
+
+Before publishing or changing the stable pointer, run:
+
+```sh
+node loader/verify-stable-release.mjs
+node loader/verify-stable-release.mjs --remote
+```
+
+The guard checks the root stable manifest, immutable source URL/commit/path, UTF-8 byte size, SHA-256, JavaScript syntax, and the matching release changelog. The `--remote` mode also fetches the published manifest and pinned source from GitHub and verifies them against the local checkout.
+
