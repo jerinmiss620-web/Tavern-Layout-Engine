@@ -17,7 +17,13 @@ const compare = (a,b) => { const A=a.split('.').map(Number), B=b.split('.').map(
 const sourcePath = (kind, version = plan[kind]) => kind === 'core' ? `releases/v${version}/TLE.js` : `loader/runtime/v${version}/TLE-Remote-Loader.js`;
 const manifestPath = kind => kind === 'core' ? 'latest.json' : 'loader/latest.json';
 const bootstrapPath = `loader/bootstrap/TLE-Permanent-Bootstrap-${plan.bootstrap}`;
-const info = name => `**简介：** ${name}，TLE 一次安装自动更新系统。**使用方式：** 在酒馆助手中仅导入并启用 Bootstrap，由它自动加载 Loader 和 Core；版本与更新位于 TLE 原有默认收起的折叠区域。**注意事项：** 首次迁移禁用旧独立 Loader 和 Core 并保留备份；首次安装需联网；自动更新默认开启，可关闭；源码必须通过 Commit、路径、SHA-256 和字节数校验。**作者：** 小松鼠 & ChatGPT（小松7）。`;
+const info = name => `**简介：** ${name}，TLE 一次安装自动更新系统。
+
+**使用方式：** 在酒馆助手中仅导入并启用 Bootstrap，由它自动加载 Loader 和 Core；版本与更新位于 TLE 原有默认收起的折叠区域。
+
+**注意事项：** 首次迁移禁用旧独立 Loader 和 Core 并保留备份；首次安装需联网；自动更新默认开启，可关闭；源码必须通过 Commit、路径、SHA-256 和字节数校验。
+
+**作者：** 小松鼠 & ChatGPT（小松7）。`;
 function prepare() {
   for (const kind of ['core', 'bootstrap']) {
     const path = kind === 'core' ? `releases/v${plan.core}/TLE-${plan.core}-import.json` : bootstrapPath + '.json';
@@ -108,7 +114,7 @@ async function verify({ remote = false, candidate = false } = {}) {
     const pack = json(path);
     assert.equal(pack.content, read(source)); assert.equal(pack.enabled, false); assert.equal(pack.type, 'script');
     for (const text of ['简介','使用方式','注意事项','作者','小松鼠 & ChatGPT（小松7）']) assert.ok(pack.info.includes(text));
-    assert.doesNotMatch(pack.info, /[\r\n]|\\n/);
+    assert.doesNotMatch(pack.info, /\\n/, 'info 必须使用实际换行，不得包含字面量反斜杠 n');
     new vm.Script(pack.content);
     if (remote) assert.deepEqual(JSON.parse(await fetchText(raw + 'main/' + path + '?_tle=' + Date.now())), pack);
   }
