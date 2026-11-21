@@ -1,4 +1,20 @@
-# TLE Remote Loader — Headless Test Build 0.3.0
+# TLE Remote Loader — Stable 0.3.1 and Headless Test Build 0.3.0
+
+## Stable Loader 0.3.1 (current recommended path)
+
+The stable bootstrapper is `loader/TLE-Remote-Loader-Stable-0.3.1.json`. It remains headless: version information and update actions appear **inside the TLE control panel**, not in a second floating Loader window. Its source is `loader/TLE-Remote-Loader-Stable-0.3.1.js`, and its manifest is `main/latest.json`.
+
+- Disable the old Test Loader 0.3.0 first (do not run both loaders).
+- Install Stable Loader 0.3.1 once in Tavern Helper. Previously verified IndexedDB Last Known Good/Previous caches remain readable.
+- In TLE v0.3.203, open the TLE control panel and view Core version, Loader channel, and update availability. Click "检查更新" for an on-demand check or the green "可更新" button when a newer official version is verified.
+- To enable auto-restore of an already running and verified same-version TLE, click "启用 Loader 接管" and confirm. Disable the old standalone TLE script after this authorization, and retain it as a disabled rescue copy.
+- A live standalone TLE whose version differs from the verified Loader candidate cannot be replaced without a verified rollback backup. The Loader correctly refuses unsafe upgrades; bring the standalone to the current version once or use an existing trusted Loader cache.
+- If no TLE instance is running and there is no trusted cache, first-time headless setup can be initiated from the host console with `window.__TLE_REMOTE_LOADER_STABLE_V1__?.loadRemote()`. After that, future updates use the TLE panel.
+- On refresh Stable Loader automatically restores only the user-authorized verified cached version and **checks silently** for updates. It never automatically installs a newer release or displays unsolicited update confirmations.
+
+Runtime status can be inspected through `window.__TLE_REMOTE_LOADER_STABLE_V1__?.getInfo()`, with `checkRemote()` (silent check), `loadRemote()` (explicit installation with confirmation) and `rollback()` preserved. See `CHANGELOG-Stable-0.3.1.md`.
+
+---
 
 This is a test-only Tavern Helper `type: script` bootstrapper. It has no panel, launcher, Shadow DOM, CSS, floating button or viewport positioning code.
 
