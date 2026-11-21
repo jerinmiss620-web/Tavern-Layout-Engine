@@ -28,6 +28,18 @@ TLE **v0.3.203** is the current stable release, published through `latest.json` 
 
 The mobile diagnostics button remains anchored top-right using Top Layer / fixed document-root fallback, unchanged by this release. Static and isolated update checks have passed; live ST/TT/iPhone migration still requires maintainer validation.
 
+### Migration from older Test Loader / Core v0.3.198
+
+Test channel currently provides **TLE v0.3.204 TEST**, while the stable channel remains **v0.3.203** pending user runtime validation. The previous Test Loader 0.3.0 restores a verified older TLE from IndexedDB before checking the test manifest. A toast about restoring v0.3.198 is **not** evidence that an update completed, and Core v0.3.198 does not contain the new in-panel update controls.
+
+To request the already-installed Test Loader to verify and install v0.3.204, open the Tavern host DevTools console and run:
+
+```js
+window.__TLE_REMOTE_LOADER_TEST_V1__?.checkRemote()
+```
+
+This prompts through the old Loader after source verification; no new TLE JSON import is needed if its LKG cache and upgrade checks succeed. If no confirmation appears, inspect `window.__TLE_REMOTE_LOADER_TEST_V1__?.diagnostics?.lastStatus` for a concrete failure. TLE v0.3.204 adds in-panel handling for both legacy Test Loader and Stable Loader. The legacy Test Loader may prompt when checking; Stable Loader checks silently. Do not run both loaders at once.
+
 ## Repository Structure
 
 ```text
@@ -42,12 +54,13 @@ Tavern-Layout-Engine/
 
 ## Development Status
 
-Stable TLE v0.3.203 and Stable Loader 0.3.1 are published; Test Loader 0.3.0 remains test-only. See `latest.json`, `releases/v0.3.203/CHANGELOG.md`, `loader/CHANGELOG-Stable-0.3.1.md`, `tests/tle-loader-stable.test.mjs` and `loader/verify-stable-release.mjs`.
+Stable TLE v0.3.203 and Stable Loader 0.3.1 are published; the test channel now offers TLE v0.3.204 compatible with existing Test Loader 0.3.0. See `latest.json`, `releases/v0.3.203/CHANGELOG.md`, `loader/CHANGELOG-Stable-0.3.1.md`, `tests/tle-loader-stable.test.mjs` and `loader/verify-stable-release.mjs`.
 
 ## Release records and script documentation
 
 - Keep one `CHANGELOG.md` per TLE release under `releases/vX.Y.Z/`. Append later corrections to that release's history; do not rewrite or discard previous entries.
 - Keep loader and auxiliary-script histories under `loader/` or their own versioned folders. Record feature additions, behavior changes, bug fixes, compatibility changes, and release-metadata corrections.
-- Every Tavern Helper `type: script` package must include a single-line Markdown `info` value with the script name, a concise function summary, usage steps, cautions, and author name. The `info` value must contain no line breaks and no escaped `\n` sequences.
+- Every Tavern Helper `type: script` package must include a single-line Markdown `info` value with the script name and explicitly marked **简介 / 使用方式 / 注意事项 / 作者** sections. The `info` value must contain no line breaks and no escaped `\n` sequences.
+- The CI release-metadata check (`node tests/tle-release-metadata.test.mjs`) requires a per-version changelog and all four `info` sections for current stable/test TLE packages and Stable Loader.
 - Before publishing a stable pointer, run `node loader/verify-stable-release.mjs`; after pushing the release, run `node loader/verify-stable-release.mjs --remote`.
 
