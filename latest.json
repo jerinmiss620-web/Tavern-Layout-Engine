@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.206",
+  "latest_version": "0.3.207",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.206",
-    "source_path": "releases/v0.3.206/TLE.js",
-    "source_commit": "2d2759d8195eba59574b08ffca904c848476e163",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2d2759d8195eba59574b08ffca904c848476e163/releases/v0.3.206/TLE.js",
-    "changelog_path": "releases/v0.3.206/CHANGELOG.md",
-    "sha256": "27a79560d651e5c9ce0f0375d268ace80ab675edc59e712d32dbd83d61e33b3f",
-    "size_bytes": 504548
+    "version": "0.3.207",
+    "source_path": "releases/v0.3.207/TLE.js",
+    "source_commit": "d15a4ee4c6462b896fb6042c02f9d02cd8440557",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d15a4ee4c6462b896fb6042c02f9d02cd8440557/releases/v0.3.207/TLE.js",
+    "changelog_path": "releases/v0.3.207/CHANGELOG.md",
+    "sha256": "3bc7fec052b14270492ea09c746430e54def80079a77f83b946175a18f977456",
+    "size_bytes": 504629
   },
-  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
+  "notes": "v0.3.207: native inline-drawer update settings and compact Floor Tools on mobile; preserved Recent Chats scrolling; runtime device validation pending."
 }
