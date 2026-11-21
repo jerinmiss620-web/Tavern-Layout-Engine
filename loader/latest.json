@@ -7,10 +7,10 @@
   "release": {
     "version": "0.3.3",
     "source_path": "loader/runtime/v0.3.3/TLE-Remote-Loader.js",
-    "source_commit": "0199e6f943c3b16b0e0809bf223acebfe86d3b50",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/0199e6f943c3b16b0e0809bf223acebfe86d3b50/loader/runtime/v0.3.3/TLE-Remote-Loader.js",
-    "sha256": "386b4fc9b9489f8a6154de0184378c94961c3cb2f48273e019f90d55f3841a5d",
-    "size_bytes": 46214,
+    "source_commit": "276d79f39c8ab334ad56628e27a94a735aa77959",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/276d79f39c8ab334ad56628e27a94a735aa77959/loader/runtime/v0.3.3/TLE-Remote-Loader.js",
+    "sha256": "42bb1aeabf362992526a7053268bd3d6c30151ad81afadfef19417638ce2b770",
+    "size_bytes": 46933,
     "changelog_path": "loader/runtime/v0.3.3/CHANGELOG.md"
   },
   "notes": "Bootstrap v1 dynamically updates the headless Loader runtime. TLE Core stable manifest stays independent. This separate loader pointer does not affect users of older standalone Loaders."
