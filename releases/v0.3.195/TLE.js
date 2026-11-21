@@ -595,9 +595,17 @@ body[data-tle-nav] #top-settings-holder#top-settings-holder > .drawer {
   overflow: visible !important;
   box-sizing: border-box !important;
 }
+/* Native Tavern nav icons must remain visible in every TLE navigation mode.
+   Some themes hide .drawer-icon itself with opacity:0 !important, which also
+   makes its ::before artwork disappear. Keep the icon element visible while
+   preserving the theme's art/content on ::before. */
+body[data-tle-nav] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
+  opacity: 1 !important;
+}
+
 /* Opt-in navigation hitbox compatibility for image-backed themes:
-   native icons may have opacity:0 and ::before may be an empty absolute sprite.
-   Keep theme artwork/opacity untouched; restore real, nonzero native click boxes. */
+   native icons may use an empty absolute ::before sprite and 100% widths.
+   Preserve theme artwork while restoring real, nonzero native click boxes. */
 body[data-tle-nav][data-tle-compat-nav-hitbox] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle {
   display: flex !important;
   position: relative !important;
@@ -5675,7 +5683,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
               <input type="checkbox" data-tle-setting="compat-nav-hitbox">
               <span>修复导航图标点击区域 / 对齐</span>
             </label>
-            <p class="tle-muted">适用于使用透明原生图标、空 ::before 贴图制作导航的主题。为按钮保留稳定的点击区域，调整图标与文字对齐；不覆盖主题贴图及透明度。默认关闭、仅当前会话生效，切换 UI 主题时自动关闭。</p>
+            <p class="tle-muted">适用于使用透明原生图标、空 ::before 贴图制作导航的主题。为按钮保留稳定的点击区域，调整图标与文字对齐；TLE 导航会强制图标容器 opacity:1 以显示主题贴图。默认关闭、仅当前会话生效，切换 UI 主题时自动关闭。</p>
             <label class="tle-row" style="justify-content:flex-start;gap:10px;margin-top:12px;">
               <input type="checkbox" data-tle-setting="compat-panel-bg">
               <span>修复 TLE 面板透明背景</span>
