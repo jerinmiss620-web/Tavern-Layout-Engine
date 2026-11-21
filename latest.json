@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.210",
+  "latest_version": "0.3.211",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.210",
-    "source_path": "releases/v0.3.210/TLE.js",
-    "source_commit": "867b1bb4304b1e1f797dfb13efec6bcd90207ff1",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/867b1bb4304b1e1f797dfb13efec6bcd90207ff1/releases/v0.3.210/TLE.js",
-    "changelog_path": "releases/v0.3.210/CHANGELOG.md",
-    "sha256": "ceaa96e79e72d78993c1fd8bd6b3cc266542055d8a1db407ba337b7f296596c2",
-    "size_bytes": 506543
+    "version": "0.3.211",
+    "source_path": "releases/v0.3.211/TLE.js",
+    "source_commit": "5e978bbcb63cfd755f6c91b8eb7ac127d3bdea56",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5e978bbcb63cfd755f6c91b8eb7ac127d3bdea56/releases/v0.3.211/TLE.js",
+    "changelog_path": "releases/v0.3.211/CHANGELOG.md",
+    "sha256": "1f442933443cb93f72d7474ebbf3f237298ef3dcaf79c317f2b3de992ebc9a8b",
+    "size_bytes": 506318
   },
-  "notes": "v0.3.210: mobile group manager uses icon-only header import/export, inline Theme sync next to filter pills, concise hint and improved small-screen group editing."
+  "notes": "v0.3.211: UI Theme group sync sits left of search (group pills full width); removes TLE scrollbar-width and hardcoded WebKit scrollbar styles to respect global host theme scrollbars."
 }
