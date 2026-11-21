@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.194",
+  "latest_version": "0.3.196",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.194",
-    "source_path": "releases/v0.3.194/TLE.js",
-    "source_commit": "440a42746e17ff33fbc5297ba36b3eea3a06d802",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/440a42746e17ff33fbc5297ba36b3eea3a06d802/releases/v0.3.194/TLE.js",
-    "changelog_path": "releases/v0.3.194/CHANGELOG.md",
-    "sha256": "2d21d1c219d9e14fbdadc83950a019ce20359a88e40192febb6097deb8f226cd",
-    "size_bytes": 444731
+    "version": "0.3.196",
+    "source_path": "releases/v0.3.196/TLE.js",
+    "source_commit": "d315c58bb4284fd104fe5e10e81f71762c1070af",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d315c58bb4284fd104fe5e10e81f71762c1070af/releases/v0.3.196/TLE.js",
+    "changelog_path": "releases/v0.3.196/CHANGELOG.md",
+    "sha256": "612208b1a5d4c0f8d74b0ac8c8b2e2a2622470ce0812dba82202ac734da4ec13",
+    "size_bytes": 466040
   },
-  "status": "test-only; TLE v0.3.194 fixes Loader commit-path rejection, diagnostic click interception, missing debugger action, Popover fallback visibility and button lifecycle recovery; PC/ST/TT/iPhone runtime validation pending",
+  "status": "test-only; v0.3.196 adds two-field Floor tools with inline clear controls, optional native navigation width/icon repair, and optional chat quick actions in the 会话侠 header; JavaScript syntax and source integrity metadata verified; ST/TT PC/mobile runtime regression pending",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
