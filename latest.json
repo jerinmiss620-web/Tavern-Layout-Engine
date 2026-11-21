@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.202",
+  "latest_version": "0.3.203",
   "minimum_loader_version": "0.1.0",
   "release": {
-    "version": "0.3.202",
-    "source_path": "releases/v0.3.202/TLE.js",
-    "source_commit": "4dd5daa22993ecedbeb5d87234d0974dfb00e98b",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4dd5daa22993ecedbeb5d87234d0974dfb00e98b/releases/v0.3.202/TLE.js",
-    "changelog_path": "releases/v0.3.202/CHANGELOG.md",
-    "sha256": "19edf420298ce40b19d0e69d227385705783ef9ceab79dd04a96f72fced25a23",
-    "size_bytes": 489512
+    "version": "0.3.203",
+    "source_path": "releases/v0.3.203/TLE.js",
+    "source_commit": "65ed78df9d23c12d1d49300f92e2f43c2ee49cdd",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/65ed78df9d23c12d1d49300f92e2f43c2ee49cdd/releases/v0.3.203/TLE.js",
+    "changelog_path": "releases/v0.3.203/CHANGELOG.md",
+    "sha256": "18ec8b806c19edb769bbdfe05517eb593774838e8b812ee134a1cae1ba81d601",
+    "size_bytes": 495304
   },
-  "update_system_status": "stable-release-v0.3.202-published; v0.3.198 feature baseline plus navigation compatibility-only adjustable icon opacity, two-field floor-range input and native session actions. JS syntax, focused logic regressions, diagnostic top-right invariant and pinned SHA-256/UTF-8 size verified; comprehensive live ST/TT/iPhone validation for final opacity slider still pending."
+  "update_system_status": "stable v0.3.203 published with in-TLE Loader 0.3.1 update UI, no auto-install, immutable commit/SHA-256 checks, headless loader and rollback; static and isolated tests passed; full ST/TT runtime migration still pending."
 }
