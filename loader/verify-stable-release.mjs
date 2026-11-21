@@ -16,7 +16,7 @@ assert.equal(manifest.channel, 'stable');
 assert.equal(manifest.latest_version, manifest.release?.version, 'Stable version fields differ');
 
 const release = manifest.release;
-assert.match(release.version, /^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$/);
+assert.match(release.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
 assert.equal(release.source_path, `releases/v${release.version}/TLE.js`);
 assert.match(release.source_commit, /^[a-f0-9]{40}$/);
 assert.match(release.sha256, /^[a-f0-9]{64}$/);
