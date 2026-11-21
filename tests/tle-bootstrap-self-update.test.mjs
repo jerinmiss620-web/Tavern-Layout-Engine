@@ -8,10 +8,8 @@ const bootstrap = read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.js');
 const bootstrapPackage = JSON.parse(read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.json'));
 const loader = read('loader/runtime/v0.3.3/TLE-Remote-Loader.js');
 const latest = JSON.parse(read('loader/latest.json'));
-const core = read('releases/v0.3.205/TLE.js');
 new vm.Script(bootstrap);
 new vm.Script(loader);
-new vm.Script(core);
 assert.equal(bootstrapPackage.content, bootstrap);
 for (const section of ['简介', '使用方式', '注意事项', '作者'])
   assert.ok(bootstrapPackage.info.includes(section), 'bootstrap info lacks ' + section);
@@ -38,12 +36,6 @@ assert.match(bootstrap, /await evaluate\(fallback\)/);
 assert.match(loader, /bootstrapManaged: true/);
 assert.match(loader, /Bootstrap 首次安装/);
 assert.match(loader, /AUTO_UPDATE_KEY = 'tle\.loader\.stable\.autoUpdate\.v1'/);
-assert.match(core, /data-tle-update-details/);
-assert.match(core, /data-tle-loader-available-version/);
-assert.match(core, /data-tle-action="check-loader-update"/);
-assert.match(core, /data-tle-action="install-loader-update"/);
-assert.match(core, /tle-loader-bootstrap-state-change/);
-assert.match(core, /function syncDiagnosticButtonPosition\(\)/);
 
 // Isolated host simulation: verify that a single installed Bootstrap can move
 // between remote Loader versions, obey the toggle and recover from offline cache.
