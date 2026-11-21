@@ -33,8 +33,9 @@
 ## Experimental navigation hitbox compatibility (test branch only)
 
 - Added a **manual, session-only** “修复导航图标点击区域 / 对齐” control under Compatibility Repair, disabled by default, reset on UI theme changes.
-- For themes with `.drawer-toggle/.drawer-icon { width:100% }`, an empty absolutely positioned `::before`, and intentionally transparent native icons, reserve a stable 44px-or-row-height slot for both native elements. Both the icon and its parent remain valid hit targets, independent of glyph content.
-- In text/info navigation modes, keep the TLE label after that icon slot and left-aligned. Preserve theme `::before` art, icon opacity, and backgrounds; do not use `width:fit-content` for native hit targets.
+- For themes with `.drawer-toggle/.drawer-icon { width:100% }`, an empty absolutely positioned `::before`, and transparent native icons, reserve a stable 44px-or-row-height slot for both native elements. Both the icon and its parent remain valid hit targets, independent of glyph content.
+- **Visibility correction:** while TLE navigation is active, its native `.drawer-icon` container is always `opacity: 1 !important`. This defeats themes that otherwise hide all image-based `::before` art through parent opacity. The pseudo-element artwork, mask and background remain theme-defined.
+- In text/info navigation modes, keep the TLE label after that icon slot and left-aligned. Preserve theme `::before` art and backgrounds while enforcing visible native icon containers; do not use `width:fit-content` for native hit targets.
 - Isolated Chromium mock regression verified icons, labels and info modes: 44×44px hitboxes, icon→toggle click propagation, label beginning after icon slot. Live ST/TT/mobile validation is still required.
 - Does not touch the stable branch, bottom bar, or chat virtualization; does not enable automatically.
 
