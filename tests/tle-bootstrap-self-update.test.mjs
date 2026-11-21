@@ -4,9 +4,9 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const bootstrap = read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.js');
-const bootstrapPackage = JSON.parse(read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.json'));
-const loader = read('loader/runtime/v0.3.3/TLE-Remote-Loader.js');
+const bootstrap = read('tests/fixtures/legacy/bootstrap-v1.0.0.js');
+const bootstrapPackage = JSON.parse(read('tests/fixtures/legacy/bootstrap-v1.0.0.json'));
+const loader = read('tests/fixtures/legacy/runtime-v0.3.3.js');
 const latest = JSON.parse(read('tests/fixtures/loader-0.3.3.json'));
 new vm.Script(bootstrap);
 new vm.Script(loader);

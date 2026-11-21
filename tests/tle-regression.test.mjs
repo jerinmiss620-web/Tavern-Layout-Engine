@@ -6,7 +6,12 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = relative => readFileSync(path.join(root, relative), 'utf8');
+const legacyFiles = {
+  'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
+  'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
+  'loader/TLE-Remote-Loader-Test-0.3.0.json': 'tests/fixtures/legacy/test-loader-v0.3.0.json',
+};
+const read = relative => readFileSync(path.join(root, legacyFiles[relative] || relative), 'utf8');
 const manifest = JSON.parse(read('channels/test.json'));
 
 assert.equal(manifest.schema_version, 1);

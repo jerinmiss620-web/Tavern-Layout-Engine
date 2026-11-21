@@ -22,11 +22,16 @@ const OWNER = 'jerinmiss620-web';
 const REPO = 'Tavern-Layout-Engine';
 const REMOTE = process.argv.includes('--remote');
 
+const legacyFiles = {
+  'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
+  'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
+  'loader/TLE-Remote-Loader-Test-0.3.0.json': 'tests/fixtures/legacy/test-loader-v0.3.0.json',
+};
 function readText(path) {
-  return readFileSync(join(ROOT, path), 'utf8');
+  return readFileSync(join(ROOT, legacyFiles[path] || path), 'utf8');
 }
 function readBytes(path) {
-  return readFileSync(join(ROOT, path));
+  return readFileSync(join(ROOT, legacyFiles[path] || path));
 }
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex');

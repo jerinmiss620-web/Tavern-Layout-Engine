@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const core = read('releases/v0.3.205/TLE.js');
-const corePackage = JSON.parse(read('releases/v0.3.205/TLE-0.3.205-TEST-import.json'));
-const loader = read('loader/TLE-Remote-Loader-Stable-0.3.2.js');
-const loaderPackage = JSON.parse(read('loader/TLE-Remote-Loader-Stable-0.3.2-TEST.json'));
+const core = read('tests/fixtures/legacy/core-v0.3.205.js');
+const corePackage = JSON.parse(read('tests/fixtures/legacy/core-v0.3.205.json'));
+const loader = read('tests/fixtures/legacy/stable-loader-v0.3.2.js');
+const loaderPackage = JSON.parse(read('tests/fixtures/legacy/stable-loader-v0.3.2.json'));
 new vm.Script(core);
 new vm.Script(loader);
 assert.equal(corePackage.content, core, 'TLE importer must equal release source');

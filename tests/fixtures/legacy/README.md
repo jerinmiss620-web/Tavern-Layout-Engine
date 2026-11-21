@@ -1,0 +1,9 @@
+# TLE 历史回归测试样本
+
+此目录保存自动化测试仍需要的历史版本原始字节，**不是安装或下载入口**。
+
+旧 Core、Stable/Test Loader、旧 Bootstrap 的原版脚本与导入包从发布版本目录迁入此处，只供 `npm test`、旧缓存迁移、回退和诊断相关测试使用。
+
+历史正式版本在 `releases/v*/` 仅保留 `CHANGELOG.md`，当前正式版本仍保留完整源码和安装包；历史 Git Commit 不做重写。
+
+请使用 [仓库首页](../../../README.md) 的当前 Bootstrap 安装方式。
