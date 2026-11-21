@@ -96,6 +96,13 @@ assert.match(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="labels"\][\
 assert.match(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="info"\][\s\S]*?margin-inline: 15px !important;/);
 assert.doesNotMatch(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="icons"\][\s\S]{0,500}margin-inline: 15px !important;/);
 assert.match(tle, /function findNavigationControlForEvent\(event\)/);
+assert.match(tle, /function getNavigationEventDetails\(button, event\)/);
+assert.match(tle, /targetArea/);
+assert.match(tle, /iconReceivesHit/);
+assert.match(tle, /labelReceivesHit/);
+assert.match(tle, /iconCenterButtonReceivesHit/);
+assert.match(tle, /iconPseudoElements/);
+assert.match(tle, /navigationInteractionProbe\.activeClickEvent === event/);
 assert.match(tle, /function recordNavigationPointerDown\(event\)/);
 assert.match(tle, /function recordNavigationClickCapture\(event\)/);
 assert.match(tle, /function recordNavigationClickDocumentBubble\(event\)/);
