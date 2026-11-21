@@ -88,6 +88,7 @@ assert.match(tle, /data-chat-quick-action="new"/);
 assert.match(tle, /option_start_new_chat/);
 assert.match(tle, /option_close_chat/);
 assert.match(tle, /option_select_chat/);
+assert.ok(tle.includes('querySelectorAll(`#options [id="${id}"]`)'));
 assert.match(tle, /quickActionsEnabled: chatQuickActionsEnabled/);
 assert.match(tle, /navigationRepairEnabled: compatibilityNavigationRepair/);
 
