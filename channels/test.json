@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.198",
     "source_path": "releases/v0.3.198/TLE.js",
-    "source_commit": "f7563ea91c271c57c5189a055e735617c4464b65",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/f7563ea91c271c57c5189a055e735617c4464b65/releases/v0.3.198/TLE.js",
+    "source_commit": "7207b6c212a76f20063f01a7d7a4826aad78f13e",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/7207b6c212a76f20063f01a7d7a4826aad78f13e/releases/v0.3.198/TLE.js",
     "changelog_path": "releases/v0.3.198/CHANGELOG.md",
-    "sha256": "db128407d531d629546b0c3506acb4c12da21f3d66246c42800cadebb7f37354",
-    "size_bytes": 483852
+    "sha256": "8d8f77279a244e7cdce3c30fe675b58d49bb8990d860687c0b7450b6c25f7810",
+    "size_bytes": 483845
   },
   "status": "test-only; v0.3.198 adds explicit icon-versus-label hit testing, pointerdown/click target-area classification, icon pseudo-element styles, event path and hit-stack diagnostics; preserves v0.3.197 compatibility-only spacing; static syntax and source integrity verified; ST/TT runtime interaction regression pending",
   "recommended_loader_version": "0.3.0",
