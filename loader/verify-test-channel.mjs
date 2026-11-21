@@ -150,6 +150,7 @@ assert.ok(tleSource.includes('buttonReceivesHit'));
  assert.ok(tleSource.includes('option_start_new_chat'));
  assert.ok(tleSource.includes('option_close_chat'));
  assert.ok(tleSource.includes('option_select_chat'));
+ assert.ok(tleSource.includes('querySelectorAll(`#options [id="${id}"]`)'));
  assert.ok(tleSource.includes('navigationRepairEnabled: compatibilityNavigationRepair'));
  assert.ok(tleSource.includes('quickActionsEnabled: chatQuickActionsEnabled'));
 if (REMOTE) {
