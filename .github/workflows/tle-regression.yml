@@ -31,3 +31,5 @@ jobs:
         run: node tests/tle-regression.test.mjs
       - name: Verify immutable stable release metadata and source integrity
         run: node loader/verify-stable-release.mjs
+      - name: Verify Stable Loader bridge and in-panel update controls
+        run: node tests/tle-loader-stable.test.mjs
