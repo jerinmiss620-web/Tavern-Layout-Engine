@@ -13,3 +13,9 @@
 分步骤恢复入口：`prepare` 只生成安装包；`pin <artifact-commit>` 核对 Git 中源码字节并生成清单；`verify` 校验本地发布组合；`verify --remote` 核验远端。不要单独推送产物提交到 main。通过 GitHub API 发布时同样先创建不可变产物提交，再创建同时更新两份清单的子提交，最后只移动一次 main 引用。
 
 CI 对 main 和 PR 运行全部测试与清单守卫；main 还核验 GitHub 远端。真实 ST/TT 手动验证范围记录在 VALIDATION.md，不能把源码模拟称为真机通过。
+
+## 历史产物维护
+
+正式发布后，`releases/v*/` 下的历史版本仅保留 `CHANGELOG.md`；当前正式版本保留 `TLE.js` 和可导入 JSON。对自动化回归确有必要的旧源码，按原字节移至 `tests/fixtures/legacy/`，并同步修改测试引用。旧版本不可变 Commit URL 仍可用于检验与追溯，不要重写发布历史。Loader 和 Bootstrap 采用相同原则；兼容旧版的 Test 通道清单暂时保留，不再作为下载入口。
+
+清理之后必须运行 `npm test` 和远端发布校验，确保主清单、更新链和未来 `scripts/release.mjs` 的模板选取均保持正常。

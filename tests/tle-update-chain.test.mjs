@@ -232,7 +232,7 @@ try {
 
   // Existing pre-Bootstrap installations retain their old DB, settings and source.
   db = new IDBFactory(); storage = new Map([['tle.diagnosticMode', 'true'], ['tle.loader.test.autoRestore.v1', 'true'], ['user.unrelated', 'keep']]);
-  const oldCore = read('releases/v0.3.203/TLE.js');
+  const oldCore = read('tests/fixtures/legacy/core-v0.3.203.js');
   const oldRecord = { version: '0.3.203', source: oldCore, size_bytes: Buffer.byteLength(oldCore),
     sha256: createHash('sha256').update(oldCore).digest('hex'), source_commit: '65ed78df9d23c12d1d49300f92e2f43c2ee49cdd',
     source_url: rootURL + '65ed78df9d23c12d1d49300f92e2f43c2ee49cdd/releases/v0.3.203/TLE.js' };
@@ -271,7 +271,7 @@ try {
   db = new IDBFactory();
   storage = new Map([['tle.diagnosticMode', 'true'],
     ['tle.loader.test.autoRestore.v1', 'true']]);
-  const oldLoaderSource = read('loader/runtime/v0.3.3/TLE-Remote-Loader.js');
+  const oldLoaderSource = read('tests/fixtures/legacy/runtime-v0.3.3.js');
   const oldLoaderCommit = 'c88ba23fb540152de041110f506421bd6a835088';
   const oldLoaderRecord = {
     version: '0.3.3', source: oldLoaderSource,

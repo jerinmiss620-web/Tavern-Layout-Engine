@@ -3,7 +3,13 @@ import { existsSync, readFileSync } from 'node:fs';
 
 const root = new URL('../', import.meta.url);
 const fileUrl = path => new URL(path, root);
-const read = path => readFileSync(fileUrl(path), 'utf8');
+const legacyFiles = {
+  'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
+  'releases/v0.3.204/TLE-0.3.204-TEST-import.json': 'tests/fixtures/legacy/core-v0.3.204.json',
+  'loader/TLE-Remote-Loader-Stable-0.3.1.js': 'tests/fixtures/legacy/stable-loader-v0.3.1.js',
+  'loader/TLE-Remote-Loader-Stable-0.3.1.json': 'tests/fixtures/legacy/stable-loader-v0.3.1.json',
+};
+const read = path => readFileSync(fileUrl(legacyFiles[path] || path), 'utf8');
 const json = path => JSON.parse(read(path));
 
 function checkInfo(info, label) {

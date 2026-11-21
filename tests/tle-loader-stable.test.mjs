@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const tle = read('releases/v0.3.203/TLE.js');
-const loader = read('loader/TLE-Remote-Loader-Stable-0.3.1.js');
-const importTLE = JSON.parse(read('releases/v0.3.203/TLE-0.3.203-import.json'));
-const importLoader = JSON.parse(read('loader/TLE-Remote-Loader-Stable-0.3.1.json'));
+const tle = read('tests/fixtures/legacy/core-v0.3.203.js');
+const loader = read('tests/fixtures/legacy/stable-loader-v0.3.1.js');
+const importTLE = JSON.parse(read('tests/fixtures/legacy/core-v0.3.203.json'));
+const importLoader = JSON.parse(read('tests/fixtures/legacy/stable-loader-v0.3.1.json'));
 new vm.Script(tle);
 new vm.Script(loader);
 assert.equal(importTLE.type, 'script');

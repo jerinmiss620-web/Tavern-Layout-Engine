@@ -51,7 +51,7 @@ assert.match(floorGrid, /width: max-content;/);
 assert.match(floorGrid, /margin: 0;/);
 assert.doesNotMatch(floorGrid, /5\.8em/);
 assert.match(source, /正常主题不要开启：此修复会强制调整按钮与图标尺寸，可能造成图文错位/);
-const prevSource = read('releases/v0.3.207/TLE.js');
+const prevSource = read('tests/fixtures/legacy/core-v0.3.207.js');
 const compatSelectorStart = 'body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle {';
 const compatSelectorEnd = '/* Optional structural layout repair.';
 function compatRules(text) {
