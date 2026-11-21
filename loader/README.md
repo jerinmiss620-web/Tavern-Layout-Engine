@@ -52,7 +52,7 @@ Useful methods:
 3. Enable Loader 0.3.0 and refresh the Tavern page.
 4. It reads the same IndexedDB database and existing LKG/Previous slots. No manual storage clearing or migration is required.
 5. If auto-restore was previously authorized, it restores the verified LKG from IndexedDB. If not, it leaves the current page untouched until you confirm the first load.
-6. It checks the test manifest and asks before installing/updating TLE v0.3.193.
+6. It checks the test manifest and asks before installing/updating TLE v0.3.196.
 7. Keep the original local TLE script disabled but do not delete it.
 
 ## Safety and limits
