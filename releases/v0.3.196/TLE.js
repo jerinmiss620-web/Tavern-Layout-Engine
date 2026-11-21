@@ -10157,7 +10157,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.195',
+    version: '0.3.196',
     destroy,
     state,
     emergencyRestore,
