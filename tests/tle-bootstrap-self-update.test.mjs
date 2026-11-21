@@ -184,6 +184,7 @@ remotelyPublished = fakeManifest('0.3.4');
 host.dispatchEvent(new host.CustomEvent('tle-loader-auto-update-preference'));
 await waitFor(() => host[LOADER_KEY]?.version === '0.3.4', 'unattended Loader upgrade');
 await waitFor(() => dbData.get('last')?.version === '0.3.4', 'upgraded cache promotion');
+await waitFor(() => host[BOOT_KEY].getInfo().busy === false, 'upgrade finalization');
 assert.equal(dbData.get('previous')?.version, '0.3.3');
 assert.ok(loadedVersions.includes('0.3.4'));
 
