@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.209",
+  "latest_version": "0.3.210",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.209",
-    "source_path": "releases/v0.3.209/TLE.js",
-    "source_commit": "d6e2d198cc2707cbf1dd24dfdcb3b22cb2a5a314",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d6e2d198cc2707cbf1dd24dfdcb3b22cb2a5a314/releases/v0.3.209/TLE.js",
-    "changelog_path": "releases/v0.3.209/CHANGELOG.md",
-    "sha256": "ce1e088ca52429d250c95f3a15d3f254f6b8c01aed9c06197d9416db7ff4b4b6",
-    "size_bytes": 505060
+    "version": "0.3.210",
+    "source_path": "releases/v0.3.210/TLE.js",
+    "source_commit": "867b1bb4304b1e1f797dfb13efec6bcd90207ff1",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/867b1bb4304b1e1f797dfb13efec6bcd90207ff1/releases/v0.3.210/TLE.js",
+    "changelog_path": "releases/v0.3.210/CHANGELOG.md",
+    "sha256": "ceaa96e79e72d78993c1fd8bd6b3cc266542055d8a1db407ba337b7f296596c2",
+    "size_bytes": 506543
   },
-  "notes": "v0.3.209: Floor Tools range hint spans both grid columns; Theme Manager group import is displayed only under Current UI Theme category, global backup actions unchanged."
+  "notes": "v0.3.210: mobile group manager uses icon-only header import/export, inline Theme sync next to filter pills, concise hint and improved small-screen group editing."
 }
