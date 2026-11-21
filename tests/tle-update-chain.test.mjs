@@ -185,7 +185,10 @@ async function boot({ empty = false, transient = null } = {}) {
     assert.equal(targetedRequests, 2, 'first failure must recover on the second request');
     assert.equal(host[B].getInfo().remoteFailure, null);
     assert.equal(host.document.getElementById('tle-bootstrap-failure-dialog'), null);
-    assert.equal(host.document.getElementById('tle-bootstrap-retry-progress'), null);
+    // Bootstrap v1.0.6 deliberately keeps its successful first-start notice
+    // visible for at least 1.2 seconds, even after Core becomes healthy.
+    await waitFor(() => host.document.getElementById('tle-bootstrap-retry-progress') === null,
+      'first-start notice auto-dismisses after its minimum visible interval');
   }
 }
 function close() {
@@ -244,7 +247,8 @@ try {
   assert.equal(host[L], liveLoader); assert.equal(host[C], liveCore);
   assert.deepEqual(await readBootstrapCache(), durableBefore, 'server failure must not write or clear any cache slot');
   assert.equal(host.document.getElementById('tle-bootstrap-failure-dialog'), null);
-  assert.equal(host.document.getElementById('tle-bootstrap-retry-progress'), null);
+  await waitFor(() => host.document.getElementById('tle-bootstrap-retry-progress') === null,
+    'initial notice finishes before later update checks');
   assertSingle();
   frame.fetch = healthyFetch;
   console.log('PASS three HTTP 503 responses preserve actual healthy Loader/Core and all durable Bootstrap cache slots');

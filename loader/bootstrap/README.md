@@ -1,6 +1,6 @@
-# TLE Permanent Bootstrap 1.0.5
+# TLE Permanent Bootstrap 1.0.6
 
-[下载固定 Bootstrap 安装包](TLE-Permanent-Bootstrap-1.0.5.json)。在酒馆助手导入一次，禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留禁用备份，然后启用本 Bootstrap 并刷新。
+[下载固定 Bootstrap 安装包](TLE-Permanent-Bootstrap-1.0.6.json)。在酒馆助手导入一次，禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留禁用备份，然后启用本 Bootstrap 并刷新。
 
 此后保持 Bootstrap 启用。Loader Runtime 和 Core 从 GitHub 独立清单自动更新，不需要重新导入或控制台操作。仅未来底层启动协议确实不兼容时才可能需要迁移；日常 Core/Loader 更新不更换 Bootstrap。
 
@@ -24,4 +24,8 @@ Bootstrap 正常启动不增加面板或按钮；若 Bootstrap 已执行但 Core
 
 ## 首次加载体验与多线路
 
-首次启用等待超过约 500ms，将出现「TLE 正在努力加载中，请稍候…」非阻塞通知。进入 Core 后自动清除；失败则由独立诊断弹窗显示原因。冷安装优先 jsDelivr、Fastly jsDelivr，最后回退 GitHub Raw；已有健康 Loader 的更新检查优先官方 Raw 约 5 秒，失败再通过 CDN 查找。固定 Commit 与 SHA-256 等安全校验保持不变。jsDelivr @main 的缓存可能令更新提示滞后，不能保证完全实时。
+首次启用等待启动后立即，将出现「TLE 正在努力加载中，请稍候…」非阻塞通知。进入 Core 后自动清除；失败则由独立诊断弹窗显示原因。冷安装优先 jsDelivr、Fastly jsDelivr，最后回退 GitHub Raw；已有健康 Loader 的更新检查优先官方 Raw 约 5 秒，失败再通过 CDN 查找。固定 Commit 与 SHA-256 等安全校验保持不变。jsDelivr @main 的缓存可能令更新提示滞后，不能保证完全实时。
+
+## v1.0.6：立即显示启动反馈
+
+不再延迟 500ms，Bootstrap 启动立即显示非阻塞「TLE 正在努力加载中，请稍候…」，至少保留约 1.2 秒，加载成功自动消失；失败由已有独立诊断弹窗接管。遇到 WebKit IndexedDB 连接丢失时，有限重建一次并重新执行原操作，仍失败提示用户完全退出重启 TT。缓存完整性、回滚与版本校验不变。

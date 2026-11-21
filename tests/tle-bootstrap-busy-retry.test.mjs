@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-for (const path of ['tests/fixtures/legacy/bootstrap-v1.0.2.js', 'loader/bootstrap/TLE-Permanent-Bootstrap-1.0.5.js']) {
+for (const path of ['tests/fixtures/legacy/bootstrap-v1.0.2.js', 'loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.js']) {
 const src = readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 new vm.Script(src);
 const begin = src.indexOf('  function scheduleNextCheck() {') >= 0 ? src.indexOf('  function scheduleNextCheck() {') : src.indexOf('  async function startup() {');
