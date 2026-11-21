@@ -38,6 +38,6 @@ Stable TLE v0.3.195 is available. The headless Remote Loader 0.3.0 remains test-
 
 - Keep one `CHANGELOG.md` per TLE release under `releases/vX.Y.Z/`. Append later corrections to that release's history; do not rewrite or discard previous entries.
 - Keep loader and auxiliary-script histories under `loader/` or their own versioned folders. Record feature additions, behavior changes, bug fixes, compatibility changes, and release-metadata corrections.
-- Every Tavern Helper `type: script` package must include a single-line Markdown `info` value with the script name, a concise function summary, usage steps, cautions, and author name. The `info` value must contain no line breaks and no escaped `\\n` sequences.
+- Every Tavern Helper `type: script` package must include a single-line Markdown `info` value with the script name, a concise function summary, usage steps, cautions, and author name. The `info` value must contain no line breaks and no escaped `\n` sequences.
 - Before publishing a stable pointer, run `node loader/verify-stable-release.mjs`; after pushing the release, run `node loader/verify-stable-release.mjs --remote`.
 
