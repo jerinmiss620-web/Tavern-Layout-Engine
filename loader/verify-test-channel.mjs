@@ -154,6 +154,15 @@ assert.ok(tleSource.includes('buttonReceivesHit'));
  assert.ok(tleSource.includes('querySelectorAll(`#options [id="${id}"]`)'));
  assert.ok(tleSource.includes('navigationRepairEnabled: compatibilityNavigationRepair'));
  assert.ok(tleSource.includes('quickActionsEnabled: chatQuickActionsEnabled'));
+ assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="labels"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
+ assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="info"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
+ assert.ok(tleSource.includes('function findNavigationControlForEvent(event)'));
+ assert.ok(tleSource.includes('function recordNavigationPointerDown(event)'));
+ assert.ok(tleSource.includes('function recordNavigationClickCapture(event)'));
+ assert.ok(tleSource.includes('function recordNavigationClickDocumentBubble(event)'));
+ assert.ok(tleSource.includes('function recordNavigationClickWindowBubble(event)'));
+ assert.ok(tleSource.includes('nativeControls: navigationControlDiagnostics'));
+ assert.ok(tleSource.includes('drawerOpenAfterDispatch'));
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
