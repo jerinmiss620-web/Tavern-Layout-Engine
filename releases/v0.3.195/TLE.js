@@ -6396,6 +6396,35 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
   }
 
+  function syncChatFadeBottomPadding() {
+    const chat = getChatFadeChat();
+    const previous = state.chatFade.paddingChat;
+    if (previous && previous !== chat) previous.classList.remove(CHAT_FADE_BOTTOM_PADDING_CLASS);
+    if (chat) {
+      chat.classList.toggle(
+        CHAT_FADE_BOTTOM_PADDING_CLASS,
+        chatFadeEnabled && chatFadeBottomPaddingEnabled
+      );
+    }
+    state.chatFade.paddingChat = chat || null;
+  }
+
+  function clearChatFadeBottomPadding() {
+    state.chatFade.paddingChat?.classList.remove(CHAT_FADE_BOTTOM_PADDING_CLASS);
+    getChatFadeChat()?.classList.remove(CHAT_FADE_BOTTOM_PADDING_CLASS);
+    state.chatFade.paddingChat = null;
+  }
+
+  function setChatFadeBottomPaddingEnabled(enabled) {
+    chatFadeBottomPaddingEnabled = Boolean(enabled);
+    try {
+      HOST_WIN.localStorage.setItem(CHAT_FADE_BOTTOM_PADDING_KEY, String(chatFadeBottomPaddingEnabled));
+    } catch {}
+    const input = state.panel?.querySelector('[data-tle-setting="chat-fade-bottom-padding"]');
+    if (input) input.checked = chatFadeBottomPaddingEnabled;
+    syncChatFadeBottomPadding();
+  }
+
   function clearChatFadeVisual() {
     const chats = new Set([state.chatFade.chat, getChatFadeChat()]);
     for (const chat of chats) {
