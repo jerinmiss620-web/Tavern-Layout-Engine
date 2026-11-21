@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.206",
+  "latest_version": "0.3.207",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.206",
-    "source_path": "releases/v0.3.206/TLE.js",
-    "source_commit": "2d2759d8195eba59574b08ffca904c848476e163",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2d2759d8195eba59574b08ffca904c848476e163/releases/v0.3.206/TLE.js",
-    "changelog_path": "releases/v0.3.206/CHANGELOG.md",
-    "sha256": "27a79560d651e5c9ce0f0375d268ace80ab675edc59e712d32dbd83d61e33b3f",
-    "size_bytes": 504548
+    "version": "0.3.207",
+    "source_path": "releases/v0.3.207/TLE.js",
+    "source_commit": "c13ab84aa0995c071c525fbedb0bd79148a6143d",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c13ab84aa0995c071c525fbedb0bd79148a6143d/releases/v0.3.207/TLE.js",
+    "changelog_path": "releases/v0.3.207/CHANGELOG.md",
+    "sha256": "ebe5fbda63173b849b5386eb49c8836a9b53e1cdb072d22d59daa909beca87a8",
+    "size_bytes": 504547
   },
-  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
+  "notes": "v0.3.207: update disclosure reuses the native inline-drawer component and removes legacy details styles; simulated ST/TT behavior regression passes, real device check pending."
 }
