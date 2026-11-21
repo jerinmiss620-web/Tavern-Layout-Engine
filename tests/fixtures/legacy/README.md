@@ -7,3 +7,5 @@
 历史正式版本在 `releases/v*/` 仅保留 `CHANGELOG.md`，当前正式版本仍保留完整源码和安装包；历史 Git Commit 不做重写。
 
 请使用 [仓库首页](../../../README.md) 的当前 Bootstrap 安装方式。
+
+Bootstrap 1.0.2 的源码与安装包用于保留旧版忙碌重试回归；Bootstrap 1.0.3 为当前安装版本。

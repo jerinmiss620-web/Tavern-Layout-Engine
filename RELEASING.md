@@ -19,3 +19,7 @@ CI 对 main 和 PR 运行全部测试与清单守卫；main 还核验 GitHub 远
 正式发布后，`releases/v*/` 下的历史版本仅保留 `CHANGELOG.md`；当前正式版本保留 `TLE.js` 和可导入 JSON。对自动化回归确有必要的旧源码，按原字节移至 `tests/fixtures/legacy/`，并同步修改测试引用。旧版本不可变 Commit URL 仍可用于检验与追溯，不要重写发布历史。Loader 和 Bootstrap 采用相同原则；兼容旧版的 Test 通道清单暂时保留，不再作为下载入口。
 
 清理之后必须运行 `npm test` 和远端发布校验，确保主清单、更新链和未来 `scripts/release.mjs` 的模板选取均保持正常。
+
+## 固定 Bootstrap 的紧急修复
+
+Bootstrap 不由 Core/Loader 两份更新清单自动替换。修复 Bootstrap 时必须创建新的不可变版本 JS + 完整匹配的酒馆助手导入 JSON，推进 `release-plan.json.bootstrap`、更新 README/CHANGELOG 并进行所有回归。旧版仅以测试样本形式归档，不能覆盖历史固定源码。引导用户停用旧 Bootstrap、重新导入新版本一次。

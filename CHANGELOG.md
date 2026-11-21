@@ -1,6 +1,6 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.211 / Loader Runtime v0.3.4 / Bootstrap v1.0.2**。
+目前正式版：**Core v0.3.211 / Loader Runtime v0.3.4 / Bootstrap v1.0.3**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
 
@@ -33,6 +33,7 @@
 - [Stable Loader v0.3.1](loader/CHANGELOG-Stable-0.3.1.md)
 - [Test Loader v0.3.0](loader/CHANGELOG-0.3.0.md)
 - [Test Loader v0.2.2](loader/CHANGELOG-0.2.2.md)
+- [Bootstrap v1.0.3](loader/bootstrap/CHANGELOG-1.0.3.md)
 - [Bootstrap v1.0.2](loader/bootstrap/CHANGELOG-1.0.2.md)
 - [Bootstrap v1.0.1](loader/bootstrap/CHANGELOG-1.0.1.md)
 
