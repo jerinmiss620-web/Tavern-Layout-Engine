@@ -247,7 +247,8 @@ try {
   assert.equal(host[L], liveLoader); assert.equal(host[C], liveCore);
   assert.deepEqual(await readBootstrapCache(), durableBefore, 'server failure must not write or clear any cache slot');
   assert.equal(host.document.getElementById('tle-bootstrap-failure-dialog'), null);
-  assert.equal(host.document.getElementById('tle-bootstrap-retry-progress'), null);
+  await waitFor(() => host.document.getElementById('tle-bootstrap-retry-progress') === null,
+    'initial notice finishes before later update checks');
   assertSingle();
   frame.fetch = healthyFetch;
   console.log('PASS three HTTP 503 responses preserve actual healthy Loader/Core and all durable Bootstrap cache slots');
