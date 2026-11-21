@@ -16,3 +16,10 @@
 - 此版本为独立开发分支上的测试候选，未将 `main/latest.json` 或 `main/channels/test.json` 指向该版本。
 - 在 ST、TT 的面板交互、回滚、刷新恢复及自动安装测试通过前，不提升为正式版。
 - 作者：小松鼠 & ChatGPT（小松7）。
+
+## 2026-11-21 · 双层版本更新补充
+- 折叠区域新增「Loader 最新版本」行，可同时查看当前 Runtime、GitHub Loader 版本和 Bootstrap 版本。
+- 新增「检查 Loader 更新」「更新 Loader」入口，并接入 Bootstrap 状态事件；折叠状态下 Core 或 Loader 任一发现更新都会显示绿色提示。
+- 完整远程链路改为 Permanent Bootstrap v1.0.0 → Loader Runtime v0.3.3 → TLE Core；Loader Runtime 后续更换不再要求用户下载或重复导入 Tavern Helper JSON。
+- Bootstrap 和 Runtime 共用自动更新选项，默认开启、可关闭；缓存、签名替代的固定 Commit + SHA-256 校验、失败回滚独立保留。
+- Bootstrap 测试入口已发布到 GitHub main，但 TLE v0.3.205 本身仍在开发分支；正式 Core 指针仍为 v0.3.203，未自动推广给现有用户。
