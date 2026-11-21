@@ -33,3 +33,5 @@ jobs:
         run: node loader/verify-stable-release.mjs
       - name: Verify Stable Loader bridge and in-panel update controls
         run: node tests/tle-loader-stable.test.mjs
+      - name: Verify release changelogs and import-script info fields
+        run: node tests/tle-release-metadata.test.mjs
