@@ -152,7 +152,9 @@
         for (const [name, value] of Object.entries(fixedStyle)) {
           panel.style.setProperty(name.replace(/[A-Z]/g, c => '-' + c.toLowerCase()), value, 'important');
         }
-        const shadow = panel.attachShadow({ mode: 'open' });
+        const surface = HOST_DOC.createElement('div');
+        panel.appendChild(surface);
+        const shadow = surface.attachShadow({ mode: 'open' });
         shadow.innerHTML = [
           '<style>',
           ':host{font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif;color:#293443;}',

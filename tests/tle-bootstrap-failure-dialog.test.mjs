@@ -58,14 +58,14 @@ function createHost({ legacy = false, managedLoader = false, healthyCore = false
   await waitFor(() => t.host.document.getElementById(D), 'first-run network failure dialog');
   const node = t.host.document.getElementById(D);
   assert.equal(node.parentNode, t.host.document.documentElement, 'dialog must not be clipped by chat or TT drawer');
-  assert.ok(node.shadowRoot, 'error UI must be isolated from host themes');
-  assert.match(node.shadowRoot.querySelector('[data-stage]').textContent, /Loader 下载或执行/);
-  assert.match(node.shadowRoot.querySelector('[data-reason]').textContent, /模拟 TT 无法连接 GitHub/);
-  assert.match(node.shadowRoot.querySelector('[data-report]').textContent, /TLE Bootstrap v1\.0\.3/);
+  assert.ok(node.firstElementChild?.shadowRoot, 'error UI must be isolated from host themes');
+  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-stage]').textContent, /Loader 下载或执行/);
+  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-reason]').textContent, /模拟 TT 无法连接 GitHub/);
+  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-report]').textContent, /TLE Bootstrap v1\.0\.3/);
   assert.equal(t.host[B].getInfo().startupFailure.stage, 'Loader 下载或执行');
-  node.shadowRoot.querySelector('[data-action="copy"]').click();
-  assert.match(node.shadowRoot.querySelector('[data-copy-state]').textContent, /长按/);
-  node.shadowRoot.querySelector('[data-action="close"]').click();
+  node.firstElementChild.shadowRoot.querySelector('[data-action="copy"]').click();
+  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-copy-state]').textContent, /长按/);
+  node.firstElementChild.shadowRoot.querySelector('[data-action="close"]').click();
   assert.equal(t.host.document.getElementById(D), null, 'closing must remove dialog');
   assert.ok(t.host[B].getInfo().startupFailure, 'failure remains available via getInfo');
   // Late successful Core initialization must clear a dismissed failure.
@@ -78,15 +78,15 @@ function createHost({ legacy = false, managedLoader = false, healthyCore = false
 {
   const t = createHost({ legacy: true });
   await waitFor(() => t.host.document.getElementById(D), 'legacy loader collision');
-  assert.match(t.host.document.getElementById(D).shadowRoot.querySelector('[data-stage]').textContent, /旧 Loader 冲突/);
+  assert.match(t.host.document.getElementById(D).firstElementChild.shadowRoot.querySelector('[data-stage]').textContent, /旧 Loader 冲突/);
   assert.equal(t.host[B].getInfo().startupFailure.stage, '旧 Loader 冲突');
   t.cleanup();
 }
 {
   const t = createHost({ managedLoader: true });
   await waitFor(() => t.host.document.getElementById(D), 'Loader succeeds but Core fails');
-  assert.match(t.host.document.getElementById(D).shadowRoot.querySelector('[data-stage]').textContent, /Core 加载/);
-  assert.match(t.host.document.getElementById(D).shadowRoot.querySelector('[data-reason]').textContent, /Core 下载失败/);
+  assert.match(t.host.document.getElementById(D).firstElementChild.shadowRoot.querySelector('[data-stage]').textContent, /Core 加载/);
+  assert.match(t.host.document.getElementById(D).firstElementChild.shadowRoot.querySelector('[data-reason]').textContent, /Core 下载失败/);
   t.cleanup();
 }
 {
