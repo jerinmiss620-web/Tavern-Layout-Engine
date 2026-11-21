@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.207",
     "source_path": "releases/v0.3.207/TLE.js",
-    "source_commit": "c13ab84aa0995c071c525fbedb0bd79148a6143d",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c13ab84aa0995c071c525fbedb0bd79148a6143d/releases/v0.3.207/TLE.js",
+    "source_commit": "d15a4ee4c6462b896fb6042c02f9d02cd8440557",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d15a4ee4c6462b896fb6042c02f9d02cd8440557/releases/v0.3.207/TLE.js",
     "changelog_path": "releases/v0.3.207/CHANGELOG.md",
-    "sha256": "ebe5fbda63173b849b5386eb49c8836a9b53e1cdb072d22d59daa909beca87a8",
-    "size_bytes": 504547
+    "sha256": "3bc7fec052b14270492ea09c746430e54def80079a77f83b946175a18f977456",
+    "size_bytes": 504629
   },
-  "notes": "v0.3.207: update disclosure reuses the native inline-drawer component and removes legacy details styles; simulated ST/TT behavior regression passes, real device check pending."
+  "notes": "v0.3.207: native inline-drawer update settings and compact Floor Tools on mobile; preserved Recent Chats scrolling; runtime device validation pending."
 }
