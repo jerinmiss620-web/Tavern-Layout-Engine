@@ -37,3 +37,5 @@ jobs:
         run: node tests/tle-release-metadata.test.mjs
       - name: Protect old Test Loader migration and visible update controls
         run: node tests/tle-legacy-loader-bridge.test.mjs
+      - name: Verify folded updates and safe default automatic installs
+        run: node tests/tle-auto-update-fold.test.mjs
