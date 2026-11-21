@@ -1,6 +1,6 @@
-# TLE Permanent Bootstrap 1.0.4
+# TLE Permanent Bootstrap 1.0.5
 
-[下载固定 Bootstrap 安装包](TLE-Permanent-Bootstrap-1.0.4.json)。在酒馆助手导入一次，禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留禁用备份，然后启用本 Bootstrap 并刷新。
+[下载固定 Bootstrap 安装包](TLE-Permanent-Bootstrap-1.0.5.json)。在酒馆助手导入一次，禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留禁用备份，然后启用本 Bootstrap 并刷新。
 
 此后保持 Bootstrap 启用。Loader Runtime 和 Core 从 GitHub 独立清单自动更新，不需要重新导入或控制台操作。仅未来底层启动协议确实不兼容时才可能需要迁移；日常 Core/Loader 更新不更换 Bootstrap。
 
@@ -21,3 +21,7 @@ Bootstrap 正常启动不增加面板或按钮；若 Bootstrap 已执行但 Core
 - `security`：清单、正式仓库来源、固定 Commit、SHA-256 或 UTF-8 字节数验证失败。拒绝执行，不进行网络重试。
 - 自动重试期间显示阶段和尝试次数，最终诊断保留原始错误。并发检查共用一个 Promise；相同清单可复用已经验证的 candidate/Last 字节，仍重新校验。
 - 本次针对 Android 原版 SillyTavern 已报告的请求错误；iPhone TT 迁移后发送消息才见到界面和首次检查偶发失败的根因仍未确认。没有按 User-Agent 分支，也没有新增聊天消息、发送按钮或聊天 DOM 触发逻辑。
+
+## 首次加载体验与多线路
+
+首次启用等待超过约 500ms，将出现「TLE 正在努力加载中，请稍候…」非阻塞通知。进入 Core 后自动清除；失败则由独立诊断弹窗显示原因。冷安装优先 jsDelivr、Fastly jsDelivr，最后回退 GitHub Raw；已有健康 Loader 的更新检查优先官方 Raw 约 5 秒，失败再通过 CDN 查找。固定 Commit 与 SHA-256 等安全校验保持不变。jsDelivr @main 的缓存可能令更新提示滞后，不能保证完全实时。

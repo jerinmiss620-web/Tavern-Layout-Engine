@@ -5,10 +5,14 @@ import { JSDOM } from 'jsdom';
 import { IDBFactory } from 'fake-indexeddb';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const bootstrap = read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.4.js');
-const legacyBootstrap = read('tests/fixtures/legacy/bootstrap-v1.0.3.js');
-assert.equal(JSON.parse(read('tests/fixtures/legacy/bootstrap-v1.0.3.json')).content, legacyBootstrap);
-assert.equal(JSON.parse(read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.4.json')).content, bootstrap);
+const canonicalUrl = url => String(url).replace(
+  /^https:\/\/(?:cdn|fastly)\.jsdelivr\.net\/gh\/jerinmiss620-web\/Tavern-Layout-Engine@([^/]+)\//,
+  'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/$1/');
+
+const bootstrap = read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.5.js');
+const legacyBootstrap = read('tests/fixtures/legacy/bootstrap-v1.0.4.js');
+assert.equal(JSON.parse(read('tests/fixtures/legacy/bootstrap-v1.0.4.json')).content, legacyBootstrap);
+assert.equal(JSON.parse(read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.5.json')).content, bootstrap);
 const B = '__TLE_REMOTE_BOOTSTRAP_V1__';
 const L = '__TLE_REMOTE_LOADER_STABLE_V1__';
 const C = '__TAVERN_LAYOUT_ENGINE_V02__';
@@ -33,13 +37,13 @@ function createHost({ legacy = false, managedLoader = false, healthyCore = false
   let timerID = 100000;
   frame.setTimeout = (fn, ms, ...args) => {
     if (ms === 60000 || ms === 21600000) { const id = ++timerID; scheduled.set(id, { fn, ms }); return id; }
-    return nativeTimeout(fn, [500, 1000].includes(ms) ? 5 : ms === 20000 && fastTimeout ? 10 : ms, ...args);
+    return nativeTimeout(fn, [250, 500, 1000].includes(ms) ? 5 : [8000, 20000].includes(ms) && fastTimeout ? 10 : ms, ...args);
   };
   frame.clearTimeout = id => { scheduled.delete(id); nativeClear(id); };
   frame.fetch = async (url, options) => {
     assert.equal(host.document.getElementById(D), null, 'no final dialog while requests are still retrying');
-    calls.push({ url, signal: options.signal });
-    if (fetcher) return await fetcher(url, options, calls.length);
+    calls.push({ url: canonicalUrl(url), actualUrl: String(url), signal: options.signal });
+    if (fetcher) return await fetcher(canonicalUrl(url), options, calls.length);
     throw new TypeError('Failed to fetch');
   };
   host.addEventListener('tle-loader-bootstrap-state-change', () => {
@@ -87,10 +91,10 @@ for (const legacyVersion of [true, false]) {
   const node = t.host.document.getElementById(D);
   assert.equal(node.parentNode, t.host.document.documentElement, 'dialog must not be clipped by chat or TT drawer');
   assert.ok(node.firstElementChild?.shadowRoot, 'error UI must be isolated from host themes');
-  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-stage]').textContent, legacyVersion ? /Loader 下载或执行/ : /Loader 清单下载/);
+  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-stage]').textContent, /Loader 清单下载/);
   assert.match(node.firstElementChild.shadowRoot.querySelector('[data-reason]').textContent, /Failed to fetch/);
-  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-report]').textContent, legacyVersion ? /TLE Bootstrap v1\.0\.3/ : /TLE Bootstrap v1\.0\.4/);
-  assert.equal(t.host[B].getInfo().startupFailure.stage, legacyVersion ? 'Loader 下载或执行' : 'Loader 清单下载');
+  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-report]').textContent, legacyVersion ? /TLE Bootstrap v1\.0\.4/ : /TLE Bootstrap v1\.0\.5/);
+  assert.equal(t.host[B].getInfo().startupFailure.stage, 'Loader 清单下载');
   node.firstElementChild.shadowRoot.querySelector('[data-action="copy"]').click();
   assert.match(node.firstElementChild.shadowRoot.querySelector('[data-copy-state]').textContent, /长按/);
   node.firstElementChild.shadowRoot.querySelector('[data-action="close"]').click();
@@ -126,7 +130,7 @@ for (const legacyVersion of [true, false]) {
   t.cleanup();
 }
 }
-console.log('Bootstrap v1.0.3/v1.0.4 dialog regressions passed.');
+console.log('Bootstrap v1.0.4/v1.0.5 dialog regressions passed.');
 
 const source = '// verified UTF-8 源码';
 const release = {
@@ -145,13 +149,16 @@ for (const [kind, fetcher, count] of [
   ['network', async () => { throw new TypeError('Failed to fetch'); }, 3],
   ['interrupted', async () => { throw new DOMException('signal is aborted without reason', 'AbortError'); }, 3],
   ['timeout', async (url, { signal }) => new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(new DOMException('signal is aborted without reason', 'AbortError')))), 3],
-  ...[408, 429, 500, 503, 599, 400, 401, 403, 404].map(status => ['http', async () => ({ ok: false, status }), [408, 429, 500, 503, 599].includes(status) ? 3 : 1])
+  ...[408, 429, 500, 503, 599, 400, 401, 403, 404].map(status => ['http', async () => ({ ok: false, status }), [408, 429, 500, 503, 599, 403, 404].includes(status) ? 3 : 1])
 ]) {
   const t = createHost({ fetcher, fastTimeout: true });
   const failure = await failed(t);
   assert.equal(failure.type, kind);
   assert.equal(failure.attempt, count);
   assert.equal(t.calls.length, count);
+  assert.ok(t.calls[0].actualUrl.startsWith('https://cdn.jsdelivr.net/gh/'), 'cold install prefers jsDelivr');
+  if (count > 1) assert.ok(t.calls[1].actualUrl.startsWith('https://fastly.jsdelivr.net/gh/'), 'Fastly is second');
+  if (count > 2) assert.ok(t.calls[2].actualUrl.startsWith('https://raw.githubusercontent.com/'), 'Raw is final fallback');
   assert.equal(t.scheduled.size, 0, 'exhausted first-start failure must not loop every minute');
   assert.equal(t.injected.length, 0);
   const report = t.host.document.getElementById(D).firstElementChild.shadowRoot.querySelector('[data-report]').textContent;
@@ -235,7 +242,7 @@ for (const tamper of ['sha256', 'source_url', 'source_commit', 'size_bytes', 'js
   assert.equal(t.injected.length, 0);
   t.cleanup();
 }
-console.log('Bootstrap v1.0.4: bounded retries, HTTP classes, cancellation, security, healthy runtime and single-flight checks passed.');
+console.log('Bootstrap v1.0.5: bounded retries, HTTP classes, cancellation, security, healthy runtime and single-flight checks passed.');
 
 // A replaced Bootstrap owns a different controller; late resolution cannot restart the old one.
 {

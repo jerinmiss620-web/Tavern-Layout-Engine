@@ -7,6 +7,10 @@ import { IDBFactory, IDBObjectStore } from 'fake-indexeddb';
 // Real, complete Bootstrap/Loader/Core sources execute in a Tavern Helper iframe.
 // Only host facilities, network publication and elapsed scheduler time are simulated.
 const read = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
+const canonicalUrl = url => String(url).replace(
+  /^https:\/\/(?:cdn|fastly)\.jsdelivr\.net\/gh\/jerinmiss620-web\/Tavern-Layout-Engine@([^/]+)\//,
+  'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/$1/');
+
 const plan = JSON.parse(read('release-plan.json'));
 let bootstrap = read(`loader/bootstrap/TLE-Permanent-Bootstrap-${plan.bootstrap}.js`);
 let loaderSource = read(`loader/runtime/v${plan.loader}/TLE-Remote-Loader.js`);
@@ -129,12 +133,13 @@ async function boot({ empty = false, transient = null } = {}) {
   let timerID = 100000;
   frame.setTimeout = (fn, ms, ...args) => {
     if (ms === 21600000 || ms === 60000) { const id = ++timerID; timers.set(id, { fn, ms }); return id; }
-    return nativeTimeout(fn, [500, 900, 1000].includes(ms) ? 0 : ms === 20000 && transient?.type === 'timeout' ? 15 : ms, ...args);
+    return nativeTimeout(fn, [250, 500, 900, 1000].includes(ms) ? 0 : [8000, 20000].includes(ms) && transient?.type === 'timeout' ? 15 : ms, ...args);
   };
   frame.clearTimeout = id => { timers.delete(id); nativeClear(id); };
   let failedOnce = false;
   let targetedRequests = 0;
   frame.fetch = async (url, options) => {
+    url = canonicalUrl(url);
     const target = transient?.resource === 'source' ? String(url).includes('/loader/runtime/') : String(url).includes('/main/loader/latest.json');
     if (transient && target) {
       targetedRequests++;
@@ -163,7 +168,7 @@ async function boot({ empty = false, transient = null } = {}) {
       try {
         const isBlob = blobs.has(script.src);
         if (!isBlob && offline) throw Error('offline external script');
-        const source = isBlob ? await blobs.get(script.src).text() : sources.get(script.src);
+        const source = isBlob ? await blobs.get(script.src).text() : sources.get(canonicalUrl(script.src));
         assert.ok(source, 'published script exists');
         if (script.integrity) assert.equal(script.integrity, 'sha256-' + createHash('sha256').update(source).digest('base64'));
         try { frame.eval(source); } catch (err) { errors.push(err.message); }
@@ -228,7 +233,7 @@ try {
   const healthyFetch = frame.fetch;
   let unavailableCalls = 0;
   frame.fetch = async (url, options) => {
-    if (String(url).includes('/main/loader/latest.json')) {
+    if (canonicalUrl(url).includes('/main/loader/latest.json')) {
       unavailableCalls++;
       return { ok: false, status: 503 };
     }
