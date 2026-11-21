@@ -109,7 +109,7 @@ Stable TLE v0.3.195 is published through the repository-root `latest.json`; it i
 
 ## Tavern Helper script info convention
 
-Every distributed `type: script` JSON package must provide a concise, single-line Markdown `info` value. Include: **script name**, **what it does**, **how to use it**, **important cautions**, and **author**. Do not include actual line breaks or escaped `\\n` sequences in the `info` value. Keep detailed release history in GitHub changelog files instead of packing it into `info`.
+Every distributed `type: script` JSON package must provide a concise, single-line Markdown `info` value. Include: **script name**, **what it does**, **how to use it**, **important cautions**, and **author**. Do not include actual line breaks or escaped `\n` sequences in the `info` value. Keep detailed release history in GitHub changelog files instead of packing it into `info`.
 
 ## Stable publication guard
 
