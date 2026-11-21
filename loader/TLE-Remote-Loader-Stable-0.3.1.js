@@ -918,7 +918,8 @@
   }
 
   function getInfo() {
-    refreshButtons();
+    // Read-only snapshot. Never dispatch a state-change event here: TLE calls
+    // getInfo() while handling that same event, so re-dispatch would recurse.
     return {
       loaderVersion: LOADER_VERSION,
       channel: CHANNEL,
