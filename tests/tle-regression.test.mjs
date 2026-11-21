@@ -92,5 +92,16 @@ assert.match(tle, /option_select_chat/);
 assert.ok(tle.includes('querySelectorAll(`#options [id="${id}"]`)'));
 assert.match(tle, /quickActionsEnabled: chatQuickActionsEnabled/);
 assert.match(tle, /navigationRepairEnabled: compatibilityNavigationRepair/);
+assert.match(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="labels"\][\s\S]*?margin-inline: 15px !important;/);
+assert.match(tle, /body\[data-tle-compat-nav-repair\]\[data-tle-nav="info"\][\s\S]*?margin-inline: 15px !important;/);
+assert.match(tle, /function findNavigationControlForEvent\(event\)/);
+assert.match(tle, /function recordNavigationPointerDown\(event\)/);
+assert.match(tle, /function recordNavigationClickCapture\(event\)/);
+assert.match(tle, /function recordNavigationClickDocumentBubble\(event\)/);
+assert.match(tle, /function recordNavigationClickWindowBubble\(event\)/);
+assert.match(tle, /nativeControls: navigationControlDiagnostics/);
+assert.match(tle, /drawerOpenAfterDispatch/);
+assert.match(tle, /buttonReceivesHit: Boolean\(topNode/);
+assert.match(tle, /buttonPresentInHitStack: hitNodes\.some/);
 
 console.log('TLE test-channel regression checks passed: TLE v' + manifest.release.version + ', Loader v' + loaderRelease.version + '.');
