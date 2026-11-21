@@ -163,6 +163,8 @@ assert.ok(tleSource.includes('buttonReceivesHit'));
  assert.ok(tleSource.includes('function recordNavigationClickWindowBubble(event)'));
  assert.ok(tleSource.includes('nativeControls: navigationControlDiagnostics'));
  assert.ok(tleSource.includes('drawerOpenAfterDispatch'));
+ assert.ok(tleSource.includes('buttonPresentInHitStack: hitNodes.some'));
+ assert.ok(!/body\[data-tle-compat-nav-repair\]\[data-tle-nav="icons"\][\s\S]{0,500}margin-inline: 15px !important;/.test(tleSource));
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
