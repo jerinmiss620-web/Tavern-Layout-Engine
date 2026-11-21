@@ -115,6 +115,10 @@
   let diagnosticCaptureSnapshot = null;
   let diagnosticClientHints = { status: 'not-requested' };
   let diagnosticClientHintsRequested = false;
+  const navigationInteractionProbe = {
+    lastPointerDown: null,
+    lastClickCapture: null,
+  };
   function getDiagnosticMode() {
     try { return HOST_WIN.localStorage.getItem(DIAGNOSTIC_MODE_KEY) === 'true'; }
     catch { return false; }
@@ -1110,6 +1114,12 @@ body[data-tle-compat-nav-repair][data-tle-nav] #top-settings-holder#top-settings
   align-self: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
+}
+/* Only compatibility repair in label-bearing navigation modes needs the
+   requested horizontal breathing room. Icon-only and normal navigation stay untouched. */
+body[data-tle-compat-nav-repair][data-tle-nav="labels"] #top-settings-holder#top-settings-holder#top-settings-holder > .drawer > .drawer-toggle,
+body[data-tle-compat-nav-repair][data-tle-nav="info"] #top-settings-holder#top-settings-holder#top-settings-holder > .drawer > .drawer-toggle {
+  margin-inline: 15px !important;
 }
 body[data-tle-compat-nav-repair][data-tle-nav] #top-settings-holder#top-settings-holder#top-settings-holder > .drawer > .drawer-toggle,
 body[data-tle-compat-nav-repair][data-tle-nav] #top-settings-holder#top-settings-holder#top-settings-holder > .drawer > .drawer-toggle::before,
@@ -9480,6 +9490,95 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
   }
 
+  function describeNavigationEventNode(node) {
+    if (!node) return null;
+    return {
+      tag: node.tagName || null,
+      id: node.id || '',
+      className: typeof node.className === 'string' ? node.className.slice(0, 160) : String(node.getAttribute?.('class') || '').slice(0, 160),
+      role: node.getAttribute?.('role') || null,
+    };
+  }
+
+  function findNavigationControlForEvent(event) {
+    const target = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
+    const direct = target?.closest?.('#top-settings-holder > .drawer > .drawer-toggle');
+    if (direct) return direct;
+    const x = Number(event.clientX);
+    const y = Number(event.clientY);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const root = HOST_DOC.getElementById('top-settings-holder');
+    if (!root) return null;
+    for (const drawer of root.children) {
+      if (!drawer.matches?.('.drawer')) continue;
+      const button = drawer.querySelector(':scope > .drawer-toggle');
+      const rect = button?.getBoundingClientRect?.();
+      if (rect && x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return button;
+    }
+    return null;
+  }
+
+  function recordNavigationPointerDown(event) {
+    const button = findNavigationControlForEvent(event);
+    if (!button) return;
+    const target = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
+    const rect = button.getBoundingClientRect();
+    navigationInteractionProbe.lastPointerDown = {
+      at: new Date().toISOString(),
+      pointerType: event.pointerType || null,
+      isTrusted: Boolean(event.isTrusted),
+      label: button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '',
+      point: { x: Number.isFinite(event.clientX) ? Math.round(event.clientX) : null, y: Number.isFinite(event.clientY) ? Math.round(event.clientY) : null },
+      target: describeNavigationEventNode(target),
+      targetInsideControl: Boolean(target && (target === button || button.contains(target))),
+      controlRect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
+    };
+  }
+
+  function recordNavigationClickCapture(event) {
+    const button = findNavigationControlForEvent(event);
+    if (!button) return;
+    const target = event.target?.nodeType === 1 ? event.target : event.target?.parentElement;
+    const rect = button.getBoundingClientRect();
+    const record = {
+      at: new Date().toISOString(),
+      isTrusted: Boolean(event.isTrusted),
+      label: button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '',
+      point: { x: Number.isFinite(event.clientX) ? Math.round(event.clientX) : null, y: Number.isFinite(event.clientY) ? Math.round(event.clientY) : null },
+      target: describeNavigationEventNode(target),
+      targetInsideControl: Boolean(target && (target === button || button.contains(target))),
+      controlRect: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
+      defaultPreventedAtWindowCapture: Boolean(event.defaultPrevented),
+      defaultPreventedAtDocumentBubble: null,
+      defaultPreventedAfterDispatch: null,
+      documentBubbleReached: false,
+      windowBubbleReached: false,
+    };
+    navigationInteractionProbe.lastClickCapture = record;
+    Promise.resolve().then(() => {
+      if (navigationInteractionProbe.lastClickCapture === record) {
+        record.defaultPreventedAfterDispatch = Boolean(event.defaultPrevented);
+      }
+    });
+  }
+
+  function recordNavigationClickDocumentBubble(event) {
+    const record = navigationInteractionProbe.lastClickCapture;
+    if (!record || record.isTrusted !== Boolean(event.isTrusted)) return;
+    const button = findNavigationControlForEvent(event);
+    if (!button || record.label !== (button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '')) return;
+    record.documentBubbleReached = true;
+    record.defaultPreventedAtDocumentBubble = Boolean(event.defaultPrevented);
+  }
+
+  function recordNavigationClickWindowBubble(event) {
+    const record = navigationInteractionProbe.lastClickCapture;
+    if (!record || record.isTrusted !== Boolean(event.isTrusted)) return;
+    const button = findNavigationControlForEvent(event);
+    if (!button || record.label !== (button.parentElement?.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '')) return;
+    record.windowBubbleReached = true;
+  }
+
   function collectDiagnosticReport() {
     const now = new Date();
     const body = HOST_DOC.body;
@@ -9709,6 +9808,121 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const drawers = [...HOST_DOC.querySelectorAll('.drawer-content')].slice(0, 80).map(el => ({ id: el.id || '', className: typeof el.className === 'string' ? el.className.slice(0, 160) : '', open: el.classList.contains('openDrawer'), display: HOST_WIN.getComputedStyle(el).display, visibility: HOST_WIN.getComputedStyle(el).visibility, zIndex: HOST_WIN.getComputedStyle(el).zIndex, rect: rectOf(el) }));
 
+    const navigationControlDiagnostics = (() => {
+      const root = HOST_DOC.getElementById('top-settings-holder');
+      if (!root) return { status: 'missing-top-settings-holder', mode: navigationMode, controls: [] };
+
+      const describeNode = node => {
+        if (!node) return null;
+        const style = diagnosticSafe(() => HOST_WIN.getComputedStyle(node), null);
+        const rect = diagnosticSafe(() => rectOf(node), null);
+        return {
+          tag: node.tagName || null,
+          id: node.id || '',
+          className: typeof node.className === 'string' ? node.className.slice(0, 160) : String(node.getAttribute?.('class') || '').slice(0, 160),
+          role: node.getAttribute?.('role') || null,
+          tabIndex: Number.isFinite(node.tabIndex) ? node.tabIndex : null,
+          disabled: Boolean(node.disabled),
+          ariaDisabled: node.getAttribute?.('aria-disabled') || null,
+          display: style?.display || null,
+          visibility: style?.visibility || null,
+          opacity: style?.opacity || null,
+          pointerEvents: style?.pointerEvents || null,
+          cursor: style?.cursor || null,
+          position: style?.position || null,
+          zIndex: style?.zIndex || null,
+          transform: style?.transform || null,
+          filter: style?.filter || null,
+          overflow: style ? [style.overflow, style.overflowX, style.overflowY].join('/') : null,
+          rect,
+        };
+      };
+
+      const drawers = [...root.children].filter(node => node.matches?.('.drawer'));
+      const controls = drawers.map((drawer, index) => {
+        const button = drawer.querySelector(':scope > .drawer-toggle');
+        if (!button) return { index, status: 'missing-direct-drawer-toggle' };
+        const label = drawer.querySelector(':scope > .tle-drawer-label')?.textContent?.trim().slice(0, 80) || '';
+        const buttonRect = rectOf(button);
+        const icon = button.querySelector('.drawer-icon, i, svg, [class*="icon"]');
+        const iconRect = rectOf(icon);
+        const points = [];
+        if (buttonRect && buttonRect.width > 0 && buttonRect.height > 0) {
+          points.push({
+            name: 'button-center',
+            x: Math.round(buttonRect.left + buttonRect.width / 2),
+            y: Math.round(buttonRect.top + buttonRect.height / 2),
+          });
+          if (iconRect && iconRect.width > 0 && iconRect.height > 0) {
+            points.push({
+              name: 'icon-center',
+              x: Math.round(iconRect.left + iconRect.width / 2),
+              y: Math.round(iconRect.top + iconRect.height / 2),
+            });
+          }
+        }
+        const hitTests = points.map(point => {
+          const stack = diagnosticSafe(() => HOST_DOC.elementsFromPoint(point.x, point.y), [])
+            .slice(0, 6)
+            .map(describeNode);
+          const top = stack[0] || null;
+          const topNode = diagnosticSafe(() => HOST_DOC.elementFromPoint(point.x, point.y), null);
+          return {
+            name: point.name,
+            point: { x: point.x, y: point.y },
+            topHit: top,
+            buttonReceivesHit: Boolean(topNode && (topNode === button || button.contains(topNode))),
+            buttonPresentInHitStack: stack.some(item => item && (item.id === button.id && button.id || item.tag === button.tagName && item.className === String(button.getAttribute('class') || '').slice(0, 160))),
+            stack,
+          };
+        });
+        const ancestors = [];
+        for (let node = button, depth = 0; node && node !== HOST_DOC && depth < 9; node = node.parentElement, depth++) {
+          ancestors.push(describeNode(node));
+        }
+        const pseudoElements = ['::before', '::after'].map(pseudo => {
+          const style = diagnosticSafe(() => HOST_WIN.getComputedStyle(button, pseudo), null);
+          return style ? {
+            pseudo,
+            content: style.content,
+            display: style.display,
+            visibility: style.visibility,
+            opacity: style.opacity,
+            pointerEvents: style.pointerEvents,
+            position: style.position,
+            zIndex: style.zIndex,
+          } : { pseudo, status: 'unavailable' };
+        });
+        const buttonStyle = diagnosticSafe(() => HOST_WIN.getComputedStyle(button), null);
+        return {
+          index,
+          label,
+          element: describeNode(button),
+          icon: describeNode(icon),
+          marginInline: buttonStyle ? { start: buttonStyle.marginInlineStart, end: buttonStyle.marginInlineEnd } : null,
+          pseudoElements,
+          ancestors,
+          hitTests,
+          likelyCssBlockers: {
+            selfPointerEventsNone: buttonStyle?.pointerEvents === 'none',
+            selfHidden: Boolean(buttonStyle && (buttonStyle.display === 'none' || buttonStyle.visibility === 'hidden' || Number(buttonStyle.opacity) === 0)),
+            ancestorPointerEventsNone: ancestors.slice(1).some(item => item.pointerEvents === 'none'),
+            ancestorHidden: ancestors.slice(1).some(item => item.display === 'none' || item.visibility === 'hidden' || Number(item.opacity) === 0),
+            hitTestBlocked: hitTests.some(item => !item.buttonReceivesHit),
+          },
+        };
+      });
+
+      return {
+        status: 'captured',
+        mode: navigationMode,
+        compatibilityRepairEnabled: compatibilityNavigationRepair,
+        expectedMarginInline: compatibilityNavigationRepair && (navigationMode === 'labels' || navigationMode === 'info') ? '15px' : 'not-forced',
+        count: controls.length,
+        controls,
+      };
+    })();
+
     const reasoningControls = [...HOST_DOC.querySelectorAll('#reasoning_select, #openai_reasoning_effort')].slice(0, 12).map(el => ({ id: el.id || '', tag: el.tagName, type: el.getAttribute('type') || '', className: typeof el.className === 'string' ? el.className.slice(0, 160) : '', disabled: Boolean(el.disabled), selectedIndex: el.tagName === 'SELECT' ? el.selectedIndex : null, selectedLabel: el.tagName === 'SELECT' ? (el.selectedOptions?.[0]?.textContent?.trim().slice(0, 100) || '') : null, optionCount: el.tagName === 'SELECT' ? el.options.length : null, visible: Boolean(el.getClientRects().length && rectOf(el)?.width > 0 && HOST_WIN.getComputedStyle(el).display !== 'none' && HOST_WIN.getComputedStyle(el).visibility !== 'hidden'), rect: rectOf(el) }));
     const infoStation = HOST_DOC.querySelector('#top-settings-holder > .tle-sidebar-info');
     const reasoningRow = infoStation?.querySelector('[data-info-item="reasoning"]');
@@ -9774,7 +9988,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       remoteLoaderTestVersion: diagnosticSafe(() => HOST_WIN.__TLE_REMOTE_LOADER_TEST_V1__?.version || null, null),
       active: state.active,
       destroyed: state.destroyed,
-      navigation: { mode: navigationMode, docked: state.mobileNav.docked, mobileNavOpen: state.mobileNav.open, pcHamburgerEnabled, desktopNavLabels: getDesktopNavLabelsEnabled(), globalSearchEnabled, globalSearchOpen: state.globalSearchOpen, searchPanelPresent: Boolean(state.globalSearchPanel?.isConnected), navEntryPresent: Boolean(state.navEntry?.isConnected), searchObserverPresent: Boolean(search.observer), searchControlCount: search.controls?.size || 0, searchResultCount: search.matches?.length || 0 },
+      navigation: {
+        mode: navigationMode,
+        docked: state.mobileNav.docked,
+        mobileNavOpen: state.mobileNav.open,
+        pcHamburgerEnabled,
+        desktopNavLabels: getDesktopNavLabelsEnabled(),
+        globalSearchEnabled,
+        globalSearchOpen: state.globalSearchOpen,
+        searchPanelPresent: Boolean(state.globalSearchPanel?.isConnected),
+        navEntryPresent: Boolean(state.navEntry?.isConnected),
+        searchObserverPresent: Boolean(search.observer),
+        searchControlCount: search.controls?.size || 0,
+        searchResultCount: search.matches?.length || 0,
+        nativeControls: navigationControlDiagnostics,
+        interactionProbe: {
+          lastPointerDown: navigationInteractionProbe.lastPointerDown,
+          lastClick: navigationInteractionProbe.lastClickCapture,
+        },
+      },
       workspace: { presetApplied: state.preset.applied, presetRootPresent: Boolean(state.preset.root?.isConnected), characterApplied: state.character.applied, characterRootPresent: Boolean(state.character.root?.isConnected) },
       informationStation: infoStationDiagnostic,
       quickSwitch: { moduleIds: QUICK_MODULES.map(item => item.id), groups: quickGroupSummary, groupManagerOpen: Boolean(HOST_DOC.querySelector('#tle-quick-group-manager')), pickerOpen: Boolean(HOST_DOC.querySelector('#tle-quick-picker')) },
@@ -9895,7 +10127,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       generatedAt: now.toISOString(),
       captureMode: 'one-click floating-button snapshot; pre-click state preferred',
       privacy: {
-        collected: ['设备与浏览器识别信息（UA/可用 Client Hints）', '宿主类型与实际暴露的版本字段', '屏幕、视口、安全区、焦点与键盘高度估算', 'TLE 功能开关与模块健康状态', '关键 DOM 几何、计算样式、祖先层叠上下文与遮挡命中', '斜杠命令执行接口可用性（不执行命令）', '页面本次生命周期内最近 30 条脱敏 JS 错误', '低开销性能摘要（浏览器支持时）'],
+        collected: ['设备与浏览器识别信息（UA/可用 Client Hints）', '宿主类型与实际暴露的版本字段', '屏幕、视口、安全区、焦点与键盘高度估算', 'TLE 功能开关与模块健康状态', '关键 DOM 几何、计算样式、祖先层叠上下文与遮挡命中', '原生导航按钮计算样式、命中测试与点击事件传播状态', '斜杠命令执行接口可用性（不执行命令）', '页面本次生命周期内最近 30 条脱敏 JS 错误', '低开销性能摘要（浏览器支持时）'],
         excluded: ['聊天正文、消息内容、角色卡、世界书正文、提示词', 'input/textarea 内容、表单值、API Key、令牌、Cookie、密码', 'localStorage/sessionStorage 原始数据', '任意 DOM innerText/innerHTML 与资源请求 URL 查询参数'],
         note: '设备型号、系统版本、宿主版本只在浏览器或宿主明确暴露时填写；UA 解析值会标注来源与置信度。',
       },
@@ -10178,6 +10410,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   HOST_DOC.addEventListener('click', onClick, { signal: state.abort.signal });
   HOST_DOC.addEventListener('click', queueChatShortcutRefresh, { signal: state.abort.signal });
   HOST_DOC.addEventListener('keydown', queueChatShortcutRefresh, { signal: state.abort.signal });
+  // Passive observation only: record hit-target and propagation outcomes for native
+  // sidebar clicks without preventing, stopping, or replaying any host interaction.
+  HOST_WIN.addEventListener('pointerdown', recordNavigationPointerDown, { capture: true, passive: true, signal: state.abort.signal });
+  HOST_WIN.addEventListener('click', recordNavigationClickCapture, { capture: true, passive: true, signal: state.abort.signal });
+  HOST_DOC.addEventListener('click', recordNavigationClickDocumentBubble, { passive: true, signal: state.abort.signal });
+  HOST_WIN.addEventListener('click', recordNavigationClickWindowBubble, { passive: true, signal: state.abort.signal });
   state.chatShortcutObserver = new HOST_WIN.MutationObserver(records => {
     if (state.destroyed) return;
 
