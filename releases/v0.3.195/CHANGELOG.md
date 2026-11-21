@@ -30,6 +30,14 @@
 - Restored all three functions from the v0.3.194 lifecycle contract, adapted to the current CSS-class clearance implementation. Rebuilt the standalone import package and repinned its source checksum.
 - **Do not use the first package commit `209632a97b50d7cfb37850e70c8432cca5e27569`.** Use only the corrected package commit recorded in `TEST-MANIFEST.json`.
 
+## Experimental navigation hitbox compatibility (test branch only)
+
+- Added a **manual, session-only** “修复导航图标点击区域 / 对齐” control under Compatibility Repair, disabled by default, reset on UI theme changes.
+- For themes with `.drawer-toggle/.drawer-icon { width:100% }`, an empty absolutely positioned `::before`, and intentionally transparent native icons, reserve a stable 44px-or-row-height slot for both native elements. Both the icon and its parent remain valid hit targets, independent of glyph content.
+- In text/info navigation modes, keep the TLE label after that icon slot and left-aligned. Preserve theme `::before` art, icon opacity, and backgrounds; do not use `width:fit-content` for native hit targets.
+- Isolated Chromium mock regression verified icons, labels and info modes: 44×44px hitboxes, icon→toggle click propagation, label beginning after icon slot. Live ST/TT/mobile validation is still required.
+- Does not touch the stable branch, bottom bar, or chat virtualization; does not enable automatically.
+
 ## Known limitations / required tests
 
 1. Confirm TT's bounded ChatSurface stays running after toggling fade, switching chats and scrolling across mount/unmount boundaries.
