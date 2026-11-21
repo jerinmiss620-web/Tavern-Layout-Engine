@@ -131,7 +131,7 @@ const scrollableSurfaces = [
   '#${ID.chatToolsPanel} .tle-chat-tools-range-value {',
   '#${ID.chatToolsPanel} .tle-chat-tools-recent-root .welcomeRecent {',
   '#tle-global-search-panel .tle-search-results {',
-  '#top-settings-holder > .tle-sidebar-info .tle-info-list-scroll {',
+  '#top-settings-holder > .tle-sidebar-info {',
   '.tle-quick-manager .tle-quick-tabs {',
   '.tle-quick-manager .tle-quick-filter-bar {',
   '.tle-quick-manager .tle-quick-operations {',
