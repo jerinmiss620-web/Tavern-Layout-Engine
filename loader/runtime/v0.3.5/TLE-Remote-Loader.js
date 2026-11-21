@@ -227,7 +227,7 @@
     const cdn = { url: 'https://cdn.jsdelivr.net/gh/' + cdnPath, label: 'jsDelivr', timeout: 8000 };
     const fastly = { url: 'https://fastly.jsdelivr.net/gh/' + cdnPath, label: 'Fastly', timeout: 8000 };
     return authoritativeFirst && target[1] === 'main'
-      ? [official, cdn, fastly] : [cdn, fastly, official];
+      ? [{ ...official, timeout: 5000 }, cdn, fastly] : [cdn, fastly, official];
   }
   async function fetchText(url, timeoutMs = 20000) {
     const routes = downloadRoutes(url, url.includes('/main/latest.json') && Boolean(getActiveInstance()));

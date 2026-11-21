@@ -149,7 +149,7 @@ for (const [kind, fetcher, count] of [
   ['network', async () => { throw new TypeError('Failed to fetch'); }, 3],
   ['interrupted', async () => { throw new DOMException('signal is aborted without reason', 'AbortError'); }, 3],
   ['timeout', async (url, { signal }) => new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(new DOMException('signal is aborted without reason', 'AbortError')))), 3],
-  ...[408, 429, 500, 503, 599, 400, 401, 403, 404].map(status => ['http', async () => ({ ok: false, status }), [408, 429, 500, 503, 599].includes(status) ? 3 : 1])
+  ...[408, 429, 500, 503, 599, 400, 401, 403, 404].map(status => ['http', async () => ({ ok: false, status }), [408, 429, 500, 503, 599, 403, 404].includes(status) ? 3 : 1])
 ]) {
   const t = createHost({ fetcher, fastTimeout: true });
   const failure = await failed(t);

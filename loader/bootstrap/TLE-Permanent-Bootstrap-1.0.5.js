@@ -481,7 +481,7 @@
     const fastly = { url: 'https://fastly.jsdelivr.net/gh/' + cdnPath, label: 'Fastly', timeout: 8000 };
     // Branch manifests can be stale on the CDN: healthy installs check Raw first.
     return authoritativeFirst && target[1] === 'main'
-      ? [official, cdn, fastly] : [cdn, fastly, official];
+      ? [{ ...official, timeout: 5000 }, cdn, fastly] : [cdn, fastly, official];
   }
   async function fetchText(url, stage, timeout = 20000) {
     const routes = downloadRoutes(url, stage === 'Loader 清单下载' && Boolean(currentRuntime()));
@@ -507,7 +507,8 @@
         });
         assertActive();
         if (!result.ok) throw requestError('http', 'HTTP ' + result.status,
-          result.status === 408 || result.status === 429 || result.status >= 500 && result.status <= 599);
+          result.status === 408 || result.status === 429 || result.status >= 500 && result.status <= 599 ||
+          route.label !== 'GitHub Raw' && (result.status === 403 || result.status === 404));
         const text = await result.text();
         assertActive();
         if (timedOut) throw requestError('timeout', 'Bootstrap 请求超时（' + requestTimeout + 'ms）', true);
