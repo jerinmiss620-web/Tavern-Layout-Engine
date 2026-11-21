@@ -7,7 +7,7 @@ const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8'
 const bootstrap = read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.js');
 const bootstrapPackage = JSON.parse(read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.json'));
 const loader = read('loader/runtime/v0.3.3/TLE-Remote-Loader.js');
-const latest = JSON.parse(read('loader/latest.json'));
+const latest = JSON.parse(read('tests/fixtures/loader-0.3.3.json'));
 new vm.Script(bootstrap);
 new vm.Script(loader);
 assert.equal(bootstrapPackage.content, bootstrap);
@@ -172,6 +172,7 @@ await waitFor(() => host[LOADER_KEY]?.version === '0.3.3', 'first Bootstrap inst
 assert.equal(loadedVersions.at(-1), '0.3.3');
 assert.equal(host[BOOT_KEY].getInfo().bootstrapVersion, '1.0.0');
 await waitFor(() => dbData.get('last')?.version === '0.3.3', 'first cache promotion');
+await waitFor(() => host[BOOT_KEY].getInfo().busy === false, 'first install finalization');
 remotelyPublished = fakeManifest('0.3.4');
 host.dispatchEvent(new host.CustomEvent('tle-loader-auto-update-preference'));
 await waitFor(() => host[LOADER_KEY]?.version === '0.3.4', 'unattended Loader upgrade');

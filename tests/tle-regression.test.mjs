@@ -42,13 +42,15 @@ function verifyPinnedRelease(release, expectedPath, expectedUrlPattern) {
 }
 
 const tlePath = 'releases/v' + manifest.release.version + '/TLE.js';
-const tle = verifyPinnedRelease(
+const pinnedTle = verifyPinnedRelease(
   manifest.release,
   tlePath,
   /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/releases\/v(\d+\.\d+\.\d+)\/TLE\.js$/
 );
-assert.ok(tle.includes(`const api = {\n    version: '${manifest.release.version}',`), 'Runtime instance API version must match the release manifest');
+assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.version}',`), 'Runtime instance API version must match the release manifest');
 
+const plan = JSON.parse(read('release-plan.json'));
+const tle = process.argv.includes('--current') ? read('releases/v' + plan.core + '/TLE.js') : pinnedTle;
 const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
 const loader = verifyPinnedRelease(

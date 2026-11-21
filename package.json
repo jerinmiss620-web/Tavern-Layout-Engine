@@ -1,0 +1,14 @@
+{
+  "name": "tavern-layout-engine",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/test.mjs",
+    "release": "node scripts/release.mjs publish",
+    "verify:remote": "node scripts/release.mjs verify --remote"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.8",
+    "jsdom": "31.0.1"
+  }
+}

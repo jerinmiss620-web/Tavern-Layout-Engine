@@ -1,140 +1,14 @@
-# TLE Remote Loader — Stable 0.3.1 and Headless Test Build 0.3.0
+# TLE 自动更新运行时
 
-## Stable Loader 0.3.1 (current recommended path)
+当前安装入口是 [固定 Bootstrap 1.0.1](bootstrap/TLE-Permanent-Bootstrap-1.0.1.json)。它通过 [独立清单](latest.json) 加载 Loader Runtime v0.3.4；Loader 通过根目录 latest.json 自动维护 Core v0.3.206。
 
-The stable bootstrapper is `loader/TLE-Remote-Loader-Stable-0.3.1.json`. It remains headless: version information and update actions appear **inside the TLE control panel**, not in a second floating Loader window. Its source is `loader/TLE-Remote-Loader-Stable-0.3.1.js`, and its manifest is `main/latest.json`.
+首次迁移只需最后导入一次 Bootstrap，禁用旧独立 Loader/Core 并保留备份；以后常规更新不再导入 JSON，不需要控制台命令。保留旧数据库、LKG/Previous 和用户设置。两个更新层共用默认开启的自动安装开关。
 
-- Disable the old Test Loader 0.3.0 first (do not run both loaders).
-- Install Stable Loader 0.3.1 once in Tavern Helper. Previously verified IndexedDB Last Known Good/Previous caches remain readable.
-- In TLE v0.3.203, open the TLE control panel and view Core version, Loader channel, and update availability. Click "检查更新" for an on-demand check or the green "可更新" button when a newer official version is verified.
-- To enable auto-restore of an already running and verified same-version TLE, click "启用 Loader 接管" and confirm. Disable the old standalone TLE script after this authorization, and retain it as a disabled rescue copy.
-- A live standalone TLE whose version differs from the verified Loader candidate cannot be replaced without a verified rollback backup. The Loader correctly refuses unsafe upgrades; bring the standalone to the current version once or use an existing trusted Loader cache.
-- If no TLE instance is running and there is no trusted cache, first-time headless setup can be initiated from the host console with `window.__TLE_REMOTE_LOADER_STABLE_V1__?.loadRemote()`. After that, future updates use the TLE panel.
-- On refresh Stable Loader automatically restores only the user-authorized verified cached version and **checks silently** for updates. It never automatically installs a newer release or displays unsolicited update confirmations.
+更新信息和操作全部位于原有 TLE「版本与更新」折叠区域。失败保留或回滚旧版；成功以实际运行版本和可读回的持久缓存为准。
 
-Runtime status can be inspected through `window.__TLE_REMOTE_LOADER_STABLE_V1__?.getInfo()`, with `checkRemote()` (silent check), `loadRemote()` (explicit installation with confirmation) and `rollback()` preserved. See `CHANGELOG-Stable-0.3.1.md`.
+- [安装说明](bootstrap/README.md)
+- [Loader 变更日志](runtime/v0.3.4/CHANGELOG.md)
+- [统一发布流程](../RELEASING.md)
+- [验证范围与未验证项](../VALIDATION.md)
 
----
-
-This is a test-only Tavern Helper `type: script` bootstrapper. It has no panel, launcher, Shadow DOM, CSS, floating button or viewport positioning code.
-
-## Architecture
-
-1. Tavern Helper runs the small bootstrapper in its script realm.
-2. The bootstrapper reads the test manifest from GitHub.
-3. It fetches the immutable release source and verifies UTF-8 byte size and SHA-256.
-4. For the remote candidate, it injects a classic `<script src="immutable-raw-github-url">` element into the same Tavern Helper script document. The browser applies a matching `sha256-...` Subresource Integrity value with `crossorigin="anonymous"`.
-5. If the external script request fails (network/CORS/SRI), the loader uses a classic Blob script built from the already verified source. This is a compatibility/recovery fallback, not an ES module import.
-6. The loader checks the TLE instance, host references and destroy interface before accepting the candidate.
-
-The TLE source is a self-executing classic-script IIFE, not an ES module. Running the injected script in the Tavern Helper script realm preserves the existing TLE contract where `window.parent` is the Tavern host window.
-
-## What is retained
-
-- IndexedDB database `TLE_Remote_Loader_Test_Cache`, object store `records`, slots `lkg` and `previous`.
-- Existing localStorage keys `tle.loader.test.lastKnownGood.v1`, `tle.loader.test.previousKnownGood.v1` and `tle.loader.test.autoRestore.v1`.
-- One-time migration of legacy full-source localStorage records after IndexedDB readback and SHA-256/byte-size verification.
-- Verified Previous backup before replacing a healthy current TLE. The cached LKG version must also match the active TLE version; a mismatch is treated as an unsafe state and the loader refuses replacement.
-- Automatic rollback only when the candidate itself fails execution/health checks.
-- Cache persistence and auto-restore authorization failures after a healthy startup are warnings; they do not destroy the healthy TLE.
-- Existing user auto-restore authorization. New version changes still require an explicit native browser confirmation.
-
-## Status and control
-
-There is no Loader UI. Status is written to the browser console and, when available, Tavern's toast service. Inspect:
-
-```js
-window.__TLE_REMOTE_LOADER_DIAGNOSTICS__
-```
-
-The Loader API is available at:
-
-```js
-window.__TLE_REMOTE_LOADER_TEST_V1__
-```
-
-Useful methods:
-
-- `checkRemote()`: fetch/verify the test manifest and prompt before loading a new candidate.
-- `loadRemote()`: load the already verified candidate, with confirmation.
-- `rollback()`: restore the Previous Known Good cache, with confirmation.
-- `setAutoRestore(false)`: disable startup restoration without deleting cached source.
-- `destroy()`: stop the bootstrapper; it does not destroy the active TLE instance.
-
-## Upgrade from Loader 0.2.2
-
-1. Disable Loader 0.2.2 first. Do not run two Loader versions at the same time.
-2. Import `TLE-Remote-Loader-Test-0.3.0.json`. The Tavern Helper script ID is preserved: `8f994fad-ea17-49f8-93af-ebe8ba4f6c67`.
-3. Enable Loader 0.3.0 and refresh the Tavern page.
-4. It reads the same IndexedDB database and existing LKG/Previous slots. No manual storage clearing or migration is required.
-5. If auto-restore was previously authorized, it restores the verified LKG from IndexedDB. If not, it leaves the current page untouched until you confirm the first load.
-6. It checks the test manifest and asks before installing/updating TLE v0.3.196.
-7. Keep the original local TLE script disabled but do not delete it.
-
-## Safety and limits
-
-- No silent updates. A new TLE version always requires a native browser confirmation.
-- If a healthy current TLE exists but no verified LKG is available, the loader refuses to replace it.
-- If both IndexedDB and legacy localStorage cannot safely preserve a rollback copy, the update is refused.
-- If the candidate passes health checks but final cache persistence fails, it remains running for the current session and a warning is reported.
-- SHA-256 and SRI detect byte mismatch; they do not constitute a publisher signature. The pinned GitHub repository/commit remains the trust root.
-- The external script-src + SRI path and Blob fallback require runtime validation in ST and TT. Do not promote this test build until both hosts are checked.
-
-
-## Publication guard and immutable source validation
-
-Before publishing a test-channel change, run from the repository root:
-
-```sh
-node loader/verify-test-channel.mjs
-node loader/verify-test-channel.mjs --remote
-```
-
-The guard verifies:
-- The TLE and Loader commit pins are exactly 40 lowercase hexadecimal characters.
-- Each immutable raw URL matches the expected repository, commit and file path exactly.
-- Local source byte sizes and SHA-256 values match the test manifest.
-- The importable Tavern Helper JSON contains exactly the pinned Loader source.
-- The Loader keeps its strict raw-GitHub/commit trust checks.
-- The diagnostic button keeps its Top Layer, top-right, VisualViewport and native-dialog regression contract, and does not return to a bottom-corner anchor.
-- With `--remote`, the pinned GitHub artifacts and installer are downloaded and checked again.
-
-### Corrected v0.3.193 manifest failure
-
-The first v0.3.193 test manifest accidentally omitted one hexadecimal character from the TLE source commit, leaving a 39-character value. Loader 0.3.0 correctly rejected it before downloading or modifying the running TLE. The manifest now points to the verified 40-character commit:
-
-`ddb8da7b2e55759fbb2bfa4807ff7d6f9d629309`
-
-Do not weaken the Loader's 40-character commit validation to work around a malformed manifest.
-
-## Confirm the TLE version actually running
-
-After Loader reports a successful update, run this in the host page console:
-
-```js
-window.__TAVERN_LAYOUT_ENGINE_V02__?.version
-```
-
-The diagnostic Top Layer change is in TLE v0.3.193. If the returned value is still an older version, the new diagnostic-button implementation has not yet been loaded.
-
-If the floating button is still missing or cannot be clicked after v0.3.193 is confirmed, use the TLE panel's existing **复制诊断报告** action. Host Diagnostics 2.0 records the button's Popover support/open state, computed position, bounding rectangle, hit-test target, and the debugger dialog's open/mount state. This distinguishes a rendering/positioning failure from an input interception or event-routing failure.
-
-## Stable channel and no-refresh bootstrap validation
-
-Stable TLE v0.3.195 is published through the repository-root `latest.json`; it is separate from the test-only `channels/test.json`. On 2026-11-21, the maintainer validated a one-time Stable Bootstrap that fetches the immutable v0.3.195 source, verifies its UTF-8 byte size and SHA-256, and executes the verified source as a classic Blob script in the Tavern Helper script realm. The bootstrap completed without refreshing the Tavern page, and enabling/disabling the Tavern Helper script was manually confirmed to control the loaded TLE. This successful bootstrap is a validation milestone, not a promotion of Loader 0.3.0: Loader 0.3.0 remains test-only.
-
-## Tavern Helper script info convention
-
-Every distributed `type: script` JSON package must provide a concise, single-line Markdown `info` value. Include: **script name**, **what it does**, **how to use it**, **important cautions**, and **author**. Do not include actual line breaks or escaped `\n` sequences in the `info` value. Keep detailed release history in GitHub changelog files instead of packing it into `info`.
-
-## Stable publication guard
-
-Before publishing or changing the stable pointer, run:
-
-```sh
-node loader/verify-stable-release.mjs
-node loader/verify-stable-release.mjs --remote
-```
-
-The guard checks the root stable manifest, immutable source URL/commit/path, UTF-8 byte size, SHA-256, JavaScript syntax, and the matching release changelog. The `--remote` mode also fetches the published manifest and pinned source from GitHub and verifies them against the local checkout.
-
+旧 Stable/Test Loader 文件和测试通道保留供历史兼容验证，不能与当前 Bootstrap 同时启用。SHA-256 和固定 Commit 防止内容/地址不一致，不是发行者数字签名；信任根仍为此 GitHub 仓库。

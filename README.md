@@ -1,74 +1,26 @@
-
 # Tavern Layout Engine (TLE)
 
-A modular layout and interface enhancement engine for SillyTavern and TauriTavern.
+酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-酒馆布局引擎 · 由小松鼠 & ChatGPT（小松7）共同开发。
+## 一次安装，后续自动更新
 
-## Project
+正式发布：**Core v0.3.206 / Loader Runtime v0.3.4 / 固定 Bootstrap v1.0.1**。
 
-TLE enhances the Tavern interface with customizable navigation, workspace layouts, chat utilities, diagnostics and optional visual modules.
+1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.1.json)，在酒馆助手中导入一次。
+2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用新 Bootstrap 并刷新。已有缓存和设置会继续使用。
+3. 以后保留 Bootstrap 启用。Core 与 Loader 发布新版本只需更新 GitHub，无需重复导入、下载 Core JSON 或执行控制台命令。
 
-## Supported Hosts
+更新链：`固定 Bootstrap → loader/latest.json → Loader Runtime → latest.json → Core`。
 
-- SillyTavern (ST)
-- TauriTavern (TT)
+两个更新层共用默认开启的持久开关；启动、恢复联网和持续运行期间自动检查。关闭后仍显示更新提示，重新开启立即继续更新。TLE 面板的「版本与更新」使用默认收起的原生折叠区，显示实际运行版本、远程版本、绿色提醒、检查/安装按钮和结果。没有第二套 Loader 面板。
 
-## Optional Preview — Permanent Bootstrap for Loader Self-Updates
+下载和缓存源码都验证固定仓库、来源路径、40 位 Commit、SHA-256 与 UTF-8 字节数；新版本启动并持久写入成功才算更新成功，失败自动恢复 Last Known Good / Previous。首次安装需要网络；已有可用缓存时可离线恢复。浏览器清空站点数据后需要联网重新取得源码，仍不需要重新导入 Bootstrap。
 
-The installed standalone Stable Loader cannot rewrite its own Tavern Helper script. To end repeated Loader JSON imports, the **opt-in Bootstrap 1.0.0** is now available at [loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.json](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.json).
+## 发布与验证
 
-**One-time migration:** keep old scripts as disabled backups; disable the standalone Stable/Test Loader and standalone Core, enable the Bootstrap, and refresh. The Bootstrap verifies and retrieves the latest Loader Runtime through [loader/latest.json](loader/latest.json). The Loader Runtime then manages TLE Core through the independent root [latest.json](latest.json). Both update layers share the default-enabled auto-install preference; complete checks and rollback are retained.
+- [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
+- [Core 变更日志](releases/v0.3.206/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.4/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.1.md)
+- [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
+- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；**真实 ST/TT/iOS 环境尚未验证**。
 
-The Bootstrap and Loader runtime are **testing candidates**, with ST/TT/iOS runtime validation outstanding. The stable TLE Core pointer remains v0.3.203. See [Bootstrap instructions](loader/bootstrap/README.md) and [Loader v0.3.3 changelog](loader/runtime/v0.3.3/CHANGELOG.md). Do not run old Loader and Bootstrap simultaneously.
-
-## Distribution
-
-TLE **v0.3.203** is the current stable release, published through `latest.json` with immutable Git commit, SHA-256 and UTF-8 size verification. **Stable Loader 0.3.1** restores the requested in-panel version and update workflow without adding a separate Loader floating panel.
-
-- Install once: `loader/TLE-Remote-Loader-Stable-0.3.1.json` in Tavern Helper; disable the old Test Loader 0.3.0 before enabling the stable one. It uses the previously established IndexedDB LKG/Previous caches for safe migration.
-- TLE stable source: `releases/v0.3.203/TLE.js`; optional one-time manual bootstrap import: `releases/v0.3.203/TLE-0.3.203-import.json`.
-- TLE panel now displays the current **running** version, Stable Loader connection, "检查更新", and a green "可更新 · vX" action next to the version; Engine Hub shows a green update dot when an update is available.
-- Startup performs **silent checks only**. Downloading, SHA-256 verification, cached rollback and immutable script loading remain Loader-owned. **Installation requires a user click and browser confirmation; never silent auto-install.**
-- A previously imported standalone TLE can be handed to the Stable Loader using the in-panel "启用 Loader 接管" action when its version matches the verified remote version. The user must then disable the standalone TLE script to avoid duplicate startup; keep a backup copy disabled.
-- **First-time bootstrap note:** a Loader with no verified last-known-good cache will not replace a live standalone TLE of another version. Bring standalone TLE to the current release once, then click "启用 Loader 接管"; or initialize through Loader when no standalone TLE is active. This preserves the rollback safety gate.
-- The headless Test Loader 0.3.0 is still test-channel-only (`channels/test.json`); it should not run alongside Stable Loader 0.3.1.
-
-The mobile diagnostics button remains anchored top-right using Top Layer / fixed document-root fallback, unchanged by this release. Static and isolated update checks have passed; live ST/TT/iPhone migration still requires maintainer validation.
-
-### Migration from older Test Loader / Core v0.3.198
-
-Test channel currently provides **TLE v0.3.204 TEST**, while the stable channel remains **v0.3.203** pending user runtime validation. The previous Test Loader 0.3.0 restores a verified older TLE from IndexedDB before checking the test manifest. A toast about restoring v0.3.198 is **not** evidence that an update completed, and Core v0.3.198 does not contain the new in-panel update controls.
-
-To request the already-installed Test Loader to verify and install v0.3.204, open the Tavern host DevTools console and run:
-
-```js
-window.__TLE_REMOTE_LOADER_TEST_V1__?.checkRemote()
-```
-
-This prompts through the old Loader after source verification; no new TLE JSON import is needed if its LKG cache and upgrade checks succeed. If no confirmation appears, inspect `window.__TLE_REMOTE_LOADER_TEST_V1__?.diagnostics?.lastStatus` for a concrete failure. TLE v0.3.204 adds in-panel handling for both legacy Test Loader and Stable Loader. The legacy Test Loader may prompt when checking; Stable Loader checks silently. Do not run both loaders at once.
-
-## Repository Structure
-
-```text
-Tavern-Layout-Engine/
-├── README.md
-├── latest.json
-├── channels/
-├── loader/
-├── releases/
-└── tests/
-```
-
-## Development Status
-
-Stable TLE v0.3.203 and Stable Loader 0.3.1 are published; the test channel now offers TLE v0.3.204 compatible with existing Test Loader 0.3.0. See `latest.json`, `releases/v0.3.203/CHANGELOG.md`, `loader/CHANGELOG-Stable-0.3.1.md`, `tests/tle-loader-stable.test.mjs` and `loader/verify-stable-release.mjs`.
-
-## Release records and script documentation
-
-- Keep one `CHANGELOG.md` per TLE release under `releases/vX.Y.Z/`. Append later corrections to that release's history; do not rewrite or discard previous entries.
-- Keep loader and auxiliary-script histories under `loader/` or their own versioned folders. Record feature additions, behavior changes, bug fixes, compatibility changes, and release-metadata corrections.
-- Every Tavern Helper `type: script` package must include a single-line Markdown `info` value with the script name and explicitly marked **简介 / 使用方式 / 注意事项 / 作者** sections. The `info` value must contain no line breaks and no escaped `\n` sequences.
-- The CI release-metadata check (`node tests/tle-release-metadata.test.mjs`) requires a per-version changelog and all four `info` sections for current stable/test TLE packages and Stable Loader.
-- Before publishing a stable pointer, run `node loader/verify-stable-release.mjs`; after pushing the release, run `node loader/verify-stable-release.mjs --remote`.
-
+右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道及旧独立安装包仅供历史兼容与备份，不是当前安装入口。

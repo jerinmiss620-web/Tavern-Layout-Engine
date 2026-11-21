@@ -1,24 +1,10 @@
 name: TLE release regression checks
-
 on:
   push:
-    paths:
-      - 'channels/test.json'
-      - 'latest.json'
-      - 'loader/**'
-      - 'releases/**'
-      - 'tests/**'
-      - '.github/workflows/tle-regression.yml'
   pull_request:
-    paths:
-      - 'channels/test.json'
-      - 'latest.json'
-      - 'loader/**'
-      - 'releases/**'
-      - 'tests/**'
-      - '.github/workflows/tle-regression.yml'
   workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -26,16 +12,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - name: Verify pinned test release, compatibility regressions and mobile diagnostic button
-        run: node tests/tle-regression.test.mjs
-      - name: Verify immutable stable release metadata and source integrity
-        run: node loader/verify-stable-release.mjs
-      - name: Verify Stable Loader bridge and in-panel update controls
-        run: node tests/tle-loader-stable.test.mjs
-      - name: Verify release changelogs and import-script info fields
-        run: node tests/tle-release-metadata.test.mjs
-      - name: Protect old Test Loader migration and visible update controls
-        run: node tests/tle-legacy-loader-bridge.test.mjs
-      - name: Verify permanent Bootstrap Loader updates and offline recovery
-        run: node tests/tle-bootstrap-self-update.test.mjs
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Full-source update simulation, compatibility and publication guards
+        run: npm test
+      - name: Verify published manifests and immutable GitHub artifacts
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: npm run verify:remote
+      - name: Replay runtime chain with downloaded release bytes
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: node tests/tle-update-chain.test.mjs --remote
