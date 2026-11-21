@@ -79,13 +79,36 @@ assert.match(manager, /themeImportRow\.append\(readThemeManagerButton\)/);
 assert.match(manager, /themeImportRow\.hidden = true;/);
 assert.match(manager, /themeImportRow\.hidden = module !== 'theme';/,
   'category-specific action must appear only in the Theme tab');
-assert.match(manager, /tabs, groupFilters, themeImportRow, toolbar, manageRow,/,
-  'theme import belongs between theme group filters and management toolbar');
-assert.match(manager, /const readThemeManagerButton = quickButton\('读取主题管理分组', \(\) => void importThemeManagerGroups\(\)\)/);
+assert.match(manager, /groupFiltersWrap\.append\(groupFilters, themeImportRow\)/,
+  'theme sync must share the filter row rather than occupy a separate line');
+assert.match(manager, /hint, tabs, groupFiltersWrap, toolbar, manageRow/,
+  'manager body must not include a separate import or redundant hint row');
+assert.match(manager, /const readThemeManagerButton = quickButton\('', \(\) => void importThemeManagerGroups\(\)\)/);
+assert.match(manager, /readThemeManagerButton\.setAttribute\('aria-label', '读取主题管理分组，仅替换当前 UI 主题分类'\)/);
+assert.match(manager, /readThemeManagerButton\.append\(themeImportIcon, HOST_DOC\.createTextNode\('同步'\)\)/);
 assert.match(manager, /if \(!await confirmGroupTransfer\(message, '导入 UI 主题分组'\)\) return;/,
   'existing confirmation must remain');
 assert.match(source, /\.tle-quick-manager \.tle-quick-theme-import\[hidden\] \{ display: none !important; \}/,
   'hidden must override author-level flex display');
 
-console.log('Core 0.3.209: native update drawer, compact Floor Tools, two-column hint and contextual theme import passed.');
+const managerHeading = source.slice(
+  source.indexOf('.tle-quick-manager .tle-quick-heading {'),
+  source.indexOf('.tle-quick-manager .tle-quick-hint,')
+);
+assert.match(managerHeading, /flex-wrap: nowrap;/);
+assert.match(managerHeading, /\.tle-quick-title \{[\s\S]*?flex: 1 1 auto;/);
+assert.match(managerHeading, /\.tle-quick-heading-actions \{[\s\S]*?flex: 0 0 auto;/);
+assert.doesNotMatch(managerHeading, /order: 3;[\s\S]*?flex: 1 1 100%;/,
+  'mobile must never force the global icon actions to a second row');
+assert.match(source, /\.tle-quick-backup-row > \.tle-quick-icon-action \{/);
+assert.match(globalBackup, /fa-solid fa-file-import/);
+assert.match(globalBackup, /fa-solid fa-file-export/);
+assert.match(globalBackup, /importBackupButton\.setAttribute\('aria-label', '导入全部分组方案文件'\)/);
+assert.match(globalBackup, /exportBackupButton\.setAttribute\('aria-label', '导出全部快切分类的分组方案'\)/);
+assert.match(manager, /const groupFiltersWrap = quickNode\('div', 'tle-quick-filters-wrap'\)/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-filters-wrap \{/);
+assert.doesNotMatch(manager, /backupHint/);
+assert.doesNotMatch(manager, /search\.focus\(\{ preventScroll: true \}\);/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-manage-row > input \{ grid-column: 1 \/ -1; \}/);
+console.log('Core 0.3.210: compact single-row header, accessible file icons, inline theme sync and no redundant hint passed.');
 
