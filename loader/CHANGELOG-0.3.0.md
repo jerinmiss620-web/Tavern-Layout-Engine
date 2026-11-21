@@ -15,3 +15,11 @@
 - Correct the v0.3.193 test manifest's truncated 39-character source commit to the verified 40-character Git commit. The Loader trust policy remains strict; malformed metadata is fixed rather than accepted.
 - Add `loader/verify-test-channel.mjs` as a dependency-free publication guard for commit lengths, immutable URLs, SHA-256/byte-size metadata, installer synchronization and the diagnostic Top Layer regression contract.
 - Document how to confirm that v0.3.193 actually loaded before evaluating its diagnostic-button behavior.
+
+## Post-publication maintenance — 2026-11-21
+
+- Correct the stable v0.3.195 `latest.json` SHA-256 metadata after the first stable bootstrap attempt exposed a checksum mismatch. The pinned source commit and strict verification remain unchanged.
+- Validate the corrected stable source in the maintainer's browser with Web Crypto SHA-256 and UTF-8 byte-size checks, then execute it as a classic Blob script. Confirm successful TLE v0.3.195 startup without refreshing Tavern and working Tavern Helper enable/disable controls.
+- Add `loader/verify-stable-release.mjs` to check the stable manifest, immutable source URL, UTF-8 byte size, SHA-256, JavaScript syntax and release changelog before publication; its `--remote` mode checks the published GitHub files.
+- Update the Loader 0.3.0 package `info` to single-line Markdown with its name, purpose, usage, cautions and author. Detailed history remains in GitHub changelogs.
+
