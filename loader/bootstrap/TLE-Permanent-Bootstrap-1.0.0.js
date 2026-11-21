@@ -34,6 +34,7 @@
 
   let closed = false;
   let busy = false;
+  let installing = false;
   let candidate = null;
   let cached = null;
   let checkTimer = 0;
@@ -94,7 +95,7 @@
       lastStatus,
       checkedAt: remoteCheckedAt,
       hasCachedLoader: Boolean(cached),
-      busy,
+      busy: busy || installing,
     };
   }
 
@@ -320,7 +321,10 @@
   }
 
   async function installRecord(record, { manual = false, force = false } = {}) {
-    if (!record || closed) return false;
+    if (!record || closed || installing) return false;
+    installing = true;
+    notify();
+    try {
     const running = currentRuntime();
     if (healthy(record)) return true;
     if (running?.bootstrapManaged && compareVersions(record.version, running.version) < 0 && !force) {
@@ -386,10 +390,11 @@
       }
       return false;
     }
+    } finally { installing = false; notify(); }
   }
 
   async function checkRemote() {
-    if (closed || busy) return candidate;
+    if (closed || busy || installing) return candidate;
     busy = true;
     notify();
     try {
@@ -417,13 +422,13 @@
     } finally { busy = false; notify(); }
   }
   async function loadRemote() {
-    if (busy || closed) return false;
+    if (busy || installing || closed) return false;
     const record = candidate || await checkRemote();
     if (!record || closed) return false;
     return await installRecord(record, { manual: true });
   }
   async function refreshAutomatic() {
-    if (closed || busy) return;
+    if (closed || busy || installing) return;
     const record = await checkRemote();
     if (!record || closed) return;
     const running = currentRuntime();
