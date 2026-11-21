@@ -13,7 +13,7 @@
     "sha256": "86262a982d53c1d954905c55e89d4cc36915e59aa178ecbc31baab834827db92",
     "size_bytes": 466049
   },
-  "status": "test-only; v0.3.196 adds two-field Floor tools with inline clear controls, optional native navigation width/icon repair, and optional chat quick actions in the 会话侠 header; JavaScript syntax and source integrity metadata verified; ST/TT PC/mobile runtime regression pending",
+  "status": "test-only; v0.3.196 runtime API version registration corrected to match manifest version after Loader health-check failure; two-field Floor tools, optional native navigation repair, and optional chat quick actions included; JavaScript syntax, immutable source integrity, and API-version regression guard verified; ST/TT PC/mobile runtime regression pending",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
