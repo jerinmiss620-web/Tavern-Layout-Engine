@@ -14,6 +14,14 @@ TLE enhances the Tavern interface with customizable navigation, workspace layout
 - SillyTavern (ST)
 - TauriTavern (TT)
 
+## Optional Preview — Permanent Bootstrap for Loader Self-Updates
+
+The installed standalone Stable Loader cannot rewrite its own Tavern Helper script. To end repeated Loader JSON imports, the **opt-in Bootstrap 1.0.0** is now available at [loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.json](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.0.json).
+
+**One-time migration:** keep old scripts as disabled backups; disable the standalone Stable/Test Loader and standalone Core, enable the Bootstrap, and refresh. The Bootstrap verifies and retrieves the latest Loader Runtime through [loader/latest.json](loader/latest.json). The Loader Runtime then manages TLE Core through the independent root [latest.json](latest.json). Both update layers share the default-enabled auto-install preference; complete checks and rollback are retained.
+
+The Bootstrap and Loader runtime are **testing candidates**, with ST/TT/iOS runtime validation outstanding. The stable TLE Core pointer remains v0.3.203. See [Bootstrap instructions](loader/bootstrap/README.md) and [Loader v0.3.3 changelog](loader/runtime/v0.3.3/CHANGELOG.md). Do not run old Loader and Bootstrap simultaneously.
+
 ## Distribution
 
 TLE **v0.3.203** is the current stable release, published through `latest.json` with immutable Git commit, SHA-256 and UTF-8 size verification. **Stable Loader 0.3.1** restores the requested in-panel version and update workflow without adding a separate Loader floating panel.
