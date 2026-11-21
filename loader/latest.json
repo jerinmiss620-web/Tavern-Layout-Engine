@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project": "Tavern Layout Engine",
+  "channel": "stable-loader",
+  "latest_version": "0.3.3",
+  "minimum_bootstrap_version": "1.0.0",
+  "release": {
+    "version": "0.3.3",
+    "source_path": "loader/runtime/v0.3.3/TLE-Remote-Loader.js",
+    "source_commit": "c88ba23fb540152de041110f506421bd6a835088",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c88ba23fb540152de041110f506421bd6a835088/loader/runtime/v0.3.3/TLE-Remote-Loader.js",
+    "sha256": "42bb1aeabf362992526a7053268bd3d6c30151ad81afadfef19417638ce2b770",
+    "size_bytes": 46933,
+    "changelog_path": "loader/runtime/v0.3.3/CHANGELOG.md"
+  },
+  "notes": "Opt-in Bootstrap 1.0.0 candidate: separate Loader runtime pointer. Standalone Loader 0.3.1/0.3.2 and Core latest.json are unchanged; requires real ST/TT verification before public rollout."
+}
