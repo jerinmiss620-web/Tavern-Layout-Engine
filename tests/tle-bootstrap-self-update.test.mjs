@@ -56,6 +56,7 @@ let remotelyPublished = structuredClone(latest);
 let offline = false;
 const hostEvents = new Map();
 const loadedVersions = [];
+const publishedCode = version => loader.replaceAll('0.3.3', version);
 const host = {
   document: { documentElement: {}, body: {} },
   console: { info() {}, warn() {}, error() {} },
@@ -144,7 +145,8 @@ const scriptWin = {
       return { ok: true, text: async () => JSON.stringify(remotelyPublished) };
     }
     if (String(url).includes('/loader/runtime/')) {
-      return { ok: true, text: async () => loader };
+      const version = String(url).match(/\/loader\/runtime\/v(\d+\.\d+\.\d+)\//)?.[1];
+      return { ok: true, text: async () => publishedCode(version) };
     }
     throw Error('unexpected fetch URL: ' + url);
   }
@@ -166,6 +168,8 @@ const fakeManifest = version => {
   item.latest_version = version;
   item.release.version = version;
   item.release.source_path = 'loader/runtime/v' + version + '/TLE-Remote-Loader.js';
+  item.release.sha256 = createHash('sha256').update(publishedCode(version)).digest('hex');
+  item.release.size_bytes = Buffer.byteLength(publishedCode(version));
   item.release.source_commit = 'a'.repeat(40);
   item.release.source_url = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/'
     + item.release.source_commit + '/' + item.release.source_path;
