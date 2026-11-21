@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const src = readFileSync(new URL('../tests/fixtures/legacy/bootstrap-v1.0.2.js', import.meta.url), 'utf8');
+for (const path of ['tests/fixtures/legacy/bootstrap-v1.0.2.js', 'loader/bootstrap/TLE-Permanent-Bootstrap-1.0.4.js']) {
+const src = readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 new vm.Script(src);
-const begin = src.indexOf('  async function startup() {');
+const begin = src.indexOf('  function scheduleNextCheck() {') >= 0 ? src.indexOf('  function scheduleNextCheck() {') : src.indexOf('  async function startup() {');
 const end = src.indexOf('  function destroy() {', begin);
 assert.ok(begin > 0 && end > begin, 'extract real Bootstrap startup function');
 const startupSource = src.slice(begin, end);
@@ -16,7 +17,7 @@ async function simulate({ oldBusy = true, remote = '0.3.4', enabled = true } = {
   let cached = null, candidate = null, runtime = null;
   const planned = [], statuses = [];
   const sandbox = {
-    closed: false, RETRY_INTERVAL: 60_000, CHECK_INTERVAL: 21_600_000,
+    closed: false, remoteFailure: null, RETRY_INTERVAL: 60_000, CHECK_INTERVAL: 21_600_000,
     readCached: async slot => slot === 'last' ? { version: '0.3.3' } : null,
     installRecord: async () => { runtime = { version: '0.3.3', getInfo: () => ({ busy: oldBusy }) }; return true; },
     currentRuntime: () => runtime,
@@ -44,4 +45,6 @@ assert.deepEqual(await simulate({ oldBusy: false }), [60_000], 'pending newer ve
 assert.deepEqual(await simulate({ remote: '0.3.3' }), [21_600_000], 'up-to-date Loader retains regular interval');
 assert.deepEqual(await simulate({ enabled: false }), [21_600_000], 'explicit opt-out remains respected');
 
-console.log('Bootstrap 1.0.2 regression: cached v0.3.3 busy while v0.3.4 awaits retry no longer waits six hours.');
+console.log(path + ': cached v0.3.3 busy while v0.3.4 awaits retry no longer waits six hours.');
+
+}
