@@ -101,6 +101,7 @@ assert.ok(loaderSource.includes('release.source_commit && release.source_commit 
 // Diagnostic-button regression contract. This is a static guard, not a substitute
 // for an actual ST/TT/iPhone interaction test.
 const tleSource = tleBytes.toString('utf8');
+assert.ok(tleSource.includes(`const api = {\n    version: '${release.version}',`), 'TLE runtime API version must match manifest release.version');
 const diagStart = tleSource.indexOf('/* Diagnostic escape hatch:');
 const diagEnd = tleSource.indexOf('/* Core panel layer:', diagStart);
 assert.ok(diagStart >= 0 && diagEnd > diagStart, 'Diagnostic CSS block must remain identifiable');
