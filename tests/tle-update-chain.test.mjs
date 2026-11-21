@@ -58,7 +58,9 @@ function publish(kind, version, suffix = '') {
   const source_url = rootURL + source_commit + '/' + source_path;
   sources.set(source_url, source);
   const manifest = { schema_version: 1, project: 'Tavern Layout Engine', channel: kind === 'loader' ? 'stable-loader' : 'stable',
-    latest_version: version, release: { version, source_path, source_commit, source_url,
+    latest_version: version,
+    ...(kind === 'loader' ? { minimum_bootstrap_version: '1.0.0' } : { minimum_loader_version: '0.3.4' }),
+    release: { version, source_path, source_commit, source_url,
       sha256: createHash('sha256').update(source).digest('hex'), size_bytes: Buffer.byteLength(source) } };
   if (kind === 'loader') loaderManifest = manifest; else coreManifest = manifest;
   return manifest;
@@ -250,6 +252,44 @@ try {
   await versions(CV[0], LV[0]);
   console.log('PASS offline first start recovers automatically on reconnection');
 
+  // PC regression: durable Bootstrap cache still contains Loader v0.3.3 and
+  // Core v0.3.203. The old Loader starts checking Core v0.3.206, which rejects
+  // it because minimum_loader_version is 0.3.4. Bootstrap must retry Loader
+  // replacement within one minute, NOT quietly wait six hours.
+  close();
+  db = new IDBFactory();
+  storage = new Map([['tle.diagnosticMode', 'true'],
+    ['tle.loader.test.autoRestore.v1', 'true']]);
+  const oldLoaderSource = read('loader/runtime/v0.3.3/TLE-Remote-Loader.js');
+  const oldLoaderCommit = 'c88ba23fb540152de041110f506421bd6a835088';
+  const oldLoaderRecord = {
+    version: '0.3.3', source: oldLoaderSource,
+    size_bytes: Buffer.byteLength(oldLoaderSource),
+    sha256: createHash('sha256').update(oldLoaderSource).digest('hex'),
+    source_commit: oldLoaderCommit,
+    source_url: rootURL + oldLoaderCommit + '/loader/runtime/v0.3.3/TLE-Remote-Loader.js'
+  };
+  await writeCache('TLE_Remote_Bootstrap_Cache', 'last', oldLoaderRecord);
+  await writeCache('TLE_Remote_Loader_Test_Cache', 'lkg', oldRecord);
+  offline = false;
+  publish('core', CV[0]); publish('loader', LV[0]);
+  await boot();
+  if (host[L]?.version === '0.3.3') {
+    // boot() may observe the idle gap between cached Loader recovery and
+    // remote manifest verification. Wait for either a prompt upgrade or
+    // a scheduled short retry before asserting the update policy.
+    await waitFor(() => host[L]?.version === LV[0] ||
+      [...timers.values()].some(t => t.ms === 60000),
+      'cached Loader must upgrade or schedule a 1-minute retry');
+    if (host[L]?.version === '0.3.3') {
+      assert.ok([...timers.values()].some(t => t.ms === 60000),
+        'pending Loader v0.3.4 must use a 1-minute retry, not six hours');
+      await tick();
+    }
+  }
+  await versions(CV[0], LV[0]);
+  console.log('PASS PC legacy Loader v0.3.3 + Core v0.3.203 cache upgrades to current versions without waiting six hours');
+
   // Closing while an async request is pending must never resurrect the owner.
   let finishFetch;
   const realFetch = frame.fetch;
@@ -259,7 +299,11 @@ try {
   const retiredCore = host[C], retiredLoader = host[L];
   host[B].destroy();
   await finishFetch(); await pending;
-  assert.equal(retiredCore.state.destroyed, true); assert.equal(retiredLoader.diagnostics.destroyed, true);
+  assert.equal(retiredCore.state.destroyed, true, JSON.stringify({
+    coreManaged: retiredCore.remoteLoaderManaged, loaderManaged: retiredLoader.bootstrapManaged,
+    coreVersion: retiredCore.version, loaderVersion: retiredLoader.version,
+    currentCore: host[C]?.version, currentLoader: host[L]?.version
+  })); assert.equal(retiredLoader.diagnostics.destroyed, true);
   assert.equal(host[B], undefined); assert.equal(host[L], undefined); assert.equal(host[C], undefined);
   assert.equal(timers.size, 0);
   console.log('PASS destruction during pending work cannot resurrect Loader or Core');
