@@ -46,5 +46,5 @@ These are manual tests in the maintainer's environment, not an automated certifi
 ### Documentation and release-record policy
 
 - Keep detailed development history in versioned GitHub changelogs, including post-release corrections; never replace earlier release notes.
-- Every Tavern Helper script package must have a concise, single-line Markdown `info` field containing the script name, function summary, usage steps, cautions, and author. Do not place line breaks or escaped `\\n` sequences in the `info` value.
+- Every Tavern Helper script package must have a concise, single-line Markdown `info` field containing the script name, function summary, usage steps, cautions, and author. Do not place line breaks or escaped `\n` sequences in the `info` value.
 
