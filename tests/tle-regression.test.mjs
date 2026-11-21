@@ -47,6 +47,7 @@ const tle = verifyPinnedRelease(
   tlePath,
   /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/releases\/v(\d+\.\d+\.\d+)\/TLE\.js$/
 );
+assert.ok(tle.includes(`const api = {\n    version: '${manifest.release.version}',`), 'Runtime instance API version must match the release manifest');
 
 const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
