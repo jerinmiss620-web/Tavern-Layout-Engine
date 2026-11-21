@@ -39,3 +39,5 @@ jobs:
         run: node tests/tle-legacy-loader-bridge.test.mjs
       - name: Verify folded updates and safe default automatic installs
         run: node tests/tle-auto-update-fold.test.mjs
+      - name: Verify permanent Bootstrap Loader self-updates and offline recovery
+        run: node tests/tle-bootstrap-self-update.test.mjs
