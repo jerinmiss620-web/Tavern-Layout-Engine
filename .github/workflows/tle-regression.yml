@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'channels/test.json'
+      - 'latest.json'
       - 'loader/**'
       - 'releases/**'
       - 'tests/**'
@@ -11,6 +12,7 @@ on:
   pull_request:
     paths:
       - 'channels/test.json'
+      - 'latest.json'
       - 'loader/**'
       - 'releases/**'
       - 'tests/**'
@@ -25,5 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify pinned releases and diagnostic regressions
+      - name: Verify pinned test release, compatibility regressions and mobile diagnostic button
         run: node tests/tle-regression.test.mjs
+      - name: Verify immutable stable release metadata and source integrity
+        run: node loader/verify-stable-release.mjs
