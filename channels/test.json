@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.196",
     "source_path": "releases/v0.3.196/TLE.js",
-    "source_commit": "d315c58bb4284fd104fe5e10e81f71762c1070af",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d315c58bb4284fd104fe5e10e81f71762c1070af/releases/v0.3.196/TLE.js",
+    "source_commit": "5094cd84cf82285c73520103b9e9ad355d868169",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5094cd84cf82285c73520103b9e9ad355d868169/releases/v0.3.196/TLE.js",
     "changelog_path": "releases/v0.3.196/CHANGELOG.md",
-    "sha256": "612208b1a5d4c0f8d74b0ac8c8b2e2a2622470ce0812dba82202ac734da4ec13",
-    "size_bytes": 466040
+    "sha256": "e49f2b22d048328e31af8ca0743a0a1f6ae1f63a4f7458d62cb0f6221313fd89",
+    "size_bytes": 466049
   },
   "status": "test-only; v0.3.196 adds two-field Floor tools with inline clear controls, optional native navigation width/icon repair, and optional chat quick actions in the 会话侠 header; JavaScript syntax and source integrity metadata verified; ST/TT PC/mobile runtime regression pending",
   "recommended_loader_version": "0.3.0",
