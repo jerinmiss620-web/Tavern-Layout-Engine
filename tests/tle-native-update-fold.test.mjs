@@ -27,4 +27,20 @@ assert.doesNotMatch(source, /tle-update-section > summary|tle-update-section\[op
 assert.doesNotMatch(source, /<details class="tle-update-section"/);
 assert.match(source, /#\$\{ID\.panel\} \.tle-update-content \{/);
 assert.doesNotMatch(source, /#\$\{ID\.panel\} \.inline-drawer-content\s*\{[^}]*display:\s*grid/);
-console.log('Current Core native update drawer: shared engine style, collapsed default, no legacy patches.');
+// Floor Tools must shrink to its content; Recent Chats alone fills the panel.
+const panelStart = source.indexOf('#${ID.chatToolsPanel} {');
+const panelRule = source.slice(panelStart, source.indexOf('#${ID.chatToolsPanel}[hidden]', panelStart));
+assert.match(panelRule, /height: auto;/);
+assert.match(panelRule, /min-height: 0;/);
+assert.match(panelRule, /justify-content: flex-start;/);
+const toolsStart = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-page {');
+const toolsRule = source.slice(toolsStart, source.indexOf('#${ID.chatToolsPanel} [data-chat-tools-page="recent"] {', toolsStart));
+assert.match(toolsRule, /flex: 0 1 auto;/);
+assert.doesNotMatch(toolsRule, /flex: 1 1 auto;/);
+const recentStart = source.indexOf('#${ID.chatToolsPanel} [data-chat-tools-page="recent"] {');
+const recentRule = source.slice(recentStart, source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-actions {', recentStart));
+assert.match(recentRule, /flex: 1 1 auto;/);
+assert.match(recentRule, /overflow: hidden;/);
+assert.match(source, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\] \{ height: min\(80dvh, 700px\); \}/);
+assert.match(source, /#\$\{ID\.chatToolsPanel\} \.tle-chat-tools-range-value \{ max-height: 22dvh; \}/);
+console.log('Current Core: native update drawer and content-sized Floor Tools panel regression passed.');
