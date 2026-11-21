@@ -78,4 +78,17 @@ assert.match(tle, /top: calc\(env\(safe-area-inset-top, 0px\) \+ 52px\) !importa
 assert.doesNotMatch(tle, /inset:\s*auto 12px calc\(env\(safe-area-inset-bottom/);
 assert.doesNotMatch(tle, /if \(target\.closest\('#' \+ ID\.diagnosticButton\)\)/);
 
+assert.match(tle, /const CHAT_ACTIONS = \[\s*\{\s*id: 'jump'[\s\S]*?\},\s*\{\s*id: 'range'/);
+assert.match(tle, /buttons: \[\{ id: 'hide', label: '隐藏' \}, \{ id: 'unhide', label: '恢复' \}\]/);
+assert.match(tle, /data-chat-action-clear/);
+assert.match(tle, /请输入有效范围，例如 90-90/);
+assert.match(tle, /data-tle-setting="compat-nav-repair"/);
+assert.match(tle, /width: fit-content !important;/);
+assert.match(tle, /data-chat-quick-action="new"/);
+assert.match(tle, /option_start_new_chat/);
+assert.match(tle, /option_close_chat/);
+assert.match(tle, /option_select_chat/);
+assert.match(tle, /quickActionsEnabled: chatQuickActionsEnabled/);
+assert.match(tle, /navigationRepairEnabled: compatibilityNavigationRepair/);
+
 console.log('TLE test-channel regression checks passed: TLE v' + manifest.release.version + ', Loader v' + loaderRelease.version + '.');
