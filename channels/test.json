@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.197",
+  "latest_version": "0.3.198",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.197",
-    "source_path": "releases/v0.3.197/TLE.js",
-    "source_commit": "7f3eac2935854fdaed71f1fdd6bde24f48e121c4",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/7f3eac2935854fdaed71f1fdd6bde24f48e121c4/releases/v0.3.197/TLE.js",
-    "changelog_path": "releases/v0.3.197/CHANGELOG.md",
-    "sha256": "c8cb08a67b20fcd037381ba7d538dc665e41f41ac2f7ea03954dd558a2d0d73a",
-    "size_bytes": 478258
+    "version": "0.3.198",
+    "source_path": "releases/v0.3.198/TLE.js",
+    "source_commit": "f7563ea91c271c57c5189a055e735617c4464b65",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/f7563ea91c271c57c5189a055e735617c4464b65/releases/v0.3.198/TLE.js",
+    "changelog_path": "releases/v0.3.198/CHANGELOG.md",
+    "sha256": "db128407d531d629546b0c3506acb4c12da21f3d66246c42800cadebb7f37354",
+    "size_bytes": 483852
   },
-  "status": "test-only; v0.3.197 adds compatibility-only 15px inline spacing for labels/info navigation modes and passive JS clickability diagnostics for native drawer controls; includes the v0.3.196 startup API-version registration correction and Floor tools/chat quick-action changes; static syntax and immutable source integrity verified; ST/TT PC/mobile runtime interaction regression pending",
+  "status": "test-only; v0.3.198 adds explicit icon-versus-label hit testing, pointerdown/click target-area classification, icon pseudo-element styles, event path and hit-stack diagnostics; preserves v0.3.197 compatibility-only spacing; static syntax and source integrity verified; ST/TT runtime interaction regression pending",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
