@@ -79,10 +79,14 @@ assert.match(manager, /themeImportRow\.append\(readThemeManagerButton\)/);
 assert.match(manager, /themeImportRow\.hidden = true;/);
 assert.match(manager, /themeImportRow\.hidden = module !== 'theme';/,
   'category-specific action must appear only in the Theme tab');
-assert.match(manager, /groupFiltersWrap\.append\(groupFilters, themeImportRow\)/,
-  'theme sync must share the filter row rather than occupy a separate line');
-assert.match(manager, /hint, tabs, groupFiltersWrap, toolbar, manageRow/,
-  'manager body must not include a separate import or redundant hint row');
+assert.match(manager, /searchRow\.append\(themeImportRow, search\)/,
+  'theme sync must appear before the search box');
+assert.match(manager, /toolbar\.append\(searchRow, targetSelect, manageButton, autoGroupButton\)/,
+  'search row must share the existing toolbar with controls');
+assert.match(manager, /hint, tabs, groupFilters, toolbar, manageRow/,
+  'group filter pills must take their full-width scrolling row');
+assert.doesNotMatch(manager, /groupFiltersWrap|tle-quick-filters-wrap/,
+  'old filter/sync wrapper must be removed');
 assert.match(manager, /const readThemeManagerButton = quickButton\('', \(\) => void importThemeManagerGroups\(\)\)/);
 assert.match(manager, /readThemeManagerButton\.setAttribute\('aria-label', '读取主题管理分组，仅替换当前 UI 主题分类'\)/);
 assert.match(manager, /readThemeManagerButton\.append\(themeImportIcon, HOST_DOC\.createTextNode\('同步'\)\)/);
@@ -105,10 +109,40 @@ assert.match(globalBackup, /fa-solid fa-file-import/);
 assert.match(globalBackup, /fa-solid fa-file-export/);
 assert.match(globalBackup, /importBackupButton\.setAttribute\('aria-label', '导入全部分组方案文件'\)/);
 assert.match(globalBackup, /exportBackupButton\.setAttribute\('aria-label', '导出全部快切分类的分组方案'\)/);
-assert.match(manager, /const groupFiltersWrap = quickNode\('div', 'tle-quick-filters-wrap'\)/);
-assert.match(source, /\.tle-quick-manager \.tle-quick-filters-wrap \{/);
+assert.match(manager, /const searchRow = quickNode\('div', 'tle-quick-search-row'\)/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-search-row \{/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-toolbar > \.tle-quick-search-row \{\s*grid-column: 1 \/ -1;/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-search \{\s*flex: 1 1 0;/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-filters-wrap \{/);
 assert.doesNotMatch(manager, /backupHint/);
 assert.doesNotMatch(manager, /search\.focus\(\{ preventScroll: true \}\);/);
 assert.match(source, /\.tle-quick-manager \.tle-quick-manage-row > input \{ grid-column: 1 \/ -1; \}/);
-console.log('Core 0.3.210: compact single-row header, accessible file icons, inline theme sync and no redundant hint passed.');
+// All TLE-generated scroll regions leave scrollbar appearance to the host's
+// global theme rules. Width/color and WebKit pseudo-element rules are not
+// inherited like normal text properties; TLE must not override them.
+assert.doesNotMatch(source, /scrollbar-width\s*:/,
+  'TLE must not force thin/default scrollbar widths on Firefox or Chromium');
+assert.doesNotMatch(source, /scrollbar-color\s*:/,
+  'TLE must not override theme thumb and track colors');
+assert.doesNotMatch(source, /::-(?:webkit|moz)-scrollbar(?:-[a-z-]+)?\s*\{/,
+  'TLE must not generate competing vendor-specific scrollbar style rules');
+const scrollableSurfaces = [
+  '#${ID.chatToolsPanel} .tle-chat-tools-page {',
+  '#${ID.chatToolsPanel} .tle-chat-tools-range-value {',
+  '#${ID.chatToolsPanel} .tle-chat-tools-recent-root .welcomeRecent {',
+  '#tle-global-search-panel .tle-search-results {',
+  '#top-settings-holder > .tle-sidebar-info .tle-info-list-scroll {',
+  '.tle-quick-manager .tle-quick-tabs {',
+  '.tle-quick-manager .tle-quick-filter-bar {',
+  '.tle-quick-manager .tle-quick-operations {',
+  '.tle-quick-manager .tle-quick-list {',
+  '.tle-quick-picker-surface .scrollableInner {',
+  '#tle-mobile-debugger pre {',
+];
+for (const selector of scrollableSurfaces) {
+  assert.ok(source.includes(selector), 'scrollable TLE surface missing: ' + selector);
+}
+assert.equal((source.match(/scrollbar-gutter: stable;/g) || []).length, 2,
+  'preserve wide workspace scroll layout, which is not a scrollbar skin');
+console.log('Core 0.3.211: Theme sync beside search, full-width group pills, scrollbar skin audit passed.');
 
