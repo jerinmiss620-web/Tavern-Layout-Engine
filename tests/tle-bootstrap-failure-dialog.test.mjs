@@ -9,10 +9,10 @@ const canonicalUrl = url => String(url).replace(
   /^https:\/\/(?:cdn|fastly)\.jsdelivr\.net\/gh\/jerinmiss620-web\/Tavern-Layout-Engine@([^/]+)\//,
   'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/$1/');
 
-const bootstrap = read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.5.js');
+const bootstrap = read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.js');
 const legacyBootstrap = read('tests/fixtures/legacy/bootstrap-v1.0.4.js');
 assert.equal(JSON.parse(read('tests/fixtures/legacy/bootstrap-v1.0.4.json')).content, legacyBootstrap);
-assert.equal(JSON.parse(read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.5.json')).content, bootstrap);
+assert.equal(JSON.parse(read('loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json')).content, bootstrap);
 const B = '__TLE_REMOTE_BOOTSTRAP_V1__';
 const L = '__TLE_REMOTE_LOADER_STABLE_V1__';
 const C = '__TAVERN_LAYOUT_ENGINE_V02__';
@@ -93,7 +93,7 @@ for (const legacyVersion of [true, false]) {
   assert.ok(node.firstElementChild?.shadowRoot, 'error UI must be isolated from host themes');
   assert.match(node.firstElementChild.shadowRoot.querySelector('[data-stage]').textContent, /Loader 清单下载/);
   assert.match(node.firstElementChild.shadowRoot.querySelector('[data-reason]').textContent, /Failed to fetch/);
-  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-report]').textContent, legacyVersion ? /TLE Bootstrap v1\.0\.4/ : /TLE Bootstrap v1\.0\.5/);
+  assert.match(node.firstElementChild.shadowRoot.querySelector('[data-report]').textContent, legacyVersion ? /TLE Bootstrap v1\.0\.4/ : /TLE Bootstrap v1\.0\.6/);
   assert.equal(t.host[B].getInfo().startupFailure.stage, 'Loader 清单下载');
   node.firstElementChild.shadowRoot.querySelector('[data-action="copy"]').click();
   assert.match(node.firstElementChild.shadowRoot.querySelector('[data-copy-state]').textContent, /长按/);
@@ -130,7 +130,7 @@ for (const legacyVersion of [true, false]) {
   t.cleanup();
 }
 }
-console.log('Bootstrap v1.0.4/v1.0.5 dialog regressions passed.');
+console.log('Bootstrap v1.0.4/v1.0.6 dialog regressions passed.');
 
 const source = '// verified UTF-8 源码';
 const release = {
@@ -242,7 +242,7 @@ for (const tamper of ['sha256', 'source_url', 'source_commit', 'size_bytes', 'js
   assert.equal(t.injected.length, 0);
   t.cleanup();
 }
-console.log('Bootstrap v1.0.5: bounded retries, HTTP classes, cancellation, security, healthy runtime and single-flight checks passed.');
+console.log('Bootstrap v1.0.6: bounded retries, HTTP classes, cancellation, security, healthy runtime and single-flight checks passed.');
 
 // A replaced Bootstrap owns a different controller; late resolution cannot restart the old one.
 {

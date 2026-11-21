@@ -12,3 +12,6 @@ Bootstrap 1.0.2 的源码与安装包用于保留旧版忙碌重试回归；Boot
 
 - `bootstrap-v1.0.4.js/json`：已发布 Bootstrap v1.0.4 原字节样本，验证旧版弹窗行为。
 - `loader-v0.3.4.js`：已发布 Loader Runtime v0.3.4 原字节样本，保留历史对照。
+
+- `bootstrap-v1.0.5.js/json`：多线路 Bootstrap v1.0.5 原始发布字节。
+- `loader-v0.3.5.js`：多线路 Loader v0.3.5 原始发布字节。
