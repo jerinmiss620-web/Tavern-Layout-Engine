@@ -16,16 +16,17 @@ TLE enhances the Tavern interface with customizable navigation, workspace layout
 
 ## Distribution
 
-TLE v0.3.202 is the latest **stable** release, pinned in `latest.json` to an immutable Git commit with SHA-256 and UTF-8 byte count.
+TLE **v0.3.203** is the current stable release, published through `latest.json` with immutable Git commit, SHA-256 and UTF-8 size verification. **Stable Loader 0.3.1** restores the requested in-panel version and update workflow without adding a separate Loader floating panel.
 
-- Stable source: `releases/v0.3.202/TLE.js`.
-- Manual Tavern Helper import: `releases/v0.3.202/TLE-0.3.202-import.json` (disabled by default; do not enable it alongside another TLE instance).
-- Release notes: `releases/v0.3.202/CHANGELOG.md`.
-- Test channel: `channels/test.json` points to the same verified v0.3.202 release. The headless Remote Loader 0.3.0 remains test-only; it has not been promoted to a stable loader.
+- Install once: `loader/TLE-Remote-Loader-Stable-0.3.1.json` in Tavern Helper; disable the old Test Loader 0.3.0 before enabling the stable one. It uses the previously established IndexedDB LKG/Previous caches for safe migration.
+- TLE stable source: `releases/v0.3.203/TLE.js`; optional one-time manual bootstrap import: `releases/v0.3.203/TLE-0.3.203-import.json`.
+- TLE panel now displays the current **running** version, Stable Loader connection, "检查更新", and a green "可更新 · vX" action next to the version; Engine Hub shows a green update dot when an update is available.
+- Startup performs **silent checks only**. Downloading, SHA-256 verification, cached rollback and immutable script loading remain Loader-owned. **Installation requires a user click and browser confirmation; never silent auto-install.**
+- A previously imported standalone TLE can be handed to the Stable Loader using the in-panel "启用 Loader 接管" action when its version matches the verified remote version. The user must then disable the standalone TLE script to avoid duplicate startup; keep a backup copy disabled.
+- **First-time bootstrap note:** a Loader with no verified last-known-good cache will not replace a live standalone TLE of another version. Bring standalone TLE to the current release once, then click "启用 Loader 接管"; or initialize through Loader when no standalone TLE is active. This preserves the rollback safety gate.
+- The headless Test Loader 0.3.0 is still test-channel-only (`channels/test.json`); it should not run alongside Stable Loader 0.3.1.
 
-v0.3.202 merges the ChatSurface-compatible Fade Engine, the improved floor-range controls and native chat shortcuts with an **opt-in** navigation repair for themes that hide or distort native drawer icons. Icon opacity is adjustable from 40% to 100% (default 70%) only when that compatibility repair is enabled; ordinary themes retain their own icon opacity. The diagnostic button remains fixed in the upper-right on mobile, using Top Layer when possible and a document-root fallback otherwise.
-
-Validation includes source/package checks, isolated compatibility toggle and chat-range command tests, and static integrity/diagnostic regressions. The earlier navigation hitbox repair was manually confirmed under the problem theme. Full v0.3.202 cross-device ST/TT runtime regression is not yet exhaustive.
+The mobile diagnostics button remains anchored top-right using Top Layer / fixed document-root fallback, unchanged by this release. Static and isolated update checks have passed; live ST/TT/iPhone migration still requires maintainer validation.
 
 ## Repository Structure
 
@@ -41,7 +42,7 @@ Tavern-Layout-Engine/
 
 ## Development Status
 
-Stable TLE v0.3.202 is published; older releases remain versioned under `releases/`. Remote Loader 0.3.0 remains test-only. See `latest.json`, `channels/test.json`, `releases/v0.3.202/CHANGELOG.md`, `loader/README.md`, `tests/tle-regression.test.mjs` and `loader/verify-stable-release.mjs`.
+Stable TLE v0.3.203 and Stable Loader 0.3.1 are published; Test Loader 0.3.0 remains test-only. See `latest.json`, `releases/v0.3.203/CHANGELOG.md`, `loader/CHANGELOG-Stable-0.3.1.md`, `tests/tle-loader-stable.test.mjs` and `loader/verify-stable-release.mjs`.
 
 ## Release records and script documentation
 
