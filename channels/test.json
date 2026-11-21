@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.203",
+  "latest_version": "0.3.204",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.203",
-    "source_path": "releases/v0.3.203/TLE.js",
-    "source_commit": "65ed78df9d23c12d1d49300f92e2f43c2ee49cdd",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/65ed78df9d23c12d1d49300f92e2f43c2ee49cdd/releases/v0.3.203/TLE.js",
-    "changelog_path": "releases/v0.3.203/CHANGELOG.md",
-    "sha256": "18ec8b806c19edb769bbdfe05517eb593774838e8b812ee134a1cae1ba81d601",
-    "size_bytes": 495304
+    "version": "0.3.204",
+    "source_path": "releases/v0.3.204/TLE.js",
+    "source_commit": "caf5cb6aef942946a2091540de4854a876100617",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/caf5cb6aef942946a2091540de4854a876100617/releases/v0.3.204/TLE.js",
+    "changelog_path": "releases/v0.3.204/CHANGELOG.md",
+    "sha256": "1cb93e490c2fdd0c551088dccdc624f26fd72aa3a17a06ac81d48e7052762bc8",
+    "size_bytes": 497156
   },
-  "status": "test channel synchronized to v0.3.203; test loader remains 0.3.0 with original test-only bootstrap. Stable Loader 0.3.1 uses latest.json independently.",
+  "status": "TEST v0.3.204: compatible update UI for existing Test Loader 0.3.0 and Stable Loader 0.3.1, with current version, user-triggered check/update, and complete script info. Stable latest.json intentionally remains v0.3.203 pending ST/TT confirmation.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
