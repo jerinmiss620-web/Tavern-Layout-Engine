@@ -37,3 +37,5 @@ jobs:
         run: node tests/tle-release-metadata.test.mjs
       - name: Protect old Test Loader migration and visible update controls
         run: node tests/tle-legacy-loader-bridge.test.mjs
+      - name: Verify permanent Bootstrap Loader updates and offline recovery
+        run: node tests/tle-bootstrap-self-update.test.mjs
