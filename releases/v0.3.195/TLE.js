@@ -43,6 +43,7 @@
   HOST_DOC.body.removeAttribute('data-tle-search-available');
   HOST_DOC.body.removeAttribute('data-tle-compat-layer-repair');
   HOST_DOC.body.removeAttribute('data-tle-compat-structure-repair');
+  HOST_DOC.body.removeAttribute('data-tle-compat-nav-hitbox');
   HOST_DOC.body.removeAttribute('data-tle-compat-panel-bg');
   HOST_DOC.body.removeAttribute('data-tle-compat-panel-bg-mode');
   HOST_DOC.body.style.removeProperty('--tle-compat-panel-bg-custom');
@@ -99,6 +100,8 @@
   let compatibilityLayerRepair = getStoredBool(COMPAT_LAYER_REPAIR_KEY, false);
   // Structural repair is session-only: it defaults off and is never persisted.
   let compatibilityStructureRepair = false;
+  // Navigation hitbox compatibility repair is session-only, default off.
+  let compatibilityNavHitboxRepair = false;
   let compatibilityPanelBackground = getStoredBool(COMPAT_PANEL_BG_KEY, false);
   let compatibilityPanelBackgroundMode = getStoredString(COMPAT_PANEL_BG_MODE_KEY, 'smart');
   let compatibilityPanelBackgroundColor = getStoredString(COMPAT_PANEL_BG_COLOR_KEY, '#282027');
@@ -278,6 +281,7 @@
 
     body.toggleAttribute('data-tle-compat-layer-repair', compatibilityLayerRepair);
     body.toggleAttribute('data-tle-compat-structure-repair', compatibilityStructureRepair);
+    body.toggleAttribute('data-tle-compat-nav-hitbox', compatibilityNavHitboxRepair);
     body.toggleAttribute('data-tle-compat-panel-bg', compatibilityPanelBackground);
     body.setAttribute('data-tle-compat-panel-bg-mode',
       compatibilityPanelBackgroundMode === 'custom' ? 'custom' : 'smart');
@@ -289,6 +293,9 @@
 
     const structureInput = state.panel?.querySelector('[data-tle-setting="compat-structure-repair"]');
     if (structureInput) structureInput.checked = compatibilityStructureRepair;
+
+    const navHitboxInput = state.panel?.querySelector('[data-tle-setting="compat-nav-hitbox"]');
+    if (navHitboxInput) navHitboxInput.checked = compatibilityNavHitboxRepair;
 
     const bgInput = state.panel?.querySelector('[data-tle-setting="compat-panel-bg"]');
     if (bgInput) bgInput.checked = compatibilityPanelBackground;
@@ -315,6 +322,11 @@
 
   function setCompatibilityStructureRepair(enabled) {
     compatibilityStructureRepair = Boolean(enabled);
+    applyCompatibilitySettings();
+  }
+
+  function setCompatibilityNavHitboxRepair(enabled) {
+    compatibilityNavHitboxRepair = Boolean(enabled);
     applyCompatibilitySettings();
   }
 
@@ -583,6 +595,51 @@ body[data-tle-nav] #top-settings-holder#top-settings-holder > .drawer {
   overflow: visible !important;
   box-sizing: border-box !important;
 }
+/* Opt-in navigation hitbox compatibility for image-backed themes:
+   native icons may have opacity:0 and ::before may be an empty absolute sprite.
+   Keep theme artwork/opacity untouched; restore real, nonzero native click boxes. */
+body[data-tle-nav][data-tle-compat-nav-hitbox] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle {
+  display: flex !important;
+  position: relative !important;
+  flex: 0 0 min(44px, var(--tle-row-height)) !important;
+  width: min(44px, var(--tle-row-height)) !important;
+  min-width: min(44px, var(--tle-row-height)) !important;
+  max-width: min(44px, var(--tle-row-height)) !important;
+  height: min(44px, var(--tle-row-height)) !important;
+  min-height: min(44px, var(--tle-row-height)) !important;
+  max-height: min(44px, var(--tle-row-height)) !important;
+  align-self: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+}
+body[data-tle-nav][data-tle-compat-nav-hitbox] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
+  display: block !important;
+  position: relative !important;
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+}
+body[data-tle-nav][data-tle-compat-nav-hitbox]:not([data-tle-nav="icons"]) #top-settings-holder#top-settings-holder > .drawer > .tle-drawer-label {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  align-self: center !important;
+  text-align: left !important;
+}
+
 body[data-tle-nav] #top-settings-holder > .drawer:first-child { padding-right: var(--tle-first-row-end); }
 #top-settings-holder > .drawer > .tle-drawer-label {
   display: none;
@@ -5615,6 +5672,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             </label>
             <p class="tle-muted">仅在主题将 #chat 或 #form_sheld 设为 absolute / fixed，导致聊天区脱离 Flex 布局或底栏跑位时启用。恢复两个核心容器的正常布局流；不扫描主题 CSS，不修改消息内部定位、背景、毛玻璃、Mask 或渐隐效果。默认关闭，不写入长期设置；切换 UI 主题时自动关闭。</p>
             <label class="tle-row" style="justify-content:flex-start;gap:10px;margin-top:12px;">
+              <input type="checkbox" data-tle-setting="compat-nav-hitbox">
+              <span>修复导航图标点击区域 / 对齐</span>
+            </label>
+            <p class="tle-muted">适用于使用透明原生图标、空 ::before 贴图制作导航的主题。为按钮保留稳定的点击区域，调整图标与文字对齐；不覆盖主题贴图及透明度。默认关闭、仅当前会话生效，切换 UI 主题时自动关闭。</p>
+            <label class="tle-row" style="justify-content:flex-start;gap:10px;margin-top:12px;">
               <input type="checkbox" data-tle-setting="compat-panel-bg">
               <span>修复 TLE 面板透明背景</span>
             </label>
@@ -9564,7 +9626,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         };
       })(),
       scrollBottom: { enabled: scrollBottomEnabled, buttonPresent: Boolean(state.scrollBottom.button?.isConnected), generating: state.scrollBottom.generating, eventSourcePresent: Boolean(state.scrollBottom.eventSource), listenerCount: state.scrollBottom.eventListeners?.length || 0 },
-      compatibility: { layerRepairEnabled: compatibilityLayerRepair, structureRepairEnabled: compatibilityStructureRepair, panelBackgroundRepairEnabled: compatibilityPanelBackground, panelBackgroundMode: compatibilityPanelBackgroundMode, panelBackgroundColor: compatibilityPanelBackgroundColor },
+      compatibility: { layerRepairEnabled: compatibilityLayerRepair, structureRepairEnabled: compatibilityStructureRepair, navHitboxRepairEnabled: compatibilityNavHitboxRepair, panelBackgroundRepairEnabled: compatibilityPanelBackground, panelBackgroundMode: compatibilityPanelBackgroundMode, panelBackgroundColor: compatibilityPanelBackgroundColor },
       diagnostics: (() => {
         const button = state.diagnosticButton;
         const rect = rectOf(button);
@@ -9883,6 +9945,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.body.removeAttribute('data-tle-search-available');
     HOST_DOC.body.removeAttribute('data-tle-compat-layer-repair');
     HOST_DOC.body.removeAttribute('data-tle-compat-structure-repair');
+    HOST_DOC.body.removeAttribute('data-tle-compat-nav-hitbox');
     HOST_DOC.body.removeAttribute('data-tle-compat-panel-bg');
     HOST_DOC.body.removeAttribute('data-tle-compat-panel-bg-mode');
     HOST_DOC.body.style.removeProperty('--tle-compat-panel-bg-custom');
@@ -9981,8 +10044,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     attributeFilter: ['class', 'style', 'hidden', 'aria-hidden'],
   });
   HOST_DOC.addEventListener('change', (event) => {
-    if (event.target?.matches?.('#themes') && compatibilityStructureRepair) {
-      setCompatibilityStructureRepair(false);
+    if (event.target?.matches?.('#themes')) {
+      if (compatibilityStructureRepair) setCompatibilityStructureRepair(false);
+      if (compatibilityNavHitboxRepair) setCompatibilityNavHitboxRepair(false);
     }
 
     const foldMaster = event.target.closest?.('[data-tle-fold-master]');
@@ -10029,6 +10093,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const compatStructureInput = event.target.closest('[data-tle-setting="compat-structure-repair"]');
     if (compatStructureInput) setCompatibilityStructureRepair(compatStructureInput.checked);
+
+    const compatNavHitboxInput = event.target.closest('[data-tle-setting="compat-nav-hitbox"]');
+    if (compatNavHitboxInput) setCompatibilityNavHitboxRepair(compatNavHitboxInput.checked);
 
     const compatBgInput = event.target.closest('[data-tle-setting="compat-panel-bg"]');
     if (compatBgInput) setCompatibilityPanelBackground(compatBgInput.checked);
