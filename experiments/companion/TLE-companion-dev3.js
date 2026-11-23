@@ -906,6 +906,27 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 .tle-companion-default { display: flex; flex-direction: row !important; align-items: center; gap: 8px; }
 .tle-companion-actions > .menu_button { white-space: nowrap; }
 
+.tle-companion-schedule {
+  display: flex; flex-direction: column; gap: 10px; padding-block: 12px;
+  border-top: 1px solid var(--SmartThemeBorderColor, #8886);
+}
+.tle-companion-schedule > .tle-companion-title { justify-content: space-between; }
+.tle-companion-schedule-row {
+  display: grid; grid-template-columns: minmax(68px, 1fr) minmax(90px, 1fr) minmax(0, 1.5fr);
+  align-items: center; gap: 7px; min-width: 0;
+}
+.tle-companion-schedule-row > .text_pole { width: 100%; min-width: 0; }
+.tle-companion-schedule-badge {
+  display: inline-flex; border-radius: 20px; padding: 2px 7px;
+  background: var(--SmartThemeQuoteColor, #8883); color: var(--SmartThemeBodyColor, inherit);
+  font-size: .75em; font-weight: 650; line-height: 1.4; white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .tle-companion-schedule-row { grid-template-columns: minmax(78px, 1fr) minmax(0, 1fr); }
+  .tle-companion-schedule-row > select { grid-column: 1 / -1; }
+}
+
+
 #${ID.chatToolsPanel} .tle-chat-tools-actions {
   display: grid;
   gap: 10px;
@@ -7741,11 +7762,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     for (const plan of plans) {
       const isDefault = data.defaults[role.key] === plan.id;
+      const rule = data.schedules?.[role.key];
+      const isDay = rule?.enabled && rule.dayPlanId === plan.id;
+      const isNight = rule?.enabled && rule.nightPlanId === plan.id;
       const row = quickNode('div', 'tle-companion-plan' + (isDefault ? ' is-default' : ''));
       const summary = quickNode('div', 'tle-companion-copy');
       const titleRow = quickNode('div', 'tle-companion-title');
       titleRow.append(quickNode('strong', '', plan.name));
-      if (isDefault) titleRow.append(quickNode('span', 'tle-companion-default-badge', '★ 默认 · 自动应用'));
+      if (isDefault) titleRow.append(quickNode('span', 'tle-companion-default-badge', '★ 角色默认'));
+      if (isDay) titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☀ 日间'));
+      if (isNight) titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
       summary.append(titleRow);
       summary.append(quickNode('small', '', companionPlanDetails(plan) || '空方案'));
       const controls = quickNode('div', 'tle-companion-actions');
@@ -7865,6 +7891,84 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     form.append(actions);
     shell.body.append(form);
   }
+
+  function companionRenderSchedule(host, role, data) {
+    const section = quickNode('section', 'tle-companion-schedule');
+    const heading = quickNode('div', 'tle-companion-title');
+    heading.append(quickNode('strong', '', '日夜定时 · 当前角色'));
+    const rule = data.schedules?.[role.key] || {};
+    const enableLabel = quickNode('label', 'tle-companion-default');
+    const enabled = quickNode('input');
+    enabled.type = 'checkbox';
+    enabled.checked = rule.enabled === true;
+    enableLabel.append(enabled, quickNode('span', '', '启用自动切换'));
+    heading.append(enableLabel);
+    section.append(heading);
+    const plans = data.plans.filter(p => p.roles.includes(role.key));
+    const rows = [];
+    for (const part of [
+      { period: 'day', label: '☀ 日间开始', time: rule.dayStart || '07:00', planId: rule.dayPlanId || data.defaults[role.key] || plans[0]?.id || '' },
+      { period: 'night', label: '☾ 夜间开始', time: rule.nightStart || '19:00', planId: rule.nightPlanId || plans.find(p => p.id !== data.defaults[role.key])?.id || plans[0]?.id || '' },
+    ]) {
+      const row = quickNode('label', 'tle-companion-schedule-row');
+      const caption = quickNode('span', '', part.label);
+      const time = quickNode('input', 'text_pole');
+      time.type = 'time';
+      time.value = part.time;
+      time.setAttribute('aria-label', part.label + '时间');
+      const select = quickNode('select', 'text_pole');
+      select.setAttribute('aria-label', part.label + '方案');
+      const empty = quickNode('option', '', '选择方案');
+      empty.value = '';
+      select.append(empty);
+      for (const plan of plans) {
+        const option = quickNode('option', '', plan.name);
+        option.value = plan.id;
+        select.append(option);
+      }
+      select.value = part.planId;
+      row.append(caption, time, select);
+      rows.push({ period: part.period, time, select });
+      section.append(row);
+    }
+    section.append(quickNode('small', 'tle-muted',
+      '日间、夜间只是时间段名称，可任意搭配方案。手动应用其他方案后，会保持到下一次时间点。'));
+    const status = quickNode('small', 'tle-muted', rule.enabled
+      ? (companionScheduleStatus(data, role) || '定时方案失效，请重新选择并保存。')
+      : '未启用：切换角色时使用角色默认方案。');
+    section.append(status);
+    const save = companionTextButton('保存日夜设置', () => {
+      const next = {
+        enabled: enabled.checked,
+        dayStart: rows[0].time.value, nightStart: rows[1].time.value,
+        dayPlanId: rows[0].select.value, nightPlanId: rows[1].select.value,
+      };
+      if (next.enabled && (!companionClockTime(next.dayStart)
+        || !companionClockTime(next.nightStart) || next.dayStart === next.nightStart
+        || !plans.some(p => p.id === next.dayPlanId)
+        || !plans.some(p => p.id === next.nightPlanId))) {
+        companionNotice('warning', '请选择不同的日间/夜间时间，并分别指定有效方案。');
+        return;
+      }
+      const fresh = companionRead();
+      fresh.schedules[role.key] = next;
+      delete fresh.manualHolds[role.key];
+      if (!companionSave(fresh)) return;
+      companionRuntime.lastScheduleToken = '';
+      companionNotice('success', next.enabled
+        ? '日夜定时已保存，现在按当前时段应用方案。'
+        : '日夜定时已关闭；原有角色默认方案仍保留。');
+      companionOnChatChanged(next.enabled);
+      companionRefreshList();
+      status.textContent = next.enabled
+        ? (companionScheduleStatus(fresh, role) || '无法识别当前时段')
+        : '定时已关闭；下次进入角色使用默认方案。';
+    });
+    save.disabled = !plans.length;
+    section.append(save);
+    host.append(section);
+  }
+
   function companionOpenManager() {
     closeChatTools(false);
     const role = companionCurrentRole();
@@ -7887,7 +7991,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         const copy = quickNode('div', 'tle-companion-copy');
         const titleRow = quickNode('div', 'tle-companion-title');
         titleRow.append(quickNode('strong', '', plan.name));
-        if (isDefault) titleRow.append(quickNode('span', 'tle-companion-default-badge', '★ 默认 · 自动应用'));
+        if (isDefault) titleRow.append(quickNode('span', 'tle-companion-default-badge', '★ 角色默认'));
+        if (data.schedules?.[role.key]?.enabled && data.schedules[role.key].dayPlanId === plan.id)
+          titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☀ 日间'));
+        if (data.schedules?.[role.key]?.enabled && data.schedules[role.key].nightPlanId === plan.id)
+          titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
         copy.append(titleRow);
         copy.append(quickNode('small', '', companionPlanDetails(plan)));
         const actions = quickNode('div', 'tle-companion-actions');
@@ -7912,7 +8020,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             const fresh = companionRead();
             fresh.plans = fresh.plans.filter(p => p.id !== plan.id);
             for (const key of Object.keys(fresh.defaults)) if (fresh.defaults[key] === plan.id) delete fresh.defaults[key];
-            if (companionSave(fresh)) render();
+            for (const key of Object.keys(fresh.schedules)) {
+              const slot = fresh.schedules[key];
+              if (slot && (slot.dayPlanId === plan.id || slot.nightPlanId === plan.id)) slot.enabled = false;
+            }
+            if (companionSave(fresh)) {
+              render();
+              companionOnChatChanged();
+              companionRefreshList();
+            }
           }],
         ];
         for (const [label, handler] of buttons) actions.append(companionTextButton(label, handler));
@@ -7920,6 +8036,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         body.append(card);
       }
       if (!plans.length) body.append(quickNode('p', 'tle-quick-empty', '当前角色没有配套方案。'));
+      companionRenderSchedule(body, role, data);
     };
     render();
   }
