@@ -821,7 +821,8 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   text-align: start;
 }
 #${ID.chatToolsPanel}[hidden] { display: none !important; }
-#${ID.chatToolsPanel}:is([data-page="recent"], [data-page="plans"]) { height: min(80dvh, 700px); }
+#${ID.chatToolsPanel}[data-page="recent"] { height: min(80dvh, 700px); }
+#${ID.chatToolsPanel}[data-page="plans"] { height: min(80dvh, 700px); }
 #${ID.chatToolsPanel} [hidden] { display: none !important; }
 #${ID.chatToolsPanel} .tle-chat-tools-header {
   display: flex;
