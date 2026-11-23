@@ -6100,9 +6100,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   const OPTIONAL_REPO = 'jerinmiss620-web/Tavern-Layout-Engine';
   const OPTIONAL_MANIFEST_URLS = [
     { label: 'GitHub Raw · 正式清单', url: 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/refs/heads/main/optional-modules/manifest.json' },
-    { label: 'GitHub Raw · 固定快照', url: 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/07236d36412fbe8db8e45ace60309810163c1bcf/optional-modules/manifest.json' },
-    { label: 'jsDelivr · 固定快照', url: 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@07236d36412fbe8db8e45ace60309810163c1bcf/optional-modules/manifest.json' },
-    { label: 'Fastly · 固定快照', url: 'https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@07236d36412fbe8db8e45ace60309810163c1bcf/optional-modules/manifest.json' },
+    { label: 'GitHub Raw · 固定快照', url: 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/033ccf00011610b4c4e5444182c2abf88a5af1f6/optional-modules/manifest.json' },
+    { label: 'jsDelivr · 固定快照', url: 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@033ccf00011610b4c4e5444182c2abf88a5af1f6/optional-modules/manifest.json' },
+    { label: 'Fastly · 固定快照', url: 'https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@033ccf00011610b4c4e5444182c2abf88a5af1f6/optional-modules/manifest.json' },
   ];
   const OPTIONAL_RUNTIME = { busy: false, source: '', lastError: '', status: '', controller: null };
   function optionalUtf8(text) {
