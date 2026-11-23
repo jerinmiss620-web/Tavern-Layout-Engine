@@ -1,0 +1,39 @@
+# TLE 可选功能包 · 首轮实验
+
+本目录尚未进入正式版发布通道。**正式版本 `main/latest.json` 不变。**
+
+## 目录
+- `manifest.json`：功能包清单，记录脚本 ID、版本、UTF-8 字节数、SHA-256 和多个镜像地址。
+- `theme-wallpaper/theme-wallpaper-v4.1.json`：用户提供的原版酒馆助手脚本，按原内容上传，不增补代码。
+- `../experiments/optional-modules/TLE-optional-dev4-import.json`：内置可选功能管理器的 TLE 整份测试脚本。
+
+## 下载策略
+下载源按顺序尝试：GitHub Raw → jsDelivr → Fastly jsDelivr → TestingCF jsDelivr。清单读取同样有备用地址；清单首选测试分支，固定快照为备用。
+
+**安装脚本前必须同时验证**：来源 URL 在允许名单中，UTF-8 字节数一致，SHA-256 一致，JSON 格式正确，`type === 'script'`，`id` 和 `name` 等于预期。损坏、被替换、404 或超时响应不会导入。客户端 SHA-256 优先用浏览器 Web Crypto，不支持时使用等价的纯 JS 计算。
+
+首轮测试使用原版 SHA-256：
+`e51d1a5be296a67d2c3d120e294111cc43b5830fd940f651d7f2c8ee64a608d8`
+
+该包脚本 ID：
+`d354e7f5-1719-4942-a63d-71f6db16c059`
+
+## 安装与实机验证
+1. 先备份现有「主题绑定壁纸」和酒馆助手脚本列表，停用 TLE Dev3、正式 Bootstrap/Loader 及其他独立 Core。
+2. 酒馆助手导入 `TLE-optional-dev4-import.json`，手动启用，刷新酒馆。
+3. 打开 TLE 控制面板 → **可选功能包** → **主题绑定壁纸**。
+4. 若本来就有相同脚本 ID：看到“已安装”，可测试“停用 / 启用”，不会重复安装。要测试“安装并启用”，请在确认已有备份后先移除旧脚本，或使用独立测试环境。
+5. 点击 **安装并启用**，验证能看到目标脚本出现在酒馆助手**全局脚本列表**，且 enabled 状态为 true。刷新酒馆以确定脚本真正运行。
+6. 修改主题，检查绑定壁纸是否跟随切换，并与配套侠日夜方案联动。
+7. 验证停用、重新启用与卸载；确认其他酒馆助手脚本未变，且绑定数据与原生图库未被移除。
+8. 结束测试，停用 Dev4，恢复原 TLE Bootstrap/Loader 或 Dev3。
+
+## 安全与限制
+- 只操作指定 UUID 的脚本；同名但不同 ID，或重复 UUID，会阻止自动写入。
+- 使用酒馆助手 `getScriptTrees({type:'global'})` 与 `updateScriptTreesWith(...,{type:'global'})`。不会使用 `replaceScriptTrees` 整体覆盖。
+- 停用和卸载后建议刷新酒馆，宿主执行态是否即时更新以实际 ST/TT 为准。
+- 目前 GitHub Raw 内容通过仓库工具验证，镜像切换逻辑、文件校验、安装与脚本库修改已在模拟环境通过；**jsDelivr 各地址的现场网络可达性和 ST/TT 实机行为尚未验证**。
+- 若宿主没有提供脚本管理 API，会显示不可用并阻止安装，不模拟 UI 点击或直接改动酒馆助手存储。
+- 后续独立功能需按自身 ID、权限和兼容性逐个验证后加入目录。
+
+作者：小松鼠 & ChatGPT（小松7）。
