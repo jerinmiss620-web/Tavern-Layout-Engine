@@ -6,8 +6,8 @@
     {
       "key": "theme-wallpaper",
       "name": "主题绑定壁纸",
-      "description": "主题绑定原生图库壁纸，支持多图随机切换、跨文件夹绑定；配套侠切换主题后壁纸自动跟随。",
-      "author": "小松鼠",
+      "description": "主题绑定壁纸／多图随机切换／跨文件夹选图／配套侠联动",
+      "author": "小松鼠 & Gemini",
       "version": "4.1",
       "script_id": "d354e7f5-1719-4942-a63d-71f6db16c059",
       "filename": "theme-wallpaper-v4.1.json",
@@ -31,14 +31,15 @@
           "url": "https://testingcf.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@0dce101ee37f53dbc1e324bb4f027ffba7908105/optional-modules/theme-wallpaper/theme-wallpaper-v4.1.json"
         }
       ],
-      "entry_location": "原生背景面板 → 顶部工具栏 → 主题壁纸绑定管理器",
-      "independent": true
+      "entry_location": "酒馆原生「背景」面板 → 顶部工具栏 → 主题壁纸绑定管理器",
+      "independent": true,
+      "presentation_version": 1
     },
     {
       "key": "freesia-override",
       "name": "Freesia 覆盖侠",
-      "description": "字体管理、正文排版、留白居中、滚动条与头像焦点调校；实时预览和实时使用在原按钮上切换，也可写入主题 CSS；兼容 TT 字体比例读取。",
-      "entry_location": "底栏 → 扩展菜单（魔法棒）→ Freesia 覆盖侠",
+      "description": "气泡居中／自定义字体／行高与字间距／滚动条宽度／头像定位",
+      "entry_location": "酒馆底栏 → 扩展菜单（魔法棒）→ Freesia 覆盖侠",
       "independent": true,
       "author": "小松鼠 & ChatGPT（小松7）",
       "version": "1.88.6",
@@ -63,7 +64,8 @@
           "label": "TestingCF jsDelivr",
           "url": "https://testingcf.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@0dce101ee37f53dbc1e324bb4f027ffba7908105/optional-modules/freesia-override/freesia-override-v1.88.6.json"
         }
-      ]
+      ],
+      "presentation_version": 1
     }
   ]
 }
