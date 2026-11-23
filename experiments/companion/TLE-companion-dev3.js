@@ -7855,7 +7855,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const defaultToggle = quickNode('input');
     defaultToggle.type = 'checkbox';
     defaultToggle.checked = source && !duplicate ? defaults[role.key] === source.id : false;
-    defaultRow.append(defaultToggle, quickNode('span', '', '设为默认（进入此角色时自动应用）'));
+    defaultRow.append(defaultToggle, quickNode('span', '', '设为角色默认（日夜定时关闭时自动应用）'));
     form.append(defaultRow);
     const actions = quickNode('div', 'tle-companion-actions');
     const saveButton = companionTextButton('保存方案', () => {
@@ -7884,7 +7884,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!companionSave(fresh)) return;
       closeQuickPanel(false);
       companionRefreshList();
-      companionNotice('success', '方案已保存：' + name + (defaultToggle.checked ? '（已设默认，下次进入角色自动应用）' : ''));
+      companionNotice('success', '方案已保存：' + name + (defaultToggle.checked ? '（已设角色默认）' : ''));
     });
     const cancel = companionTextButton('取消', () => closeQuickPanel(false));
     actions.append(saveButton, cancel);
@@ -7978,7 +7978,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       body.replaceChildren();
       const data = companionRead();
       body.append(quickNode('p', 'tle-muted', role ? '当前角色：' + role.name : '请先进入一个角色，才能关联和编辑配套方案。'));
-      body.append(quickNode('p', 'tle-muted', '★ 设置默认后，进入该角色时自动应用；未设置默认则保留当前配置，无需额外总开关。'));
+      body.append(quickNode('p', 'tle-muted', '角色默认方案：未启用日夜定时时自动应用。启用日夜定时后，以当前时段设置为准。'));
       if (!role) return;
       const add = companionTextButton('保存当前配置', () => void companionOpenEditor());
       body.append(add);
@@ -8009,8 +8009,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
               render();
               companionRefreshList();
               companionNotice('success', isDefault
-                ? '已取消默认：进入此角色不再自动切换方案。'
-                : '已设为默认：下次进入此角色将自动应用「' + plan.name + '」。');
+                ? '已取消角色默认；日夜定时规则不受影响。'
+                : '已设为角色默认「' + plan.name + '」；如启用日夜定时则按时段优先。');
             }
           }],
           ['删除', () => {
