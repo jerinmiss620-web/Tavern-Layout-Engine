@@ -8053,9 +8053,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       return;
     }
     if (isNativeGenerationVisible()) {
-      companionNotice('warning', '当前正在生成回复，未应用「' + plan.name + '」。生成结束后可手动应用。');
+      if (automatic) {
+        companionRuntime.pending = { id, roleKey: role.key };
+        companionQueueGenerationRetry();
+      } else companionNotice('warning', '正在生成回复，请在结束后手动应用。');
       return;
     }
+    if (automatic) companionRuntime.pending = null;
     companionRuntime.applying = true;
     companionRefreshList();
     let finished = 0;
@@ -8073,6 +8077,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
       companionRuntime.lastApplied.set(role.key, id);
+      if (!automatic) {
+        const fresh = companionRead();
+        const slot = companionScheduleState(fresh, role);
+        if (slot) {
+          fresh.manualHolds[role.key] = { until: slot.nextAt, selectedId: id };
+          companionSave(fresh);
+        }
+      }
       companionNotice('success', '已应用「' + plan.name + '」；绑定壁纸跟随 UI 主题。');
     } catch (error) {
       const superseded = automatic && companionCurrentRole()?.key !== role.key;
@@ -8088,13 +8100,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       companionRefreshList();
       const next = companionRuntime.pending;
       companionRuntime.pending = null;
-      if (!state.destroyed && next && companionCurrentRole()?.key === next.roleKey
-          && companionRead().defaults[next.roleKey] === next.id) {
-        void companionApply(next.id, true);
+      if (!state.destroyed && next && companionCurrentRole()?.key === next.roleKey) {
+        const data = companionRead();
+        const roleNow = companionCurrentRole();
+        const choice = companionAutoTarget(data, roleNow);
+        if (choice?.id === next.id && !companionManualHold(data, roleNow, choice.slot)) {
+          void companionApply(next.id, true);
+        }
       }
     }
   }
-  function companionOnChatChanged() {
+  function companionOnChatChanged(force = false) {
     HOST_WIN.clearTimeout(companionRuntime.timer);
     companionRuntime.timer = HOST_WIN.setTimeout(() => {
       if (state.destroyed) return;
@@ -8103,14 +8119,18 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const changed = key !== companionRuntime.lastRole;
       companionRuntime.lastRole = key;
       if (state.chatTools.open && state.chatTools.page === 'plans') companionRefreshList();
-      if (!changed || !key) return;
-      // Default selection itself is the opt-in. Unassigned roles are untouched.
       const data = companionRead();
-      const selected = data.plans.find(p => p.id === data.defaults[key] && p.roles.includes(key));
-      if (selected) {
-        console.info('[配套侠] 进入角色「' + role.name + '」，应用默认方案：' + selected.name);
-        void companionApply(selected.id, true);
-      }
+      const choice = companionAutoTarget(data, role);
+      companionArmSchedule(choice?.slot);
+      if (!key) { companionRuntime.lastScheduleToken = ''; return; }
+      const token = choice?.slot?.token || '';
+      const boundaryChanged = Boolean(token && companionRuntime.lastScheduleToken !== token);
+      companionRuntime.lastScheduleToken = token;
+      if (!choice || (!force && !changed && !boundaryChanged)) return;
+      if (choice.slot && companionManualHold(data, role, choice.slot)) return;
+      if (!choice.slot && !changed && !force) return;
+      console.info('[配套侠] 自动应用角色「' + role.name + '」方案：' + choice.plan.name);
+      void companionApply(choice.id, true);
     }, 350);
   }
   function companionBindEvents() {
@@ -8127,8 +8147,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         source.on(types[key], handler);
         companionRuntime.listeners.push({ type: types[key], handler });
       }
+      for (const key of ['GENERATION_ENDED', 'GENERATION_STOPPED']) {
+        if (typeof types[key] !== 'string' || !types[key]) continue;
+        if (companionRuntime.listeners.some(l => l.type === types[key])) continue;
+        const handler = () => { if (companionRuntime.pending) companionOnChatChanged(true); };
+        source.on(types[key], handler);
+        companionRuntime.listeners.push({ type: types[key], handler });
+      }
       companionRuntime.source = source;
     }
+    const resume = () => { if (HOST_DOC.visibilityState !== 'hidden') companionOnChatChanged(); };
+    HOST_DOC.addEventListener('visibilitychange', resume, { signal: state.abort.signal });
+    HOST_WIN.addEventListener('focus', resume, { signal: state.abort.signal });
+    HOST_WIN.addEventListener('pageshow', resume, { signal: state.abort.signal });
     // On script reload, apply the selected role's explicit default once.
     // This also covers environments that mounted before the eventSource was ready.
     companionRuntime.lastRole = '';
@@ -8136,6 +8167,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
   function companionCleanup() {
     HOST_WIN.clearTimeout(companionRuntime.timer);
+    HOST_WIN.clearTimeout(companionRuntime.scheduleTimer);
+    HOST_WIN.clearTimeout(companionRuntime.generationRetryTimer);
+    companionRuntime.scheduleTimer = 0;
+    companionRuntime.generationRetryTimer = 0;
     companionRuntime.pending = null;
     if (companionRuntime.source) {
       const remove = companionRuntime.source.removeListener || companionRuntime.source.off;
