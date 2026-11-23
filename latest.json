@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.212",
     "source_path": "releases/v0.3.212/TLE.js",
-    "source_commit": "49d9e50c916304d25ad4225f1e561cadefa4e849",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/49d9e50c916304d25ad4225f1e561cadefa4e849/releases/v0.3.212/TLE.js",
+    "source_commit": "6a90bc9fe4c8ccb1296893e53c05dce3caf268f0",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6a90bc9fe4c8ccb1296893e53c05dce3caf268f0/releases/v0.3.212/TLE.js",
     "changelog_path": "releases/v0.3.212/CHANGELOG.md",
-    "sha256": "8bb46ff5705f84151072cdd2c3b35d2a812ecb23865ba051efaf3539bceff643",
-    "size_bytes": 576288
+    "sha256": "dec171929df01d54feaf342c64cdcfbbc924c95462e3a03c42ec35e6ea97b481",
+    "size_bytes": 576334
   },
   "notes": "Core v0.3.212: 内置配套侠，新增独立可选功能包「Freesia 覆盖侠 1.88.6」与「主题绑定壁纸 4.1」，安装前校验哈希；Bootstrap 与 Loader 无变化。"
 }
