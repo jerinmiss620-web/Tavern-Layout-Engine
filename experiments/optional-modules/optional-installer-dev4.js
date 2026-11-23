@@ -153,7 +153,10 @@
       button.disabled = OPTIONAL_RUNTIME.busy;
     }
     panel.dataset.optionalMode = mode;
-    if (statusNode && !OPTIONAL_RUNTIME.busy) statusNode.textContent = desc;
+    if (statusNode && !OPTIONAL_RUNTIME.busy) {
+      statusNode.textContent = desc + (OPTIONAL_RUNTIME.lastError ? ' · 最近操作失败：' + OPTIONAL_RUNTIME.lastError
+        : OPTIONAL_RUNTIME.source ? ' · 最近下载来源：' + OPTIONAL_RUNTIME.source : '');
+    }
   }
   function optionalSourceAllowed(url) {
     try {
@@ -177,7 +180,10 @@
       const timeout = HOST_WIN.setTimeout(() => control.abort(), 8000);
       optionalSetStatus('正在下载（' + (i + 1) + '/' + sources.length + '）：' + src.label);
       try {
-        const response = await SCRIPT_WIN.fetch(src.url, {
+        const fetcher = typeof SCRIPT_WIN.fetch === 'function'
+          ? SCRIPT_WIN.fetch.bind(SCRIPT_WIN) : HOST_WIN.fetch?.bind(HOST_WIN);
+        if (!fetcher) throw new Error('当前宿主不支持 fetch 网络接口');
+        const response = await fetcher(src.url, {
           method: 'GET', redirect: 'follow', cache: 'no-store', credentials: 'omit', signal: control.signal,
         });
         if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -248,6 +254,8 @@
       '确认从酒馆助手卸载「主题绑定壁纸」？\n不会删除原生图库图片，也不会主动清空已保存的主题壁纸绑定数据。'
     )) return;
     OPTIONAL_RUNTIME.busy = true;
+    OPTIONAL_RUNTIME.lastError = '';
+    OPTIONAL_RUNTIME.source = '';
     optionalRefreshUI();
     try {
       const trees = await Promise.resolve(bridge.read({ type: 'global' }));
@@ -286,7 +294,8 @@
         + (OPTIONAL_RUNTIME.source ? ' · 镜像：' + OPTIONAL_RUNTIME.source : ''));
       HOST_WIN.toastr?.success?.('主题绑定壁纸已' + label + '。', 'TLE 可选功能');
     } catch (error) {
-      optionalSetStatus('操作未完成：' + (error?.message || error));
+      OPTIONAL_RUNTIME.lastError = String(error?.message || error).slice(0, 340);
+      optionalSetStatus('操作未完成：' + OPTIONAL_RUNTIME.lastError);
       HOST_WIN.toastr?.error?.(error?.message || '请检查网络与酒馆助手脚本管理接口', 'TLE 可选功能');
       console.warn('[TLE 可选功能包] 操作失败', error);
     } finally {
