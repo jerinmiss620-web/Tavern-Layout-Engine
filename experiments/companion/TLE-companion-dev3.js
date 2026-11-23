@@ -7569,7 +7569,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   ];
   const companionRuntime = {
     lastRole: '', lastApplied: new Map(), applying: false, timer: 0,
-    pending: null, source: null, listeners: [],
+    pending: null, source: null, listeners: [], scheduleTimer: 0,
+    generationRetryTimer: 0, lastScheduleToken: '',
   };
   function companionCurrentRole() {
     try {
@@ -7588,10 +7589,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           plans: raw.plans.filter(p => p && typeof p.id === 'string' && typeof p.name === 'string'
             && Array.isArray(p.roles) && p.fields && typeof p.fields === 'object'),
           defaults: raw.defaults && typeof raw.defaults === 'object' ? raw.defaults : {},
+          schedules: raw.schedules && typeof raw.schedules === 'object' ? raw.schedules : {},
+          manualHolds: raw.manualHolds && typeof raw.manualHolds === 'object' ? raw.manualHolds : {},
         };
       }
     } catch (error) { console.warn('[配套侠] 读取方案失败', error); }
-    return { schema: 1, plans: [], defaults: {} };
+    return { schema: 1, plans: [], defaults: {}, schedules: {}, manualHolds: {} };
   }
   function companionSave(data) {
     try {
@@ -7647,6 +7650,78 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function companionTextButton(label, action) {
     return quickButton(label, action, 'menu_button');
   }
+
+  function companionClockTime(value) {
+    if (typeof value !== 'string' || !/^\d{2}:\d{2}$/.test(value)) return null;
+    const h = Number(value.slice(0, 2)), m = Number(value.slice(3, 5));
+    return h <= 23 && m <= 59 ? [h, m] : null;
+  }
+  function companionScheduleState(data, role, now = new Date()) {
+    const rule = data.schedules?.[role?.key];
+    if (!rule?.enabled || !role) return null;
+    const day = companionClockTime(rule.dayStart), night = companionClockTime(rule.nightStart);
+    if (!day || !night || rule.dayStart === rule.nightStart) return null;
+    const valid = id => data.plans.some(p => p.id === id && p.roles.includes(role.key));
+    if (!valid(rule.dayPlanId) || !valid(rule.nightPlanId)) return null;
+    const boundaries = [];
+    // Calendar days, not fixed 24-hour offsets, to accommodate local DST.
+    for (let offset = -1; offset <= 2; offset++) {
+      for (const [period, [h, m], id] of [
+        ['day', day, rule.dayPlanId], ['night', night, rule.nightPlanId],
+      ]) {
+        const at = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset, h, m).getTime();
+        boundaries.push({ period, id, at });
+      }
+    }
+    boundaries.sort((a, b) => a.at - b.at);
+    const current = [...boundaries].reverse().find(p => p.at <= now.getTime());
+    const next = boundaries.find(p => p.at > now.getTime());
+    return current && next
+      ? { period: current.period, planId: current.id, startedAt: current.at,
+          nextAt: next.at, nextPeriod: next.period, nextPlanId: next.id,
+          token: role.key + '|' + current.at + '|' + current.period }
+      : null;
+  }
+  function companionManualHold(data, role, slot, now = Date.now()) {
+    const hold = data.manualHolds?.[role?.key];
+    return Boolean(slot && hold && Number(hold.until) > now && Number(hold.until) <= slot.nextAt);
+  }
+  function companionAutoTarget(data, role, now = new Date()) {
+    if (!role) return null;
+    const slot = companionScheduleState(data, role, now);
+    const id = slot?.planId || (!data.schedules?.[role.key]?.enabled ? data.defaults[role.key] : '');
+    const plan = data.plans.find(p => p.id === id && p.roles.includes(role.key));
+    return plan ? { id: plan.id, plan, slot } : null;
+  }
+  function companionArmSchedule(slot) {
+    HOST_WIN.clearTimeout(companionRuntime.scheduleTimer);
+    companionRuntime.scheduleTimer = 0;
+    if (!slot || state.destroyed) return;
+    const delay = Math.min(2147000000, Math.max(250, slot.nextAt - Date.now() + 120));
+    companionRuntime.scheduleTimer = HOST_WIN.setTimeout(() => {
+      companionRuntime.scheduleTimer = 0;
+      companionOnChatChanged();
+    }, delay);
+  }
+  function companionQueueGenerationRetry() {
+    if (state.destroyed || companionRuntime.generationRetryTimer) return;
+    companionRuntime.generationRetryTimer = HOST_WIN.setTimeout(() => {
+      companionRuntime.generationRetryTimer = 0;
+      if (state.destroyed || !companionRuntime.pending) return;
+      if (isNativeGenerationVisible()) companionQueueGenerationRetry();
+      else companionOnChatChanged(true);
+    }, 12000);
+  }
+  function companionScheduleStatus(data, role) {
+    const slot = companionScheduleState(data, role);
+    if (!slot) return '';
+    const plan = data.plans.find(p => p.id === slot.planId);
+    const next = data.plans.find(p => p.id === slot.nextPlanId);
+    const nextTime = new Date(slot.nextAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (slot.period === 'day' ? '☀ 日间' : '☾ 夜间') + '：' + (plan?.name || '未知方案')
+      + ' · 下次 ' + nextTime + ' → ' + (next?.name || '未知方案');
+  }
+
   function companionRefreshList() {
     const list = state.chatTools.panel?.querySelector('[data-companion-list]');
     const heading = state.chatTools.panel?.querySelector('[data-companion-role]');
