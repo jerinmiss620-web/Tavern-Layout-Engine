@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.212",
+  "latest_version": "0.3.213",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.212",
-    "source_path": "releases/v0.3.212/TLE.js",
-    "source_commit": "6a90bc9fe4c8ccb1296893e53c05dce3caf268f0",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6a90bc9fe4c8ccb1296893e53c05dce3caf268f0/releases/v0.3.212/TLE.js",
-    "changelog_path": "releases/v0.3.212/CHANGELOG.md",
-    "sha256": "dec171929df01d54feaf342c64cdcfbbc924c95462e3a03c42ec35e6ea97b481",
-    "size_bytes": 576334
+    "version": "0.3.213",
+    "source_path": "releases/v0.3.213/TLE.js",
+    "source_commit": "d6c241855b8ecccdfdc3182a8025b8de7992776a",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d6c241855b8ecccdfdc3182a8025b8de7992776a/releases/v0.3.213/TLE.js",
+    "changelog_path": "releases/v0.3.213/CHANGELOG.md",
+    "sha256": "9ad123f6b0fba8055550bc5310bcbd7a399aa60b2793909767a43a9c64191c00",
+    "size_bytes": 579163
   },
-  "notes": "Core v0.3.212: 内置配套侠，新增独立可选功能包「Freesia 覆盖侠 1.88.6」与「主题绑定壁纸 4.1」，安装前校验哈希；Bootstrap 与 Loader 无变化。"
+  "notes": "v0.3.213：可选功能包两张卡片统一显示名称、明确功能、版本、作者与实际入口；「更多」弹窗补全覆盖侠各项功能。两款独立包本体、配套侠与更新链均不变。"
 }
