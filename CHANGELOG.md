@@ -1,10 +1,12 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.212 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
+目前正式版：**Core v0.3.213 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
 
 ## Core 更新记录
+
+- [v0.3.213](releases/v0.3.213/CHANGELOG.md)
 
 - [v0.3.212](releases/v0.3.212/CHANGELOG.md)
 
