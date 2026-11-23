@@ -7883,8 +7883,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       companionRuntime.lastApplied.set(role.key, id);
       companionNotice('success', '已应用「' + plan.name + '」；绑定壁纸跟随 UI 主题。');
     } catch (error) {
-      companionNotice('warning', '方案只完成 ' + finished + ' 项，已停止：' + (error?.message || error));
-      console.warn('[配套侠] 应用中断', error);
+      const superseded = automatic && companionCurrentRole()?.key !== role.key;
+      if (superseded) {
+        // Switching away is expected; don't alarm the user when a newer role supersedes this request.
+        console.info('[配套侠] 已取消前一角色的待完成方案。');
+      } else {
+        companionNotice('warning', '方案只完成 ' + finished + ' 项，已停止：' + (error?.message || error));
+        console.warn('[配套侠] 应用中断', error);
+      }
     } finally {
       companionRuntime.applying = false;
       companionRefreshList();
