@@ -15,7 +15,8 @@ const json = path => JSON.parse(read(path));
 function checkInfo(info, label) {
   assert.equal(typeof info, 'string', label + ': missing info');
   assert.ok(info.length > 50 && info.length < 1600, label + ': info length');
-  assert.doesNotMatch(info, /[\r\n]|\\n/, label + ': info must be one line');
+  assert.doesNotMatch(info, /\\n/, label + ': info must not contain escaped newline characters');
+  if (label.startsWith('stable v0.3.212')) assert.match(info, /\n\n/, label + ': expected real paragraph spacing');
   for (const section of ['简介', '使用方式', '注意事项', '作者']) {
     assert.ok(info.includes(section), label + ': missing ' + section);
   }
