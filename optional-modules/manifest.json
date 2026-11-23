@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "title": "TLE Optional Modules · Experimental",
+  "channel": "test",
+  "packages": [
+    {
+      "key": "theme-wallpaper",
+      "name": "主题绑定壁纸",
+      "description": "主题绑定原生图库壁纸，支持多图随机切换、跨文件夹绑定；配套侠切换主题后壁纸自动跟随。",
+      "author": "小松鼠",
+      "version": "4.1",
+      "script_id": "d354e7f5-1719-4942-a63d-71f6db16c059",
+      "filename": "theme-wallpaper-v4.1.json",
+      "size_bytes": 42582,
+      "sha256": "e51d1a5be296a67d2c3d120e294111cc43b5830fd940f651d7f2c8ee64a608d8",
+      "sources": [
+        {
+          "label": "GitHub Raw",
+          "url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/dfa40fdb6410a2f251d8987fbb64723187bb0dd8/optional-modules/theme-wallpaper/theme-wallpaper-v4.1.json"
+        },
+        {
+          "label": "jsDelivr",
+          "url": "https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@dfa40fdb6410a2f251d8987fbb64723187bb0dd8/optional-modules/theme-wallpaper/theme-wallpaper-v4.1.json"
+        },
+        {
+          "label": "Fastly jsDelivr",
+          "url": "https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@dfa40fdb6410a2f251d8987fbb64723187bb0dd8/optional-modules/theme-wallpaper/theme-wallpaper-v4.1.json"
+        },
+        {
+          "label": "TestingCF jsDelivr",
+          "url": "https://testingcf.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@dfa40fdb6410a2f251d8987fbb64723187bb0dd8/optional-modules/theme-wallpaper/theme-wallpaper-v4.1.json"
+        }
+      ]
+    }
+  ]
+}
