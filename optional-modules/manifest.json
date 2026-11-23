@@ -35,31 +35,31 @@
     {
       "key": "freesia-override",
       "name": "Freesia 覆盖侠",
-      "description": "字体导入与常驻使用、正文排版、留白居中、滚动条及头像调校；支持临时预览和写入主题 CSS。",
+      "description": "字体管理、正文排版、留白居中、滚动条与头像焦点调校；实时预览和实时使用在原按钮上切换，也可写入主题 CSS；兼容 TT 字体比例读取。",
       "entry_location": "底栏 → 扩展菜单（魔法棒）→ Freesia 覆盖侠",
       "independent": true,
       "author": "小松鼠 & ChatGPT（小松7）",
-      "version": "1.88.5",
+      "version": "1.88.6",
       "script_id": "66c0243c-e963-48a3-a960-ed641bbb332e",
-      "filename": "freesia-override-v1.88.5.json",
-      "size_bytes": 228364,
-      "sha256": "9a81aaae61f39580795bcff9bc361d9ff51e396162187ac2629ac6c7ccb0e3d9",
+      "filename": "freesia-override-v1.88.6.json",
+      "size_bytes": 234040,
+      "sha256": "fc312e0c928c3737d0ff0f1eb8f01cfda1365a59601b39f3b07f84d1e821828b",
       "sources": [
         {
           "label": "GitHub Raw",
-          "url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a1d94697942e83c56f3385b872562c41ef721cda/optional-modules/freesia-override/freesia-override-v1.88.5.json"
+          "url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d27a6c387b868c76910f108d65953b15bcb6b68b/optional-modules/freesia-override/freesia-override-v1.88.6.json"
         },
         {
           "label": "jsDelivr",
-          "url": "https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@a1d94697942e83c56f3385b872562c41ef721cda/optional-modules/freesia-override/freesia-override-v1.88.5.json"
+          "url": "https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@d27a6c387b868c76910f108d65953b15bcb6b68b/optional-modules/freesia-override/freesia-override-v1.88.6.json"
         },
         {
           "label": "Fastly jsDelivr",
-          "url": "https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@a1d94697942e83c56f3385b872562c41ef721cda/optional-modules/freesia-override/freesia-override-v1.88.5.json"
+          "url": "https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@d27a6c387b868c76910f108d65953b15bcb6b68b/optional-modules/freesia-override/freesia-override-v1.88.6.json"
         },
         {
           "label": "TestingCF jsDelivr",
-          "url": "https://testingcf.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@a1d94697942e83c56f3385b872562c41ef721cda/optional-modules/freesia-override/freesia-override-v1.88.5.json"
+          "url": "https://testingcf.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@d27a6c387b868c76910f108d65953b15bcb6b68b/optional-modules/freesia-override/freesia-override-v1.88.6.json"
         }
       ]
     }
