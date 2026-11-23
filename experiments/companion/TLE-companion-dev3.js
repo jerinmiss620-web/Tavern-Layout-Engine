@@ -7892,7 +7892,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     shell.body.append(form);
   }
 
-  function companionRenderSchedule(host, role, data) {
+  function companionRenderSchedule(host, role, data, rerender) {
     const section = quickNode('section', 'tle-companion-schedule');
     const heading = quickNode('div', 'tle-companion-title');
     heading.append(quickNode('strong', '', '日夜定时 · 当前角色'));
@@ -7960,9 +7960,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         : '日夜定时已关闭；原有角色默认方案仍保留。');
       companionOnChatChanged(next.enabled);
       companionRefreshList();
-      status.textContent = next.enabled
-        ? (companionScheduleStatus(fresh, role) || '无法识别当前时段')
-        : '定时已关闭；下次进入角色使用默认方案。';
+      rerender();
     });
     save.disabled = !plans.length;
     section.append(save);
@@ -8036,7 +8034,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         body.append(card);
       }
       if (!plans.length) body.append(quickNode('p', 'tle-quick-empty', '当前角色没有配套方案。'));
-      companionRenderSchedule(body, role, data);
+      companionRenderSchedule(body, role, data, render);
     };
     render();
   }
