@@ -9,7 +9,7 @@
     { label: 'jsDelivr · 固定快照', url: 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@49570194e2a160c18f082970e78cfe04ff776ce3/optional-modules/manifest.json' },
     { label: 'Fastly · 固定快照', url: 'https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@49570194e2a160c18f082970e78cfe04ff776ce3/optional-modules/manifest.json' },
   ];
-  const OPTIONAL_RUNTIME = { busy: false, source: '', lastError: '', status: '' };
+  const OPTIONAL_RUNTIME = { busy: false, source: '', lastError: '', status: '', controller: null };
   function optionalUtf8(text) {
     const Encoder = SCRIPT_WIN.TextEncoder || HOST_WIN.TextEncoder;
     if (typeof Encoder === 'function') return new Encoder().encode(text);
@@ -177,6 +177,7 @@
       const src = sources[i];
       if (state.destroyed) throw new Error('TLE 已退出');
       const control = new HOST_WIN.AbortController();
+      OPTIONAL_RUNTIME.controller = control;
       const timeout = HOST_WIN.setTimeout(() => control.abort(), 8000);
       optionalSetStatus('正在下载（' + (i + 1) + '/' + sources.length + '）：' + src.label);
       try {
@@ -198,6 +199,7 @@
         console.warn('[TLE 可选功能包] 镜像失败，尝试备用地址：', src.label, error);
       } finally {
         HOST_WIN.clearTimeout(timeout);
+        if (OPTIONAL_RUNTIME.controller === control) OPTIONAL_RUNTIME.controller = null;
       }
     }
     throw new Error('所有镜像均失败。' + errors.map(x => '\n' + x).join(''));
@@ -266,6 +268,7 @@
         if (matches.matchingIds.length) throw new Error('已安装该脚本，不会重复导入');
         const manifest = await optionalGetManifest();
         const file = await optionalGetPackage(manifest);
+        if (state.destroyed) throw new Error('TLE 已关闭，取消导入');
         optionalSetStatus('下载与 SHA-256 校验通过，正在导入酒馆助手…');
         await Promise.resolve(bridge.write(existing => {
           const match = optionalFind(existing);
@@ -302,4 +305,8 @@
       OPTIONAL_RUNTIME.busy = false;
       optionalRefreshUI();
     }
+  }
+  function optionalCleanup() {
+    try { OPTIONAL_RUNTIME.controller?.abort?.(); } catch {}
+    OPTIONAL_RUNTIME.controller = null;
   }
