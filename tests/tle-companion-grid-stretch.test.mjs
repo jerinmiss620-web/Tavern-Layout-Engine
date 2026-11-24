@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const read = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
+const {core} = JSON.parse(read('release-plan.json'));
+const source = read('releases/v' + core + '/TLE.js');
+const rule = source.match(/#tle-quick-picker#tle-quick-picker\s+\.tle-companion-schedule-row > input\[type="time"\]\.text_pole\s*\{([^}]+)\}/);
+assert.ok(rule, 'Scoped time control rule missing');
+for (const decl of ['box-sizing: border-box','width: auto','min-width: 0','max-width: 100%','justify-self: stretch','margin-inline: 0']) assert.ok(rule[1].includes(decl + ' !important'), decl);
+assert.doesNotMatch(source, /\.tle-companion-schedule-row > \.text_pole\s*\{/);
+assert.doesNotMatch(source, /companionOverflowReport|widthProbe|probeOutput|检查横向溢出/);
+assert.ok(source.includes('function watchDiagnosticButton()'));
+console.log('Companion time control layout regression checks passed.');
