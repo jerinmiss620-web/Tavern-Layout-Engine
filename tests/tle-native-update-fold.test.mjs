@@ -54,9 +54,17 @@ assert.match(source, /正常主题不要开启：此修复会强制调整按钮�
 const prevSource = read('tests/fixtures/legacy/core-v0.3.207.js');
 const compatSelectorStart = 'body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle {';
 const compatSelectorEnd = '/* Optional structural layout repair.';
+const compatNavTextStart = '/* Opt-in sidebar text only.';
 function compatRules(text) {
   const start = text.indexOf(compatSelectorStart);
-  return text.slice(start, text.indexOf(compatSelectorEnd, start));
+  assert.ok(start >= 0, 'opt-in native navigation repair rules missing');
+  const nextStructural = text.indexOf(compatSelectorEnd, start);
+  const nextTextColor = text.indexOf(compatNavTextStart, start);
+  // New opt-in text-colour rules are separate from the unchanged layout repair.
+  // Compare ONLY the old repair block; do not accidentally include the next feature.
+  const end = nextTextColor >= 0 && nextTextColor < nextStructural ? nextTextColor : nextStructural;
+  assert.ok(end > start, 'opt-in native navigation repair block has no endpoint');
+  return text.slice(start, end);
 }
 assert.equal(compatRules(source), compatRules(prevSource), 'existing opt-in navigation repair behavior must remain unchanged');
 const helpStart = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-range-help {');
