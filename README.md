@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.213 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.214 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -19,7 +19,7 @@
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.213/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.214/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
 - [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；故障注入及长期可靠性仍未实机覆盖。
 
@@ -40,6 +40,14 @@ Bootstrap 启动即出现「TLE 正在努力加载中，请稍候…」，至少
 **配套侠**已经成为 TLE 内置功能，可在 TLE 控制面板保存、关联和管理角色配置，并自动联动预设、模型、推理格式及 UI 主题，无须另装脚本。
 
 两款独立可选脚本可以从「可选功能包」中按需安装：**Freesia 覆盖侠 v1.88.6**（实际入口：底栏扩展菜单／魔法棒）和 **主题绑定壁纸 v4.1**（实际入口：酒馆原生背景面板顶部工具栏）。功能包只负责脚本安装与管理，**实际操作不在 TLE 面板中**。详见 [可选功能包使用说明](optional-modules/README.md) 和 [统一展示规范](optional-modules/DISPLAY-STANDARD.md)。
+
+### Core v0.3.214 · 导航兼容性与滑屏体验
+
+新增可选的**侧边栏文字颜色自定义**，仅影响 TLE 左侧栏的文字和文字按钮，不强行改变原生导航图标、聊天正文或其他面板；关闭即恢复主题颜色。
+
+「导航交互」新增**滑动开关侧栏**（默认关闭），右滑打开、侧栏内部左滑关闭。启用时自动通过酒馆原生「手势」设置关闭聊天左右翻页手势；关闭 TLE 选项时仅恢复此前由 TLE 代为关闭的设置。消息回复版本箭头和汉堡按钮保留。PC 可在浏览器移动设备模拟模式中发出触摸事件测试。
+
+**兼容性说明：** PC 模拟触摸和 iPhone 已有用户验证通过；安卓设备品牌、系统导航方式差异较大，可能触发系统返回、导航栏或退出应用，暂不保证可用。安卓用户可主动测试，发生冲突立即关闭该选项，TLE 不会禁用安卓系统手势。无需重新导入 Bootstrap；保持原有自动更新链即可。
 
 ### Core v0.3.213 · 功能包展示统一
 
