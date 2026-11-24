@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.213",
+  "latest_version": "0.3.214",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.213",
-    "source_path": "releases/v0.3.213/TLE.js",
-    "source_commit": "d6c241855b8ecccdfdc3182a8025b8de7992776a",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d6c241855b8ecccdfdc3182a8025b8de7992776a/releases/v0.3.213/TLE.js",
-    "changelog_path": "releases/v0.3.213/CHANGELOG.md",
-    "sha256": "9ad123f6b0fba8055550bc5310bcbd7a399aa60b2793909767a43a9c64191c00",
-    "size_bytes": 579163
+    "version": "0.3.214",
+    "source_path": "releases/v0.3.214/TLE.js",
+    "source_commit": "4c180effca7902ee10ae916b6605168e590ee3f3",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4c180effca7902ee10ae916b6605168e590ee3f3/releases/v0.3.214/TLE.js",
+    "changelog_path": "releases/v0.3.214/CHANGELOG.md",
+    "sha256": "8f487a31179cc759deead6edbab99c7cbe23005cf10b05cf2d2792c0b2e8deab",
+    "size_bytes": 595213
   },
-  "notes": "v0.3.213：可选功能包两张卡片统一显示名称、明确功能、版本、作者与实际入口；「更多」弹窗补全覆盖侠各项功能。两款独立包本体、配套侠与更新链均不变。"
+  "notes": "v0.3.214：新增导航栏文字颜色自定义；可选滑屏开关侧栏并自动关闭/按需恢复酒馆原生翻页手势。PC 模拟触摸与 iPhone 已验证；安卓可能与系统返回冲突，默认关闭。Bootstrap 和 Loader 不变。"
 }

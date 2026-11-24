@@ -13,5 +13,5 @@
     "sha256": "344df210747a2d9813f948ebed672fc9ad6004649a5be14ea49978f21dcfa48d",
     "size_bytes": 52840
   },
-  "notes": "Bootstrap 1.0.6 / Loader 0.3.6: IndexedDB reconnect and immediate progress notice; CI simulation required; iPhone TT/WebKit runtime test pending."
+  "notes": "Loader v0.3.6 不变；Core v0.3.214 更新导航栏文字颜色兼容及可选滑屏/酒馆翻页手势联动。原有 Bootstrap 1.0.6 与 SHA-256 校验、缓存恢复及自动更新机制不变。"
 }
