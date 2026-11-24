@@ -7096,7 +7096,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
   function navEdgeSwipeAllowed() {
     const body = HOST_DOC.body;
-    if (!navEdgeSwipeEnabled || state.destroyed || !state.active || !isMobileViewport() || !usesHamburger() || state.mobileNav.docked) return false;
+    if (!navEdgeSwipeEnabled || state.destroyed || !state.active || !usesHamburger() || state.mobileNav.docked) return false;
+    // Supports Android tablets in landscape when hamburger navigation is enabled.
+    if (!('ontouchstart' in HOST_WIN || Number(HOST_WIN.navigator?.maxTouchPoints) > 0)) return false;
     if (body.hasAttribute('data-tle-external-surface') || body.classList.contains('tle-global-search-open') || body.classList.contains('tle-quick-modal-open')) return false;
     if (state.panel?.dataset.open === 'true' || state.chatTools.open || HOST_DOC.querySelector('dialog[open], .popup.openDrawer')) return false;
     // Hidden native drawers may retain openDrawer after overlay closes. Their stale
@@ -7108,8 +7110,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     const vv = HOST_WIN.visualViewport;
     if (vv && (vv.scale > 1.05 || vv.height < HOST_DOC.documentElement.clientHeight * .75)) return false;
-    const focus = HOST_DOC.activeElement;
-    if (focus?.matches?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return false;
+    // A chat textarea may keep DOM focus even after its keyboard closes. Do not
+    // reject ALL future navigation swipes for that stale focus; touched form
+    // controls are excluded separately by blockedTarget().
     return true;
   }
   function syncNavEdgeSwipe() {
