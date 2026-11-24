@@ -13,5 +13,5 @@
     "sha256": "344df210747a2d9813f948ebed672fc9ad6004649a5be14ea49978f21dcfa48d",
     "size_bytes": 52840
   },
-  "notes": "Loader v0.3.6 不变；Core v0.3.214 更新导航栏文字颜色兼容及可选滑屏/酒馆翻页手势联动。原有 Bootstrap 1.0.6 与 SHA-256 校验、缓存恢复及自动更新机制不变。"
+  "notes": "Loader v0.3.6 与 Bootstrap v1.0.6 保持不变；Core v0.3.217 修复 TT 滑屏及原生手势同步。"
 }

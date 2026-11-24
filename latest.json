@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.215",
+  "latest_version": "0.3.217",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.215",
-    "source_path": "releases/v0.3.215/TLE.js",
-    "source_commit": "d97cc9c5e4bde843b15148735f699d7104e7f524",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d97cc9c5e4bde843b15148735f699d7104e7f524/releases/v0.3.215/TLE.js",
-    "changelog_path": "releases/v0.3.215/CHANGELOG.md",
-    "sha256": "4f25ffeb31598067ede6f5d33a4a3b7cb8da2569e558296605421db4aa9aafa2",
-    "size_bytes": 596388
+    "version": "0.3.217",
+    "source_path": "releases/v0.3.217/TLE.js",
+    "source_commit": "a83a490fe740bcc03cb8fc45fac611440a8b1558",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a83a490fe740bcc03cb8fc45fac611440a8b1558/releases/v0.3.217/TLE.js",
+    "changelog_path": "releases/v0.3.217/CHANGELOG.md",
+    "sha256": "6b9af72f08b082b7d03bb514f369f4eee7e843626345a18319eef5de283bb61c",
+    "size_bytes": 600739
   },
-  "notes": "v0.3.215：修复配套侠管理窗横向溢出，优化日夜定时输入框与移动端管理窗尺寸；会话侠明确上下内边距。已获用户测试确认，Bootstrap 和 Loader 不变。"
+  "notes": "修复 TT 滑屏与原生手势首次同步；v0.3.217 独立测试版已获 iPhone TT 用户验证。Bootstrap、Loader 不变。"
 }
