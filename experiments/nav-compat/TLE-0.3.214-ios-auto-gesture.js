@@ -7164,11 +7164,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (!isIOSHost() || !navEdgeSwipeEnabled || state.destroyed || !state.active ||
         !isMobileViewport() || !usesHamburger() || state.mobileNav.docked) return false;
     if (body.hasAttribute('data-tle-external-surface') || body.classList.contains('tle-global-search-open') || body.classList.contains('tle-quick-modal-open')) return false;
-    if (state.panel?.dataset.open === 'true' || state.chatTools.open || HOST_DOC.querySelector('dialog[open], .popup.openDrawer, .drawer-content.openDrawer:not(.pinnedOpen)')) return false;
+    if (state.panel?.dataset.open === 'true' || state.chatTools.open ||
+        HOST_DOC.querySelector('dialog[open], .popup.openDrawer')) return false;
+    // A hidden native drawer can retain openDrawer even after TLE closes the rail;
+    // its stale class must not permanently block subsequent swipe openings.
+    for (const drawer of HOST_DOC.querySelectorAll('.drawer-content.openDrawer:not(.pinnedOpen)')) {
+      if (drawer === state.panel || drawer.closest('#top-settings-holder')) continue;
+      const computed = HOST_WIN.getComputedStyle(drawer);
+      if (drawer.getClientRects().length && computed.display !== 'none' && computed.visibility !== 'hidden') return false;
+    }
+    // Respect ST if its native gesture was manually switched back on.
+    if (navEdgeSwipeEnabled && nativeGestureCheckbox()?.checked !== false) return false;
     const vv = HOST_WIN.visualViewport;
     if (vv && (vv.scale > 1.05 || vv.height < HOST_DOC.documentElement.clientHeight * .75)) return false;
-    const focus = HOST_DOC.activeElement;
-    if (focus?.matches?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return false;
+    // Touching an actual form control is filtered in blockedTarget().
+    // A textarea retaining focus after its keyboard closes is not a gesture blocker.
     return true;
   }
   function syncNavEdgeSwipe() {
