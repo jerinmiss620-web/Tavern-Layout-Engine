@@ -8837,6 +8837,78 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     host.append(section);
   }
 
+  // Experimental, read-only width probe: measures live host/theme-computed sizes,
+  // rather than assuming TLE or the native .popup is responsible for overflow.
+  function companionOverflowReport(surface, content) {
+    const viewport = HOST_WIN.visualViewport;
+    const box = content.getBoundingClientRect();
+    const round = n => Math.round(Number(n) * 10) / 10;
+    const identify = el => {
+      const parts = [el.tagName?.toLowerCase() || '?'];
+      if (el.id) parts.push('#' + el.id);
+      for (const cls of Array.from(el.classList || []).slice(0, 3)) parts.push('.' + cls);
+      return parts.join('');
+    };
+    const nodes = [surface, content, ...Array.from(content.querySelectorAll('*'))];
+    const values = nodes.map(el => {
+      const rect = el.getBoundingClientRect(), css = HOST_WIN.getComputedStyle(el);
+      return {
+        element: identify(el),
+        client: el.clientWidth,
+        scroll: el.scrollWidth,
+        rectW: round(rect.width),
+        left: round(rect.left),
+        right: round(rect.right),
+        overX: Math.max(0, el.scrollWidth - el.clientWidth),
+        excessR: Math.max(0, round(rect.right - box.right)),
+        excessL: Math.max(0, round(box.left - rect.left)),
+        display: css.display,
+        minW: css.minWidth,
+        maxW: css.maxWidth,
+        cssW: css.width,
+        boxSizing: css.boxSizing,
+        margin: css.margin,
+        padding: css.padding,
+        overflowX: css.overflowX,
+        overflowY: css.overflowY,
+        whiteSpace: css.whiteSpace,
+        flex: css.flex,
+        flexWrap: css.flexWrap,
+        grid: css.gridTemplateColumns,
+      };
+    });
+    const line = v => [
+      v.element, 'client=' + v.client, 'scroll=' + v.scroll,
+      'rectW=' + v.rectW, 'overX=' + v.overX,
+      'beyond=' + v.excessL + '/' + v.excessR,
+      'width=' + v.cssW, 'min=' + v.minW, 'max=' + v.maxW,
+      'box=' + v.boxSizing, 'margin=' + v.margin, 'padding=' + v.padding,
+      'overflow=' + v.overflowX + '/' + v.overflowY,
+      'display=' + v.display, 'flex=' + v.flex,
+      'wrap=' + v.flexWrap, 'grid=' + v.grid, 'whiteSpace=' + v.whiteSpace,
+    ].join(' | ');
+    const excess = values.filter(v => v.overX > 2 || v.excessL > 2 || v.excessR > 2)
+      .sort((a,b) => Math.max(b.overX, b.excessL, b.excessR) -
+                      Math.max(a.overX, a.excessL, a.excessR)).slice(0,25);
+    const special = values.filter(v => /companion-(plan|actions|copy|schedule|title|manager|editor)|text_pole/.test(v.element)).slice(0,20);
+    const direct = values.filter(v => v.element === identify(surface) || v.element === identify(content));
+    return [
+      'TLE v0.3.215 / 配套侠管理窗横向溢出检测',
+      'viewport=' + HOST_DOC.documentElement.clientWidth + 'x' + HOST_DOC.documentElement.clientHeight +
+        ' visual=' + (viewport ? round(viewport.width) + 'x' + round(viewport.height) + ' scale=' + round(viewport.scale) : 'none'),
+      'rootClient=' + content.clientWidth + ' rootScroll=' + content.scrollWidth +
+        ' rootOverflowX=' + HOST_WIN.getComputedStyle(content).overflowX,
+      'popupClient=' + surface.clientWidth + ' popupScroll=' + surface.scrollWidth,
+      'managerBounds=' + round(box.left) + ',' + round(box.right),
+      '—— 父级尺寸与样式 ——',
+      ...direct.map(line),
+      '—— 超出宽度的元素（按超出像素排序） ——',
+      ...(excess.length ? excess.map(line) : ['未发现几何超出（如仍有横向滚动，请提供实际滑动发生位置）。']),
+      '—— 关键元素尺寸 ——',
+      ...special.map(line),
+    ].join('\n');
+  }
+
   function companionOpenManager() {
     closeChatTools(false);
     const role = companionCurrentRole();
@@ -8907,6 +8979,38 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       companionRenderSchedule(body, role, data, render);
     };
     render();
+    // Temporary diagnostics for the private test branch only.
+    // This control is OUTSIDE the scrollable manager, so it cannot affect
+    // the measured horizontal scroll width of the actual content.
+    const widthProbe = companionTextButton('检查横向溢出', async () => {
+      const report = companionOverflowReport(shell.body, body);
+      probeOutput.value = report;
+      probeOutput.hidden = false;
+      probeOutput.style.display = 'block';
+      let copied = false;
+      try {
+        if (HOST_WIN.navigator.clipboard?.writeText) {
+          await HOST_WIN.navigator.clipboard.writeText(report);
+          copied = true;
+        }
+      } catch {}
+      if (!copied) {
+        probeOutput.focus({ preventScroll: true });
+        probeOutput.select();
+        try { copied = HOST_DOC.execCommand('copy'); } catch {}
+      }
+      companionNotice(copied ? 'success' : 'info',
+        copied ? '横向溢出检测结果已复制，请粘贴给我。'
+          : '请在下方诊断文本框长按全选并复制结果。');
+    });
+    const probeOutput = HOST_DOC.createElement('textarea');
+    probeOutput.className = 'text_pole';
+    probeOutput.readOnly = true;
+    probeOutput.hidden = true;
+    probeOutput.rows = 7;
+    probeOutput.setAttribute('aria-label', '配套侠横向溢出检测结果');
+    probeOutput.style.cssText = 'display:none;width:100%;max-width:100%;box-sizing:border-box;resize:vertical;';
+    shell.body.append(widthProbe, probeOutput);
   }
   async function companionApply(id, automatic = false) {
     if (state.destroyed) return;
