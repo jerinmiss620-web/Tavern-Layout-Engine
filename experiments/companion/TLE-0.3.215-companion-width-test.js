@@ -8849,7 +8849,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       for (const cls of Array.from(el.classList || []).slice(0, 3)) parts.push('.' + cls);
       return parts.join('');
     };
-    const nodes = [surface, content, ...Array.from(content.querySelectorAll('*'))];
+    const overlay = surface.parentElement;
+    const nodes = [...new Set([overlay, surface, content, ...Array.from(surface.querySelectorAll('*'))])].filter(Boolean);
     const values = nodes.map(el => {
       const rect = el.getBoundingClientRect(), css = HOST_WIN.getComputedStyle(el);
       return {
@@ -8891,7 +8892,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       .sort((a,b) => Math.max(b.overX, b.excessL, b.excessR) -
                       Math.max(a.overX, a.excessL, a.excessR)).slice(0,25);
     const special = values.filter(v => /companion-(plan|actions|copy|schedule|title|manager|editor)|text_pole/.test(v.element)).slice(0,20);
-    const direct = values.filter(v => v.element === identify(surface) || v.element === identify(content));
+    const direct = values.filter(v => v.element === identify(overlay) || v.element === identify(surface) || v.element === identify(content));
     return [
       'TLE v0.3.215 / 配套侠管理窗横向溢出检测',
       'viewport=' + HOST_DOC.documentElement.clientWidth + 'x' + HOST_DOC.documentElement.clientHeight +
@@ -8899,6 +8900,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       'rootClient=' + content.clientWidth + ' rootScroll=' + content.scrollWidth +
         ' rootOverflowX=' + HOST_WIN.getComputedStyle(content).overflowX,
       'popupClient=' + surface.clientWidth + ' popupScroll=' + surface.scrollWidth,
+      'overlayClient=' + overlay?.clientWidth + ' overlayScroll=' + overlay?.scrollWidth,
+      'documentClient=' + HOST_DOC.documentElement.clientWidth + ' documentScroll=' + HOST_DOC.documentElement.scrollWidth,
       'managerBounds=' + round(box.left) + ',' + round(box.right),
       '—— 父级尺寸与样式 ——',
       ...direct.map(line),
