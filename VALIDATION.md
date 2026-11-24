@@ -1,6 +1,6 @@
 # 自动更新验证记录 — 2026-11-22
 
-当前发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core 0.3.211。
+当前发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core 0.3.217。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
 
