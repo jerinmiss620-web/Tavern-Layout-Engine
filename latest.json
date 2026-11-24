@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.214",
+  "latest_version": "0.3.215",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.214",
-    "source_path": "releases/v0.3.214/TLE.js",
-    "source_commit": "4c180effca7902ee10ae916b6605168e590ee3f3",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4c180effca7902ee10ae916b6605168e590ee3f3/releases/v0.3.214/TLE.js",
-    "changelog_path": "releases/v0.3.214/CHANGELOG.md",
-    "sha256": "8f487a31179cc759deead6edbab99c7cbe23005cf10b05cf2d2792c0b2e8deab",
-    "size_bytes": 595213
+    "version": "0.3.215",
+    "source_path": "releases/v0.3.215/TLE.js",
+    "source_commit": "d97cc9c5e4bde843b15148735f699d7104e7f524",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d97cc9c5e4bde843b15148735f699d7104e7f524/releases/v0.3.215/TLE.js",
+    "changelog_path": "releases/v0.3.215/CHANGELOG.md",
+    "sha256": "4f25ffeb31598067ede6f5d33a4a3b7cb8da2569e558296605421db4aa9aafa2",
+    "size_bytes": 596388
   },
-  "notes": "v0.3.214：新增导航栏文字颜色自定义；可选滑屏开关侧栏并自动关闭/按需恢复酒馆原生翻页手势。PC 模拟触摸与 iPhone 已验证；安卓可能与系统返回冲突，默认关闭。Bootstrap 和 Loader 不变。"
+  "notes": "v0.3.215：修复配套侠管理窗横向溢出，优化日夜定时输入框与移动端管理窗尺寸；会话侠明确上下内边距。已获用户测试确认，Bootstrap 和 Loader 不变。"
 }
