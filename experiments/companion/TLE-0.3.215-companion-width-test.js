@@ -2899,6 +2899,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         box-sizing: border-box;
         overflow: visible;
       }
+      /* Companion plan management uses the Session Tools plan-page height.
+         Desktop stays 560px wide (wider than Session Tools' 460px). */
+      #tle-quick-picker[data-tle-quick-panel="companion-manager"] > .tle-quick-picker-surface {
+        height: min(80dvh, 700px);
+        max-height: min(80dvh, 700px);
+      }
 .tle-quick-picker-surface .tle-quick-heading {
   display: flex;
   flex: 0 0 auto;
@@ -3451,8 +3457,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         #tle-quick-picker:is([data-tle-quick-panel="companion-manager"], [data-tle-quick-panel="companion-editor"]) > .tle-quick-picker-surface {
           width: calc(100vw - 16px);
           max-width: calc(100vw - 16px);
-          height: min(80dvh, 700px);
-          max-height: min(80dvh, 700px);
         }
       }
 
