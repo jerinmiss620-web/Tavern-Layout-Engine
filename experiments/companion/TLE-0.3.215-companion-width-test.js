@@ -855,6 +855,7 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   min-width: 0;
   box-sizing: border-box;
   overflow: visible;
+  padding-block: 12px;
   text-align: start;
 }
 #${ID.chatToolsPanel}[hidden] { display: none !important; }
@@ -3444,6 +3445,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           gap: 9px;
           border-radius: 12px;
           overflow: visible;
+        }
+        /* Companion management/editing needs the same usable mobile width as
+           the Session Tools panel. Keep their 560px desktop width unchanged. */
+        #tle-quick-picker:is([data-tle-quick-panel="companion-manager"], [data-tle-quick-panel="companion-editor"]) > .tle-quick-picker-surface {
+          width: calc(100vw - 16px);
+          max-width: calc(100vw - 16px);
+          height: min(80dvh, 700px);
+          max-height: min(80dvh, 700px);
         }
       }
 
