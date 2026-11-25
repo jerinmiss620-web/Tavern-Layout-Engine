@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.239
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.240
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -6817,12 +6817,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const INFO_STORAGE_KEY = 'tle.sidebarInfo.v1';
-  const INFO_ENABLED_KEY = 'tle.sidebarInfo.enabled';
-  function getInfoEnabled() {
-    try { return HOST_WIN.localStorage.getItem(INFO_ENABLED_KEY) === 'true'; }
-    catch { return false; }
-  }
-  let infoEnabled = getInfoEnabled();
+  // Information-station visibility is derived exclusively from navigationMode === 'info'.
+  // The legacy standalone enable key is intentionally no longer read.
   const INFO_MODULES = [
     { id: 'preset', title: '当前预设', jump: true },
     { id: 'api', title: 'API 连接与模型', jump: true },
@@ -6858,7 +6854,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
   function readInfoSettings() {
     const defaults = Object.fromEntries(INFO_MODULES.map(item => [
-      item.id, { visible: false, jump: item.jump, quick: false }
+      item.id, { visible: true, jump: item.jump, quick: item.id !== 'characterWorldBook' }
     ]));
     try {
       const saved = JSON.parse(HOST_WIN.localStorage.getItem(INFO_STORAGE_KEY) || '{}');
@@ -6893,11 +6889,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
   function saveInfoNavWidth() {
     try { HOST_WIN.localStorage.setItem(NAV_WIDTH_KEY, String(infoNavWidth)); } catch {}
-  }
-
-  function saveInfoEnabled() {
-    try { HOST_WIN.localStorage.setItem(INFO_ENABLED_KEY, String(infoEnabled)); }
-    catch (error) { console.warn('[Tavern Layout Engine] 信息站总开关保存失败。', error); }
   }
 
   function saveInfoSettings() {
@@ -7395,7 +7386,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     // Remove them even when the station is disabled or its rows are not rendered.
     station.querySelectorAll('.tle-chat-actions, [data-tle-chat-actions], [data-chat-action-row]').forEach(node => node.remove());
 
-    const enabled = infoEnabled && navigationMode === 'info'
+    const enabled = navigationMode === 'info'
       && INFO_STATION_MODULES.some(item => infoSettings[item.id].visible);
     if (!enabled) { station.hidden = true; return; }
     const values = getInfoValues();
@@ -10707,14 +10698,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.239 · 搜索框统一继承主题原生样式</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.240 · 搜索框统一继承主题原生样式</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.239</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.240</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -10828,11 +10819,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content">
-            <label class="tle-row" style="justify-content:flex-start;gap:10px;margin:10px 0;">
-              <input type="checkbox" data-tle-setting="info-enabled">
-              <span>启用信息站</span>
-            </label>
-            <p class="tle-muted">只在完整模式显示。关闭或未选中任何内容时，分割线也不显示。</p>
+            <p class="tle-muted">信息站由上方导航栏展示模式控制：选择「完整：图标 + 文字 + 信息站」即可显示；选择极简或标准模式则自动关闭。下方项目首次默认全部启用，可按需取消。</p>
             <div class="tle-info-settings" data-tle-info-settings></div>
             <p class="tle-muted">快切：点击信息打开居中选择弹窗；右侧箭头仍可跳转。分组整理与批量删除统一进入侧边导航栏「整理侠」。User 身份切换已移至导航顶部的 Hello 问候按钮。</p>
             <div class="tle-companion-actions">
@@ -10938,8 +10925,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const modeInput = panel.querySelector('[data-tle-setting="navigation-mode"]');
     if (modeInput) modeInput.value = navigationMode;
     applyNavIconOpacity();
-    const infoInput = panel.querySelector('[data-tle-setting="info-enabled"]');
-    if (infoInput) infoInput.checked = infoEnabled;
     const diagnosticModeInput = panel.querySelector('[data-tle-setting="diagnostic-mode"]');
     if (diagnosticModeInput) diagnosticModeInput.checked = diagnosticMode;
     const globalSearchInput = panel.querySelector('[data-tle-setting="global-search"]');
@@ -14399,7 +14384,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       add(entry);
     }
     for (const [setting, title] of [['pc-hamburger', 'PC 汉堡导航'], ['diagnostic-mode', '诊断模式 引擎体检仪'],
-      ['info-enabled', '侧栏信息站设置'], ['compat-layer-repair', '兼容性修复 标准层级'],
+      ['compat-layer-repair', '兼容性修复 标准层级'],
       ['compat-panel-bg', '兼容性修复 面板背景']]) {
       add({ kind: 'control', targetId: `tle-setting-${setting}`, selector: `[data-tle-setting="${setting}"]`,
         category: '设置', panelId: ID.panel, title, subtitle: '布局引擎设置' });
@@ -16292,7 +16277,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const reasoningRow = infoStation?.querySelector('[data-info-item="reasoning"]');
     const reasoningRowValue = reasoningRow?.querySelector('.tle-info-value')?.textContent?.trim().slice(0, 100) || '';
     const infoStationDiagnostic = {
-      enabled: infoEnabled,
+      enabled: navigationMode === 'info',
       navigationMode,
       stationExists: Boolean(infoStation),
       stationHidden: infoStation ? infoStation.hidden : null,
@@ -16789,7 +16774,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.239',
+    version: '0.3.240',
     ready: false,
     destroy,
     state,
@@ -16923,13 +16908,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const globalSearchSetting = event.target.closest?.('[data-tle-setting="global-search"]');
     if (globalSearchSetting) setGlobalSearchEnabled(globalSearchSetting.checked);
-
-    const infoMaster = event.target.closest?.('[data-tle-setting="info-enabled"]');
-    if (infoMaster) {
-      infoEnabled = infoMaster.checked;
-      saveInfoEnabled();
-      updateInfoStation();
-    }
 
     const diagnosticModeInput = event.target.closest('[data-tle-setting="diagnostic-mode"]');
     if (diagnosticModeInput) setDiagnosticMode(diagnosticModeInput.checked);
@@ -17160,7 +17138,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   // Refresh only on host UI mutations/events; no timer or continuous DOM polling.
   let infoRefreshQueued = false;
   const queueInfoRefresh = () => {
-    if (infoRefreshQueued || state.destroyed || !infoEnabled || navigationMode !== 'info') return;
+    if (infoRefreshQueued || state.destroyed || navigationMode !== 'info') return;
     infoRefreshQueued = true;
     HOST_WIN.requestAnimationFrame(() => {
       infoRefreshQueued = false;
@@ -17247,5 +17225,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.239 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.240 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
