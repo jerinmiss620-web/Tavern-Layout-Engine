@@ -1677,35 +1677,17 @@ body.tle-global-search-open { overflow: hidden !important; }
   text-align: left;
   color: var(--SmartThemeBodyColor, inherit);
 }
-#tle-organizer-panel.drawer-content {
-  display: none !important;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  padding: 0 !important;
-  overflow: hidden !important;
-  color: var(--SmartThemeBodyColor, inherit);
-}
-#tle-organizer-panel.drawer-content.openDrawer { display: flex !important; }
-#tle-organizer-panel[hidden] { display: none !important; }
-#tle-organizer-panel .tle-search-surface {
-  display: flex;
-  flex: 1 1 auto;
+#tle-organizer-panel.drawer-content.openDrawer {
+  display: flex !important;
   flex-direction: column;
   gap: 12px;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
   min-width: 0;
-  max-width: none;
+  min-height: 0;
   padding: 16px;
   box-sizing: border-box;
-  overflow: hidden;
-  text-align: left;
-  color: var(--SmartThemeBodyColor, inherit);
 }
 #tle-global-search-panel .tle-search-heading,
-#tle-organizer-panel .tle-search-heading {
+#tle-organizer-panel.drawer-content > .tle-search-heading {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -1716,7 +1698,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   border-bottom: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 22%));
 }
 #tle-global-search-panel .tle-search-heading-copy,
-#tle-organizer-panel .tle-search-heading-copy {
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -1724,11 +1706,11 @@ body.tle-global-search-open { overflow: hidden !important; }
   gap: 3px;
 }
 #tle-global-search-panel .tle-search-title,
-#tle-organizer-panel .tle-search-title { font-size: 1.08em; font-weight: 700; }
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-title { font-size: 1.08em; font-weight: 700; }
 #tle-global-search-panel .tle-search-subtitle,
-#tle-organizer-panel .tle-search-subtitle { font-size: .78em; opacity: .62; }
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-subtitle { font-size: .78em; opacity: .62; }
 #tle-global-search-panel .tle-search-close,
-#tle-organizer-panel .tle-search-close {
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-close {
   display: grid;
   flex: 0 0 34px;
   place-items: center;
@@ -1744,7 +1726,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   cursor: pointer;
 }
 #tle-global-search-panel .tle-search-close:hover,
-#tle-organizer-panel .tle-search-close:hover { background: rgb(127 127 127 / 22%); }
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-close:hover { background: rgb(127 127 127 / 22%); }
 .tle-search-field {
   display: block;
   flex: 0 0 auto;
@@ -1773,9 +1755,9 @@ body.tle-global-search-open { overflow: hidden !important; }
 }
 .tle-search-field-wrap input.tle-search-field { flex: 1 1 auto; }
 #tle-global-search-panel button,
-#tle-organizer-panel button { color: inherit; border: 0; cursor: pointer; font: inherit; }
+#tle-organizer-panel.drawer-content button { color: inherit; border: 0; cursor: pointer; font: inherit; }
 #tle-global-search-panel .tle-search-clear,
-#tle-organizer-panel .tle-search-clear {
+#tle-organizer-panel.drawer-content > .tle-search-field-wrap .tle-search-clear {
   display: grid;
   place-items: center;
   flex: 0 0 30px;
@@ -1788,7 +1770,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   line-height: 1;
 }
 #tle-global-search-panel [hidden],
-#tle-organizer-panel [hidden] { display: none !important; }
+#tle-organizer-panel.drawer-content [hidden] { display: none !important; }
 #tle-global-search-panel .tle-search-results {
   display: block;
   flex: 1 1 auto;
@@ -1846,7 +1828,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   background: rgb(127 127 127 / 15%);
 }
 #tle-global-search-panel .tle-organizer-search-view,
-#tle-organizer-panel .tle-organizer-resources {
+#tle-organizer-panel.drawer-content > .tle-organizer-resources {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -1854,7 +1836,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   min-height: 0;
   overflow: hidden;
 }
-#tle-organizer-panel .tle-organizer-resources { gap: 5px; }
+#tle-organizer-panel.drawer-content > .tle-organizer-resources { gap: 5px; }
 #tle-organizer-panel .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0; }
 .tle-worldbook-filter-bar {
   display: flex;
@@ -1889,20 +1871,17 @@ body.tle-global-search-open { overflow: hidden !important; }
   border-color: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 35%, transparent);
 }
 @media (max-width: 700px) {
-  #tle-global-search-panel .tle-search-surface,
-  #tle-organizer-panel .tle-search-surface {
-    padding: 12px;
-    gap: 10px;
-  }
+  #tle-global-search-panel .tle-search-surface { padding: 12px; gap: 10px; }
+  #tle-organizer-panel.drawer-content.openDrawer { padding: 12px; gap: 10px; }
   #tle-global-search-panel .tle-search-heading,
-  #tle-organizer-panel .tle-search-heading { flex-wrap: wrap; row-gap: 8px; }
+  #tle-organizer-panel.drawer-content > .tle-search-heading { flex-wrap: wrap; row-gap: 8px; }
   #tle-global-search-panel .tle-search-heading-copy,
-  #tle-organizer-panel .tle-search-heading-copy {
+  #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
     order: 1;
     flex: 1 1 calc(100% - 48px);
   }
   #tle-global-search-panel .tle-search-close,
-  #tle-organizer-panel .tle-search-close {
+  #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-close {
     order: 3;
     margin-inline-start: auto;
   }
@@ -5336,7 +5315,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (clear) clear.hidden = true;
       current.trigger?.setAttribute('aria-pressed', 'false');
       if (current.node?.classList.contains('openDrawer')) {
-        state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.click();
+        setOrganizerDrawerOpen(false);
       }
       queueChatShortcutRefresh();
       return;
@@ -11645,23 +11624,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       panel.setAttribute('aria-label', '整理侠资源管理');
       panel.setAttribute('aria-hidden', 'true');
       panel.innerHTML = `
-        <div class="tle-search-surface">
-          <header class="tle-search-heading">
-            <div class="tle-search-heading-copy">
-              <strong class="tle-search-title">整理侠</strong>
-              <span class="tle-search-subtitle">资源分组 · 批量管理 · 世界书绑定核对</span>
-            </div>
-            <button type="button" class="tle-search-close" data-organizer-close aria-label="关闭整理侠">×</button>
-          </header>
-          <div class="tle-search-input-wrap tle-search-field-wrap">
-            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-            <input class="text_pole tle-search-field" type="text" enterkeyhint="search"
-              autocomplete="off" spellcheck="false" placeholder="筛选当前分类资源名称、备注或标签…"
-              aria-label="筛选当前分类资源名称、备注或标签" />
-            <button type="button" class="tle-search-clear" aria-label="清除筛选" hidden>×</button>
+        <header class="tle-search-heading">
+          <div class="tle-search-heading-copy">
+            <strong class="tle-search-title">整理侠</strong>
+            <span class="tle-search-subtitle">资源分组 · 批量管理 · 世界书绑定核对</span>
           </div>
-          <div class="tle-organizer-resources"></div>
-        </div>`;
+          <button type="button" class="tle-search-close" data-organizer-close aria-label="关闭整理侠">×</button>
+        </header>
+        <div class="tle-search-input-wrap tle-search-field-wrap">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input class="text_pole tle-search-field" type="text" enterkeyhint="search"
+            autocomplete="off" spellcheck="false" placeholder="筛选当前分类资源名称、备注或标签…"
+            aria-label="筛选当前分类资源名称、备注或标签" />
+          <button type="button" class="tle-search-clear" aria-label="清除筛选" hidden>×</button>
+        </div>
+        <div class="tle-organizer-resources"></div>`;
 
       const input = panel.querySelector('.tle-search-field');
       input.addEventListener('input', () => {
@@ -11677,7 +11654,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           quickPanel?.onSearchInput?.();
           input.focus({ preventScroll: true });
         } else if (event.target.closest('[data-organizer-close]')) {
-          state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.click();
+          setOrganizerDrawerOpen(false);
         }
       }, { signal: state.abort.signal });
       state.organizerEntry?.appendChild(panel);
@@ -11786,16 +11763,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       event.stopPropagation();
       organizerToggle.click();
     }, { signal: state.abort.signal });
-    organizerToggle.addEventListener('click', () => {
-      HOST_WIN.requestAnimationFrame(() => {
-        const isOpen = state.organizerPanel?.classList.contains('openDrawer');
-        if (isOpen && !(quickPanel?.embedded && quickPanel.module === 'groups')) {
-          openQuickGroupManager(null);
-        } else if (!isOpen && quickPanel?.embedded) {
-          closeQuickPanel(false);
-        }
-      });
-    }, { signal: state.abort.signal });
+    organizerToggle.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleOrganizerDrawer();
+    }, { capture: true, signal: state.abort.signal });
     setMobileNavOpen(false);
   }
 
@@ -11973,6 +11945,51 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     } finally {
       if (!state.destroyed) syncRemoteUpdateUI();
     }
+  }
+
+  function setOrganizerDrawerOpen(open) {
+    const panel = state.organizerPanel;
+    const toggle = state.organizerEntry?.querySelector(':scope > .drawer-toggle');
+    if (!panel || !toggle) return;
+
+    const expanded = Boolean(open);
+    const wasOpen = panel.classList.contains('openDrawer');
+    if (expanded === wasOpen) {
+      if (expanded && !(quickPanel?.embedded && quickPanel.module === 'groups')) {
+        openQuickGroupManager(null);
+      }
+      return;
+    }
+
+    if (expanded) {
+      if (state.globalSearchOpen) closeGlobalSearch(false);
+      if (quickPanel) closeQuickPanel(false);
+      closeMobileNativeDrawers();
+    }
+
+    panel.classList.toggle('openDrawer', expanded);
+    panel.classList.toggle('closedDrawer', !expanded);
+    panel.setAttribute('aria-hidden', String(!expanded));
+    toggle.setAttribute('aria-expanded', String(expanded));
+
+    if (expanded) {
+      openQuickGroupManager(null);
+      if (state.mobileNav.open && isMobileViewport()) {
+        HOST_WIN.requestAnimationFrame(() => {
+          if (!state.destroyed && panel.classList.contains('openDrawer')) {
+            setMobileNavOpen(false, true);
+          }
+        });
+      }
+    } else if (quickPanel?.embedded && quickPanel.node === panel) {
+      closeQuickPanel(false);
+    }
+  }
+
+  function toggleOrganizerDrawer() {
+    const panel = state.organizerPanel;
+    if (!panel) return;
+    setOrganizerDrawerOpen(!panel.classList.contains('openDrawer'));
   }
 
   function setPanelOpen(open) {
@@ -13488,7 +13505,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.223',
+    version: '0.3.224',
     ready: false,
     destroy,
     state,
@@ -13938,5 +13955,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.223 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.224 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
