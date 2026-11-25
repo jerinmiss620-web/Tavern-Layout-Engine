@@ -6,15 +6,15 @@
 
 本次测试更新：信息站总开关并入导航栏显示模式；选择「图标 + 文字 + 信息站」即可开启。首次使用时，所有可用项目默认勾选显示及支持的快切/跳转，老用户自定义选项保留。详见 [v0.3.240 更新记录](releases/v0.3.240/CHANGELOG.md)。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.236/TLE-0.3.236-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.240/TLE-0.3.240-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
 
 整理侠“资源名称 / 查找与替换”共用一个搜索框和原资源列表。已安装原版 Global Batch Replace v1.1.0 PC 服务端即可查找、预览、替换及整份恢复；[配套服务端插件](plugins/global-batch-replace/README-TLE.md) 增加 ZIP 导入和按文件恢复。TT 使用 Core 内置原生适配。
 
-[安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md) · [本版日志](releases/v0.3.236/CHANGELOG.md)。正式发布通道仍为下文版本。
+[安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md) · [本版日志](releases/v0.3.240/CHANGELOG.md)。正式发布通道仍为下文版本。
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.220 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.239 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -42,7 +42,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 整理侠的资源管理现在直接位于自己的原生形态 `.drawer-content` 内，不再套用第二层 `.tle-search-surface`。抽屉图标、导航文字与全局搜索弹窗的跳转入口统一调用明确的开合控制器，直接维护 `openDrawer / closedDrawer`；打开时先关闭其他普通抽屉和 TLE 控制面板，移动端仍由原生导航生命周期收起侧栏。
 
-本分支将全局搜索与整理侠拆分为两个独立功能：全局搜索恢复为工作区顶栏的独立按钮和居中弹窗，保留原有搜索能力；弹窗内提供「进入整理侠」跳转入口，但不承载资源管理。整理侠仍是侧边栏第十个一级功能抽屉，位于角色管理下方，拥有独立 `.drawer-content`、自己的资源筛选输入框、分组和批量管理功能，按 `openDrawer / closedDrawer` 展开收起。世界书采用统一清单，分别识别全局启用、角色主要绑定、额外绑定、未绑定和疑似孤儿，并提供「全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用」快速筛选；全局启用与角色绑定是可重叠的独立状态。懒加载角色卡仍支持按需扫描，扫描未完成时不把未知绑定误判为未绑定。本轮不实现新的首页画廊，也不改造酒馆原生角色预览区；首页画廊需求单独讨论。世界书分组使用名称作为稳定标识，并迁移旧索引键；批量删除仍调用酒馆原生接口，不另建世界书编辑器或角色管理系统。全局搜索与替换的后续整合留待 Codex 单独处理，不在本候选版本混入。
+本分支将全局搜索与整理侠拆分为两个独立功能：全局搜索恢复为工作区顶栏的独立按钮和居中弹窗，保留原有搜索能力；弹窗内提供「进入整理侠」跳转入口，但不承载资源管理。整理侠仍是侧边栏第十个一级功能抽屉，位于角色管理下方，拥有独立 `.drawer-content`、自己的资源筛选输入框、分组和批量管理功能，按 `openDrawer / closedDrawer` 展开收起。世界书采用统一清单，分别识别全局启用、角色主要绑定、额外绑定、未绑定和疑似孤儿，并提供「全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用」快速筛选；全局启用与角色绑定是可重叠的独立状态。懒加载角色卡仍支持按需扫描，扫描未完成时不把未知绑定误判为未绑定。本轮不实现新的首页画廊，也不改造酒馆原生角色预览区；首页画廊需求单独讨论。世界书分组使用名称作为稳定标识，并迁移旧索引键；批量删除仍调用酒馆原生接口，不另建世界书编辑器或角色管理系统。全局搜索与替换已在独立内容处理模块中接入，仍保留与资源名称搜索的独立模式；本次 v0.3.240 仅调整信息站开关及默认选项，不改查找、预览、替换和备份恢复流程。
 
 **PC 布局：** v0.3.239 起，三栏取消独立色块底板，改由两个纵向 `hr` 分隔元素分栏；使用 `vertical-rl` 与逻辑边框方向将横向分隔样式转为竖向，并跟随酒馆主题边框色。1000px 以下隐藏分隔线，移动端单栏布局不变。
 
@@ -52,14 +52,14 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 **独立测试入口已准备：** [v0.3.231 候选更新日志](releases/v0.3.231/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
-此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.231 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。标题栏的同步、导入、导出按钮恢复继承酒馆 `menu_button` 主题样式，不再覆盖主题底色、边框、圆角、内边距和字体；按钮仅保留必要的排列与对齐规则。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.220。
+v0.3.239 已正式发布为 Stable Core；本分支继续在同一开发线路上推进 v0.3.240。当前测试清单 `channels/test.json` 指向 v0.3.240；正式 `latest.json` 与 `release-plan.json` 保持 v0.3.239，Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。v0.3.240 仅调整信息站总开关与默认选项，不改动已发布的 v0.3.239 源码。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.231 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。标题栏的同步、导入、导出按钮恢复继承酒馆 `menu_button` 主题样式，不再覆盖主题底色、边框、圆角、内边距和字体；按钮仅保留必要的排列与对齐规则。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.239。
 
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.220/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.239/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；Core v0.3.224 的整理侠抽屉激活与直接 `.drawer-content` 布局仍待桌面与移动端视觉验收，Core v0.3.219 新增的批量删除流程仍待实机验收，故障注入及长期可靠性也未全部覆盖。
+- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC 整理侠三栏 HR 分隔线布局已由用户截图确认视觉方向；配套侠部分应用、渐隐侠壁纸同步及整理侠重复工具栏修复仍需在 ST/TT 实际环境继续验收，iPhone 与 Android 的完整功能矩阵、故障注入及长期可靠性也未全部覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
