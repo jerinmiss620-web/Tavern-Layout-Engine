@@ -6,13 +6,14 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const legacyFiles = {
+const readRaw = relative => readFileSync(path.join(root, relative), 'utf8');
+const manifest = JSON.parse(readRaw('channels/test.json'));
+const legacyFiles = manifest.release.version === '0.3.204' ? {
   'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.json': 'tests/fixtures/legacy/test-loader-v0.3.0.json',
-};
+} : {};
 const read = relative => readFileSync(path.join(root, legacyFiles[relative] || relative), 'utf8');
-const manifest = JSON.parse(read('channels/test.json'));
 
 assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
@@ -65,10 +66,16 @@ const loader = verifyPinnedRelease(
 );
 assert.equal(loaderRelease.version, '0.3.0');
 assert.match(loader, /const LOADER_VERSION = '0\.3\.0'/);
+if (manifest.release.version === '0.3.221') {
+  assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
+  assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
+  assert.match(loader, /tle\.loader\.organizerBranchTest\.lastKnownGood\.v1/);
+}
 
 const installer = JSON.parse(read(loaderRelease.installer_path));
 assert.equal(installer.type, 'script');
-assert.equal(installer.id, '8f994fad-ea17-49f8-93af-ebe8ba4f6c67');
+assert.equal(installer.id, manifest.release.version === '0.3.204' ? '8f994fad-ea17-49f8-93af-ebe8ba4f6c67' : 'e1a1d9fa-8f4b-4c2a-9c45-6c8d3a2f7b10');
+assert.equal(installer.enabled, manifest.release.version === '0.3.204');
 assert.equal(installer.content, loader, 'Tavern Helper installer content is out of sync with Loader source');
 
 assert.match(tle, /if \(action === 'open-debugger'\) openMobileDebugger\(\);/);
