@@ -243,6 +243,8 @@ assert.ok(source.includes('HOST_DOC.body.appendChild(panel)'), 'Global search mo
 assert.ok(source.includes('data-search-organizer-jump'), 'Global search modal must link to Organizer');
 assert.ok(source.includes('function createOrganizerPanel()'));
 assert.ok(source.includes("organizerToggle.addEventListener('click', event =>"), 'Organizer must own its click activation');
+assert.ok(source.includes('      toggleOrganizerDrawer();'), 'Organizer icon clicks must invoke the explicit toggle controller');
+assert.ok(source.includes('      setPanelOpen(false);'), 'Opening Organizer must close the TLE control panel');
 assert.ok(source.includes('function setOrganizerDrawerOpen(open)'), 'Organizer must explicitly toggle its drawer classes');
 assert.ok(source.includes("panel.classList.toggle('openDrawer', expanded)"));
 assert.ok(source.includes("panel.classList.toggle('closedDrawer', !expanded)"));
