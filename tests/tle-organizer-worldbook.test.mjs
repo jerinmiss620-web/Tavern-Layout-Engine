@@ -17,7 +17,7 @@ const buildWorldInfoCatalog = vm.runInNewContext(
   '(' + extractFunction('buildWorldInfoCatalog', '  function removeWorldInfoExtraLinks') + ')'
 );
 const removeWorldInfoExtraLinks = vm.runInNewContext(
-  '(' + extractFunction('removeWorldInfoExtraLinks', '  let worldInfoCatalogMeta') + ')'
+  '(' + extractFunction('removeWorldInfoExtraLinks', '  function quickThemeItems') + ')'
 );
 
 const worldNames = ['Global', 'Primary', 'Extra', 'Orphan', 'Mixed', 'Unbound'];
