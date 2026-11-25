@@ -28,7 +28,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 ## 当前开发分支（未发布）
 
-开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.221）。
+开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.222）。
 
 本分支将整理侠实现为侧边栏第十个一级功能抽屉：位于角色管理下方，拥有与酒馆原生导航相同的 `.drawer-toggle` 和独立 `.drawer-content`，按 `openDrawer / closedDrawer` 展开收起，不再使用 popup/modal。原全局搜索仍是默认页面，并与资源管理共用现有搜索能力；世界书采用统一清单，展示全局选择、角色主要绑定、额外绑定、未绑定及疑似孤儿状态，并支持按需扫描懒加载角色卡。本轮不实现新的首页画廊，也不改造酒馆原生角色预览区；首页画廊需求单独讨论。世界书分组使用名称作为稳定标识，并迁移旧索引键；批量删除仍调用酒馆原生接口，不另建世界书编辑器或角色管理系统。
 
