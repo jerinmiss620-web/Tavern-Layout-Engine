@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.222`
+Current test Core: `v0.3.223`
 
 ## Import once
 
@@ -16,18 +16,19 @@ The installer is disabled by default. It reads the test manifest from this devel
 2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
 3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
 4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.222**.
-6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.222**.
+5. Confirm the native prompt to install **TLE Core v0.3.223**.
+6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.223**.
 
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
 
 ## Test the current build
 
-- Confirm **整理侠** is the tenth `.drawer` directly below **角色管理**, with its own `.drawer-toggle` and `.drawer-content`; it must not open a centered popup or modal.
-- Confirm the tenth icon participates in icon-only, icon+label, compact two-column, and mobile hamburger navigation modes. Clicking it opens/closes the drawer like the other native icons; on mobile, the rail folds away while the opened drawer remains visible.
-- Confirm the original global search is still the default page and uses the same search field.
-- Open the resource manager's **世界书** category. Check global selection, primary character bindings, extra-book bindings, unbound books, and suspected orphan references.
-- Confirm shallow-loaded character cards are marked **待核对** until the optional scan is run.
+- Confirm the original **全局搜索** button is restored in the workspace header in every navigation mode. It opens its own centered modal and retains the original search index, search field, result navigation, and clear behavior.
+- Confirm the global-search modal contains a compact **整理侠** jump entry. Activating it closes the search modal and opens the Organizer drawer; it must not switch the search modal into a resource-management tab.
+- Confirm **整理侠** is the tenth `.drawer` directly below **角色管理**, with its own `.drawer-toggle` and `.drawer-content`; it opens/closes like a native drawer, not a centered popup. Its resource filter input and manager state are independent from global search.
+- Confirm the tenth icon participates in icon-only, icon+label, compact two-column, and mobile hamburger navigation modes. On mobile, the rail folds away while the opened drawer remains visible.
+- Open the Organizer's **世界书** category. Verify quick filters for **全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用** and their counts. Primary/extra character bindings define **已绑定**; global enablement is independent and may overlap either bound state.
+- Verify a globally enabled book with no character binding appears in both **未绑定** and **全局启用**. Verify stale extra-book references are marked **疑似孤儿** (or **含遗留关联** when the book also has a current character binding).
 - Use **扫描绑定** only when you want to load the remaining character-card metadata. It is opt-in and may increase session memory use.
 - Test grouping, searching, selection, and batch deletion only on disposable test resources first. Verify native Tavern behavior and the remaining bindings after each deletion.
 - Check PC and mobile layouts separately, then repeat in ST and TT as applicable.
