@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.218",
     "source_path": "releases/v0.3.218/TLE.js",
-    "source_commit": "54463165da45767b72074ec8e9cec2fffc06d4ce",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/54463165da45767b72074ec8e9cec2fffc06d4ce/releases/v0.3.218/TLE.js",
+    "source_commit": "9d3def06834467cf11d14820edc83ec0ea5eb17c",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/9d3def06834467cf11d14820edc83ec0ea5eb17c/releases/v0.3.218/TLE.js",
     "changelog_path": "releases/v0.3.218/CHANGELOG.md",
-    "sha256": "c2e0d5a7ae5fb1e0968342cafdae9d2ced22e973ad1be8422b0bb009c1954c22",
-    "size_bytes": 617740
+    "sha256": "8084d7f4cf5902f76b30c3b6dd6161bfb2230933b7bdcb79026cc2cff851424e",
+    "size_bytes": 617694
   },
   "notes": "整理侠：原全局搜索入口升级为统一面板，默认搜索页；资源分组与批量管理共用单一搜索框；批量删除采用资源白名单与酒馆原生接口。Bootstrap、Loader 不变。"
 }
