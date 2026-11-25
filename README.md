@@ -34,7 +34,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 **孤儿识别边界：** 若角色卡删除后，唯一的主要世界书引用也随角色卡文件一并消失，酒馆没有留下可追溯关联，TLE 无法还原它原来绑定的角色；这类世界书会显示为「未绑定」，供人工核对。仍保留在酒馆额外绑定记录中的失效角色关联可标记为「疑似孤儿」。聊天级或身份级引用不属于本轮角色绑定判定范围。懒加载扫描仅在用户主动点击时执行，逐张读取角色元数据，可能增加当前会话内存占用。
 
-**独立测试入口已准备：** [测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
+**独立测试入口已准备：** [v0.3.223 候选更新日志](releases/v0.3.223/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
 此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.222 候选的开发回归已通过；v0.3.223 的入口拆分与世界书筛选已更新源码和回归断言，本轮完整 CI 与 PC/移动端 SillyTavern、TauriTavern 的真实界面验收仍待进行。当前正式版仍为 Core v0.3.220。
 
