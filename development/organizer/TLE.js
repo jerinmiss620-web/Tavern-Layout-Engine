@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.222
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.223
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -59,6 +59,8 @@
     style: 'tle-core-style',
     nav: 'tle-nav-entry',
     organizerEntry: 'tle-organizer-entry',
+    organizerToggle: 'tle-organizer-toggle',
+    organizerPanel: 'tle-organizer-panel',
     panel: 'tle-control-panel',
     presetGrid: 'tle-preset-workspace',
     presetSettings: 'tle-preset-settings',
@@ -275,6 +277,7 @@
     diagnosticButtonObserver: null,
     diagnosticButtonRepairFrame: 0,
     globalSearchPanel: null,
+    organizerPanel: null,
     globalSearchOpen: false,
     globalSearchView: 'search',
     globalSearchIndex: [],
@@ -1643,8 +1646,37 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
 }
 
 
-/* Organizer: the tenth native-shaped drawer below Character Management. */
-#tle-global-search-panel.drawer-content {
+/* Global search: its original header button opens an independent centered modal. */
+body.tle-global-search-open { overflow: hidden !important; }
+#tle-global-search-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 10090;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  color: var(--SmartThemeBodyColor, inherit);
+  background: rgb(0 0 0 / 48%);
+}
+#tle-global-search-panel[hidden] { display: none !important; }
+#tle-global-search-panel .tle-search-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(560px, calc(100vw - 32px));
+  height: min(700px, 70dvh);
+  max-height: calc(100dvh - 32px);
+  min-height: 280px;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-align: left;
+  color: var(--SmartThemeBodyColor, inherit);
+}
+#tle-organizer-panel.drawer-content {
   display: none !important;
   flex-direction: column;
   min-width: 0;
@@ -1653,9 +1685,9 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   overflow: hidden !important;
   color: var(--SmartThemeBodyColor, inherit);
 }
-#tle-global-search-panel.drawer-content.openDrawer { display: flex !important; }
-#tle-global-search-panel[hidden] { display: none !important; }
-#tle-global-search-panel .tle-search-surface {
+#tle-organizer-panel.drawer-content.openDrawer { display: flex !important; }
+#tle-organizer-panel[hidden] { display: none !important; }
+#tle-organizer-panel .tle-search-surface {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -1671,7 +1703,8 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   text-align: left;
   color: var(--SmartThemeBodyColor, inherit);
 }
-#tle-global-search-panel .tle-search-heading {
+#tle-global-search-panel .tle-search-heading,
+#tle-organizer-panel .tle-search-heading {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -1681,16 +1714,20 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 22%));
 }
-#tle-global-search-panel .tle-search-heading-copy {
+#tle-global-search-panel .tle-search-heading-copy,
+#tle-organizer-panel .tle-search-heading-copy {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
   gap: 3px;
 }
-#tle-global-search-panel .tle-search-title { font-size: 1.08em; font-weight: 700; }
-#tle-global-search-panel .tle-search-subtitle { font-size: .78em; opacity: .62; }
-#tle-global-search-panel .tle-search-close {
+#tle-global-search-panel .tle-search-title,
+#tle-organizer-panel .tle-search-title { font-size: 1.08em; font-weight: 700; }
+#tle-global-search-panel .tle-search-subtitle,
+#tle-organizer-panel .tle-search-subtitle { font-size: .78em; opacity: .62; }
+#tle-global-search-panel .tle-search-close,
+#tle-organizer-panel .tle-search-close {
   display: grid;
   flex: 0 0 34px;
   place-items: center;
@@ -1705,7 +1742,8 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   line-height: 1;
   cursor: pointer;
 }
-#tle-global-search-panel .tle-search-close:hover { background: rgb(127 127 127 / 22%); }
+#tle-global-search-panel .tle-search-close:hover,
+#tle-organizer-panel .tle-search-close:hover { background: rgb(127 127 127 / 22%); }
 .tle-search-field {
   display: block;
   flex: 0 0 auto;
@@ -1733,8 +1771,10 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   font-size: 14px;
 }
 .tle-search-field-wrap input.tle-search-field { flex: 1 1 auto; }
-#tle-global-search-panel button { color: inherit; border: 0; cursor: pointer; font: inherit; }
-#tle-global-search-panel .tle-search-clear {
+#tle-global-search-panel button,
+#tle-organizer-panel button { color: inherit; border: 0; cursor: pointer; font: inherit; }
+#tle-global-search-panel .tle-search-clear,
+#tle-organizer-panel .tle-search-clear {
   display: grid;
   place-items: center;
   flex: 0 0 30px;
@@ -1746,7 +1786,8 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   font-size: 21px;
   line-height: 1;
 }
-#tle-global-search-panel [hidden] { display: none !important; }
+#tle-global-search-panel [hidden],
+#tle-organizer-panel [hidden] { display: none !important; }
 #tle-global-search-panel .tle-search-results {
   display: block;
   flex: 1 1 auto;
@@ -1785,29 +1826,26 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   padding: 12px 4px;
   background: transparent;
 }
-#tle-global-search-panel .tle-organizer-tabs {
-  display: flex;
+#tle-global-search-panel .tle-search-organizer-jump {
+  display: inline-flex;
   flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
-  min-width: 0;
-  margin-inline-start: auto;
-  padding: 1px 0;
+  min-height: 34px;
+  padding: 6px 10px !important;
+  border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 22%)) !important;
+  border-radius: 9px;
+  background: rgb(127 127 127 / 9%);
+  font-size: .84em !important;
+  white-space: nowrap;
 }
-#tle-global-search-panel .tle-organizer-tabs > button {
-  flex: 0 0 auto;
-  padding: 6px 12px;
-  border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 20%));
-  border-radius: 8px;
-  background: rgb(127 127 127 / 8%);
-  font-size: .9em;
-}
-#tle-global-search-panel .tle-organizer-tabs > button[aria-pressed="true"] {
-  border-color: var(--SmartThemeQuoteColor, currentColor);
-  color: var(--SmartThemeQuoteColor, inherit);
-  background: rgb(127 127 127 / 14%);
+#tle-global-search-panel .tle-search-organizer-jump:hover {
+  border-color: var(--SmartThemeQuoteColor, currentColor) !important;
+  background: rgb(127 127 127 / 15%);
 }
 #tle-global-search-panel .tle-organizer-search-view,
-#tle-global-search-panel .tle-organizer-resources {
+#tle-organizer-panel .tle-organizer-resources {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -1815,29 +1853,61 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
   min-height: 0;
   overflow: hidden;
 }
-#tle-global-search-panel .tle-organizer-resources { gap: 5px; }
-#tle-global-search-panel .tle-organizer-search-view[hidden],
-#tle-global-search-panel .tle-organizer-resources[hidden] { display: none !important; }
-#tle-global-search-panel .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0; }
-
+#tle-organizer-panel .tle-organizer-resources { gap: 5px; }
+#tle-organizer-panel .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0; }
+.tle-worldbook-filter-bar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 1px 3px;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.tle-worldbook-filter-bar[hidden] { display: none !important; }
+.tle-worldbook-filter {
+  flex: 0 0 auto;
+  padding: 5px 9px !important;
+  border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 22%)) !important;
+  border-radius: 999px;
+  background: rgb(127 127 127 / 8%);
+  font-size: .82em !important;
+  white-space: nowrap;
+}
+.tle-worldbook-filter[aria-pressed="true"] {
+  border-color: var(--SmartThemeQuoteColor, currentColor) !important;
+  background: rgb(127 127 127 / 15%);
+}
+.tle-quick-item-status.is-global {
+  color: var(--SmartThemeQuoteColor, inherit);
+  border-color: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 35%, transparent);
+}
 @media (max-width: 700px) {
-  #tle-global-search-panel .tle-search-surface {
+  #tle-global-search-panel .tle-search-surface,
+  #tle-organizer-panel .tle-search-surface {
     padding: 12px;
     gap: 10px;
   }
-  #tle-global-search-panel .tle-search-heading { flex-wrap: wrap; row-gap: 8px; }
-  #tle-global-search-panel .tle-search-heading-copy {
+  #tle-global-search-panel .tle-search-heading,
+  #tle-organizer-panel .tle-search-heading { flex-wrap: wrap; row-gap: 8px; }
+  #tle-global-search-panel .tle-search-heading-copy,
+  #tle-organizer-panel .tle-search-heading-copy {
     order: 1;
     flex: 1 1 calc(100% - 48px);
   }
-  #tle-global-search-panel .tle-search-close {
-    order: 2;
+  #tle-global-search-panel .tle-search-close,
+  #tle-organizer-panel .tle-search-close {
+    order: 3;
     margin-inline-start: auto;
   }
-  #tle-global-search-panel .tle-organizer-tabs {
-    order: 3;
-    flex: 0 0 100%;
-    margin-inline-start: 0;
+  #tle-global-search-panel .tle-search-organizer-jump {
+    order: 2;
+    margin-inline-start: auto;
   }
 }
 .tle-search-highlight {
@@ -3588,7 +3658,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function applyGlobalSearchAvailability() {
     const available = globalSearchEnabled;
     HOST_DOC.body.toggleAttribute('data-tle-search-available', available);
-    if (state.organizerEntry) state.organizerEntry.hidden = !available;
+    const searchButton = state.workspaceHeader?.querySelector('#' + ID.searchToggle);
+    if (searchButton) searchButton.hidden = !available;
     if (!available && state.globalSearchOpen) closeGlobalSearch();
     const setting = state.panel?.querySelector('[data-tle-setting="global-search"]');
     if (setting) setting.checked = globalSearchEnabled;
@@ -4851,33 +4922,30 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const extra = [...(extraByBook.get(name) || [])];
       const orphan = [...(orphanByBook.get(name) || [])];
       const global = globalNames.has(name);
-      const hasCurrent = global || primary.length > 0 || extra.length > 0;
+      const bound = primary.length > 0 || extra.length > 0;
       let statusLabel = '未绑定';
       let statusTone = 'neutral';
-      if (orphan.length && !hasCurrent && unloadedIndices.length === 0) {
+      if (orphan.length && !bound && unloadedIndices.length === 0) {
         statusLabel = '疑似孤儿';
         statusTone = 'orphan';
-      } else if (orphan.length && hasCurrent) {
+      } else if (orphan.length && bound) {
         statusLabel = '含遗留关联';
         statusTone = 'warning';
       } else if (unloadedIndices.length) {
-        statusLabel = hasCurrent ? '部分扫描' : '待核对';
+        statusLabel = bound ? '已绑定 · 部分扫描' : '待核对';
         statusTone = 'pending';
-      } else if (hasCurrent) {
-        statusLabel = '已关联';
+      } else if (bound) {
+        statusLabel = '已绑定';
         statusTone = 'linked';
-      } else if (orphan.length) {
-        statusLabel = '待核对';
-        statusTone = 'pending';
       }
 
       const details = [];
-      if (global) details.push('全局');
+      if (global) details.push('全局启用');
       if (primary.length) details.push('主要绑定：' + primary.join('、'));
       if (extra.length) details.push('额外绑定：' + extra.join('、'));
       if (orphan.length) details.push('遗留角色绑定：' + orphan.join('、'));
-      if (unloadedIndices.length) details.push('尚有 ' + unloadedIndices.length + ' 张角色卡未加载，主要绑定待核对');
-      if (!details.length) details.push('未发现全局或角色卡绑定；可能是独立世界书，也可能是删除角色卡后遗留，请人工核对');
+      if (unloadedIndices.length) details.push('尚有 ' + unloadedIndices.length + ' 张角色卡未加载，绑定状态待核对');
+      if (!details.length) details.push('未发现全局启用或角色卡绑定；可能是独立世界书，也可能是删除角色卡后遗留，请人工核对');
 
       const optionValue = optionValues.get(name) ?? String(index);
       const detail = details.join(' · ');
@@ -4895,7 +4963,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         multiple: true,
         statusLabel,
         statusTone,
-        binding: { global, primary, extra, orphan },
+        binding: { global, bound, primary, extra, orphan },
       };
     });
 
@@ -5251,7 +5319,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (current.embedded) {
       current.body?.replaceChildren();
       current.body?.classList.remove('tle-quick-manager');
+      const input = current.node?.querySelector('.tle-search-field');
+      if (input) input.value = '';
+      const clear = current.node?.querySelector('.tle-search-clear');
+      if (clear) clear.hidden = true;
       current.trigger?.setAttribute('aria-pressed', 'false');
+      if (current.node?.classList.contains('openDrawer')) {
+        state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.click();
+      }
       queueChatShortcutRefresh();
       return;
     }
@@ -5481,17 +5556,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   function openQuickGroupManager(trigger) {
-    if (!state.globalSearchOpen) openGlobalSearch();
-    if (!state.globalSearchOpen || !state.globalSearchPanel) return;
-    if (quickPanel?.embedded && quickPanel.module === 'groups') {
-      setGlobalSearchView('resources');
-      return;
-    }
+    if (!state.organizerPanel) return;
+    if (quickPanel?.embedded && quickPanel.module === 'groups') return;
     if (quickPanel) closeQuickPanel(false);
-    const body = state.globalSearchPanel.querySelector('.tle-organizer-resources');
+    const body = state.organizerPanel.querySelector('.tle-organizer-resources');
     if (!body) return;
     const current = {
-      node: state.globalSearchPanel,
+      node: state.organizerPanel,
       body,
       trigger,
       module: 'groups',
@@ -5502,7 +5573,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     quickPanel = current;
     body.replaceChildren();
     body.classList.add('tle-quick-manager');
-    setGlobalSearchView('resources');
 
     let module = 'preset';
     let targetGroup = '';
@@ -5512,6 +5582,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let statusMessage = '';
     let scanBusy = false;
     let scanProgress = '';
+    let worldInfoFilter = 'all';
     const selected = new Set();
 
     const hint = quickNode(
@@ -5521,6 +5592,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     );
     hint.title = '资源管理只显示酒馆原生支持删除的资源；模型、API 与其他不可删除配置仅保留在搜索页。现有隐藏分类分组数据仍保留在全部分组备份中。右上角图标可导入/导出全部分组方案。';
     const tabs = quickNode('div', 'flex-container flexWrap tle-quick-tabs');
+    const worldFilterBar = quickNode('div', 'tle-worldbook-filter-bar');
+    worldFilterBar.hidden = true;
+    worldFilterBar.setAttribute('aria-label', '世界书绑定状态筛选');
     const groupFilters = quickNode('div', 'flex-container flexWrap tle-quick-filter-bar');
 
     const groupName = quickNode('input', 'text_pole');
@@ -5533,7 +5607,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     manageRow.hidden = true;
     manageRow.append(groupName, createButton, renameButton, deleteButton);
 
-    const search = state.globalSearchPanel.querySelector('.tle-search-field');
+    const search = state.organizerPanel.querySelector('.tle-search-field');
     if (!search) return;
     search.placeholder = '筛选当前分类资源名称、备注或标签…';
     search.setAttribute('aria-label', '筛选当前分类资源名称、备注或标签');
@@ -5644,6 +5718,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const button = quickButton(item.title, () => {
         if (module === item.id) return;
         module = item.id;
+        worldInfoFilter = 'all';
         targetGroup = '';
         viewGroup = '*';
         selected.clear();
@@ -5695,6 +5770,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const query = search.value.trim().toLocaleLowerCase();
       const groups = currentGroups(data);
       return entries.filter(entry => {
+        if (module === 'worldInfo' && worldInfoFilter !== 'all') {
+          const binding = entry.binding || {};
+          const hasOrphan = entry.statusLabel === '疑似孤儿' || entry.statusLabel === '含遗留关联';
+          if (worldInfoFilter === 'bound' && !binding.bound) return false;
+          if (worldInfoFilter === 'unbound' && (binding.bound || binding.orphan?.length || worldInfoCatalogMeta.unloadedCount)) return false;
+          if (worldInfoFilter === 'orphan' && !hasOrphan) return false;
+          if (worldInfoFilter === 'global' && !binding.global) return false;
+        }
         const assigned = quickAssignment(data, module, entry.key);
         if (viewGroup !== '*' && assigned !== viewGroup) return false;
         if (!query) return true;
@@ -5744,6 +5827,39 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
     }
 
+    function renderWorldInfoFilters() {
+      worldFilterBar.hidden = module !== 'worldInfo';
+      if (module !== 'worldInfo') {
+        worldFilterBar.replaceChildren();
+        return;
+      }
+      const hasKnownOrphan = entry => entry.statusLabel === '疑似孤儿' || entry.statusLabel === '含遗留关联';
+      const counts = {
+        all: entries.length,
+        bound: entries.filter(entry => entry.binding?.bound).length,
+        unbound: entries.filter(entry => !entry.binding?.bound && !entry.binding?.orphan?.length && !worldInfoCatalogMeta.unloadedCount).length,
+        orphan: entries.filter(hasKnownOrphan).length,
+        global: entries.filter(entry => entry.binding?.global).length,
+      };
+      const filters = [
+        { id: 'all', label: '全部', title: '显示全部世界书。' },
+        { id: 'bound', label: '已绑定', title: '至少绑定一张现存角色卡，包括主要绑定和额外绑定。' },
+        { id: 'unbound', label: '未绑定', title: '没有角色卡绑定，也没有已知遗留关联；全局启用状态独立计算。扫描未完成时不会把未知项目误判为未绑定。' },
+        { id: 'orphan', label: '疑似孤儿', title: '存在失效角色卡的遗留绑定记录；若扫描不完整则暂列待核对。' },
+        { id: 'global', label: '全局启用', title: '当前已加入全局启用列表；可同时属于已绑定或未绑定。' },
+      ];
+      worldFilterBar.replaceChildren();
+      for (const filter of filters) {
+        const button = quickButton(`${filter.label} · ${counts[filter.id]}`, () => {
+          worldInfoFilter = filter.id;
+          render();
+        }, 'tle-worldbook-filter');
+        button.title = filter.title;
+        button.setAttribute('aria-pressed', String(worldInfoFilter === filter.id));
+        worldFilterBar.append(button);
+      }
+    }
+
     function renderList(data) {
       const previousScrollTop = list.scrollTop;
       list.replaceChildren();
@@ -5777,6 +5893,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           const statusBadge = quickNode('span', 'tle-quick-item-status is-' + (entry.statusTone || 'neutral'), entry.statusLabel);
           statusBadge.title = entry.detail || entry.statusLabel;
           titleRow.append(statusBadge);
+          if (entry.binding?.global) {
+            const globalBadge = quickNode('span', 'tle-quick-item-status is-global', '全局启用');
+            globalBadge.title = '已加入全局启用列表；此状态与角色卡绑定相互独立。';
+            titleRow.append(globalBadge);
+          }
           copy.append(titleRow);
         } else {
           copy.append(title);
@@ -5807,7 +5928,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     function render() {
       if (quickPanel !== current) return;
-      const clear = state.globalSearchPanel?.querySelector('.tle-search-clear');
+      const clear = state.organizerPanel?.querySelector('.tle-search-clear');
       if (clear) clear.hidden = !search.value;
       const data = readQuickGroups();
       const groups = currentGroups(data);
@@ -5821,6 +5942,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       scanButton.textContent = scanBusy ? '扫描 ' + scanProgress : '扫描绑定';
 
       if (viewGroup !== '*' && viewGroup !== '' && !groups.some(group => group.id === viewGroup)) viewGroup = '*';
+      renderWorldInfoFilters();
       renderGroupFilters(data);
       refreshTargetSelect(data);
 
@@ -6531,7 +6653,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     };
 
     body.append(
-      categoryRow, groupControlsRow, manageRow, transferConfirm, deleteConfirm,
+      categoryRow, worldFilterBar, groupControlsRow, manageRow, transferConfirm, deleteConfirm,
       operations, list, status
     );
     void load();
@@ -7410,14 +7532,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.222 · 整理侠成为第十个原生导航抽屉</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.223 · 整理侠成为第十个原生导航抽屉</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.222</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.223</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11327,57 +11449,23 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     results.append(fragment);
   }
 
-  function setGlobalSearchView(view) {
-    const panel = state.globalSearchPanel;
-    if (!panel) return;
-    const next = view === 'resources' ? 'resources' : 'search';
-    state.globalSearchView = next;
-    panel.classList.toggle('is-resource-view', next === 'resources');
-    const searchView = panel.querySelector('.tle-organizer-search-view');
-    const resourcesView = panel.querySelector('.tle-organizer-resources');
-    if (searchView) searchView.hidden = next !== 'search';
-    if (resourcesView) resourcesView.hidden = next !== 'resources';
-    panel.querySelectorAll('[data-organizer-tab]').forEach(button => {
-      const active = button.dataset.organizerTab === next;
-      button.setAttribute('aria-pressed', String(active));
-      button.setAttribute('aria-selected', String(active));
-    });
-    const input = panel.querySelector('.tle-search-field');
-    const clear = panel.querySelector('.tle-search-clear');
-    if (input) {
-      input.value = '';
-      input.placeholder = next === 'resources'
-        ? '筛选当前分类资源名称、备注或标签…'
-        : '搜索设置、角色、User 身份、预设和正则…';
-      input.setAttribute('aria-label', next === 'resources'
-        ? '筛选当前分类资源名称、备注或标签'
-        : '搜索设置、角色、User 身份、预设和正则');
-    }
-    if (clear) clear.hidden = true;
-    if (next === 'search') {
-      renderGlobalSearchResults('');
-      refreshSearchIndex();
-      loadSearchCatalog();
-    } else {
-      quickPanel?.onSearchInput?.();
-    }
-  }
-
   function closeGlobalSearch(restoreFocus = false) {
-    if (quickPanel?.embedded) closeQuickPanel(false);
     HOST_WIN.clearTimeout(search.renderTimer);
-    const input = state.globalSearchPanel?.querySelector('input');
+    const input = state.globalSearchPanel?.querySelector('.tle-search-field');
     if (input) input.value = '';
+    const clear = state.globalSearchPanel?.querySelector('.tle-search-clear');
+    if (clear) clear.hidden = true;
     state.globalSearchView = 'search';
-    state.globalSearchPanel?.classList.remove('is-resource-view', 'openDrawer');
-    state.globalSearchPanel?.classList.add('closedDrawer');
-    state.globalSearchPanel?.setAttribute('aria-hidden', 'true');
+    if (state.globalSearchPanel) {
+      state.globalSearchPanel.hidden = true;
+      state.globalSearchPanel.setAttribute('aria-hidden', 'true');
+    }
     renderGlobalSearchResults('');
     HOST_DOC.body.classList.remove('tle-global-search-open');
     state.globalSearchOpen = false;
-    const toggle = state.organizerEntry?.querySelector(':scope > .drawer-toggle');
-    toggle?.setAttribute('aria-expanded', 'false');
-    if (restoreFocus) toggle?.focus({ preventScroll: true });
+    if (restoreFocus) {
+      state.workspaceHeader?.querySelector('#' + ID.searchToggle)?.focus({ preventScroll: true });
+    }
   }
 
   function openGlobalSearch() {
@@ -11386,19 +11474,18 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       closeGlobalSearch(true);
       return;
     }
-    if (quickPanel && !quickPanel.embedded) closeQuickPanel(false);
+    if (quickPanel) closeQuickPanel(false);
     search.jumpAbort?.abort();
     setPanelOpen(false);
     closeMobileNativeDrawers();
     const panel = state.globalSearchPanel;
-    panel.classList.remove('closedDrawer');
-    panel.classList.add('openDrawer');
+    panel.hidden = false;
     panel.setAttribute('aria-hidden', 'false');
     state.globalSearchOpen = true;
-    state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.setAttribute('aria-expanded', 'true');
+    state.globalSearchView = 'search';
     HOST_DOC.body.classList.add('tle-global-search-open');
-    const input = panel.querySelector('input');
-    setGlobalSearchView('search');
+    const input = panel.querySelector('.tle-search-field');
+    renderGlobalSearchResults(input?.value || '');
     if (input?.isConnected) input.focus({ preventScroll: true });
     if (state.mobileNav.open && isMobileViewport()) {
       HOST_WIN.requestAnimationFrame(() => {
@@ -11415,21 +11502,22 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const panel = HOST_DOC.createElement('section');
       state.globalSearchPanel = panel;
       panel.id = GLOBAL_SEARCH_ID;
-      panel.className = 'drawer-content closedDrawer';
-      panel.setAttribute('aria-label', '整理侠');
+      panel.className = 'tle-global-search-overlay';
+      panel.setAttribute('aria-label', '全局搜索');
       panel.setAttribute('aria-hidden', 'true');
+      panel.hidden = true;
       panel.innerHTML = `
-        <div class="tle-search-surface" role="region" aria-label="整理侠内容">
+        <div class="popup tle-search-surface" role="dialog" aria-modal="true" aria-label="全局搜索">
           <header class="tle-search-heading">
             <div class="tle-search-heading-copy">
-              <strong class="tle-search-title">整理侠</strong>
-              <span class="tle-search-subtitle">全局搜索 · 资源分组 · 批量管理</span>
+              <strong class="tle-search-title">全局搜索</strong>
+              <span class="tle-search-subtitle">搜索设置、角色、User 身份、预设与正则</span>
             </div>
-            <nav class="tle-organizer-tabs" role="tablist" aria-label="整理侠功能">
-              <button type="button" data-organizer-tab="search" role="tab" aria-selected="true" aria-pressed="true">搜索</button>
-              <button type="button" data-organizer-tab="resources" role="tab" aria-selected="false" aria-pressed="false">资源管理</button>
-            </nav>
-            <button type="button" class="tle-search-close" aria-label="关闭整理侠">×</button>
+            <button type="button" class="tle-search-organizer-jump" data-search-organizer-jump
+              aria-label="进入整理侠资源管理" title="进入整理侠资源管理">
+              <i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>整理侠</span>
+            </button>
+            <button type="button" class="tle-search-close" aria-label="关闭全局搜索">×</button>
           </header>
           <div class="tle-search-input-wrap tle-search-field-wrap">
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
@@ -11441,12 +11529,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="tle-organizer-search-view">
             <div id="tle-search-results" class="tle-search-results" role="list"></div>
           </div>
-          <div class="tle-organizer-resources" hidden></div>
         </div>`;
 
-      const input = panel.querySelector('input');
+      const input = panel.querySelector('.tle-search-field');
       input.addEventListener('focus', () => {
-        if (state.globalSearchView !== 'search') return;
         search.jumpAbort?.abort();
         refreshSearchIndex();
         loadSearchCatalog();
@@ -11454,10 +11540,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const onInput = () => {
         const clear = panel.querySelector('.tle-search-clear');
         if (clear) clear.hidden = !input.value;
-        if (state.globalSearchView === 'resources') {
-          quickPanel?.onSearchInput?.();
-          return;
-        }
         HOST_WIN.clearTimeout(search.renderTimer);
         renderGlobalSearchResults(input.value);
         if (Date.now() - search.lastIndexAt > 1500 && !search.composing) {
@@ -11470,23 +11552,26 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       input.addEventListener('compositionend', () => { search.composing = false; onInput(); }, { signal: state.abort.signal });
 
       panel.addEventListener('click', event => {
-        const organizerTab = event.target.closest('[data-organizer-tab]');
-        if (organizerTab) {
-          if (organizerTab.dataset.organizerTab === 'resources') openQuickGroupManager(organizerTab);
-          else setGlobalSearchView('search');
+        if (event.target === panel) {
+          closeGlobalSearch(true);
+          return;
+        }
+        const organizerJump = event.target.closest('[data-search-organizer-jump]');
+        if (organizerJump) {
+          closeGlobalSearch(false);
+          state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.click();
           return;
         }
         const result = event.target.closest('[data-search-result]');
-        if (result && state.globalSearchView === 'search') {
+        if (result) {
           const entry = search.matches[Number(result.dataset.searchResult)];
           if (entry) void jumpToSearchResult(entry);
         } else if (event.target.closest('.tle-search-clear')) {
           input.value = '';
           panel.querySelector('.tle-search-clear').hidden = true;
-          if (state.globalSearchView === 'resources') quickPanel?.onSearchInput?.();
-          else renderGlobalSearchResults('');
+          renderGlobalSearchResults('');
           input.focus({ preventScroll: true });
-        } else if (event.target.closest('.tle-search-more') && state.globalSearchView === 'search') {
+        } else if (event.target.closest('.tle-search-more')) {
           search.limit += 60;
           renderGlobalSearchResults(input.value, true);
         } else if (event.target.closest('.tle-search-close')) {
@@ -11500,13 +11585,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           event.preventDefault();
           event.stopPropagation();
           closeGlobalSearch(true);
-        } else if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && state.globalSearchView === 'search') {
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
           const buttons = [...panel.querySelectorAll('.tle-search-result, .tle-search-more')];
           if (!buttons.length) return;
           event.preventDefault();
           const index = buttons.indexOf(HOST_DOC.activeElement);
           buttons[(index + (event.key === 'ArrowDown' ? 1 : buttons.length - 1) + buttons.length) % buttons.length]?.focus();
-        } else if (event.key === 'Enter' && event.target === input && state.globalSearchView === 'search') {
+        } else if (event.key === 'Enter' && event.target === input) {
           event.preventDefault();
           if (search.matches[0]) void jumpToSearchResult(search.matches[0]);
         }
@@ -11518,8 +11603,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }, { capture: true, signal: state.abort.signal });
 
       search.observer = new HOST_WIN.MutationObserver(records => {
-        // Character/persona lists finish debounced filtering after navigation.
-        // Transfer the highlight to the same resource's replacement row.
         if (!state.destroyed && search.highlight && !search.highlight.isConnected) {
           const replacement = search.highlightResolver?.();
           if (replacement) {
@@ -11528,7 +11611,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             replacement.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
           }
         }
-        if (state.destroyed || !state.globalSearchOpen || state.globalSearchView !== 'search' || !records.some(record => {
+        if (state.destroyed || !state.globalSearchOpen || !records.some(record => {
           const el = record.target.nodeType === 1 ? record.target : record.target.parentElement;
           return el?.closest('.drawer-content') && !el.closest('#' + GLOBAL_SEARCH_ID);
         })) return;
@@ -11537,13 +11620,66 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       });
       search.observer.observe(HOST_DOC.body, { childList: true, subtree: true, characterData: true });
 
-      state.organizerEntry?.appendChild(panel);
+      HOST_DOC.body.appendChild(panel);
       applyGlobalSearchAvailability();
       renderGlobalSearchResults('');
     } catch (error) {
       state.globalSearchPanel?.remove();
       state.globalSearchPanel = null;
       console.warn('[TLE Search] 搜索创建失败，导航保持可用', error);
+    }
+  }
+
+  function createOrganizerPanel() {
+    try {
+      if (state.organizerPanel) return;
+      const panel = HOST_DOC.createElement('section');
+      state.organizerPanel = panel;
+      panel.id = ID.organizerPanel;
+      panel.className = 'drawer-content closedDrawer';
+      panel.setAttribute('aria-label', '整理侠资源管理');
+      panel.setAttribute('aria-hidden', 'true');
+      panel.innerHTML = `
+        <div class="tle-search-surface">
+          <header class="tle-search-heading">
+            <div class="tle-search-heading-copy">
+              <strong class="tle-search-title">整理侠</strong>
+              <span class="tle-search-subtitle">资源分组 · 批量管理 · 世界书绑定核对</span>
+            </div>
+            <button type="button" class="tle-search-close" data-organizer-close aria-label="关闭整理侠">×</button>
+          </header>
+          <div class="tle-search-input-wrap tle-search-field-wrap">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input class="text_pole tle-search-field" type="text" enterkeyhint="search"
+              autocomplete="off" spellcheck="false" placeholder="筛选当前分类资源名称、备注或标签…"
+              aria-label="筛选当前分类资源名称、备注或标签" />
+            <button type="button" class="tle-search-clear" aria-label="清除筛选" hidden>×</button>
+          </div>
+          <div class="tle-organizer-resources"></div>
+        </div>`;
+
+      const input = panel.querySelector('.tle-search-field');
+      input.addEventListener('input', () => {
+        const clear = panel.querySelector('.tle-search-clear');
+        if (clear) clear.hidden = !input.value;
+        quickPanel?.onSearchInput?.();
+      }, { signal: state.abort.signal });
+      panel.addEventListener('click', event => {
+        if (event.target.closest('.tle-search-clear')) {
+          input.value = '';
+          const clear = panel.querySelector('.tle-search-clear');
+          if (clear) clear.hidden = true;
+          quickPanel?.onSearchInput?.();
+          input.focus({ preventScroll: true });
+        } else if (event.target.closest('[data-organizer-close]')) {
+          state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.click();
+        }
+      }, { signal: state.abort.signal });
+      state.organizerEntry?.appendChild(panel);
+    } catch (error) {
+      state.organizerPanel?.remove();
+      state.organizerPanel = null;
+      console.warn('[TLE Organizer] 管理界面创建失败，导航保持可用', error);
     }
   }
 
@@ -11561,6 +11697,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         <span class="tle-workspace-subtitle">SILLYTAVERN WORKSPACE</span>
       </div>
       <div class="tle-workspace-actions">
+        <button id="${ID.searchToggle}" class="tle-workspace-icon-button" type="button"
+          aria-label="打开全局搜索" aria-haspopup="dialog" aria-controls="tle-global-search-panel" title="全局搜索">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        </button>
         <button id="${ID.dockToggle}" class="tle-workspace-icon-button" type="button"
           aria-label="停靠侧边导航栏" aria-pressed="false" title="停靠侠：固定侧边导航栏">
           <i class="fa-solid fa-thumbtack" aria-hidden="true"></i>
@@ -11618,22 +11758,33 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     organizerToggle.tabIndex = 0;
     organizerToggle.setAttribute('role', 'button');
     organizerToggle.setAttribute('aria-label', '整理侠');
-    organizerToggle.setAttribute('aria-controls', GLOBAL_SEARCH_ID);
+    organizerToggle.setAttribute('aria-controls', ID.organizerPanel);
     organizerToggle.setAttribute('aria-expanded', 'false');
-    organizerToggle.title = '整理侠 · 全局搜索与资源管理';
+    organizerToggle.title = '整理侠 · 资源分组与批量管理';
     const organizerIcon = HOST_DOC.createElement('div');
-    organizerIcon.id = ID.searchToggle;
+    organizerIcon.id = ID.organizerToggle;
     organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable';
     organizerIcon.setAttribute('aria-hidden', 'true');
     organizerToggle.appendChild(organizerIcon);
     organizerEntry.appendChild(organizerToggle);
+    state.organizerEntry = organizerEntry;
+    createOrganizerPanel();
     organizerToggle.addEventListener('keydown', event => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       event.stopPropagation();
-      organizerIcon.click();
+      organizerToggle.click();
     }, { signal: state.abort.signal });
-    state.organizerEntry = organizerEntry;
+    organizerToggle.addEventListener('click', () => {
+      HOST_WIN.requestAnimationFrame(() => {
+        const isOpen = state.organizerPanel?.classList.contains('openDrawer');
+        if (isOpen && !(quickPanel?.embedded && quickPanel.module === 'groups')) {
+          openQuickGroupManager(null);
+        } else if (!isOpen && quickPanel?.embedded) {
+          closeQuickPanel(false);
+        }
+      });
+    }, { signal: state.abort.signal });
     setMobileNavOpen(false);
   }
 
@@ -12121,15 +12272,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const target = event.target;
     if (!target?.closest) return;
     if (target.closest('[data-tle-quick-panel], #' + GLOBAL_SEARCH_ID)) return;
-    if (state.globalSearchOpen && !target.closest('#' + ID.organizerEntry)) {
+    if (state.globalSearchOpen && !target.closest('#' + GLOBAL_SEARCH_ID) && !target.closest('#' + ID.searchToggle)) {
       closeGlobalSearch(false);
-    }
-    const organizerToggle = target.closest('#' + ID.organizerEntry + ' > .drawer-toggle');
-    if (organizerToggle && !target.closest('#' + ID.searchToggle)) {
-      event.preventDefault();
-      event.stopPropagation();
-      organizerToggle.querySelector('#' + ID.searchToggle)?.click();
-      return;
     }
 
     const chatToolsPanel = target.closest('#' + ID.chatToolsPanel);
@@ -13331,7 +13475,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.222',
+    version: '0.3.223',
     ready: false,
     destroy,
     state,
@@ -13781,5 +13925,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.222 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.223 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
