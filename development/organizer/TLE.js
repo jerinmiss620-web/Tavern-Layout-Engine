@@ -10819,7 +10819,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content">
-            <p class="tle-muted">信息站由上方导航栏展示模式控制：选择「完整：图标 + 文字 + 信息站」即可显示；选择极简或标准模式则自动关闭。下方项目首次默认全部启用，可按需取消。</p>
+            <p class="tle-muted">信息站由上方导航栏展示模式控制：选择「完整：图标 + 文字 + 信息站」即可开启；切换到极简或标准模式会自动关闭。首次使用时，所有可用项目默认勾选「显示」及支持的「快切 / 跳转」；不需要的项目可在下方取消。当前角色世界书仅支持跳转。</p>
             <div class="tle-info-settings" data-tle-info-settings></div>
             <p class="tle-muted">快切：点击信息打开居中选择弹窗；右侧箭头仍可跳转。分组整理与批量删除统一进入侧边导航栏「整理侠」。User 身份切换已移至导航顶部的 Hello 问候按钮。</p>
             <div class="tle-companion-actions">
