@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.228
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.229
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -1725,8 +1725,16 @@ body.tle-global-search-open { overflow: hidden !important; }
   font-size: .78em;
   opacity: .62;
 }
-#tle-global-search-panel .tle-search-close,
-#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-close {
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-tools {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  min-width: 0;
+  margin-inline-start: auto;
+}
+#tle-global-search-panel .tle-search-close {
   display: grid;
   flex: 0 0 34px;
   place-items: center;
@@ -1741,8 +1749,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   line-height: 1;
   cursor: pointer;
 }
-#tle-global-search-panel .tle-search-close:hover,
-#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-close:hover { background: rgb(127 127 127 / 22%); }
+#tle-global-search-panel .tle-search-close:hover { background: rgb(127 127 127 / 22%); }
 .tle-search-field {
   display: block;
   flex: 0 0 auto;
@@ -1889,15 +1896,28 @@ body.tle-global-search-open { overflow: hidden !important; }
 @media (max-width: 700px) {
   #tle-global-search-panel .tle-search-surface { padding: 12px; gap: 10px; }
   #tle-organizer-panel.drawer-content.openDrawer { padding: 12px; gap: 10px; }
-  #tle-global-search-panel .tle-search-heading,
-  #tle-organizer-panel.drawer-content > .tle-search-heading { flex-wrap: wrap; row-gap: 8px; }
-  #tle-global-search-panel .tle-search-heading-copy,
-  #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
+  #tle-global-search-panel .tle-search-heading { flex-wrap: wrap; row-gap: 8px; }
+  #tle-organizer-panel.drawer-content > .tle-search-heading {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 7px;
+    row-gap: 0;
+  }
+  #tle-global-search-panel .tle-search-heading-copy {
     order: 1;
     flex: 1 1 calc(100% - 48px);
   }
-  #tle-global-search-panel .tle-search-close,
-  #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-close {
+  #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-tools {
+    order: 2;
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+  }
+  #tle-global-search-panel .tle-search-close {
     order: 3;
     margin-inline-start: auto;
   }
@@ -3197,9 +3217,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         flex: 1 1 auto;
         min-width: 0;
       }
-      .tle-quick-manager .tle-quick-category-row .tle-quick-theme-import {
-        flex: 0 0 auto;
-      }
       .tle-quick-manager .tle-quick-group-actions {
         display: flex;
         flex: 0 0 auto;
@@ -3232,45 +3249,54 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         min-width: 0;
         margin: 0;
       }
-      .tle-quick-manager .tle-quick-backup-row {
+      #tle-organizer-panel .tle-search-heading-tools .tle-quick-backup-row {
         display: flex;
         flex: 0 0 auto;
         flex-wrap: nowrap;
         align-items: center;
         justify-content: flex-end;
-        gap: 4px;
+        gap: 3px;
         min-width: 0;
       }
-      .tle-quick-manager .tle-quick-backup-row > .tle-quick-icon-action {
+      #tle-organizer-panel .tle-search-heading-tools .tle-quick-backup-row > .tle-quick-icon-action {
         display: grid;
         place-items: center;
-        flex: 0 0 32px;
-        width: 32px;
-        min-width: 32px;
-        height: 32px;
+        flex: 0 0 28px;
+        width: 28px;
+        min-width: 28px;
+        height: 28px;
+        min-height: 28px;
         padding: 0;
         margin: 0;
-        font-size: 1em;
+        border: 0;
+        border-radius: 8px;
+        background: rgb(127 127 127 / 12%);
+        font-size: .9em;
         line-height: 1;
         cursor: pointer;
       }
-      .tle-quick-manager .tle-quick-theme-import {
+      #tle-organizer-panel .tle-search-heading-tools .tle-quick-theme-import {
         display: flex;
         flex: 0 0 auto;
         align-items: center;
         min-width: 0;
       }
-      .tle-quick-manager .tle-quick-theme-import[hidden] { display: none !important; }
-      .tle-quick-manager .tle-quick-theme-import > button {
+      #tle-organizer-panel .tle-search-heading-tools .tle-quick-theme-import[hidden] { display: none !important; }
+      #tle-organizer-panel .tle-search-heading-tools .tle-quick-theme-import > button {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 4px;
-        min-height: 32px;
-        padding: 5px 8px;
+        height: 28px;
+        min-height: 28px;
+        padding: 0 7px;
         margin: 0;
+        border: 0;
+        border-radius: 8px;
+        background: rgb(127 127 127 / 12%);
         white-space: nowrap;
-        font-size: .9em;
+        font-size: .78em;
+        line-height: 1;
       }
       @media screen and (min-width: 1001px) {
         .tle-quick-manager .tle-organizer-workspace {
@@ -3387,15 +3413,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0 !important; }
       }
       @media (max-width: 1000px) {
-        /* The mobile workspace is a compact control grid, not a vertical stack of desktop rows. */
+        /* Keep the mobile controls compact; the list owns the remaining height. */
         #tle-organizer-panel.drawer-content > .tle-organizer-resources.tle-quick-manager {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto;
-          grid-template-rows: auto 34px 32px 34px auto auto auto auto auto minmax(0, 1fr) auto;
+          grid-template-rows: auto 38px 36px 34px auto auto auto auto auto minmax(0, 1fr) auto;
           grid-template-areas:
             "search search"
             "categories categories"
-            "groups backup"
+            "groups groups"
             "target actions"
             "manage manage"
             "world world"
@@ -3406,25 +3432,32 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             "status status";
           align-content: stretch;
           align-items: stretch;
-          gap: 6px 8px;
+          gap: 5px 7px;
           min-width: 0;
           min-height: 0;
         }
         .tle-quick-manager .tle-search-field-wrap { grid-area: search; }
         .tle-quick-manager .tle-quick-category-row {
           grid-area: categories;
-          height: 34px;
-          max-height: 34px;
+          display: flex;
+          align-items: stretch;
+          height: 38px;
+          min-height: 38px;
+          max-height: 38px;
+          min-width: 0;
           overflow: hidden;
         }
         .tle-quick-manager .tle-quick-category-row .tle-quick-tabs {
+          position: relative;
           display: flex;
-          align-items: center;
-          height: 34px;
-          max-height: 34px;
+          align-items: flex-start;
+          height: 38px;
+          min-height: 38px;
+          max-height: 38px;
+          min-width: 0;
           overflow-x: auto;
           overflow-y: hidden;
-          padding: 0;
+          padding: 0 0 5px;
           scrollbar-width: none;
           -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch;
@@ -3440,40 +3473,29 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           flex: 0 0 auto;
           height: 30px;
           min-height: 30px;
+          margin: 0;
           padding-block: 4px;
         }
         .tle-quick-manager .tle-quick-filter-bar {
           grid-area: groups;
+          position: relative;
           display: flex;
           flex: 1 1 auto;
           flex-wrap: nowrap;
-          align-items: center;
-          height: 32px;
-          min-height: 32px;
-          max-height: 32px;
+          align-items: flex-start;
+          height: 36px;
+          min-height: 36px;
+          max-height: 36px;
           min-width: 0;
           overflow-x: auto;
           overflow-y: hidden;
-          padding: 0;
+          padding: 0 0 5px;
+          gap: 4px;
           scrollbar-width: none;
           -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch;
         }
-        .tle-quick-manager .tle-quick-group-heading {
-          grid-area: backup;
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          min-width: 0;
-          gap: 0;
-        }
-        .tle-quick-manager .tle-quick-backup-row { gap: 3px; }
-        .tle-quick-manager .tle-quick-backup-row > .tle-quick-icon-action {
-          flex: 0 0 28px;
-          width: 28px;
-          min-width: 28px;
-          height: 28px;
-        }
+        .tle-quick-manager .tle-quick-group-heading { display: none; }
         .tle-quick-manager .tle-quick-toolbar {
           grid-area: target;
           display: flex;
@@ -3499,6 +3521,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         .tle-quick-manager .tle-quick-group-actions > button {
           flex: 0 0 auto;
           min-height: 34px;
+          margin: 0;
           padding-inline: 6px;
           font-size: .78em;
           white-space: nowrap;
@@ -3507,44 +3530,84 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           grid-area: manage;
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 5px;
+          gap: 4px;
           min-width: 0;
           padding: 0;
         }
         .tle-quick-manager .tle-quick-manage-row > input {
           grid-column: 1 / -1;
           min-width: 0;
+          margin: 0;
         }
         .tle-quick-manager .tle-quick-manage-row > button {
           min-width: 0;
+          min-height: 30px;
+          height: 30px;
+          margin: 0;
           padding-inline: 4px;
           font-size: .8em;
         }
         .tle-quick-manager .tle-worldbook-filter-bar {
           grid-area: world;
-          height: 32px;
-          min-height: 32px;
-          max-height: 32px;
-          padding: 0;
+          position: relative;
+          height: 36px;
+          min-height: 36px;
+          max-height: 36px;
+          padding: 0 0 5px;
           scrollbar-width: none;
           -ms-overflow-style: none;
+        }
+        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::before,
+        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::before,
+        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::before,
+        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::after,
+        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::after,
+        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::after {
+          content: "";
+          position: absolute;
+          bottom: 1px;
+          height: 3px;
+          border-radius: 999px;
+          pointer-events: none;
+          z-index: 2;
+        }
+        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::before,
+        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::before,
+        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::before {
+          left: 0;
+          right: 0;
+          background: rgb(127 127 127 / 16%);
+        }
+        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::after,
+        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::after,
+        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::after {
+          left: var(--tle-scrollbar-thumb-left, 0px);
+          width: var(--tle-scrollbar-thumb-width, 0px);
+          background: rgb(from var(--SmartThemeQuoteColor, #8bbfd0) r g b / .62);
         }
         .tle-quick-manager .tle-quick-operations {
           grid-area: operations;
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-auto-rows: 30px;
+          align-content: start;
           align-items: stretch;
-          gap: 5px;
+          gap: 3px 4px;
           width: 100%;
           min-width: 0;
+          margin: 0;
+          padding: 0;
         }
         .tle-quick-manager .tle-quick-operations > button {
           width: 100%;
           min-width: 0;
-          min-height: 32px;
-          padding: 5px 3px;
-          font-size: .78em;
-          line-height: 1.2;
+          height: 30px;
+          min-height: 30px;
+          margin: 0;
+          padding: 3px 2px;
+          box-sizing: border-box;
+          font-size: .76em;
+          line-height: 1.1;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -5836,6 +5899,37 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const groupFilters = quickNode('div', 'flex-container flexWrap tle-quick-filter-bar');
     groupFilters.setAttribute('aria-label', '当前资源类型的分组目录');
 
+    const horizontalScrollTargets = [tabs, groupFilters, worldFilterBar];
+    function updateQuickHorizontalIndicator(element) {
+      if (!element) return;
+      const clientWidth = element.clientWidth;
+      const scrollWidth = element.scrollWidth;
+      const maxScroll = scrollWidth - clientWidth;
+      if (clientWidth <= 0 || maxScroll <= 1) {
+        element.classList.remove('tle-has-horizontal-overflow');
+        return;
+      }
+      const thumbWidth = Math.max(20, Math.round(clientWidth * clientWidth / scrollWidth));
+      const thumbLeft = Math.round((element.scrollLeft / maxScroll) * Math.max(0, clientWidth - thumbWidth));
+      element.style.setProperty('--tle-scrollbar-thumb-width', thumbWidth + 'px');
+      element.style.setProperty('--tle-scrollbar-thumb-left', thumbLeft + 'px');
+      element.classList.add('tle-has-horizontal-overflow');
+    }
+    function refreshQuickHorizontalIndicators() {
+      horizontalScrollTargets.forEach(updateQuickHorizontalIndicator);
+    }
+    for (const element of horizontalScrollTargets) {
+      element.addEventListener('scroll', () => updateQuickHorizontalIndicator(element), {
+        passive: true,
+        signal: current.abort.signal,
+      });
+    }
+    const horizontalIndicatorResizeObserver = typeof HOST_WIN.ResizeObserver === 'function'
+      ? new HOST_WIN.ResizeObserver(refreshQuickHorizontalIndicators)
+      : null;
+    horizontalScrollTargets.forEach(element => horizontalIndicatorResizeObserver?.observe(element));
+    current.abort.signal.addEventListener('abort', () => horizontalIndicatorResizeObserver?.disconnect(), { once: true });
+
     const groupName = quickNode('input', 'text_pole');
     groupName.placeholder = '新分组名称 / 重命名名称';
     groupName.setAttribute('aria-label', '新分组名称或重命名名称');
@@ -5924,10 +6018,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     themeImportRow.append(readThemeManagerButton);
     themeImportRow.hidden = true;
 
+    const headingTools = state.organizerPanel.querySelector('.tle-search-heading-tools');
+    if (!headingTools) return;
+    headingTools.append(themeImportRow, backupRow);
+
     const categoryRow = quickNode('div', 'tle-quick-category-row');
     categoryRow.title = hint.title;
-    categoryRow.setAttribute('aria-label', '资源分类与主题分组同步');
-    categoryRow.append(tabs, themeImportRow);
+    categoryRow.setAttribute('aria-label', '资源分类');
+    categoryRow.append(tabs);
 
     const deleteConfirm = quickNode('div', 'tle-quick-transfer-confirm tle-quick-delete-confirm');
     deleteConfirm.hidden = true;
@@ -5962,8 +6060,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     groupPane.setAttribute('aria-label', '分组目录');
     const groupHeading = quickNode('strong', 'tle-organizer-pane-title', '分组目录');
     const groupHeader = quickNode('div', 'tle-quick-group-heading');
-    groupHeader.setAttribute('aria-label', '分组目录与全部分组备份');
-    groupHeader.append(groupHeading, backupRow);
+    groupHeader.setAttribute('aria-label', '分组目录');
+    groupHeader.append(groupHeading);
     const resourcePane = quickNode('section', 'tle-organizer-pane tle-organizer-resource-pane');
     resourcePane.setAttribute('aria-label', '资源列表');
     const resourceHeading = quickNode('strong', 'tle-organizer-pane-title', '资源列表');
@@ -6072,12 +6170,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         button.setAttribute('aria-pressed', String(viewGroup === filter.id));
         groupFilters.append(button);
       }
+      updateQuickHorizontalIndicator(groupFilters);
     }
 
     function renderWorldInfoFilters() {
       worldFilterBar.hidden = module !== 'worldInfo';
       if (module !== 'worldInfo') {
         worldFilterBar.replaceChildren();
+        updateQuickHorizontalIndicator(worldFilterBar);
         return;
       }
       const counts = {
@@ -6104,6 +6204,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         button.setAttribute('aria-pressed', String(worldInfoFilter === filter.id));
         worldFilterBar.append(button);
       }
+      updateQuickHorizontalIndicator(worldFilterBar);
     }
 
     function renderList(data) {
@@ -6907,6 +7008,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     );
     workspace.append(categoryPane, groupPane, resourcePane);
     body.append(workspace);
+    refreshQuickHorizontalIndicators();
     void load();
     // The Organizer reuses the single search field above the view; it never creates a second one.
   }
@@ -7783,14 +7885,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.228 · 整理侠移动端布局优化</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.229 · 整理侠工具栏归位与滚动条修正</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.228</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.229</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11898,7 +12000,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             <strong class="tle-search-title">整理侠</strong>
             <span class="tle-search-subtitle">资源分组 · 批量管理</span>
           </div>
-          <button type="button" class="tle-search-close" data-organizer-close aria-label="关闭整理侠">×</button>
+          <div class="tle-search-heading-tools" role="group" aria-label="整理侠工具"></div>
         </header>
         <div class="tle-search-input-wrap tle-search-field-wrap">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
@@ -11922,8 +12024,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           if (clear) clear.hidden = true;
           quickPanel?.onSearchInput?.();
           input.focus({ preventScroll: true });
-        } else if (event.target.closest('[data-organizer-close]')) {
-          setOrganizerDrawerOpen(false);
         }
       }, { signal: state.abort.signal });
       state.organizerEntry?.appendChild(panel);
@@ -13768,7 +13868,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.228',
+    version: '0.3.229',
     ready: false,
     destroy,
     state,
