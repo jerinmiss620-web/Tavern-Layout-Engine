@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.217",
+  "latest_version": "0.3.218",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.217",
-    "source_path": "releases/v0.3.217/TLE.js",
-    "source_commit": "a83a490fe740bcc03cb8fc45fac611440a8b1558",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a83a490fe740bcc03cb8fc45fac611440a8b1558/releases/v0.3.217/TLE.js",
-    "changelog_path": "releases/v0.3.217/CHANGELOG.md",
-    "sha256": "6b9af72f08b082b7d03bb514f369f4eee7e843626345a18319eef5de283bb61c",
-    "size_bytes": 600739
+    "version": "0.3.218",
+    "source_path": "releases/v0.3.218/TLE.js",
+    "source_commit": "54463165da45767b72074ec8e9cec2fffc06d4ce",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/54463165da45767b72074ec8e9cec2fffc06d4ce/releases/v0.3.218/TLE.js",
+    "changelog_path": "releases/v0.3.218/CHANGELOG.md",
+    "sha256": "c2e0d5a7ae5fb1e0968342cafdae9d2ced22e973ad1be8422b0bb009c1954c22",
+    "size_bytes": 617740
   },
-  "notes": "修复 TT 滑屏与原生手势首次同步；v0.3.217 独立测试版已获 iPhone TT 用户验证。Bootstrap、Loader 不变。"
+  "notes": "整理侠：原全局搜索入口升级为统一面板，默认搜索页；资源分组与批量管理共用单一搜索框；批量删除采用资源白名单与酒馆原生接口。Bootstrap、Loader 不变。"
 }
