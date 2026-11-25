@@ -8,7 +8,7 @@
 
 - 开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式版 `latest.json`、导入包和 release-plan 未修改，正式 Core 仍为 v0.3.220。
 - 本轮不实现新的首页画廊，也不接管原生角色管理/预览区；首页入口需求与整理侠资源管理分开设计。
-- 整理侠从顶部搜索按钮迁移为独立侧边导航项；原全局搜索能力保留并仍为默认页面，图标导航模式也可访问。
+- 整理侠成为侧边栏第十个一级原生形态抽屉，紧接角色管理下方；拥有自己的 `.drawer-toggle` 与 `.drawer-content`，复用 `openDrawer / closedDrawer`，不再创建 popup/modal。原全局搜索仍为默认页面，资源管理继续嵌入同一面板。
 - 世界书管理统一读取完整 `world_names`，显示全局选择、角色卡主要绑定、额外绑定、未绑定及疑似孤儿状态；信息站原有「全局世界书」选择器不变。
 - 世界书分组键从原生选项索引迁移为世界书名称，避免删除一本书后索引变化导致其他世界书分组错位。
 - 懒加载角色卡不会被直接判为孤儿；用户可主动扫描，逐张调用酒馆公开上下文中的 `unshallowCharacter` 读取元数据。扫描不自动运行，并显示进度与内存占用提示。
@@ -16,7 +16,7 @@
 - 新增 `tests/tle-organizer-worldbook.test.mjs`，覆盖全局/主要/额外绑定、失效角色额外绑定、未绑定候选、懒加载待核对、分组键迁移、额外绑定清理及导航入口。GitHub Actions run 45549955361（job `validate`）通过。
 - **识别限制：** 角色卡删除后，若主要世界书引用只存在于该卡文件且未留下其他绑定元数据，无法追溯原角色；该书会显示为「未绑定」，而不是被断言为孤儿。当前也不扫描聊天级或身份级引用。疑似孤儿状态只基于仍存在但指向不存在角色的额外绑定记录。
 - 自动化通过不代表真实宿主验收通过；PC ST、移动端 ST、iPhone TT 的导航显示、窄屏空间、主题继承和世界书原生删除流程仍待实机验收。
-- 已建立分支专用测试通道：Core v0.3.221，清单位于本分支 `channels/test.json`；导入包 `loader/TLE-Remote-Loader-Test-0.3.0.json` 默认禁用，Loader 使用独立的 `TLE_Organizer_Branch_Test_Cache` 与独立缓存键，不覆盖 Stable Bootstrap/Loader 缓存。Loader 固定 Commit：`8f6534c1a2839e561998d5e4d984f871074d720b`；安装包固定 Commit：`08527064995cc13ce39d64f53528ffdc163a66a1`；Core 固定 Commit：`9eb720d09802e2d6c991d1ff9cf11348ca45c244`。
+- 已建立分支专用测试通道：Core v0.3.222，清单位于本分支 `channels/test.json`；导入包 `loader/TLE-Remote-Loader-Test-0.3.0.json` 默认禁用，Loader 使用独立的 `TLE_Organizer_Branch_Test_Cache` 与独立缓存键，不覆盖 Stable Bootstrap/Loader 缓存。Loader 固定 Commit：`8f6534c1a2839e561998d5e4d984f871074d720b`；安装包固定 Commit：`08527064995cc13ce39d64f53528ffdc163a66a1`；Core 固定 Commit：`ad9e8dd7f827c15909d022e5e402cbc7612d9254`。
 - 测试 Loader 只读取开发分支的 `channels/test.json`；正式根目录 `latest.json`、`loader/latest.json`、`release-plan.json` 未改动。测试前先禁用 Bootstrap 1.0.6 并完整刷新；恢复正式版时禁用测试 Loader、启用 Bootstrap 1.0.6 并完整刷新，由正式 Loader 从自己的 LKG 缓存恢复 Core v0.3.220。
 - 测试步骤见 `development/organizer/TESTING.md`。分支 CI 增加 `node loader/verify-test-channel.mjs --remote`，验证测试 Core、Loader、安装 JSON 的 Commit pin、UTF-8 字节数、SHA-256 与安装包源码同步。
 - 分支 CI run 45555232799（job `validate`）通过：`npm test` 全量回归通过；测试通道远端验证通过，Core v0.3.221（637738 UTF-8 bytes）、Test Loader v0.3.0（39896 UTF-8 bytes）、固定 Commit、SHA-256 与远端安装 JSON 内容均通过校验。正式 Stable release verification 仍确认 Core v0.3.220。
