@@ -5,13 +5,13 @@
   "latest_version": "0.3.231",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.230",
-    "source_path": "releases/v0.3.230/TLE.js",
-    "source_commit": "b52d9236e5f44a2eb112e7e26651f0547c32ec70",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b52d9236e5f44a2eb112e7e26651f0547c32ec70/releases/v0.3.230/TLE.js",
-    "changelog_path": "releases/v0.3.230/CHANGELOG.md",
-    "sha256": "e013a92a10a01524328099f978fc195d0ea601e7fb136e7db0751ba7d30864e5",
-    "size_bytes": 655849
+    "version": "0.3.231",
+    "source_path": "releases/v0.3.231/TLE.js",
+    "source_commit": "6a9da5971dbd7f516e8aaecf4b405d1657a15101",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6a9da5971dbd7f516e8aaecf4b405d1657a15101/releases/v0.3.231/TLE.js",
+    "changelog_path": "releases/v0.3.231/CHANGELOG.md",
+    "sha256": "9a5654f79bfefb0c06c17377f582e5bb7f6036fdd6ae410eba9510a18af44206",
+    "size_bytes": 655490
   },
   "status": "TEST v0.3.231: Organizer header Sync, Import, and Export actions inherit the active SillyTavern menu_button theme styling. TLE removes custom button backgrounds, borders, radii, padding, font sizing and line-height overrides; the Organizer generic button reset excludes .menu_button. Only layout, icon alignment and minimum touch sizing remain. Sync behavior still reads local Theme Manager groups and updates only TLE's UI theme grouping. Full-group JSON import/export behavior and all other Organizer functionality are unchanged. JavaScript syntax and static style checks passed; PC/mobile ST/TT visual theme-inheritance acceptance remains pending.",
   "recommended_loader_version": "0.3.0",
