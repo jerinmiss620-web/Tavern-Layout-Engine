@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.223`
+Current test Core: `v0.3.224`
 
 ## Import once
 
@@ -16,8 +16,8 @@ The installer is disabled by default. It reads the test manifest from this devel
 2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
 3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
 4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.223**.
-6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.223**.
+5. Confirm the native prompt to install **TLE Core v0.3.224**.
+6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.224**.
 
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
 
@@ -27,6 +27,9 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 - Confirm the global-search modal contains a compact **整理侠** jump entry. Activating it closes the search modal and opens the Organizer drawer; it must not switch the search modal into a resource-management tab.
 - Confirm this candidate does not merge search and replacement workflows; that follow-up remains a separate Codex integration task.
 - Confirm **整理侠** is the tenth `.drawer` directly below **角色管理**, with its own `.drawer-toggle` and `.drawer-content`; it opens/closes like a native drawer, not a centered popup. Its resource filter input and manager state are independent from global search.
+- Confirm the Organizer's `.drawer-content` is the direct content root: the heading, resource filter and resource list are direct children; there is no nested `.tle-search-surface` wrapper.
+- Click the Organizer icon, then the navigation text label, and then close/reopen it using the close control. Each action must add/remove `openDrawer / closedDrawer` and update `aria-expanded` correctly.
+- From the global-search modal, click **整理侠**. The search modal should close and the same Organizer `.drawer-content` should open; verify this works on both desktop and mobile.
 - Confirm the tenth icon participates in icon-only, icon+label, compact two-column, and mobile hamburger navigation modes. On mobile, the rail folds away while the opened drawer remains visible.
 - Open the Organizer's **世界书** category. Verify quick filters for **全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用** and their counts. Primary/extra character bindings define **已绑定**; global enablement is independent and may overlap either bound state.
 - Verify a globally enabled book with no character binding appears in both **未绑定** and **全局启用**. Verify stale extra-book references are marked **疑似孤儿** (or **含遗留关联** when the book also has a current character binding).
