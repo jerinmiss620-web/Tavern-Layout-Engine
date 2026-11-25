@@ -46,15 +46,11 @@ const organizerToggleSandbox = {
   toggle: { setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; } },
   quickPanel: null,
   managerOpens: 0,
-  managerCloses: 0,
   nativeDrawerCloses: 0,
   closeGlobalSearch: () => { organizerToggleSandbox.state.globalSearchOpen = false; },
-  closeQuickPanel: () => { organizerToggleSandbox.quickPanel = null; organizerToggleSandbox.managerCloses++; },
+  closeQuickPanel: () => { throw new Error('unexpected quick-panel close while opening Organizer'); },
   closeMobileNativeDrawers: () => { organizerToggleSandbox.nativeDrawerCloses++; },
-  openQuickGroupManager: () => {
-    organizerToggleSandbox.managerOpens++;
-    organizerToggleSandbox.quickPanel = { embedded: true, module: 'groups', node: organizerToggleSandbox.state.organizerPanel };
-  },
+  openQuickGroupManager: () => { organizerToggleSandbox.managerOpens++; },
   HOST_WIN: { requestAnimationFrame(callback) { callback(); } },
   isMobileViewport() { return false; },
   setMobileNavOpen() {},
@@ -79,7 +75,45 @@ assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('ope
 assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('closedDrawer'), true);
 assert.equal(organizerToggleSandbox.state.organizerPanel.attributes['aria-hidden'], 'true');
 assert.equal(organizerToggleSandbox.toggle.attributes['aria-expanded'], 'false');
-assert.equal(organizerToggleSandbox.managerCloses, 1);
+
+const organizerClosePanel = {
+  classList: {
+    values: new Set(['openDrawer']),
+    contains(name) { return this.values.has(name); },
+    toggle(name, force) {
+      if (force) this.values.add(name);
+      else this.values.delete(name);
+    },
+  },
+  setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; },
+};
+const organizerCloseSandbox = {
+  state: {
+    organizerPanel: organizerClosePanel,
+    organizerEntry: { querySelector: () => ({ setAttribute() {} }) },
+    globalSearchOpen: false,
+    mobileNav: { open: false },
+    destroyed: false,
+  },
+  quickPanel: { embedded: true, module: 'groups', node: organizerClosePanel },
+  closeQuickPanel: () => { organizerCloseSandbox.quickPanel = null; organizerCloseSandbox.managerCloses++; },
+  managerCloses: 0,
+  closeGlobalSearch() {},
+  closeMobileNativeDrawers() {},
+  openQuickGroupManager() {},
+  HOST_WIN: { requestAnimationFrame(callback) { callback(); } },
+  isMobileViewport() { return false; },
+  setMobileNavOpen() {},
+};
+const closeOrganizerDrawer = vm.runInNewContext(
+  '(' + extractFunction('setOrganizerDrawerOpen', '  function toggleOrganizerDrawer') + ')',
+  organizerCloseSandbox,
+);
+closeOrganizerDrawer(false);
+assert.equal(organizerClosePanel.classList.contains('openDrawer'), false);
+assert.equal(organizerClosePanel.classList.contains('closedDrawer'), true);
+assert.equal(organizerClosePanel.attributes['aria-hidden'], 'true');
+assert.equal(organizerCloseSandbox.managerCloses, 1);
 
 const worldNames = ['Global', 'Primary', 'Extra', 'Orphan', 'Mixed', 'Unbound'];
 const select = {
