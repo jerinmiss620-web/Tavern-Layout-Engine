@@ -4954,7 +4954,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       let statusLabel = '未发现角色绑定';
       let statusTone = 'neutral';
       if (orphan.length && !hasCurrent && unloadedIndices.length === 0) {
-        statusLabel = '孤儿';
+        statusLabel = '疑似孤儿';
         statusTone = 'orphan';
       } else if (orphan.length && hasCurrent) {
         statusLabel = '含遗留关联';
@@ -4974,7 +4974,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (global) details.push('全局');
       if (primary.length) details.push('主要绑定：' + primary.join('、'));
       if (extra.length) details.push('额外绑定：' + extra.join('、'));
-      if (orphan.length) details.push('遗留角色记录：' + orphan.join('、'));
+      if (orphan.length) details.push('遗留角色绑定：' + orphan.join('、'));
       if (unloadedIndices.length) details.push('尚有 ' + unloadedIndices.length + ' 张角色卡未加载，主要绑定待核对');
       if (!details.length) details.push('未发现全局或角色卡绑定');
 
