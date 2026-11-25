@@ -1,11 +1,16 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.220 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
+目前正式版：**Core v0.3.239 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
 
+## 2026-11-26 · Core v0.3.239 · 整理侠三栏分隔线与稳定性修复（正式发布）
+
+详见 [本版完整日志](releases/v0.3.239/CHANGELOG.md)。PC 三栏改用纵向 HR 分隔；同时包含整理侠工具栏防重复挂载、配套侠逐项应用与缺项提示、渐隐侠壁纸镜像按需同步修复。
+
 ## Core 更新记录
 
+- [v0.3.239](releases/v0.3.239/CHANGELOG.md)
 - [v0.3.220](releases/v0.3.220/CHANGELOG.md)
 - [v0.3.219](releases/v0.3.219/CHANGELOG.md)
 - [v0.3.218](releases/v0.3.218/CHANGELOG.md)

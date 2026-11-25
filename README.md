@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.220 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.239 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -23,13 +23,19 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.220/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.239/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；Core v0.3.220 的整理侠新布局仍待桌面与移动端视觉验收，Core v0.3.219 新增的批量删除流程仍待实机验收，故障注入及长期可靠性也未全部覆盖。
+- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC 整理侠三栏 HR 分隔线布局已由用户截图确认视觉方向；配套侠部分应用、渐隐侠壁纸同步及整理侠重复工具栏修复仍需在 ST/TT 实际环境继续验收，iPhone 与 Android 的完整功能矩阵、故障注入及长期可靠性也未全部覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
+
+### Core v0.3.239 · 整理侠三栏分隔线与稳定性修复
+
+PC 整理侠保留「资源类型 / 分组目录 / 资源列表」三栏结构，移除三块独立色块底板，改用两条跟随酒馆主题颜色的纵向 HR 分隔线；1000px 及以下继续使用原移动端单栏布局。
+
+同时修复整理侠标题工具栏反复打开后重复累积、配套侠遇到单项缺失时整套失败且不提示、渐隐侠壁纸镜像偶发不同步等问题。配套侠逐项应用并报告缺项；渐隐侠按需监听壁纸/主题变化，不使用持续轮询；整理侠工具栏采用幂等挂载。
 
 ### Core v0.3.220 · 整理侠资源管理界面重排
 

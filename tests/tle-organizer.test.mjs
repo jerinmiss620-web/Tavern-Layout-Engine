@@ -1,84 +1,100 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const plan = JSON.parse(readFileSync('release-plan.json', 'utf8'));
-const source = readFileSync(`releases/v${plan.core}/TLE.js`, 'utf8');
+const stableManifest = JSON.parse(readFileSync('latest.json', 'utf8'));
+const hasWorkingSource = existsSync('development/organizer/TLE.js');
+const testManifest = hasWorkingSource
+  ? JSON.parse(readFileSync('channels/test.json', 'utf8'))
+  : null;
+const sourcePath = hasWorkingSource
+  ? 'development/organizer/TLE.js'
+  : `releases/v${plan.core}/TLE.js`;
+const source = readFileSync(sourcePath, 'utf8');
 const readme = readFileSync('README.md', 'utf8');
-const managerStart = source.indexOf('function openQuickGroupManager');
+const actualVersion = source.match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
+const expectedVersion = hasWorkingSource ? testManifest.latest_version : plan.core;
+
+assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
+assert.equal(actualVersion, expectedVersion, 'test/development source must match its channel version');
+new vm.Script(source, { filename: sourcePath });
+
+const managerStart = source.indexOf('function openQuickGroupManager(');
 const managerEnd = source.indexOf('const FOLD_STORAGE_KEY', managerStart);
 const manager = source.slice(managerStart, managerEnd);
 const searchStart = source.indexOf('function createGlobalSearch()');
-const searchEnd = source.indexOf('function createRailControls()', searchStart);
-const searchMarkup = source.slice(searchStart, searchEnd);
+const organizerStart = source.indexOf('function createOrganizerPanel()', searchStart);
+const railStart = source.indexOf('function createRailControls()', organizerStart);
+const searchMarkup = source.slice(searchStart, organizerStart);
+const organizerMarkup = source.slice(organizerStart, railStart);
 
-assert.equal(plan.core, '0.3.220');
-new vm.Script(source, { filename: 'TLE.js' });
+assert.ok(managerStart >= 0 && managerEnd > managerStart, 'Organizer resource manager must exist');
+assert.ok(searchStart >= 0 && organizerStart > searchStart && railStart > organizerStart);
 
-// One existing rail control is renamed; no second Organizer button is introduced.
-assert.equal((source.match(/id="\$\{ID\.searchToggle\}"/g) || []).length, 1);
-assert.match(source, /aria-label="打开整理侠"/);
-assert.doesNotMatch(source, /organizerToggle|data-tle-quick-groups/);
-
-// The original search page remains the default and the Organizer has one shared input.
-assert.match(source, /globalSearchView: 'search'/);
+// Global Search and Organizer are separate native entry points and surfaces.
+// The original global search remains intact; its only Organizer integration is a direct jump.
 assert.match(source, /function openGlobalSearch\(\)/);
-assert.match(source, /function renderGlobalSearchResults\(/);
-assert.match(source, /function setGlobalSearchView\(view\)/);
-assert.match(searchMarkup, /<strong class="tle-search-title">整理侠<\/strong>/);
-assert.match(searchMarkup, /<header class="tle-search-heading">[\s\S]*<nav class="tle-organizer-tabs"[\s\S]*data-organizer-tab="search"[\s\S]*data-organizer-tab="resources"[\s\S]*tle-search-close[\s\S]*<\/header>/);
-assert.equal((searchMarkup.match(/<nav class="tle-organizer-tabs"/g) || []).length, 1);
-assert.equal((searchMarkup.match(/class="text_pole tle-search-field"/g) || []).length, 1);
-assert.match(manager, /const search = state\.globalSearchPanel\.querySelector\('\.tle-search-field'\)/);
-assert.doesNotMatch(manager, /quickSearchBox|tle-quick-search-row/);
-assert.match(manager, /embedded: true/);
+assert.match(searchMarkup, /panel\.className = 'tle-global-search-overlay'/);
+assert.match(searchMarkup, /<strong class="tle-search-title">全局搜索<\/strong>/);
+assert.match(searchMarkup, /data-search-organizer-jump/);
+assert.match(searchMarkup, /renderGlobalSearchResults\(/);
+assert.match(searchMarkup, /jumpToSearchResult\(/);
+assert.match(searchMarkup, /state\.organizerEntry\?\.querySelector\(':scope > \.drawer-toggle'\)\?\.click\(\)/);
+assert.match(organizerMarkup, /panel\.className = 'drawer-content closedDrawer'/);
+assert.match(organizerMarkup, /class="tle-search-field text_pole flex1"/);
+assert.match(organizerMarkup, /state\.organizerEntry\?\.appendChild\(panel\)/);
+assert.match(source, /organizerEntry\.className = 'drawer'/);
+assert.match(source, /organizerToggle\.setAttribute\('aria-label', '整理侠'\)/);
+assert.match(source, /holder\.insertBefore\(state\.organizerEntry, organizerPosition\)/);
+assert.match(manager, /const search = state\.organizerPanel\.querySelector\('\.tle-search-field'\)/);
+assert.doesNotMatch(manager, /state\.globalSearchPanel|globalSearchView|setGlobalSearchView/);
+assert.match(source, /function setGlobalSearchEnabled\(enabled\)/);
+assert.match(source, /data-tle-setting="global-search"/);
 
-// Existing group data and group-only deletion semantics remain intact.
+// Group storage keeps the complete schema, including search-only categories,
+// while the visible resource manager only exposes resources with native delete APIs.
 assert.match(source, /const QUICK_GROUP_KEY = 'tle\.quickGroups\.v2'/);
+assert.match(source, /const QUICK_MODULES = INFO_MODULES\.filter\(item => item\.id !== 'characterWorldBook'\)/);
+assert.match(source, /const QUICK_DELETE_MODULES = Object\.freeze\(\{/);
+assert.match(source, /const QUICK_RESOURCE_MODULES = QUICK_MODULES\.filter\(item => QUICK_DELETE_MODULES\[item\.id\] === true\)/);
+assert.match(source, /for \(const item of QUICK_MODULES\) groupsByModule\[item\.id\]/);
+assert.match(manager, /for \(const item of QUICK_RESOURCE_MODULES\)/);
+assert.doesNotMatch(manager, /for \(const item of QUICK_MODULES\) \{\s*const button = quickButton\(item\.title/);
+assert.match(source, /API 连接、接口来源与模型仅允许搜索，不参与分组或删除。/);
+assert.match(source, /正则继续由正则侠管理/);
 assert.match(manager, /quickButton\('删除分组'/);
 assert.match(manager, /其中项目已恢复为未分组/);
-
-// Resource-management tabs are limited to resources with native delete operations.
-// The complete QUICK_MODULES schema still preserves hidden search-only group data.
-assert.ok(source.includes("persona: true,\n    theme: true,"));
-assert.ok(source.includes("const QUICK_RESOURCE_MODULES = QUICK_MODULES.filter(item => QUICK_DELETE_MODULES[item.id] === true);"));
-assert.ok(source.includes("const QUICK_MODULES = INFO_MODULES.filter(item => item.id !== 'characterWorldBook');"));
-assert.ok(source.includes("for (const item of QUICK_MODULES) groupsByModule[item.id]"));
-assert.ok(manager.includes("for (const item of QUICK_RESOURCE_MODULES)"));
-assert.ok(!manager.includes("for (const item of QUICK_MODULES) {\n      const button = quickButton(item.title"));
-assert.ok(source.includes("API 连接、接口来源与模型仅允许搜索，不参与分组或删除。"));
-assert.ok(!source.includes("整理侠暂不开放批量删除"));
-assert.match(source, /正则继续由正则侠管理/);
 assert.match(manager, /quickButton\('批量删除资源'/);
-assert.ok(manager.includes("const categoryRow = quickNode('div', 'tle-quick-category-row');"));
-assert.ok(manager.includes("categoryRow.append(tabs, themeImportRow, backupRow);"));
-assert.ok(manager.includes("const groupControlsRow = quickNode('div', 'tle-quick-group-controls');"));
-assert.ok(manager.includes("groupControlsRow.append(groupFilters, toolbar);"));
-assert.ok(manager.includes("body.append(\n      categoryRow, groupControlsRow, manageRow, transferConfirm, deleteConfirm,\n      operations, list, status\n    );"));
-assert.ok(!manager.includes("deleteHint, list, status"));
-assert.ok(!manager.includes("hint, backupRow, tabs, groupFilters"));
-assert.ok(source.includes(".tle-quick-category-row .tle-quick-tabs"));
-assert.ok(source.includes("grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);"));
-assert.ok(source.includes(".tle-quick-group-controls {\n          grid-template-columns: minmax(0, 1fr);"));
-assert.ok(source.includes("margin-inline-start: auto;"));
-assert.ok(source.includes("order: 3;\n    flex: 0 0 100%;"));
-assert.ok(manager.includes("deleteSelectedButton.setAttribute('aria-description', deleteScopeHint);"));
-assert.ok(!manager.includes("const deleteHint = quickNode"));
-assert.ok(manager.includes("categoryRow.title = hint.title;"));
-assert.ok(manager.includes("native.deleteCharacter(freshChosen.map(entry => entry.value), { deleteChats: false })"));
-assert.ok(manager.includes("native.deleteWorldInfo(entry.value)"));
-assert.ok(manager.includes("native.deletePreset(entry.label.trim())"));
-assert.ok(manager.includes("/persona-delete persona=" + "$" + "{JSON.stringify(String(entry.value))} silent=true"));
-assert.ok(manager.includes("executeTLESlashCommand(command, context)"));
-assert.ok(manager.includes("'/api/themes/delete'"));
-assert.ok(manager.includes("HOST_WIN.setTimeout(() => HOST_WIN.location.reload(), 900)"));
-assert.ok(!source.includes("quickHasActiveConversation"));
-assert.ok(!source.includes("请先退出当前角色或群聊"));
-assert.ok(!source.includes("至少保留一个预设或推理格式"));
-assert.ok(source.includes("GUI 预设是酒馆原生保留项，不能删除"));
-assert.ok(source.includes("const isGuiPreset = module === 'preset' || module === 'reasoning';"));
-// The README carries the agreed third-party layout-plugin boundary.
+
+// Resource deletion is delegated to the host's native operations with safeguards.
+assert.match(manager, /native\.deleteCharacter\(freshChosen\.map\(entry => entry\.value\), \{ deleteChats: false \}\)/);
+assert.match(manager, /native\.deleteWorldInfo\(entry\.value\)/);
+assert.match(manager, /native\.deletePreset\(entry\.label\.trim\(\)\)/);
+assert.match(manager, /\/persona-delete persona=\$\{JSON\.stringify\(String\(entry\.value\)\)\} silent=true/);
+assert.match(manager, /HOST_WIN\.fetch\('\/api\/themes\/delete'/);
+assert.match(manager, /const isGuiPreset = module === 'preset' \|\| module === 'reasoning'/);
+assert.match(manager, /deleteSelectedButton\.setAttribute\('aria-description', deleteScopeHint\)/);
+assert.doesNotMatch(source, /quickHasActiveConversation|请先退出当前角色或群聊|至少保留一个预设或推理格式/);
+assert.match(source, /GUI 预设是酒馆原生保留项，不能删除/);
+
+// Organizer title actions mount idempotently; the workspace uses three panes
+// separated by real vertical HR elements on desktop.
+assert.match(manager, /headingTools\.replaceChildren\(themeImportRow, backupRow\)/);
+assert.doesNotMatch(manager, /headingTools\.append\(themeImportRow, backupRow\)/);
+assert.match(manager, /toolbar\.append\(targetSelect\)/);
+assert.match(manager, /groupActions\.append\(manageButton, autoGroupButton\)/);
+assert.match(manager, /const categoryDivider = quickNode\('hr', 'tle-organizer-divider'\)/);
+assert.match(manager, /const groupDivider = quickNode\('hr', 'tle-organizer-divider'\)/);
+assert.match(manager, /categoryPane\.append\(categoryHeading, categoryRow\)/);
+assert.match(manager, /groupPane\.append\(groupHeader, groupActions, groupEditor, groupFilters\)/);
+assert.match(manager, /resourcePane\.append\(\s*resourceHeader, content\.searchRow, content\.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,\s*operations, list, status/);
+assert.match(manager, /workspace\.append\(categoryPane, categoryDivider, groupPane, groupDivider, resourcePane\)/);
+assert.match(manager, /body\.append\(workspace\)/);
+assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) 1px minmax\(168px, \.92fr\) 1px minmax\(360px, 2\.3fr\)/);
+assert.match(source, /border-block-start: 1px solid var\(--SmartThemeBorderColor/);
+assert.match(source, /writing-mode: vertical-rl/);
 assert.match(readme, /第三方布局插件兼容性/);
 assert.match(readme, /不保证与第三方布局管理插件同时启用时的兼容性/);
 
-console.log('TLE Organizer unified-entry, shared-search, grouping and deletion-safety tests passed.');
+console.log(`TLE Organizer ${actualVersion}: separate global search, native Organizer drawer, three-pane HR layout, grouping and deletion-safety tests passed.`);
