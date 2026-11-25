@@ -11,7 +11,7 @@
 - 整理侠仍为侧边栏第十个原生形态抽屉，独立持有 `.drawer-content`、资源筛选输入框、分组和批量管理。搜索弹窗与整理侠不共享输入框、视图状态或资源管理内容。
 - 世界书增加「全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用」快速筛选。主要绑定和额外绑定决定角色卡绑定状态；全局启用独立统计，允许与已绑定或未绑定筛选重叠。
 - 孤儿判断只依据仍存在的额外绑定记录中无法匹配到现存角色卡的引用。主要绑定随角色卡文件一并消失且无残留记录时不可追溯，仍标记未绑定；懒加载角色卡未扫描前，未知项目不误判为未绑定或孤儿。
-- 新增可单独测试的 `matchesWorldInfoFilter`，更新 `tests/tle-organizer-worldbook.test.mjs`，覆盖全局-only、角色主要/额外绑定、混合遗留引用、未绑定及懒加载待核对筛选。当前源码已通过语法解析，世界书分类/筛选使用合成数据完成定向核对；本轮完整 `npm test`、CI 与 PC/移动端 ST/TT 实机验收仍待执行。
+- 新增可单独测试的 `matchesWorldInfoFilter`，更新 `tests/tle-organizer-worldbook.test.mjs`，覆盖全局-only、角色主要/额外绑定、混合遗留引用、未绑定及懒加载待核对筛选。当前源码已通过语法解析，世界书分类/筛选使用合成数据完成定向核对；更新后的 `tests/tle-organizer-worldbook.test.mjs` 已在隔离 JS harness 通过。本轮完整 `npm test`、CI 与 PC/移动端 ST/TT 实机验收仍待执行。
 - 全局搜索与替换的后续整合留待 Codex 单独处理，不属于本候选版本。
 - 分支测试通道已发布 Core v0.3.223：release 源码 Commit `c3436e7410375dd67df94d75baf95e3b6375c641`，SHA-256 `5d8b3e3af91d232b3b76f7f74d8f2d0918f0b4fa3c8c050eec908b6896f1415d`，UTF-8 字节数 `643005`；测试清单更新 Commit `289021ed51f0484f49ae9a377cbfd4d5871548e6`。Test Loader v0.3.0 仍使用独立缓存。正式 Stable 通道和正式 Core 不受影响。
 
