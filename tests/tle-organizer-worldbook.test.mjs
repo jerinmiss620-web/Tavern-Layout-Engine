@@ -121,7 +121,7 @@ assert.ok(source.includes('holder.insertBefore(state.organizerEntry, organizerPo
 assert.ok(!source.includes('tle-global-search-overlay'), 'Organizer must not be a popup overlay');
 assert.ok(!source.includes('z-index: 10090'), 'Organizer must not create a modal scrim');
 assert.ok(source.includes('panel.classList.add(\'openDrawer\')'));
-assert.ok(source.includes('panel.classList.add(\'closedDrawer\')'));
+assert.ok(source.includes('state.globalSearchPanel?.classList.add(\'closedDrawer\')'));
 assert.ok(source.includes('const available = globalSearchEnabled;'));
 assert.ok(source.includes('if (!globalSearchEnabled || !state.globalSearchPanel) return;'));
 assert.ok(source.includes('body[data-tle-nav="icons"]'));
