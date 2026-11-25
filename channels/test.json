@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.230",
+  "latest_version": "0.3.231",
   "minimum_loader_version": "0.3.0",
   "release": {
     "version": "0.3.230",
@@ -13,7 +13,7 @@
     "sha256": "e013a92a10a01524328099f978fc195d0ea601e7fb136e7db0751ba7d30864e5",
     "size_bytes": 655849
   },
-  "status": "TEST v0.3.230: Organizer's Theme Manager group sync button is always visible beside full-group JSON import/export in the heading. It retains the existing importThemeManagerGroups() implementation, reads the local Theme Manager group data, asks for confirmation, updates only TLE's UI theme groups and assignments, and switches to the UI theme category after success. Other resource-category group data is unchanged. PC three-column layout, mobile 3px horizontal scroll indicators, compact batch actions, search, worldbook binding logic, and deletion permissions are retained. JavaScript syntax and static sync-path checks passed; ST/TT visual and data-preservation acceptance remains pending.",
+  "status": "TEST v0.3.231: Organizer header Sync, Import, and Export actions inherit the active SillyTavern menu_button theme styling. TLE removes custom button backgrounds, borders, radii, padding, font sizing and line-height overrides; the Organizer generic button reset excludes .menu_button. Only layout, icon alignment and minimum touch sizing remain. Sync behavior still reads local Theme Manager groups and updates only TLE's UI theme grouping. Full-group JSON import/export behavior and all other Organizer functionality are unchanged. JavaScript syntax and static style checks passed; PC/mobile ST/TT visual theme-inheritance acceptance remains pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
