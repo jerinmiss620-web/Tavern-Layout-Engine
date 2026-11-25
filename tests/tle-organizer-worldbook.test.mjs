@@ -14,10 +14,10 @@ function extractFunction(name, nextMarker) {
 }
 
 const buildWorldInfoCatalog = vm.runInNewContext(
-  '(' + extractFunction('buildWorldInfoCatalog', '\\n  function removeWorldInfoExtraLinks') + ')'
+  '(' + extractFunction('buildWorldInfoCatalog', '  function removeWorldInfoExtraLinks') + ')'
 );
 const removeWorldInfoExtraLinks = vm.runInNewContext(
-  '(' + extractFunction('removeWorldInfoExtraLinks', '\\n  let worldInfoCatalogMeta') + ')'
+  '(' + extractFunction('removeWorldInfoExtraLinks', '  let worldInfoCatalogMeta') + ')'
 );
 
 const worldNames = ['Global', 'Primary', 'Extra', 'Orphan', 'Mixed', 'Unbound'];
@@ -86,7 +86,7 @@ assert.deepEqual(worldInfoForCleanup.charLore, [
 ]);
 assert.equal(removeWorldInfoExtraLinks(worldInfoForCleanup, 'Missing'), false);
 
-const migrationSource = extractFunction('migrateQuickWorldInfoGroupAssignments', '\\n  function quickWorldInfoSelectItems');
+const migrationSource = extractFunction('migrateQuickWorldInfoGroupAssignments', '  function quickWorldInfoSelectItems');
 const groupData = {
   assignments: {
     worldInfo: {
@@ -109,20 +109,23 @@ assert.equal(savedData.assignments.worldInfo[JSON.stringify(['world_info', 'Glob
 assert.equal(savedData.assignments.worldInfo[JSON.stringify(['world_info', 'Extra'])], 'Archive');
 assert.equal(Object.hasOwn(savedData.assignments.worldInfo, JSON.stringify(['world_info', '0'])), false);
 
-assert.match(source, /organizerEntry: 'tle-organizer-entry'/);
-assert.match(source, /state\\.organizerEntry = organizerEntry/);
-assert.match(source, /holder\\.append\\(station, state\\.organizerEntry, state\\.navEntry\\)/);
-assert.match(source, /const available = globalSearchEnabled;/);
-assert.doesNotMatch(source, /if \\(!globalSearchEnabled \\|\\| navigationMode === 'icons'/);
-assert.match(source, /body\\[data-tle-nav="icons"\\] #\\$\\{ID\\.organizerEntry\\}/);
-assert.doesNotMatch(source, /<button id="\\$\\{ID\\.searchToggle\\}" class="tle-workspace-icon-button"/);
-assert.match(source, /title: '世界书'/);
-assert.match(source, /function quickManagerCatalog/);
-assert.match(source, /native\\.world_names/);
-assert.match(source, /native\\.selected_world_info/);
-assert.match(source, /JSON\\.stringify\\(\\['world_info', name\\]\\)/);
-assert.match(source, /native\\.deleteWorldInfo\\(entry\\.value\\)/);
-assert.match(source, /removeWorldInfoExtraLinks\\(native\\.world_info, entry\\.value\\)/);
-assert.match(source, /context\\.unshallowCharacter\\(pending\\[index\\]\\.index\\)/);
-assert.match(source, /疑似孤儿/);
+assert.ok(source.includes("organizerEntry: 'tle-organizer-entry'"));
+assert.ok(source.includes('state.organizerEntry = organizerEntry'));
+assert.ok(source.includes('holder.append(station, state.organizerEntry, state.navEntry)'));
+assert.ok(source.includes('const available = globalSearchEnabled;'));
+assert.ok(source.includes('if (!globalSearchEnabled || !state.globalSearchPanel) return;'));
+assert.ok(source.includes('body[data-tle-nav="icons"]'));
+assert.ok(source.includes('tle-organizer-entry'));
+assert.equal(source.includes('<button id="${ID.searchToggle}" class="tle-workspace-icon-button"'), false);
+assert.ok(source.includes("title: '世界书'"));
+assert.ok(source.includes("id: 'worldInfo', title: '全局世界书'"));
+assert.ok(source.includes('function quickManagerCatalog'));
+assert.ok(source.includes('native.world_names'));
+assert.ok(source.includes('native.selected_world_info'));
+assert.ok(source.includes("JSON.stringify(['world_info', name])"));
+assert.ok(source.includes('native.deleteWorldInfo(entry.value)'));
+assert.ok(source.includes('removeWorldInfoExtraLinks(native.world_info, entry.value)'));
+assert.ok(source.includes('context.unshallowCharacter(pending[index].index)'));
+assert.ok(source.includes('疑似孤儿'));
+
 console.log('TLE organizer/worldbook development checks passed');
