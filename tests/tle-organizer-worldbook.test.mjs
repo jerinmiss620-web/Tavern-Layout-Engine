@@ -23,6 +23,64 @@ const removeWorldInfoExtraLinks = vm.runInNewContext(
   '(' + extractFunction('removeWorldInfoExtraLinks', '  // Match Theme Manager') + ')'
 );
 
+const organizerToggleSandbox = {
+  state: {
+    organizerPanel: {
+      classList: {
+        values: new Set(['closedDrawer']),
+        contains(name) { return this.values.has(name); },
+        toggle(name, force) {
+          if (force) this.values.add(name);
+          else this.values.delete(name);
+        },
+      },
+      setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; },
+    },
+    organizerEntry: {
+      querySelector() { return organizerToggleSandbox.toggle; },
+    },
+    globalSearchOpen: false,
+    mobileNav: { open: false },
+    destroyed: false,
+  },
+  toggle: { setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; } },
+  quickPanel: null,
+  managerOpens: 0,
+  managerCloses: 0,
+  nativeDrawerCloses: 0,
+  closeGlobalSearch() { this.state.globalSearchOpen = false; },
+  closeQuickPanel() { this.quickPanel = null; this.managerCloses++; },
+  closeMobileNativeDrawers() { this.nativeDrawerCloses++; },
+  openQuickGroupManager() {
+    this.managerOpens++;
+    this.quickPanel = { embedded: true, module: 'groups', node: this.state.organizerPanel };
+  },
+  HOST_WIN: { requestAnimationFrame(callback) { callback(); } },
+  isMobileViewport() { return false; },
+  setMobileNavOpen() {},
+};
+const setOrganizerDrawerOpen = vm.runInNewContext(
+  '(' + extractFunction('setOrganizerDrawerOpen', '  function toggleOrganizerDrawer') + ')',
+  organizerToggleSandbox,
+);
+const toggleOrganizerDrawer = vm.runInNewContext(
+  '(' + extractFunction('toggleOrganizerDrawer', '  function setPanelOpen') + ')',
+  { state: organizerToggleSandbox.state, setOrganizerDrawerOpen },
+);
+toggleOrganizerDrawer();
+assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('openDrawer'), true);
+assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('closedDrawer'), false);
+assert.equal(organizerToggleSandbox.state.organizerPanel.attributes['aria-hidden'], 'false');
+assert.equal(organizerToggleSandbox.toggle.attributes['aria-expanded'], 'true');
+assert.equal(organizerToggleSandbox.managerOpens, 1);
+assert.equal(organizerToggleSandbox.nativeDrawerCloses, 1);
+toggleOrganizerDrawer();
+assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('openDrawer'), false);
+assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('closedDrawer'), true);
+assert.equal(organizerToggleSandbox.state.organizerPanel.attributes['aria-hidden'], 'true');
+assert.equal(organizerToggleSandbox.toggle.attributes['aria-expanded'], 'false');
+assert.equal(organizerToggleSandbox.managerCloses, 1);
+
 const worldNames = ['Global', 'Primary', 'Extra', 'Orphan', 'Mixed', 'Unbound'];
 const select = {
   options: worldNames.map((name, index) => ({ textContent: name, value: String(index) })),
@@ -148,6 +206,12 @@ assert.ok(source.includes('z-index: 10090'), 'Global search modal must retain it
 assert.ok(source.includes('HOST_DOC.body.appendChild(panel)'), 'Global search modal must be independent from the Organizer drawer');
 assert.ok(source.includes('data-search-organizer-jump'), 'Global search modal must link to Organizer');
 assert.ok(source.includes('function createOrganizerPanel()'));
+assert.ok(source.includes("organizerToggle.addEventListener('click', event =>"), 'Organizer must own its click activation');
+assert.ok(source.includes('function setOrganizerDrawerOpen(open)'), 'Organizer must explicitly toggle its drawer classes');
+assert.ok(source.includes("panel.classList.toggle('openDrawer', expanded)"));
+assert.ok(source.includes("panel.classList.toggle('closedDrawer', !expanded)"));
+assert.equal(source.includes('#tle-organizer-panel .tle-search-surface'), false, 'Organizer must not have a nested visual shell');
+assert.equal(source.includes('<div class="tle-search-surface">'), false, 'Only the global-search modal may use the search surface wrapper');
 assert.ok(source.includes("state.organizerPanel.querySelector('.tle-search-field')"), 'Organizer has its own resource filter field');
 assert.ok(source.includes('const available = globalSearchEnabled;'));
 assert.ok(source.includes('if (!globalSearchEnabled || !state.globalSearchPanel) return;'));
