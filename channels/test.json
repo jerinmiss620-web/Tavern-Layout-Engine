@@ -10,7 +10,7 @@
     "source_commit": "4f52df1f034641b6b26c153dec3e9a0dcf20ef58",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4f52df1f034641b6b26c153dec3e9a0dcf20ef58/releases/v0.3.224/TLE.js",
     "changelog_path": "releases/v0.3.224/CHANGELOG.md",
-    "sha256": "77a2e7da07cee8bab2e82eb9c63e1ed1f99351a71d5c45699e35cd76ea04b46b",
+    "sha256": "11eaa689f4ebbecaf8b96fedf90eb64f855e55f69538c1fdab7e131caa05c95c",
     "size_bytes": 643748
   },
   "status": "TEST v0.3.224: Organizer drawer now toggles its own openDrawer/closedDrawer state and uses its direct native .drawer-content as the root, without a nested .tle-search-surface. Global search and Organizer remain independent. Includes worldbook quick filters. Stable latest.json and stable Bootstrap/Loader channel are unchanged.",
