@@ -10,8 +10,8 @@
 - 根因：v0.3.223 为新增的 Organizer toggle 注册的点击回调只在下一帧读取 `openDrawer` 状态并尝试渲染管理器，却没有实际切换 `openDrawer / closedDrawer`。新增 DOM 未可靠接入酒馆原生静态抽屉点击监听，导致导航图标、文字标签和全局搜索跳转均无法展开。
 - 修复：新增 `setOrganizerDrawerOpen()` / `toggleOrganizerDrawer()`，由 Organizer 自己显式切换其直接 `.drawer-content` 的开合类与 ARIA 状态；点击事件直接进入控制器。打开时关闭全局搜索、其他普通原生抽屉及 TLE 控制面板；移动端收起导航仍复用现有原生导航事件流程。
 - 结构：删除 Organizer 内层 `.tle-search-surface`，标题栏、独立资源筛选框和资源列表直接成为 `#tle-organizer-panel.drawer-content` 的子元素。CSS 不再为 Organizer 内层 wrapper 设置第二套宽高与滚动容器，保留原生 drawer-content 的定位与滚动机制；全局搜索弹窗仍保留自己的 `.tle-search-surface`。
-- 回归：新增抽屉开合控制器的开/关测试，验证 class、ARIA、管理器启动与关闭路径；保留全局搜索/Organizer 分离及世界书分类测试。源码语法检查与隔离 JS harness 回归通过。完整 `npm test`、CI 和 PC/移动端 ST/TT 实机验收仍待执行。
-- 发布后发现测试清单中的 SHA-256 与 Loader 校验不一致；原因是首次生成摘要时使用了错误的 SHA-256 常量。已用通过 `abc` 与空字符串标准向量验证的 SHA-256 实现重新计算不可变 release 源码，并修正 `channels/test.json`；源码、固定 Commit 和 UTF-8 字节数均未改动。新的摘要已回读核对，待 Test Loader 再次检查确认。
+- 回归：新增抽屉开合控制器的开/关测试，验证 class、ARIA、管理器启动与关闭路径；保留全局搜索/Organizer 分离及世界书分类测试。源码语法检查与隔离 JS harness 回归通过。补齐禁用状态的 `TLE-0.3.224-TEST-import.json`，其源码与不可变 release 文件逐字节一致。GitHub Actions run `45564378196`（job `validate`）通过：完整 `npm test`、Organizer branch Test Loader 兼容检查、测试通道固定安装包与远端源码 SHA-256/字节数验证均通过；Stable-only 发布验证与 runtime replay 步骤在该分支事件中按工作流条件跳过。PC/移动端 ST/TT 实机验收仍待执行。
+- 发布后发现测试清单中的 SHA-256 与 Loader 校验不一致；原因是首次生成摘要时我使用了错误的 SHA-256 常量。已用通过 `abc` 与空字符串标准向量验证的实现重新计算不可变 release 源码，并修正 `channels/test.json`。随后从 `raw.githubusercontent.com` 重新读取固定 Commit 的源码，摘要与清单一致（`11eaa689f4ebbecaf8b96fedf90eb64f855e55f69538c1fdab7e131caa05c95c`），UTF-8 字节数仍为 `643748`；测试 Loader 的远端校验步骤已通过。
 - 分支测试通道已发布 Core v0.3.224：release 源码 Commit `4f52df1f034641b6b26c153dec3e9a0dcf20ef58`，SHA-256 `11eaa689f4ebbecaf8b96fedf90eb64f855e55f69538c1fdab7e131caa05c95c`，UTF-8 字节数 `643748`；Test manifest 更新 Commit `47468d110fc1430a342531c6618f9ecae9496d1f`。Test Loader v0.3.0 不变且继续使用独立缓存。正式 Stable 通道和正式 Core 不受影响。
 
 ## 2026-11-25 · Core v0.3.223 全局搜索与整理侠分离 / 世界书快速筛选（v0.3.223 先前候选，历史记录）
