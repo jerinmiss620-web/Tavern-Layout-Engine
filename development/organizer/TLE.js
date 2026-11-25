@@ -3162,6 +3162,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         display: contents;
       }
       .tle-quick-manager .tle-organizer-pane-title { display: none; }
+      .tle-quick-manager .tle-quick-group-heading {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+      }
       .tle-quick-manager .tle-quick-category-row {
         display: flex;
         flex: 0 0 auto;
@@ -3173,7 +3181,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         flex: 1 1 auto;
         min-width: 0;
       }
-      .tle-quick-manager .tle-quick-category-row .tle-quick-backup-row,
       .tle-quick-manager .tle-quick-category-row .tle-quick-theme-import {
         flex: 0 0 auto;
       }
@@ -3266,15 +3273,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           min-height: 0;
           overflow: hidden;
           padding: 10px;
-          border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 20%));
+          border: 0;
           border-radius: 10px;
-          background: rgb(127 127 127 / 4%);
+          background: rgb(from var(--SmartThemeQuoteColor) r g b / .2);
         }
         .tle-quick-manager .tle-organizer-pane-title {
           display: block;
           flex: 0 0 auto;
-          padding-bottom: 7px;
-          border-bottom: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 18%));
+          padding-bottom: 0;
+          border-bottom: 0;
           font-size: .88em;
           font-weight: 650;
           opacity: .76;
@@ -3310,7 +3317,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         }
         .tle-quick-manager .tle-quick-category-row .tle-quick-theme-import { align-self: stretch; }
         .tle-quick-manager .tle-quick-category-row .tle-quick-theme-import > button { width: 100%; }
-        .tle-quick-manager .tle-quick-category-row .tle-quick-backup-row { justify-content: flex-start; }
         .tle-quick-manager .tle-quick-filter-bar {
           display: flex;
           flex: 1 1 auto;
@@ -3366,6 +3372,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       @media (max-width: 1000px) {
         .tle-quick-manager .tle-quick-category-row { order: 1; }
+        .tle-quick-manager .tle-quick-group-heading { order: 2; }
         .tle-quick-manager .tle-worldbook-filter-bar { order: 2; }
         .tle-quick-manager .tle-quick-filter-bar { order: 3; }
         .tle-quick-manager .tle-quick-toolbar { order: 4; }
@@ -4613,7 +4620,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
   // Shared TLE picker. Information-station selectors use the same centered
   // modal shell and search-field treatment as the global search dialog.
-  const QUICK_MODULES = INFO_MODULES.filter(item => item.id !== 'characterWorldBook').map(item => item.id === 'worldInfo' ? { ...item, title: '世界书' } : item);
+  const QUICK_MODULES = INFO_MODULES.filter(item => item.id !== 'characterWorldBook').map(item => ({
+    ...item,
+    title: item.id === 'worldInfo' ? '世界书' : item.title.replace(/^当前\s*/, ''),
+  }));
   const QUICK_GROUP_KEY = 'tle.quickGroups.v2';
   const QUICK_GROUP_LEGACY_KEY = 'tle.quickGroups.v1';
   let quickPanel = null;
@@ -5742,8 +5752,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const categoryRow = quickNode('div', 'tle-quick-category-row');
     categoryRow.title = hint.title;
-    categoryRow.setAttribute('aria-label', '资源分类、主题分组同步与全部分组备份');
-    categoryRow.append(tabs, themeImportRow, backupRow);
+    categoryRow.setAttribute('aria-label', '资源分类与主题分组同步');
+    categoryRow.append(tabs, themeImportRow);
+
+    const groupHeader = quickNode('div', 'tle-quick-group-heading');
+    groupHeader.setAttribute('aria-label', '分组目录与全部分组备份');
+    groupHeader.append(groupHeading, backupRow);
 
     const deleteConfirm = quickNode('div', 'tle-quick-transfer-confirm tle-quick-delete-confirm');
     deleteConfirm.hidden = true;
@@ -6713,7 +6727,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     };
 
     categoryPane.append(categoryHeading, categoryRow);
-    groupPane.append(groupHeading, groupActions, manageRow, groupFilters);
+    groupPane.append(groupHeader, groupActions, manageRow, groupFilters);
     resourcePane.append(
       resourceHeading, current.searchWrap, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
       operations, list, status
