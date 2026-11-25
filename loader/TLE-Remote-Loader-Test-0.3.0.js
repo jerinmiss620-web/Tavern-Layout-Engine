@@ -26,12 +26,12 @@
   const MANIFEST_URL = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/feature/organizer-nav-worldbooks-20261125/channels/test.json';
   const INSTANCE_KEY = '__TAVERN_LAYOUT_ENGINE_V02__';
   const LOADER_KEY = '__TLE_REMOTE_LOADER_TEST_V1__';
-  const LKG_KEY = 'tle.loader.test.lastKnownGood.v1';
-  const PREVIOUS_KEY = 'tle.loader.test.previousKnownGood.v1';
-  const AUTO_RESTORE_KEY = 'tle.loader.test.autoRestore.v1';
+  const LKG_KEY = 'tle.loader.organizerBranchTest.lastKnownGood.v1';
+  const PREVIOUS_KEY = 'tle.loader.organizerBranchTest.previousKnownGood.v1';
+  const AUTO_RESTORE_KEY = 'tle.loader.organizerBranchTest.autoRestore.v1';
   const AUTO_RESTORE_DELAY = 900;
   const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
-  const CACHE_DB_NAME = 'TLE_Remote_Loader_Test_Cache';
+  const CACHE_DB_NAME = 'TLE_Organizer_Branch_Test_Cache';
   const CACHE_DB_VERSION = 1;
   const CACHE_STORE_NAME = 'records';
   let cacheDbPromise = null;
