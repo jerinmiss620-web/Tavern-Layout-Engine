@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.231
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.234
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -17,6 +17,2707 @@
     console.error('[Tavern Layout Engine] 无法访问 SillyTavern 宿主页面。', error);
     return;
   }
+
+  /* TLE_CONTENT_BUNDLE_START */
+var TLEBatchLibrary = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // development/organizer/batch/batch-engine.js
+  function validateRules(input, { searchOnly = false } = {}) {
+    if (!Array.isArray(input) || !input.length || input.length > 200) throw Error("\u8BF7\u586B\u5199 1\uFF5E200 \u6761\u66FF\u6362\u89C4\u5219\u3002");
+    const seen = /* @__PURE__ */ new Map(), warnings = [], rules = input.map((rule, index) => {
+      if (typeof rule.find !== "string" || !rule.find || rule.find.length > 5e3 || typeof rule.replace !== "string" || rule.replace.length > 5e4) throw Error(`\u7B2C ${index + 1} \u6761\u89C4\u5219\u4E3A\u7A7A\u6216\u8FC7\u957F\u3002`);
+      if (seen.has(rule.find)) throw Error(`\u7B2C ${index + 1} \u6761\u4E0E\u7B2C ${seen.get(rule.find) + 1} \u6761\u67E5\u627E\u5185\u5BB9\u91CD\u590D${input[seen.get(rule.find)].replace !== rule.replace ? "\u4E14\u66FF\u6362\u76EE\u6807\u51B2\u7A81" : ""}\u3002`);
+      seen.set(rule.find, index);
+      if (!searchOnly && rule.find === rule.replace) warnings.push(`\u7B2C ${index + 1} \u6761\u524D\u540E\u76F8\u540C\uFF0C\u5C06\u8DF3\u8FC7\u3002`);
+      return { find: rule.find, replace: rule.replace };
+    });
+    if (searchOnly) return { rules, warnings };
+    const edges = rules.map((a) => rules.flatMap((b, i) => a.replace.includes(b.find) ? [i] : []));
+    const state = new Uint8Array(rules.length);
+    const visit = (i) => {
+      if (state[i] === 1) return true;
+      if (state[i] === 2) return false;
+      state[i] = 1;
+      const cycle = edges[i].some(visit);
+      state[i] = 2;
+      return cycle;
+    };
+    if (rules.some((_, i) => visit(i))) warnings.push("\u89C4\u5219\u5B58\u5728\u5FAA\u73AF\u5173\u7CFB\uFF1B\u672C\u6B21\u4F7F\u7528\u539F\u6587\u975E\u7EA7\u8054\u66FF\u6362\uFF0C\u91CD\u590D\u6267\u884C\u4ECD\u53EF\u80FD\u53CD\u5411\u6539\u56DE\u3002");
+    else if (edges.some((a) => a.length)) warnings.push("\u66FF\u6362\u5185\u5BB9\u5305\u542B\u5176\u4ED6\u67E5\u627E\u8BCD\uFF1B\u672C\u6B21\u4E0D\u4F1A\u7EE7\u7EED\u66FF\u6362\u65B0\u751F\u6210\u7684\u5185\u5BB9\u3002");
+    if (rules.some((a, i) => rules.some((b, j) => i !== j && a.find.includes(b.find)))) warnings.push("\u67E5\u627E\u8BCD\u5B58\u5728\u91CD\u53E0\uFF0C\u4F18\u5148\u4FDD\u7559\u8F83\u957F\u5339\u914D\uFF0C\u540C\u957F\u5EA6\u6309\u89C4\u5219\u987A\u5E8F\u3002");
+    return { rules, warnings };
+  }
+  function compileRules(input, { searchOnly = false } = {}) {
+    const { rules, warnings } = validateRules(input, { searchOnly }), trie = /* @__PURE__ */ new Map();
+    rules.forEach((rule, i) => {
+      if (!searchOnly && rule.find === rule.replace) return;
+      let node = trie;
+      for (let n = 0; n < rule.find.length; n++) {
+        if (!node.has(rule.find[n])) node.set(rule.find[n], /* @__PURE__ */ new Map());
+        node = node.get(rule.find[n]);
+      }
+      node.rule = i;
+    });
+    return { rules, warnings, trie };
+  }
+  function* matchSteps(text, compiled, limit) {
+    const candidates = [];
+    let work = 0;
+    for (let start = 0; start < text.length; start++) {
+      if (++work % 5e4 === 0) yield;
+      let node = compiled.trie;
+      for (let end = start; end < text.length; end++) {
+        if (++work % 5e4 === 0) yield;
+        node = node.get(text[end]);
+        if (!node) break;
+        if (node.rule !== void 0) {
+          candidates.push({ start, end: end + 1, rule: node.rule });
+          if (candidates.length > limit) throw Error("\u5339\u914D\u6570\u91CF\u8D85\u8FC7\u5B89\u5168\u4E0A\u9650\uFF0C\u8BF7\u7F29\u5C0F\u8303\u56F4\u540E\u91CD\u65B0\u626B\u63CF\u3002");
+        }
+      }
+    }
+    candidates.sort((a, b) => b.end - b.start - (a.end - a.start) || a.rule - b.rule || a.start - b.start);
+    const occupied = new Uint8Array(text.length), matches = [];
+    for (const item of candidates) {
+      let overlap = false;
+      for (let i = item.start; i < item.end; i++) {
+        if (++work % 5e4 === 0) yield;
+        if (occupied[i]) {
+          overlap = true;
+          break;
+        }
+      }
+      if (overlap) continue;
+      occupied.fill(1, item.start, item.end);
+      matches.push(item);
+    }
+    return matches.sort((a, b) => a.start - b.start);
+  }
+  async function findMatchesAsync(text, compiled, { yieldControl, cancelled = () => false, limit = 1e5 }) {
+    const iterator = matchSteps(text, compiled, limit);
+    for (; ; ) {
+      if (cancelled()) throw Error("\u626B\u63CF\u5DF2\u53D6\u6D88\u3002");
+      const step = iterator.next();
+      if (step.done) return step.value;
+      await yieldControl();
+    }
+  }
+  function replaceMatches(text, matches, rules) {
+    let end = 0;
+    const parts = [];
+    for (const item of matches) {
+      if (item.start < end || text.slice(item.start, item.end) !== rules[item.rule].find) throw Error("\u5339\u914D\u4F4D\u7F6E\u5DF2\u5931\u6548\uFF0C\u8BF7\u91CD\u65B0\u626B\u63CF\u3002");
+      parts.push(text.slice(end, item.start), rules[item.rule].replace);
+      end = item.end;
+    }
+    parts.push(text.slice(end));
+    return parts.join("");
+  }
+  function snippet(text, match, rule, radius = 70) {
+    return {
+      prefix: (match.start > radius ? "\u2026" : "") + text.slice(Math.max(0, match.start - radius), match.start),
+      before: text.slice(match.start, match.end),
+      after: rule.replace,
+      suffix: text.slice(match.end, match.end + radius) + (match.end + radius < text.length ? "\u2026" : "")
+    };
+  }
+  function previewSegments(context, currentId, rules, excluded = /* @__PURE__ */ new Set()) {
+    const current = context.matches.find((m) => m.id === currentId);
+    if (!current) throw Error("\u9884\u89C8\u4F4D\u7F6E\u5931\u6548\u3002");
+    const selected = context.matches.filter((m) => !excluded.has(m.id));
+    const prefix = context.text.slice(0, current.start), suffix = context.text.slice(current.end);
+    return {
+      prefix: (context.leading ? "\u2026" : "") + prefix,
+      before: context.text.slice(current.start, current.end),
+      suffix: suffix + (context.trailing ? "\u2026" : ""),
+      afterPrefix: (context.leading ? "\u2026" : "") + replaceMatches(prefix, selected.filter((m) => m.end <= current.start), rules),
+      after: excluded.has(currentId) ? context.text.slice(current.start, current.end) : rules[current.rule].replace,
+      afterSuffix: replaceMatches(suffix, selected.filter((m) => m.start >= current.end).map((m) => ({ ...m, start: m.start - current.end, end: m.end - current.end })), rules) + (context.trailing ? "\u2026" : "")
+    };
+  }
+  var init_batch_engine = __esm({
+    "development/organizer/batch/batch-engine.js"() {
+    }
+  });
+
+  // development/organizer/batch/batch-adapters.js
+  function setAt(value, path, text) {
+    if (!path.length || path.some((k) => ["__proto__", "constructor", "prototype"].includes(String(k)))) throw Error("\u4E0D\u652F\u6301\u7684\u5B57\u6BB5\u8DEF\u5F84\u3002");
+    const parent = getAt(value, path.slice(0, -1));
+    if (!parent || !Object.hasOwn(parent, path.at(-1)) || typeof parent[path.at(-1)] !== "string") throw Error("\u5B57\u6BB5\u7ED3\u6784\u5DF2\u6539\u53D8\u3002");
+    parent[path.at(-1)] = text;
+  }
+  function editableFields(value, resource) {
+    const fields = [], keys = /* @__PURE__ */ new Set();
+    const add = (scope, path, owner = resource.id, label = resource.label, aliases = []) => {
+      const text = getAt(value, path), key = JSON.stringify(path);
+      if (typeof text !== "string" || keys.has(key)) return;
+      keys.add(key);
+      fields.push({ scope, path, aliases, owner, label, text });
+    };
+    const strings = (scope, base, names, owner, label) => names.forEach((key) => add(scope, [...base, key], owner, label));
+    const array = (scope, base, owner, label) => {
+      if (Array.isArray(getAt(value, base))) getAt(value, base).forEach((_, i) => add(scope, [...base, i], owner, label));
+    };
+    const regex = (base, owner, label) => {
+      const scripts = getAt(value, base);
+      if (scripts == null) return;
+      if (!Array.isArray(scripts) || scripts.some((s) => !s || typeof s.findRegex !== "string" || typeof s.replaceString !== "string")) throw Error("\u6B63\u5219\u89C4\u5219\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+      scripts.forEach((script, i) => strings("regex", [...base, i], ["scriptName", "findRegex", "replaceString"], owner, `${label} \xB7 \u6B63\u5219 ${script.scriptName || i + 1}`));
+    };
+    const world = (base, embedded = false) => {
+      const entries = getAt(value, [...base, "entries"]);
+      if (!entries || typeof entries !== "object") throw Error("\u4E16\u754C\u4E66\u7F3A\u5C11\u6709\u6548 entries\u3002");
+      for (const [key, entry] of Object.entries(entries)) {
+        if (!entry || typeof entry !== "object") throw Error("\u4E16\u754C\u4E66\u6761\u76EE\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+        const p = [...base, "entries", Array.isArray(entries) ? Number(key) : key];
+        strings("world", p, ["comment", "content", "name"], resource.id, `${resource.label} \xB7 \u6761\u76EE ${entry.uid ?? entry.id ?? key}`);
+        for (const name of embedded ? ["keys", "secondary_keys"] : ["key", "keysecondary"]) array("world", [...p, name]);
+      }
+    };
+    const preset = (base) => {
+      const p = getAt(value, base);
+      if (!p || typeof p !== "object") throw Error("\u9884\u8BBE\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+      if (p.prompts !== void 0 && !Array.isArray(p.prompts)) throw Error("\u63D0\u793A\u8BCD\u6761\u76EE\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+      (p.prompts || []).forEach((entry, i) => {
+        if (!entry || typeof entry !== "object") throw Error("\u63D0\u793A\u8BCD\u6761\u76EE\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+        if (entry.marker) return;
+        strings("prompts", [...base, "prompts", i], ["name", "content"], `${resource.id}:prompt:${entry.identifier ?? i}`, `${resource.label} \xB7 ${entry.name || entry.identifier || i + 1}`);
+      });
+      strings("presets", base, ["main_prompt", "nsfw_prompt", "jailbreak_prompt", "system_prompt", "system_prompt_prefix", "system_prompt_suffix", "preamble", "content", "post_history", "send_if_empty", "impersonation_prompt", "new_chat_prompt", "new_group_chat_prompt", "new_example_chat_prompt", "continue_nudge_prompt", "group_nudge_prompt", "wi_format", "scenario_format", "personality_format", "assistant_prefill", "assistant_impersonation", "input_sequence", "output_sequence", "last_output_sequence", "system_sequence", "stop_sequence", "first_output_sequence", "output_suffix", "input_suffix", "system_suffix", "user_alignment_message", "last_system_sequence", "first_input_sequence", "last_input_sequence", "story_string_prefix", "story_string_suffix", "story_string", "example_separator", "chat_start", "input_prefix", "output_prefix"]);
+      regex([...base, "extensions", "regex_scripts"], resource.id, resource.label);
+    };
+    if (resource.adapter === "settings") {
+      const pu = value.power_user;
+      if (!pu || typeof pu.personas !== "object" || Array.isArray(pu.personas)) throw Error("Persona \u8BBE\u7F6E\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+      for (const [id, name] of Object.entries(pu.personas)) {
+        const label = `${name} \xB7 ${id}`;
+        add("persona", ["power_user", "personas", id], id, label);
+        strings("persona", ["power_user", "persona_descriptions", id], ["description", "title"], id, label);
+      }
+      const avatar = value.user_avatar;
+      if (typeof avatar === "string" && Object.hasOwn(pu.personas, avatar)) {
+        strings("persona", [], ["username"], avatar, `\u5F53\u524D Persona \xB7 ${avatar}`);
+        add("persona", ["power_user", "persona_description"], avatar, `\u5F53\u524D Persona \u7F13\u5B58 \xB7 ${avatar}`);
+      }
+      preset(["oai_settings"]);
+      for (const key of ["sysprompt", "instruct", "context", "reasoning"]) if (pu[key] && typeof pu[key] === "object") preset(["power_user", key]);
+      regex(["extension_settings", "regex"], resource.id, "\u5168\u5C40\u6B63\u5219");
+    } else if (resource.adapter === "character") {
+      const base = value.data && typeof value.data === "object" ? ["data"] : [];
+      const names = ["description", "personality", "scenario", "mes_example", "creator_notes", "system_prompt", "post_history_instructions"];
+      for (const key of [...names, "first_mes"]) {
+        const path = [...base, key], text = getAt(value, path), aliases = [];
+        if (base.length && ["description", "personality", "scenario", "mes_example", "first_mes"].includes(key) && typeof value[key] === "string") {
+          if (typeof text === "string" && value[key] !== text) throw Error(`\u89D2\u8272\u5361\u517C\u5BB9\u5B57\u6BB5 ${key} \u4E0D\u4E00\u81F4\uFF0C\u5DF2\u8DF3\u8FC7\u3002`);
+          if (typeof text === "string") aliases.push([key]);
+        }
+        add(key === "first_mes" ? "greetings" : "character", path, resource.id, resource.label, aliases);
+      }
+      array("greetings", [...base, "alternate_greetings"]);
+      strings("character", [...base, "extensions", "depth_prompt"], ["prompt"]);
+      if (getAt(value, [...base, "character_book"])) world([...base, "character_book"], true);
+      regex([...base, "extensions", "regex_scripts"], resource.id, resource.label);
+    } else if (resource.adapter === "world") world([]);
+    else if (resource.adapter === "preset") preset([]);
+    else if (resource.adapter === "chat") {
+      if (!Array.isArray(value) || !value.length || value.some((row) => !row || typeof row !== "object" || Array.isArray(row))) throw Error("\u804A\u5929\u8BB0\u5F55\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+      value.forEach((row, i) => {
+        if (typeof row.mes === "string") {
+          const active = Number.isInteger(row.swipe_id) && row.swipes?.[row.swipe_id] === row.mes ? [i, "swipes", row.swipe_id] : null;
+          add("chats", [i, "mes"], resource.id, `${resource.label} \xB7 \u6D88\u606F ${i}`, active ? [active] : []);
+          if (row.is_user === true) add("chats", [i, "name"]);
+          if (Array.isArray(row.swipes)) row.swipes.forEach((_, n) => {
+            if (!active || n !== row.swipe_id) add("chats", [i, "swipes", n]);
+          });
+          strings("chats", [i, "extra"], ["reasoning"]);
+          if (Array.isArray(row.swipe_info)) row.swipe_info.forEach((_, n) => strings("chats", [i, "swipe_info", n, "extra"], ["reasoning"]));
+        } else if (i !== 0) throw Error(`\u804A\u5929\u7B2C ${i + 1} \u884C\u7F3A\u5C11\u6D88\u606F\u6B63\u6587\uFF0C\u5DF2\u8DF3\u8FC7\u3002`);
+        if (i === 0) add("chats", [i, "user_name"]);
+        strings("chats", [i, "chat_metadata"], ["note_prompt"]);
+      });
+    } else if (resource.adapter === "text") add("other", ["text"]);
+    else if (resource.adapter === "custom-json") {
+      if (!Array.isArray(resource.paths) || !resource.paths.length) throw Error("\u6307\u5B9A JSON \u6587\u4EF6\u5FC5\u987B\u5148\u586B\u5199\u5141\u8BB8\u4FEE\u6539\u7684\u5B57\u6BB5\u8DEF\u5F84\u3002");
+      for (const path of resource.paths) {
+        if (!Array.isArray(path) || !path.length || path.some((k) => typeof k !== "string" && !Number.isInteger(k))) throw Error("\u81EA\u5B9A\u4E49\u5B57\u6BB5\u8DEF\u5F84\u65E0\u6548\u3002");
+        if (typeof getAt(value, path) !== "string") throw Error("\u6307\u5B9A JSON \u8DEF\u5F84\u4E0D\u662F\u6587\u672C\u5B57\u6BB5\u3002");
+        add("other", path);
+      }
+    } else throw Error("\u4E0D\u652F\u6301\u7684\u8D44\u6E90\u683C\u5F0F\u3002");
+    return fields;
+  }
+  var BATCH_SCOPES, getAt;
+  var init_batch_adapters = __esm({
+    "development/organizer/batch/batch-adapters.js"() {
+      BATCH_SCOPES = { persona: "User Persona", chats: "\u804A\u5929\u8BB0\u5F55", character: "\u89D2\u8272\u5361\u8BBE\u5B9A", greetings: "\u89D2\u8272\u5F00\u573A\u767D", world: "\u4E16\u754C\u4E66\uFF08\u542B\u89D2\u8272\u5361\u5185\u5D4C\u4E16\u754C\u4E66\uFF09", prompts: "\u63D0\u793A\u8BCD\u6761\u76EE", presets: "\u9884\u8BBE\u4E0E\u7CFB\u7EDF\u63D0\u793A", regex: "\u6B63\u5219\u89C4\u5219", other: "\u6307\u5B9A\u6587\u672C\u6587\u4EF6" };
+      getAt = (value, path) => path.reduce((v, key) => v?.[key], value);
+    }
+  });
+
+  // development/organizer/batch/vendor/fflate.js
+  function deflateSync(data, opts) {
+    return dopt(data, opts || {}, 0, 0);
+  }
+  function inflateSync(data, opts) {
+    return inflt(data, { i: 2 }, opts && opts.out, opts && opts.dictionary);
+  }
+  function strToU8(str, latin1) {
+    if (latin1) {
+      var ar_1 = new u8(str.length);
+      for (var i = 0; i < str.length; ++i)
+        ar_1[i] = str.charCodeAt(i);
+      return ar_1;
+    }
+    if (te)
+      return te.encode(str);
+    var l = str.length;
+    var ar = new u8(str.length + (str.length >> 1));
+    var ai = 0;
+    var w = function(v) {
+      ar[ai++] = v;
+    };
+    for (var i = 0; i < l; ++i) {
+      if (ai + 5 > ar.length) {
+        var n = new u8(ai + 8 + (l - i << 1));
+        n.set(ar);
+        ar = n;
+      }
+      var c = str.charCodeAt(i);
+      if (c < 128 || latin1)
+        w(c);
+      else if (c < 2048)
+        w(192 | c >> 6), w(128 | c & 63);
+      else if (c > 55295 && c < 57344)
+        c = 65536 + (c & 1023 << 10) | str.charCodeAt(++i) & 1023, w(240 | c >> 18), w(128 | c >> 12 & 63), w(128 | c >> 6 & 63), w(128 | c & 63);
+      else
+        w(224 | c >> 12), w(128 | c >> 6 & 63), w(128 | c & 63);
+    }
+    return slc(ar, 0, ai);
+  }
+  function strFromU8(dat, latin1) {
+    if (latin1) {
+      var r = "";
+      for (var i = 0; i < dat.length; i += 16384)
+        r += String.fromCharCode.apply(null, dat.subarray(i, i + 16384));
+      return r;
+    } else if (td) {
+      return td.decode(dat);
+    } else {
+      var _a2 = dutf8(dat), s = _a2.s, r = _a2.r;
+      if (r.length)
+        err(8);
+      return s;
+    }
+  }
+  function zipSync(data, opts) {
+    if (!opts)
+      opts = {};
+    var r = {};
+    var files = [];
+    fltn(data, "", r, opts);
+    var o = 0;
+    var tot = 0;
+    for (var fn in r) {
+      var _a2 = r[fn], file = _a2[0], p = _a2[1];
+      var compression = p.level == 0 ? 0 : 8;
+      var f = strToU8(fn), s = f.length;
+      var com = p.comment, m = com && strToU8(com), ms = m && m.length;
+      var exl = exfl(p.extra);
+      if (s > 65535)
+        err(11);
+      var d = compression ? deflateSync(file, p) : file, l = d.length;
+      var c = crc();
+      c.p(file);
+      files.push(mrg(p, {
+        size: file.length,
+        crc: c.d(),
+        c: d,
+        f,
+        m,
+        u: s != fn.length || m && com.length != ms,
+        o,
+        compression
+      }));
+      o += 30 + s + exl + l;
+      tot += 76 + 2 * (s + exl) + (ms || 0) + l;
+    }
+    var out = new u8(tot + 22), oe = o, cdl = tot - o;
+    for (var i = 0; i < files.length; ++i) {
+      var f = files[i];
+      wzh(out, f.o, f, f.f, f.u, f.c.length);
+      var badd = 30 + f.f.length + exfl(f.extra);
+      out.set(f.c, f.o + badd);
+      wzh(out, o, f, f.f, f.u, f.c.length, f.o, f.m), o += 16 + badd + (f.m ? f.m.length : 0);
+    }
+    wzf(out, o, files.length, cdl, oe);
+    return out;
+  }
+  function unzipSync(data, opts) {
+    var files = {};
+    var e = data.length - 22;
+    for (; b4(data, e) != 101010256; --e) {
+      if (!e || data.length - e > 65558)
+        err(13);
+    }
+    ;
+    var c = b2(data, e + 8);
+    if (!c)
+      return {};
+    var o = b4(data, e + 16);
+    var z = o == 4294967295 || c == 65535;
+    if (z) {
+      var ze = b4(data, e - 12);
+      z = b4(data, ze) == 101075792;
+      if (z) {
+        c = b4(data, ze + 32);
+        o = b4(data, ze + 48);
+      }
+    }
+    var fltr = opts && opts.filter;
+    for (var i = 0; i < c; ++i) {
+      var _a2 = zh(data, o, z), c_2 = _a2[0], sc = _a2[1], su = _a2[2], fn = _a2[3], no = _a2[4], off = _a2[5], b = slzh(data, off);
+      o = no;
+      if (!fltr || fltr({
+        name: fn,
+        size: sc,
+        originalSize: su,
+        compression: c_2
+      })) {
+        if (!c_2)
+          files[fn] = slc(data, b, b + sc);
+        else if (c_2 == 8)
+          files[fn] = inflateSync(data.subarray(b, b + sc), { out: new u8(su) });
+        else
+          err(14, "unknown compression type " + c_2);
+      }
+    }
+    return files;
+  }
+  var u8, u16, i32, fleb, fdeb, clim, freb, _a, fl, revfl, _b, fd, revfd, rev, x, i, hMap, flt, i, i, i, i, fdt, i, flm, flrm, fdm, fdrm, max, bits, bits16, shft, slc, ec, err, inflt, wbits, wbits16, hTree, ln, lc, clen, wfblk, wblk, deo, et, dflt, crct, crc, dopt, mrg, b2, b4, b8, wbytes, fltn, te, td, tds, dutf8, slzh, zh, z64e, exfl, wzh, wzf;
+  var init_fflate = __esm({
+    "development/organizer/batch/vendor/fflate.js"() {
+      u8 = Uint8Array;
+      u16 = Uint16Array;
+      i32 = Int32Array;
+      fleb = new u8([
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        5,
+        0,
+        /* unused */
+        0,
+        0,
+        /* impossible */
+        0
+      ]);
+      fdeb = new u8([
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        6,
+        7,
+        7,
+        8,
+        8,
+        9,
+        9,
+        10,
+        10,
+        11,
+        11,
+        12,
+        12,
+        13,
+        13,
+        /* unused */
+        0,
+        0
+      ]);
+      clim = new u8([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+      freb = function(eb, start) {
+        var b = new u16(31);
+        for (var i = 0; i < 31; ++i) {
+          b[i] = start += 1 << eb[i - 1];
+        }
+        var r = new i32(b[30]);
+        for (var i = 1; i < 30; ++i) {
+          for (var j = b[i]; j < b[i + 1]; ++j) {
+            r[j] = j - b[i] << 5 | i;
+          }
+        }
+        return { b, r };
+      };
+      _a = freb(fleb, 2);
+      fl = _a.b;
+      revfl = _a.r;
+      fl[28] = 258, revfl[258] = 28;
+      _b = freb(fdeb, 0);
+      fd = _b.b;
+      revfd = _b.r;
+      rev = new u16(32768);
+      for (i = 0; i < 32768; ++i) {
+        x = (i & 43690) >> 1 | (i & 21845) << 1;
+        x = (x & 52428) >> 2 | (x & 13107) << 2;
+        x = (x & 61680) >> 4 | (x & 3855) << 4;
+        rev[i] = ((x & 65280) >> 8 | (x & 255) << 8) >> 1;
+      }
+      hMap = (function(cd, mb, r) {
+        var s = cd.length;
+        var i = 0;
+        var l = new u16(mb);
+        for (; i < s; ++i) {
+          if (cd[i])
+            ++l[cd[i] - 1];
+        }
+        var le = new u16(mb);
+        for (i = 1; i < mb; ++i) {
+          le[i] = le[i - 1] + l[i - 1] << 1;
+        }
+        var co;
+        if (r) {
+          co = new u16(1 << mb);
+          var rvb = 15 - mb;
+          for (i = 0; i < s; ++i) {
+            if (cd[i]) {
+              var sv = i << 4 | cd[i];
+              var r_1 = mb - cd[i];
+              var v = le[cd[i] - 1]++ << r_1;
+              for (var m = v | (1 << r_1) - 1; v <= m; ++v) {
+                co[rev[v] >> rvb] = sv;
+              }
+            }
+          }
+        } else {
+          co = new u16(s);
+          for (i = 0; i < s; ++i) {
+            if (cd[i]) {
+              co[i] = rev[le[cd[i] - 1]++] >> 15 - cd[i];
+            }
+          }
+        }
+        return co;
+      });
+      flt = new u8(288);
+      for (i = 0; i < 144; ++i)
+        flt[i] = 8;
+      for (i = 144; i < 256; ++i)
+        flt[i] = 9;
+      for (i = 256; i < 280; ++i)
+        flt[i] = 7;
+      for (i = 280; i < 288; ++i)
+        flt[i] = 8;
+      fdt = new u8(32);
+      for (i = 0; i < 32; ++i)
+        fdt[i] = 5;
+      flm = /* @__PURE__ */ hMap(flt, 9, 0);
+      flrm = /* @__PURE__ */ hMap(flt, 9, 1);
+      fdm = /* @__PURE__ */ hMap(fdt, 5, 0);
+      fdrm = /* @__PURE__ */ hMap(fdt, 5, 1);
+      max = function(a) {
+        var m = a[0];
+        for (var i = 1; i < a.length; ++i) {
+          if (a[i] > m)
+            m = a[i];
+        }
+        return m;
+      };
+      bits = function(d, p, m) {
+        var o = p / 8 | 0;
+        return (d[o] | d[o + 1] << 8) >> (p & 7) & m;
+      };
+      bits16 = function(d, p) {
+        var o = p / 8 | 0;
+        return (d[o] | d[o + 1] << 8 | d[o + 2] << 16) >> (p & 7);
+      };
+      shft = function(p) {
+        return (p + 7) / 8 | 0;
+      };
+      slc = function(v, s, e) {
+        if (s == null || s < 0)
+          s = 0;
+        if (e == null || e > v.length)
+          e = v.length;
+        return new u8(v.subarray(s, e));
+      };
+      ec = [
+        "unexpected EOF",
+        "invalid block type",
+        "invalid length/literal",
+        "invalid distance",
+        "stream finished",
+        "no stream handler",
+        ,
+        "no callback",
+        "invalid UTF-8 data",
+        "extra field too long",
+        "date not in range 1980-2099",
+        "filename too long",
+        "stream finishing",
+        "invalid zip data"
+        // determined by unknown compression method
+      ];
+      err = function(ind, msg, nt) {
+        var e = new Error(msg || ec[ind]);
+        e.code = ind;
+        if (Error.captureStackTrace)
+          Error.captureStackTrace(e, err);
+        if (!nt)
+          throw e;
+        return e;
+      };
+      inflt = function(dat, st, buf, dict) {
+        var sl = dat.length, dl = dict ? dict.length : 0;
+        if (!sl || st.f && !st.l)
+          return buf || new u8(0);
+        var noBuf = !buf;
+        var resize = noBuf || st.i != 2;
+        var noSt = st.i;
+        if (noBuf)
+          buf = new u8(sl * 3);
+        var cbuf = function(l2) {
+          var bl = buf.length;
+          if (l2 > bl) {
+            var nbuf = new u8(Math.max(bl * 2, l2));
+            nbuf.set(buf);
+            buf = nbuf;
+          }
+        };
+        var final = st.f || 0, pos = st.p || 0, bt = st.b || 0, lm = st.l, dm = st.d, lbt = st.m, dbt = st.n;
+        var tbts = sl * 8;
+        do {
+          if (!lm) {
+            final = bits(dat, pos, 1);
+            var type = bits(dat, pos + 1, 3);
+            pos += 3;
+            if (!type) {
+              var s = shft(pos) + 4, l = dat[s - 4] | dat[s - 3] << 8, t = s + l;
+              if (t > sl) {
+                if (noSt)
+                  err(0);
+                break;
+              }
+              if (resize)
+                cbuf(bt + l);
+              buf.set(dat.subarray(s, t), bt);
+              st.b = bt += l, st.p = pos = t * 8, st.f = final;
+              continue;
+            } else if (type == 1)
+              lm = flrm, dm = fdrm, lbt = 9, dbt = 5;
+            else if (type == 2) {
+              var hLit = bits(dat, pos, 31) + 257, hcLen = bits(dat, pos + 10, 15) + 4;
+              var tl = hLit + bits(dat, pos + 5, 31) + 1;
+              pos += 14;
+              var ldt = new u8(tl);
+              var clt = new u8(19);
+              for (var i = 0; i < hcLen; ++i) {
+                clt[clim[i]] = bits(dat, pos + i * 3, 7);
+              }
+              pos += hcLen * 3;
+              var clb = max(clt), clbmsk = (1 << clb) - 1;
+              var clm = hMap(clt, clb, 1);
+              for (var i = 0; i < tl; ) {
+                var r = clm[bits(dat, pos, clbmsk)];
+                pos += r & 15;
+                var s = r >> 4;
+                if (s < 16) {
+                  ldt[i++] = s;
+                } else {
+                  var c = 0, n = 0;
+                  if (s == 16)
+                    n = 3 + bits(dat, pos, 3), pos += 2, c = ldt[i - 1];
+                  else if (s == 17)
+                    n = 3 + bits(dat, pos, 7), pos += 3;
+                  else if (s == 18)
+                    n = 11 + bits(dat, pos, 127), pos += 7;
+                  while (n--)
+                    ldt[i++] = c;
+                }
+              }
+              var lt = ldt.subarray(0, hLit), dt = ldt.subarray(hLit);
+              lbt = max(lt);
+              dbt = max(dt);
+              lm = hMap(lt, lbt, 1);
+              dm = hMap(dt, dbt, 1);
+            } else
+              err(1);
+            if (pos > tbts) {
+              if (noSt)
+                err(0);
+              break;
+            }
+          }
+          if (resize)
+            cbuf(bt + 131072);
+          var lms = (1 << lbt) - 1, dms = (1 << dbt) - 1;
+          var lpos = pos;
+          for (; ; lpos = pos) {
+            var c = lm[bits16(dat, pos) & lms], sym = c >> 4;
+            pos += c & 15;
+            if (pos > tbts) {
+              if (noSt)
+                err(0);
+              break;
+            }
+            if (!c)
+              err(2);
+            if (sym < 256)
+              buf[bt++] = sym;
+            else if (sym == 256) {
+              lpos = pos, lm = null;
+              break;
+            } else {
+              var add = sym - 254;
+              if (sym > 264) {
+                var i = sym - 257, b = fleb[i];
+                add = bits(dat, pos, (1 << b) - 1) + fl[i];
+                pos += b;
+              }
+              var d = dm[bits16(dat, pos) & dms], dsym = d >> 4;
+              if (!d)
+                err(3);
+              pos += d & 15;
+              var dt = fd[dsym];
+              if (dsym > 3) {
+                var b = fdeb[dsym];
+                dt += bits16(dat, pos) & (1 << b) - 1, pos += b;
+              }
+              if (pos > tbts) {
+                if (noSt)
+                  err(0);
+                break;
+              }
+              if (resize)
+                cbuf(bt + 131072);
+              var end = bt + add;
+              if (bt < dt) {
+                var shift = dl - dt, dend = Math.min(dt, end);
+                if (shift + bt < 0)
+                  err(3);
+                for (; bt < dend; ++bt)
+                  buf[bt] = dict[shift + bt];
+              }
+              for (; bt < end; ++bt)
+                buf[bt] = buf[bt - dt];
+            }
+          }
+          st.l = lm, st.p = lpos, st.b = bt, st.f = final;
+          if (lm)
+            final = 1, st.m = lbt, st.d = dm, st.n = dbt;
+        } while (!final);
+        return bt != buf.length && noBuf ? slc(buf, 0, bt) : buf.subarray(0, bt);
+      };
+      wbits = function(d, p, v) {
+        v <<= p & 7;
+        var o = p / 8 | 0;
+        d[o] |= v;
+        d[o + 1] |= v >> 8;
+      };
+      wbits16 = function(d, p, v) {
+        v <<= p & 7;
+        var o = p / 8 | 0;
+        d[o] |= v;
+        d[o + 1] |= v >> 8;
+        d[o + 2] |= v >> 16;
+      };
+      hTree = function(d, mb) {
+        var t = [];
+        for (var i = 0; i < d.length; ++i) {
+          if (d[i])
+            t.push({ s: i, f: d[i] });
+        }
+        var s = t.length;
+        var t2 = t.slice();
+        if (!s)
+          return { t: et, l: 0 };
+        if (s == 1) {
+          var v = new u8(t[0].s + 1);
+          v[t[0].s] = 1;
+          return { t: v, l: 1 };
+        }
+        t.sort(function(a, b) {
+          return a.f - b.f;
+        });
+        t.push({ s: -1, f: 25001 });
+        var l = t[0], r = t[1], i0 = 0, i1 = 1, i2 = 2;
+        t[0] = { s: -1, f: l.f + r.f, l, r };
+        while (i1 != s - 1) {
+          l = t[t[i0].f < t[i2].f ? i0++ : i2++];
+          r = t[i0 != i1 && t[i0].f < t[i2].f ? i0++ : i2++];
+          t[i1++] = { s: -1, f: l.f + r.f, l, r };
+        }
+        var maxSym = t2[0].s;
+        for (var i = 1; i < s; ++i) {
+          if (t2[i].s > maxSym)
+            maxSym = t2[i].s;
+        }
+        var tr = new u16(maxSym + 1);
+        var mbt = ln(t[i1 - 1], tr, 0);
+        if (mbt > mb) {
+          var i = 0, dt = 0;
+          var lft = mbt - mb, cst = 1 << lft;
+          t2.sort(function(a, b) {
+            return tr[b.s] - tr[a.s] || a.f - b.f;
+          });
+          for (; i < s; ++i) {
+            var i2_1 = t2[i].s;
+            if (tr[i2_1] > mb) {
+              dt += cst - (1 << mbt - tr[i2_1]);
+              tr[i2_1] = mb;
+            } else
+              break;
+          }
+          dt >>= lft;
+          while (dt > 0) {
+            var i2_2 = t2[i].s;
+            if (tr[i2_2] < mb)
+              dt -= 1 << mb - tr[i2_2]++ - 1;
+            else
+              ++i;
+          }
+          for (; i >= 0 && dt; --i) {
+            var i2_3 = t2[i].s;
+            if (tr[i2_3] == mb) {
+              --tr[i2_3];
+              ++dt;
+            }
+          }
+          mbt = mb;
+        }
+        return { t: new u8(tr), l: mbt };
+      };
+      ln = function(n, l, d) {
+        return n.s == -1 ? Math.max(ln(n.l, l, d + 1), ln(n.r, l, d + 1)) : l[n.s] = d;
+      };
+      lc = function(c) {
+        var s = c.length;
+        while (s && !c[--s])
+          ;
+        var cl = new u16(++s);
+        var cli = 0, cln = c[0], cls = 1;
+        var w = function(v) {
+          cl[cli++] = v;
+        };
+        for (var i = 1; i <= s; ++i) {
+          if (c[i] == cln && i != s)
+            ++cls;
+          else {
+            if (!cln && cls > 2) {
+              for (; cls > 138; cls -= 138)
+                w(32754);
+              if (cls > 2) {
+                w(cls > 10 ? cls - 11 << 5 | 28690 : cls - 3 << 5 | 12305);
+                cls = 0;
+              }
+            } else if (cls > 3) {
+              w(cln), --cls;
+              for (; cls > 6; cls -= 6)
+                w(8304);
+              if (cls > 2)
+                w(cls - 3 << 5 | 8208), cls = 0;
+            }
+            while (cls--)
+              w(cln);
+            cls = 1;
+            cln = c[i];
+          }
+        }
+        return { c: cl.subarray(0, cli), n: s };
+      };
+      clen = function(cf, cl) {
+        var l = 0;
+        for (var i = 0; i < cl.length; ++i)
+          l += cf[i] * cl[i];
+        return l;
+      };
+      wfblk = function(out, pos, dat) {
+        var s = dat.length;
+        var o = shft(pos + 2);
+        out[o] = s & 255;
+        out[o + 1] = s >> 8;
+        out[o + 2] = out[o] ^ 255;
+        out[o + 3] = out[o + 1] ^ 255;
+        for (var i = 0; i < s; ++i)
+          out[o + i + 4] = dat[i];
+        return (o + 4 + s) * 8;
+      };
+      wblk = function(dat, out, final, syms, lf, df, eb, li, bs, bl, p) {
+        wbits(out, p++, final);
+        ++lf[256];
+        var _a2 = hTree(lf, 15), dlt = _a2.t, mlb = _a2.l;
+        var _b2 = hTree(df, 15), ddt = _b2.t, mdb = _b2.l;
+        var _c = lc(dlt), lclt = _c.c, nlc = _c.n;
+        var _d = lc(ddt), lcdt = _d.c, ndc = _d.n;
+        var lcfreq = new u16(19);
+        for (var i = 0; i < lclt.length; ++i)
+          ++lcfreq[lclt[i] & 31];
+        for (var i = 0; i < lcdt.length; ++i)
+          ++lcfreq[lcdt[i] & 31];
+        var _e = hTree(lcfreq, 7), lct = _e.t, mlcb = _e.l;
+        var nlcc = 19;
+        for (; nlcc > 4 && !lct[clim[nlcc - 1]]; --nlcc)
+          ;
+        var flen = bl + 5 << 3;
+        var ftlen = clen(lf, flt) + clen(df, fdt) + eb;
+        var dtlen = clen(lf, dlt) + clen(df, ddt) + eb + 14 + 3 * nlcc + clen(lcfreq, lct) + 2 * lcfreq[16] + 3 * lcfreq[17] + 7 * lcfreq[18];
+        if (bs >= 0 && flen <= ftlen && flen <= dtlen)
+          return wfblk(out, p, dat.subarray(bs, bs + bl));
+        var lm, ll, dm, dl;
+        wbits(out, p, 1 + (dtlen < ftlen)), p += 2;
+        if (dtlen < ftlen) {
+          lm = hMap(dlt, mlb, 0), ll = dlt, dm = hMap(ddt, mdb, 0), dl = ddt;
+          var llm = hMap(lct, mlcb, 0);
+          wbits(out, p, nlc - 257);
+          wbits(out, p + 5, ndc - 1);
+          wbits(out, p + 10, nlcc - 4);
+          p += 14;
+          for (var i = 0; i < nlcc; ++i)
+            wbits(out, p + 3 * i, lct[clim[i]]);
+          p += 3 * nlcc;
+          var lcts = [lclt, lcdt];
+          for (var it = 0; it < 2; ++it) {
+            var clct = lcts[it];
+            for (var i = 0; i < clct.length; ++i) {
+              var len = clct[i] & 31;
+              wbits(out, p, llm[len]), p += lct[len];
+              if (len > 15)
+                wbits(out, p, clct[i] >> 5 & 127), p += clct[i] >> 12;
+            }
+          }
+        } else {
+          lm = flm, ll = flt, dm = fdm, dl = fdt;
+        }
+        for (var i = 0; i < li; ++i) {
+          var sym = syms[i];
+          if (sym > 255) {
+            var len = sym >> 18 & 31;
+            wbits16(out, p, lm[len + 257]), p += ll[len + 257];
+            if (len > 7)
+              wbits(out, p, sym >> 23 & 31), p += fleb[len];
+            var dst = sym & 31;
+            wbits16(out, p, dm[dst]), p += dl[dst];
+            if (dst > 3)
+              wbits16(out, p, sym >> 5 & 8191), p += fdeb[dst];
+          } else {
+            wbits16(out, p, lm[sym]), p += ll[sym];
+          }
+        }
+        wbits16(out, p, lm[256]);
+        return p + ll[256];
+      };
+      deo = /* @__PURE__ */ new i32([65540, 131080, 131088, 131104, 262176, 1048704, 1048832, 2114560, 2117632]);
+      et = /* @__PURE__ */ new u8(0);
+      dflt = function(dat, lvl, plvl, pre, post, st) {
+        var s = st.z || dat.length;
+        var o = new u8(pre + s + 5 * (1 + Math.ceil(s / 7e3)) + post);
+        var w = o.subarray(pre, o.length - post);
+        var lst = st.l;
+        var pos = (st.r || 0) & 7;
+        if (lvl) {
+          if (pos)
+            w[0] = st.r >> 3;
+          var opt = deo[lvl - 1];
+          var n = opt >> 13, c = opt & 8191;
+          var msk_1 = (1 << plvl) - 1;
+          var prev = st.p || new u16(32768), head = st.h || new u16(msk_1 + 1);
+          var bs1_1 = Math.ceil(plvl / 3), bs2_1 = 2 * bs1_1;
+          var hsh = function(i2) {
+            return (dat[i2] ^ dat[i2 + 1] << bs1_1 ^ dat[i2 + 2] << bs2_1) & msk_1;
+          };
+          var syms = new i32(25e3);
+          var lf = new u16(288), df = new u16(32);
+          var lc_1 = 0, eb = 0, i = st.i || 0, li = 0, wi = st.w || 0, bs = 0;
+          for (; i + 2 < s; ++i) {
+            var hv = hsh(i);
+            var imod = i & 32767, pimod = head[hv];
+            prev[imod] = pimod;
+            head[hv] = imod;
+            if (wi <= i) {
+              var rem = s - i;
+              if ((lc_1 > 7e3 || li > 24576) && (rem > 423 || !lst)) {
+                pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, i - bs, pos);
+                li = lc_1 = eb = 0, bs = i;
+                for (var j = 0; j < 286; ++j)
+                  lf[j] = 0;
+                for (var j = 0; j < 30; ++j)
+                  df[j] = 0;
+              }
+              var l = 2, d = 0, ch_1 = c, dif = imod - pimod & 32767;
+              if (rem > 2 && hv == hsh(i - dif)) {
+                var maxn = Math.min(n, rem) - 1;
+                var maxd = Math.min(32767, i);
+                var ml = Math.min(258, rem);
+                while (dif <= maxd && --ch_1 && imod != pimod) {
+                  if (dat[i + l] == dat[i + l - dif]) {
+                    var nl = 0;
+                    for (; nl < ml && dat[i + nl] == dat[i + nl - dif]; ++nl)
+                      ;
+                    if (nl > l) {
+                      l = nl, d = dif;
+                      if (nl > maxn)
+                        break;
+                      var mmd = Math.min(dif, nl - 2);
+                      var md = 0;
+                      for (var j = 0; j < mmd; ++j) {
+                        var ti = i - dif + j & 32767;
+                        var pti = prev[ti];
+                        var cd = ti - pti & 32767;
+                        if (cd > md)
+                          md = cd, pimod = ti;
+                      }
+                    }
+                  }
+                  imod = pimod, pimod = prev[imod];
+                  dif += imod - pimod & 32767;
+                }
+              }
+              if (d) {
+                syms[li++] = 268435456 | revfl[l] << 18 | revfd[d];
+                var lin = revfl[l] & 31, din = revfd[d] & 31;
+                eb += fleb[lin] + fdeb[din];
+                ++lf[257 + lin];
+                ++df[din];
+                wi = i + l;
+                ++lc_1;
+              } else {
+                syms[li++] = dat[i];
+                ++lf[dat[i]];
+              }
+            }
+          }
+          for (i = Math.max(i, wi); i < s; ++i) {
+            syms[li++] = dat[i];
+            ++lf[dat[i]];
+          }
+          pos = wblk(dat, w, lst, syms, lf, df, eb, li, bs, i - bs, pos);
+          if (!lst) {
+            st.r = pos & 7 | w[pos / 8 | 0] << 3;
+            pos -= 7;
+            st.h = head, st.p = prev, st.i = i, st.w = wi;
+          }
+        } else {
+          for (var i = st.w || 0; i < s + lst; i += 65535) {
+            var e = i + 65535;
+            if (e >= s) {
+              w[pos / 8 | 0] = lst;
+              e = s;
+            }
+            pos = wfblk(w, pos + 1, dat.subarray(i, e));
+          }
+          st.i = s;
+        }
+        return slc(o, 0, pre + shft(pos) + post);
+      };
+      crct = /* @__PURE__ */ (function() {
+        var t = new Int32Array(256);
+        for (var i = 0; i < 256; ++i) {
+          var c = i, k = 9;
+          while (--k)
+            c = (c & 1 && -306674912) ^ c >>> 1;
+          t[i] = c;
+        }
+        return t;
+      })();
+      crc = function() {
+        var c = -1;
+        return {
+          p: function(d) {
+            var cr = c;
+            for (var i = 0; i < d.length; ++i)
+              cr = crct[cr & 255 ^ d[i]] ^ cr >>> 8;
+            c = cr;
+          },
+          d: function() {
+            return ~c;
+          }
+        };
+      };
+      dopt = function(dat, opt, pre, post, st) {
+        if (!st) {
+          st = { l: 1 };
+          if (opt.dictionary) {
+            var dict = opt.dictionary.subarray(-32768);
+            var newDat = new u8(dict.length + dat.length);
+            newDat.set(dict);
+            newDat.set(dat, dict.length);
+            dat = newDat;
+            st.w = dict.length;
+          }
+        }
+        return dflt(dat, opt.level == null ? 6 : opt.level, opt.mem == null ? st.l ? Math.ceil(Math.max(8, Math.min(13, Math.log(dat.length))) * 1.5) : 20 : 12 + opt.mem, pre, post, st);
+      };
+      mrg = function(a, b) {
+        var o = {};
+        for (var k in a)
+          o[k] = a[k];
+        for (var k in b)
+          o[k] = b[k];
+        return o;
+      };
+      b2 = function(d, b) {
+        return d[b] | d[b + 1] << 8;
+      };
+      b4 = function(d, b) {
+        return (d[b] | d[b + 1] << 8 | d[b + 2] << 16 | d[b + 3] << 24) >>> 0;
+      };
+      b8 = function(d, b) {
+        return b4(d, b) + b4(d, b + 4) * 4294967296;
+      };
+      wbytes = function(d, b, v) {
+        for (; v; ++b)
+          d[b] = v, v >>>= 8;
+      };
+      fltn = function(d, p, t, o) {
+        for (var k in d) {
+          var val = d[k], n = p + k, op = o;
+          if (Array.isArray(val))
+            op = mrg(o, val[1]), val = val[0];
+          if (val instanceof u8)
+            t[n] = [val, op];
+          else {
+            t[n += "/"] = [new u8(0), op];
+            fltn(val, n, t, o);
+          }
+        }
+      };
+      te = typeof TextEncoder != "undefined" && /* @__PURE__ */ new TextEncoder();
+      td = typeof TextDecoder != "undefined" && /* @__PURE__ */ new TextDecoder();
+      tds = 0;
+      try {
+        td.decode(et, { stream: true });
+        tds = 1;
+      } catch (e) {
+      }
+      dutf8 = function(d) {
+        for (var r = "", i = 0; ; ) {
+          var c = d[i++];
+          var eb = (c > 127) + (c > 223) + (c > 239);
+          if (i + eb > d.length)
+            return { s: r, r: slc(d, i - 1) };
+          if (!eb)
+            r += String.fromCharCode(c);
+          else if (eb == 3) {
+            c = ((c & 15) << 18 | (d[i++] & 63) << 12 | (d[i++] & 63) << 6 | d[i++] & 63) - 65536, r += String.fromCharCode(55296 | c >> 10, 56320 | c & 1023);
+          } else if (eb & 1)
+            r += String.fromCharCode((c & 31) << 6 | d[i++] & 63);
+          else
+            r += String.fromCharCode((c & 15) << 12 | (d[i++] & 63) << 6 | d[i++] & 63);
+        }
+      };
+      slzh = function(d, b) {
+        return b + 30 + b2(d, b + 26) + b2(d, b + 28);
+      };
+      zh = function(d, b, z) {
+        var fnl = b2(d, b + 28), fn = strFromU8(d.subarray(b + 46, b + 46 + fnl), !(b2(d, b + 8) & 2048)), es = b + 46 + fnl, bs = b4(d, b + 20);
+        var _a2 = z && bs == 4294967295 ? z64e(d, es) : [bs, b4(d, b + 24), b4(d, b + 42)], sc = _a2[0], su = _a2[1], off = _a2[2];
+        return [b2(d, b + 10), sc, su, fn, es + b2(d, b + 30) + b2(d, b + 32), off];
+      };
+      z64e = function(d, b) {
+        for (; b2(d, b) != 1; b += 4 + b2(d, b + 2))
+          ;
+        return [b8(d, b + 12), b8(d, b + 4), b8(d, b + 20)];
+      };
+      exfl = function(ex) {
+        var le = 0;
+        if (ex) {
+          for (var k in ex) {
+            var l = ex[k].length;
+            if (l > 65535)
+              err(9);
+            le += l + 4;
+          }
+        }
+        return le;
+      };
+      wzh = function(d, b, f, fn, u, c, ce, co) {
+        var fl2 = fn.length, ex = f.extra, col = co && co.length;
+        var exl = exfl(ex);
+        wbytes(d, b, ce != null ? 33639248 : 67324752), b += 4;
+        if (ce != null)
+          d[b++] = 20, d[b++] = f.os;
+        d[b] = 20, b += 2;
+        d[b++] = f.flag << 1 | (c < 0 && 8), d[b++] = u && 8;
+        d[b++] = f.compression & 255, d[b++] = f.compression >> 8;
+        var dt = new Date(f.mtime == null ? Date.now() : f.mtime), y = dt.getFullYear() - 1980;
+        if (y < 0 || y > 119)
+          err(10);
+        wbytes(d, b, y << 25 | dt.getMonth() + 1 << 21 | dt.getDate() << 16 | dt.getHours() << 11 | dt.getMinutes() << 5 | dt.getSeconds() >> 1), b += 4;
+        if (c != -1) {
+          wbytes(d, b, f.crc);
+          wbytes(d, b + 4, c < 0 ? -c - 2 : c);
+          wbytes(d, b + 8, f.size);
+        }
+        wbytes(d, b + 12, fl2);
+        wbytes(d, b + 14, exl), b += 16;
+        if (ce != null) {
+          wbytes(d, b, col);
+          wbytes(d, b + 6, f.attrs);
+          wbytes(d, b + 10, ce), b += 14;
+        }
+        d.set(fn, b);
+        b += fl2;
+        if (exl) {
+          for (var k in ex) {
+            var exf = ex[k], l = exf.length;
+            wbytes(d, b, +k);
+            wbytes(d, b + 2, l);
+            d.set(exf, b + 4), b += 4 + l;
+          }
+        }
+        if (col)
+          d.set(co, b), b += col;
+        return b;
+      };
+      wzf = function(o, b, c, d, e) {
+        wbytes(o, b, 101010256);
+        wbytes(o, b + 8, c);
+        wbytes(o, b + 10, c);
+        wbytes(o, b + 12, d);
+        wbytes(o, b + 16, e);
+      };
+    }
+  });
+
+  // development/organizer/batch/batch-tt.js
+  var batch_tt_exports = {};
+  __export(batch_tt_exports, {
+    TT_SCOPES: () => TT_SCOPES,
+    TtBatchService: () => TtBatchService,
+    ttHash: () => ttHash
+  });
+  function stable(value) {
+    if (value === null || typeof value !== "object") {
+      if (typeof value === "number" && (!Number.isFinite(value) || Number.isInteger(value) && !Number.isSafeInteger(value))) throw Error("\u8D44\u6E90\u5305\u542B\u4E0D\u80FD\u5B89\u5168\u5F80\u8FD4\u7684\u6570\u5B57\uFF0C\u5DF2\u505C\u6B62\u5904\u7406\u3002");
+      return JSON.stringify(value);
+    }
+    if (Array.isArray(value)) return `[${value.map(stable).join(",")}]`;
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(",")}}`;
+  }
+  async function ttHash(value) {
+    return bytesHash(encoder.encode(stable(value)));
+  }
+  async function bytesHash(bytes) {
+    return [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((x) => x.toString(16).padStart(2, "0")).join("");
+  }
+  function validateValue(value) {
+    const text = stable(value);
+    if (encoder.encode(text).length > MAX_FILE) throw Error("\u5355\u4EFD TT \u8D44\u6E90\u8D85\u8FC7 32 MB\uFF0C\u8BF7\u7F29\u5C0F\u8303\u56F4\u6216\u4F7F\u7528\u6587\u4EF6\u5BFC\u51FA\u3002");
+    return text;
+  }
+  function personaValue(settings, id) {
+    const pu = settings.power_user;
+    if (!Object.hasOwn(pu?.personas || {}, id)) throw Error("\u76EE\u6807\u8EAB\u4EFD\u5DF2\u4E0D\u5B58\u5728\u3002");
+    const value = { power_user: { personas: { [id]: pu.personas[id] }, persona_descriptions: {} }, oai_settings: { prompts: [] }, extension_settings: { regex: [] } };
+    if (Object.hasOwn(pu.persona_descriptions || {}, id)) value.power_user.persona_descriptions[id] = clone(pu.persona_descriptions[id]);
+    if (settings.user_avatar === id) {
+      value.user_avatar = id;
+      if (typeof settings.username === "string") value.username = settings.username;
+      if (typeof pu.persona_description === "string") value.power_user.persona_description = pu.persona_description;
+    }
+    return value;
+  }
+  var NS, TT_SCOPES, MAX_FILE, MAX_BATCH, encoder, decoder, pause, clone, uuid, safeName, rid, v1Fields, TtBatchService;
+  var init_batch_tt = __esm({
+    "development/organizer/batch/batch-tt.js"() {
+      init_batch_engine();
+      init_batch_adapters();
+      init_fflate();
+      NS = "global-batch-replace";
+      TT_SCOPES = ["persona", "chats", "character", "greetings", "world"];
+      MAX_FILE = 32 * 1024 * 1024;
+      MAX_BATCH = 128 * 1024 * 1024;
+      encoder = new TextEncoder();
+      decoder = new TextDecoder("utf-8", { fatal: true });
+      pause = () => new Promise((resolve) => setTimeout(resolve, 0));
+      clone = (value) => structuredClone(value);
+      uuid = () => crypto.randomUUID();
+      safeName = (value) => {
+        if (typeof value !== "string" || !value.trim() || /[\x00-\x1f/\\]/.test(value) || [".", ".."].includes(value)) throw Error("\u8D44\u6E90\u6807\u8BC6\u65E0\u6548\u3002");
+        return value;
+      };
+      rid = (kind, ...parts) => `tt:${kind}:${parts.map((x) => encodeURIComponent(x)).join(":")}`;
+      v1Fields = ["description", "personality", "scenario", "first_mes", "mes_example"];
+      TtBatchService = class {
+        constructor({ context, host = globalThis, fetcher = (...args) => fetch(...args) }) {
+          this.context = context;
+          this.env = host;
+          this.fetcher = fetcher;
+          this.host = "tt";
+          this.jobs = /* @__PURE__ */ new Map();
+          this.busy = false;
+        }
+        async init() {
+          if (!this.env.__TAURITAVERN__ || !this.env.SillyTavern && this.env === globalThis) throw Error("TT \u5BBF\u4E3B\u63A5\u53E3\u672A\u5C31\u7EEA\uFF1B\u4E0D\u4F1A\u6539\u7528 PC \u9152\u9986\u3002");
+          this.tt = this.env.__TAURITAVERN__;
+          await this.tt.ready;
+          if (this.tt.abiVersion !== 2) throw Error("\u6B64 TT ABI \u5C1A\u672A\u9A8C\u8BC1\uFF0C\u5DF2\u505C\u6B62\u76F4\u63A5\u5199\u5165\u3002");
+          this.store = this.tt.api?.extension?.store;
+          for (const method of ["tryGetJson", "getJson", "setJson", "listKeys", "getBlob", "setBlob"]) if (typeof this.store?.[method] !== "function") throw Error(`TT \u7F3A\u5C11\u6269\u5C55\u5907\u4EFD\u80FD\u529B ${method}\uFF0C\u5DF2\u505C\u6B62\u3002`);
+          const kind = this.env.__TAURITAVERN_HOST__?.kind;
+          if (!["desktop", "mobile"].includes(kind)) throw Error("\u65E0\u6CD5\u786E\u8BA4 TT \u5BBF\u4E3B\u7C7B\u578B\uFF0C\u505C\u6B62\u76F4\u63A5\u5199\u5165\u3002");
+          this.desktop = kind === "desktop";
+          this.root = await this.currentRoot();
+          const saved = await this.store.tryGetJson({ namespace: NS, key: "dataset" });
+          if (saved.found) {
+            this.dataset = saved.value?.id;
+            if (!this.dataset || saved.value.root !== this.root) this.bindingConflict = { previous: clone(saved.value ?? null) };
+          } else {
+            this.dataset = uuid();
+            await this.store.setJson({ namespace: NS, key: "dataset", value: { id: this.dataset, root: this.root } });
+          }
+          return this;
+        }
+        async currentRoot() {
+          if (!this.desktop) return "tt-current-mobile-sandbox";
+          const runtime = await this.tt.invoke.safeInvoke("get_runtime_paths");
+          if (!runtime?.data_root || runtime.migration_pending || runtime.migration_error) throw Error("TT \u6570\u636E\u76EE\u5F55\u672A\u7A33\u5B9A\uFF0C\u505C\u6B62\u5199\u5165\u3002");
+          return runtime.data_root.replaceAll("\\", "/");
+        }
+        async assertTarget() {
+          if (this.bindingConflict) throw Error("TT \u5907\u4EFD\u8D44\u6599\u96C6\u5F52\u5C5E\u4E0D\u4E00\u81F4\uFF1B\u8BF7\u5148\u5728\u6279\u91CF\u66FF\u6362\u4E2D\u786E\u8BA4\u767B\u8BB0\u5F53\u524D\u5BFC\u5165\u8D44\u6599\u3002");
+          if (await this.currentRoot() !== this.root) throw Error("TT \u6570\u636E\u76EE\u5F55\u5DF2\u6539\u53D8\uFF0C\u5DF2\u505C\u6B62\u3002");
+          const data = await this.store.getJson({ namespace: NS, key: "dataset" });
+          if (data.id !== this.dataset || data.root !== this.root) throw Error("TT \u8D44\u6599\u96C6\u5DF2\u6539\u53D8\uFF0C\u5DF2\u505C\u6B62\u3002");
+        }
+        async registerDataset({ confirm, previousId, root } = {}) {
+          return this.locked(async () => {
+            if (!this.bindingConflict || confirm !== true || root !== this.root || previousId !== (this.bindingConflict.previous?.id ?? null)) throw Error("\u8D44\u6599\u96C6\u767B\u8BB0\u786E\u8BA4\u5DF2\u5931\u6548\uFF0C\u8BF7\u5237\u65B0\u540E\u91CD\u8BD5\u3002");
+            if (await this.currentRoot() !== this.root) throw Error("TT \u6570\u636E\u76EE\u5F55\u5DF2\u6539\u53D8\uFF0C\u672A\u767B\u8BB0\u3002");
+            const saved = await this.store.getJson({ namespace: NS, key: "dataset" });
+            if (await ttHash(saved) !== await ttHash(this.bindingConflict.previous)) throw Error("\u8D44\u6599\u96C6\u6807\u8BB0\u5DF2\u6539\u53D8\uFF0C\u8BF7\u5237\u65B0\u540E\u91CD\u8BD5\u3002");
+            const next = { id: uuid(), root: this.root, registeredAt: (/* @__PURE__ */ new Date()).toISOString(), previousId: saved?.id ?? null };
+            const archive = { previous: clone(saved), next: clone(next), reason: "confirmed-import-or-move" };
+            await this.store.setJson({ namespace: NS, table: "datasets", key: next.id, value: archive });
+            if (await ttHash(await this.store.getJson({ namespace: NS, table: "datasets", key: next.id })) !== await ttHash(archive)) throw Error("\u65E7\u8D44\u6599\u96C6\u6807\u8BB0\u5F52\u6863\u6821\u9A8C\u5931\u8D25\uFF0C\u672A\u767B\u8BB0\u3002");
+            if (await this.currentRoot() !== this.root) throw Error("TT \u6570\u636E\u76EE\u5F55\u5DF2\u6539\u53D8\uFF0C\u672A\u767B\u8BB0\u3002");
+            await this.store.setJson({ namespace: NS, key: "dataset", value: next });
+            if (await ttHash(await this.store.getJson({ namespace: NS, key: "dataset" })) !== await ttHash(next)) throw Error("\u65B0\u8D44\u6599\u96C6\u6807\u8BB0\u590D\u8BFB\u5931\u8D25\uFF0C\u8BF7\u5237\u65B0\u68C0\u67E5\u3002");
+            this.dataset = next.id;
+            this.bindingConflict = null;
+            this.jobs.clear();
+            this.resources = null;
+            return { id: next.id, root: next.root, previousArchived: true };
+          });
+        }
+        async request(path, body = {}) {
+          if (!path.startsWith("/api/") || path.startsWith("/api/plugins/")) throw Error("TT \u8BF7\u6C42\u76EE\u6807\u88AB\u62D2\u7EDD\u3002");
+          const response = await this.fetcher(path, { method: "POST", headers: this.context().getRequestHeaders(), body: JSON.stringify(body) });
+          const text = await response.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch {
+            throw Error(`TT \u63A5\u53E3\u672A\u8FD4\u56DE JSON\uFF1A${path} (${response.status})`);
+          }
+          if (!response.ok || data?.error) throw Error(`TT ${path}\uFF1A${data?.error || response.status}${data?.details ? ` ${data.details}` : ""}`);
+          return data;
+        }
+        async settings() {
+          const result = await this.request("/api/settings/get");
+          if (typeof result.settings !== "string") throw Error("TT \u8BBE\u7F6E\u54CD\u5E94\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+          return { ...result, value: JSON.parse(result.settings) };
+        }
+        async inventory() {
+          if (this.bindingConflict) {
+            if (await this.currentRoot() !== this.root) throw Error("TT \u6570\u636E\u76EE\u5F55\u5DF2\u6539\u53D8\uFF0C\u8BF7\u5237\u65B0\u3002");
+            return { resources: [], owners: [], skipped: [], host: "tt", scopes: BATCH_SCOPES, supportedScopes: TT_SCOPES, backupLocation: "TT \u5F53\u524D\u6570\u636E\u76EE\u5F55 \u2192 _tauritavern/extension-store/global-batch-replace", warning: "\u5F53\u524D\u5BFC\u5165\u8D44\u6599\u5C1A\u672A\u767B\u8BB0\uFF0C\u626B\u63CF\u548C\u5199\u5165\u4FDD\u6301\u505C\u6B62\u3002", datasetBinding: { currentRoot: this.root, previousRoot: this.bindingConflict.previous?.root || "\u672A\u77E5\u65E7\u76EE\u5F55", previousId: this.bindingConflict.previous?.id ?? null } };
+          }
+          await this.assertTarget();
+          const [settings, characters, groups, chats] = await Promise.all([
+            this.settings(),
+            this.request("/api/characters/all"),
+            this.request("/api/groups/all"),
+            this.tt.invoke.safeInvoke("list_recent_chat_summaries", { include_metadata: false, max_entries: 10001, pinned: [] })
+          ]);
+          if (![characters, groups, chats].every(Array.isArray) || !Array.isArray(settings.world_names)) throw Error("TT \u8D44\u6E90\u5217\u8868\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+          if (chats.length > 1e4) throw Error("TT \u804A\u5929\u6570\u8D85\u8FC7\u5355\u6B21\u8D44\u6E90\u9884\u7B97\uFF0C\u8BF7\u5148\u5206\u6279\u5BFC\u51FA\u3002");
+          const resources = [], owners = [], skipped = [];
+          const add = (resource) => {
+            resource.label = resource.relative;
+            resources.push(resource);
+            owners.push({ id: resource.avatarId || resource.id, type: resource.ownerType || resource.adapter, label: resource.relative });
+          };
+          for (const [avatar, name] of Object.entries(settings.value.power_user?.personas || {})) {
+            safeName(avatar);
+            add({ id: rid("persona", avatar), adapter: "settings", ownerType: "persona", avatarId: avatar, relative: `User Persona \xB7 ${name} \xB7 ${avatar}` });
+          }
+          const cards = /* @__PURE__ */ new Map();
+          for (const character of characters) {
+            const avatar = safeName(character.avatar), stem = avatar.replace(/\.png$/i, "");
+            const resource = { id: rid("character", avatar), adapter: "character", avatar, relative: `\u89D2\u8272\u5361 \xB7 ${avatar}` };
+            cards.set(stem, resource.id);
+            add(resource);
+          }
+          for (const name of settings.world_names) {
+            safeName(name);
+            add({ id: rid("world", name), adapter: "world", name, relative: `\u4E16\u754C\u4E66 \xB7 ${name}` });
+          }
+          for (const chat of chats) {
+            const characterId = safeName(chat.character_name), fileName = safeName(chat.file_name.replace(/\.jsonl$/i, ""));
+            add({ id: rid("chat", characterId, fileName), adapter: "chat", characterId, fileName, ...cards.has(characterId) ? { characterOwner: cards.get(characterId) } : {}, relative: `\u804A\u5929 \xB7 ${characterId}/${fileName}.jsonl` });
+          }
+          const groupIds = /* @__PURE__ */ new Set();
+          for (const group of groups) for (const name of group.chats || []) {
+            const fileName = safeName(String(name).replace(/\.jsonl$/i, ""));
+            if (groupIds.has(fileName)) continue;
+            groupIds.add(fileName);
+            add({ id: rid("group-chat", fileName), adapter: "chat", group: true, fileName, relative: `\u7FA4\u804A \xB7 ${fileName}.jsonl` });
+          }
+          this.resources = new Map(resources.map((resource) => [resource.id, resource]));
+          return { resources, owners, skipped, host: "tt", scopes: BATCH_SCOPES, supportedScopes: TT_SCOPES, backupLocation: "TT \u5F53\u524D\u6570\u636E\u76EE\u5F55 \u2192 _tauritavern/extension-store/global-batch-replace", warning: "TT \u4F7F\u7528\u539F\u751F\u63A5\u53E3\u9010\u9879\u4FDD\u5B58\uFF0CJSON \u6392\u7248\u53EF\u80FD\u89C4\u8303\u5316\uFF1B\u6267\u884C\u671F\u95F4\u6682\u505C\u5176\u4ED6\u7F16\u8F91\u4E0E\u540C\u6B65\u3002" };
+        }
+        chatBody(resource) {
+          return resource.group ? { id: resource.fileName } : { ch_name: resource.characterId, file_name: resource.fileName };
+        }
+        async read(resource) {
+          let value;
+          if (resource.avatarId) {
+            const { value: settings } = await this.settings();
+            value = personaValue(settings, resource.avatarId);
+          } else if (resource.adapter === "character") {
+            const result = await this.request("/api/characters/get", { avatar_url: resource.avatar });
+            if (typeof result.json_data !== "string") throw Error("TT \u672A\u63D0\u4F9B\u89D2\u8272\u5361\u539F\u59CB JSON\uFF0C\u505C\u6B62\u5904\u7406\u8BE5\u5361\u3002");
+            const card = JSON.parse(result.json_data);
+            value = { data: card.data || card };
+          } else if (resource.adapter === "world") {
+            const settings = await this.settings();
+            if (!settings.world_names.includes(resource.name)) throw Error("\u76EE\u6807\u4E16\u754C\u4E66\u5DF2\u4E0D\u5B58\u5728\u3002");
+            value = await this.request("/api/worldinfo/get", { name: resource.name });
+          } else value = await this.request(resource.group ? "/api/chats/group/get" : "/api/chats/get", { ...this.chatBody(resource), allow_not_found: false });
+          validateValue(value);
+          return value;
+        }
+        async originalBlob(resource) {
+          let response;
+          if (resource.avatarId) response = await this.fetcher(`/User%20Avatars/${encodeURIComponent(resource.avatarId)}`, { cache: "no-store" });
+          else if (resource.adapter === "character") response = await this.fetcher(`/characters/${encodeURIComponent(resource.avatar)}`, { cache: "no-store" });
+          else return null;
+          if (!response.ok) throw Error("\u539F\u59CB\u56FE\u7247\u5907\u4EFD\u8BFB\u53D6\u5931\u8D25\u3002");
+          const blob = await response.blob();
+          if (!blob.size || blob.size > MAX_FILE) throw Error("\u539F\u59CB\u56FE\u7247\u5907\u4EFD\u5927\u5C0F\u65E0\u6548\u3002");
+          return blob;
+        }
+        async write(resource, value, expectedHash) {
+          await this.assertTarget();
+          if (this.context().isGenerating || this.context().streamingProcessor) throw Error("\u8BF7\u5148\u505C\u6B62\u751F\u6210\uFF0C\u518D\u6267\u884C\u66FF\u6362\u3002");
+          if (await ttHash(await this.read(resource)) !== expectedHash) throw Error(`${resource.relative} \u5199\u5165\u524D\u5DF2\u53D1\u751F\u53D8\u5316\u3002`);
+          if (resource.avatarId) {
+            const current = await this.settings(), id = resource.avatarId;
+            if (await ttHash(personaValue(current.value, id)) !== expectedHash) throw Error("\u8EAB\u4EFD\u5728\u51C6\u5907\u4FDD\u5B58\u671F\u95F4\u53D1\u751F\u53D8\u5316\u3002");
+            const full = current.value;
+            full.power_user.personas = clone(value.power_user.personas);
+            full.power_user.persona_descriptions = clone(value.power_user.persona_descriptions);
+            if (value.user_avatar === id) {
+              if (Object.hasOwn(value, "username")) full.username = value.username;
+              if (Object.hasOwn(value.power_user, "persona_description")) full.power_user.persona_description = value.power_user.persona_description;
+            }
+            if (!current.tauritavern_settings_revision) throw Error("TT \u7F3A\u5C11\u8BBE\u7F6E\u7248\u672C\u4EE4\u724C\u3002");
+            const headers = { ...this.context().getRequestHeaders(), "X-TauriTavern-Settings-Revision": JSON.stringify(current.tauritavern_settings_revision) };
+            const response = await this.fetcher("/api/settings/save", { method: "POST", headers, body: JSON.stringify(full) });
+            const result = await response.json();
+            if (!response.ok || result.result !== "ok" || Object.keys(result.persona_errors || {}).length) throw Error(`\u8EAB\u4EFD\u4FDD\u5B58\u672A\u5B8C\u6574\u6210\u529F\uFF1A${JSON.stringify(result.persona_errors || result.error || result.result)}\uFF08${id}\uFF09`);
+          } else if (resource.adapter === "character") {
+            const data = value.data;
+            await this.request("/api/characters/merge-attributes", { avatar: resource.avatar, data, ...Object.fromEntries(v1Fields.filter((key) => typeof data[key] === "string").map((key) => [key, data[key]])) });
+          } else if (resource.adapter === "world") await this.request("/api/worldinfo/edit", { name: resource.name, data: value });
+          else await this.request(resource.group ? "/api/chats/group/save" : "/api/chats/save", { ...this.chatBody(resource), chat: value, force: false });
+          if (await ttHash(await this.read(resource)) !== await ttHash(value)) throw Error(`${resource.relative} \u4FDD\u5B58\u540E\u590D\u8BFB\u4E0D\u4E00\u81F4\u3002`);
+        }
+        async scan(options) {
+          if (this.busy) throw Error("\u6B63\u5728\u5199\u5165\u6216\u6062\u590D\u3002");
+          await this.assertTarget();
+          if (!["global", "local"].includes(options.mode) || !options.scopes?.length || options.scopes.some((scope) => !TT_SCOPES.includes(scope))) throw Error("\u8BF7\u9009\u62E9 TT \u5DF2\u652F\u6301\u7684\u4F5C\u7528\u8303\u56F4\u3002");
+          if (options.searchOnly !== void 0 && typeof options.searchOnly !== "boolean") throw Error("\u4EC5\u67E5\u627E\u9009\u9879\u65E0\u6548\u3002");
+          const compiled = compileRules(options.rules, { searchOnly: options.searchOnly === true }), inventory = await this.inventory();
+          if (options.mode === "local" && !options.fileIds?.length && !options.ownerIds?.length) throw Error("\u5C40\u90E8\u6A21\u5F0F\u5FC5\u987B\u9009\u62E9\u8D44\u6E90\u3002");
+          for (const [id, old] of this.jobs) if (Date.now() - old.created > 30 * 60 * 1e3) this.jobs.delete(id);
+          if (this.jobs.size >= 4) {
+            const idle = [...this.jobs].find(([, job2]) => job2.status !== "scanning");
+            if (idle) this.jobs.delete(idle[0]);
+            else throw Error("\u626B\u63CF\u4EFB\u52A1\u8FC7\u591A\u3002");
+          }
+          const scopes = options.scopes, applicable = (resource) => resource.avatarId ? scopes.includes("persona") : resource.adapter === "character" ? scopes.some((s) => ["character", "greetings", "world"].includes(s)) : scopes.includes(resource.adapter === "world" ? "world" : "chats");
+          const chosen = (resource) => options.mode === "global" || options.fileIds?.includes(resource.id) || options.ownerIds?.includes(resource.avatarId || resource.id) || resource.characterOwner && options.ownerIds?.includes(resource.characterOwner);
+          const resources = inventory.resources.filter((resource) => applicable(resource) && chosen(resource));
+          const job = { id: uuid(), created: Date.now(), status: "scanning", compiled, options: clone(options), files: [], counts: compiled.rules.map(() => 0), scopeCounts: {}, warnings: ["TT \u9010\u8D44\u6E90\u5907\u4EFD\u548C\u63D0\u4EA4\uFF0C\u4E0D\u662F\u8DE8\u8D44\u6E90\u539F\u5B50\u4E8B\u52A1\uFF1B\u6267\u884C\u671F\u95F4\u6682\u505C\u5176\u4ED6\u7F16\u8F91\u4E0E\u540C\u6B65\u3002"], skipped: [], total: resources.length, scanned: 0, matches: 0, bytes: 0 };
+          this.jobs.set(job.id, job);
+          job.done = (async () => {
+            try {
+              for (const resource of resources) {
+                if (job.cancelled) break;
+                try {
+                  const value = await this.read(resource), text = validateValue(value);
+                  job.bytes += encoder.encode(text).length;
+                  if (job.bytes > MAX_BATCH) throw Error("\u672C\u6B21 TT \u626B\u63CF\u8D85\u8FC7 128 MB \u9884\u7B97\uFF0C\u8BF7\u5206\u6279\u3002");
+                  const fields = editableFields(value, resource).filter((field) => scopes.includes(field.scope)), hits = [];
+                  for (const [i, field] of fields.entries()) {
+                    const matches = await findMatchesAsync(field.text, compiled, { yieldControl: pause, cancelled: () => job.cancelled });
+                    for (const match of matches) match.id = `${resource.id}:${i}:${match.start}:${match.rule}`;
+                    if (matches.length) hits.push({ ...field, matches });
+                  }
+                  const count = hits.reduce((n, field) => n + field.matches.length, 0);
+                  job.matches += count;
+                  if (job.matches > 1e5) throw Error("\u5339\u914D\u8D85\u8FC7\u5341\u4E07\u5904\uFF0C\u8BF7\u7F29\u5C0F\u8303\u56F4\u3002");
+                  for (const field of hits) for (const match of field.matches) {
+                    job.counts[match.rule]++;
+                    job.scopeCounts[field.scope] = (job.scopeCounts[field.scope] || 0) + 1;
+                  }
+                  if (hits.length) job.files.push({ ...resource, beforeHash: await ttHash(value), fields: hits, count });
+                } catch (error) {
+                  if (job.cancelled) break;
+                  if (job.bytes > MAX_BATCH || job.matches > 1e5) throw error;
+                  job.skipped.push({ path: resource.relative, error: error.message });
+                }
+                job.scanned++;
+                await pause();
+              }
+              job.status = job.cancelled ? "cancelled" : "ready";
+            } catch (error) {
+              job.status = "failed";
+              job.error = error.message;
+            }
+          })();
+          return { id: job.id };
+        }
+        job(id) {
+          const job = this.jobs.get(id);
+          if (!job || Date.now() - job.created > 30 * 60 * 1e3) throw Error("\u626B\u63CF\u5DF2\u8FC7\u671F\uFF0C\u8BF7\u91CD\u65B0\u626B\u63CF\u3002");
+          return job;
+        }
+        matchesFilter(file, field, match, rules, filter = {}) {
+          if (filter.rule !== void 0 && filter.rule !== "" && Number(filter.rule) !== match.rule || filter.scope && filter.scope !== field.scope) return false;
+          if (!filter.query) return true;
+          const view = snippet(field.text, match, rules[match.rule]);
+          return `${file.relative} ${field.label} ${field.path.join(".")} ${view.prefix}${view.before}${view.after}${view.suffix}`.toLocaleLowerCase().includes(String(filter.query).toLocaleLowerCase());
+        }
+        status(id, filter) {
+          const job = this.job(id);
+          return {
+            id,
+            status: job.status,
+            scanned: job.scanned,
+            total: job.total,
+            matches: job.matches,
+            counts: job.counts,
+            scopeCounts: job.scopeCounts,
+            warnings: job.warnings,
+            skipped: job.skipped,
+            error: job.error,
+            files: job.files.map((file) => ({ id: file.id, path: file.relative, beforeHash: file.beforeHash, count: file.count, visible: file.fields.reduce((n, field) => n + field.matches.filter((m) => this.matchesFilter(file, field, m, job.compiled.rules, filter)).length, 0), scopes: [...new Set(file.fields.map((f) => f.scope))], labels: [...new Set(file.fields.map((f) => f.label))] }))
+          };
+        }
+        preview(id, fileId, offset = 0, filter) {
+          const job = this.job(id), file = job.files.find((f) => f.id === fileId);
+          if (!file || !Number.isInteger(offset) || offset < 0) throw Error("\u9884\u89C8\u8D44\u6E90\u65E0\u6548\u3002");
+          const hits = file.fields.flatMap((field) => field.matches.filter((m) => this.matchesFilter(file, field, m, job.compiled.rules, filter)).map((match) => ({ field, match })));
+          const rows = hits.slice(offset, offset + 100).map(({ field, match }) => {
+            let start = Math.max(0, match.start - 70), end = Math.min(field.text.length, match.end + 70);
+            const nearby = field.matches.filter((m) => m.end > start && m.start < end);
+            start = Math.min(start, ...nearby.map((m) => m.start));
+            end = Math.max(end, ...nearby.map((m) => m.end));
+            return { ...match, scope: field.scope, owner: field.owner, label: field.label, field: field.path.join("."), aliases: field.aliases.map((p) => p.join(".")), context: { text: field.text.slice(start, end), leading: start > 0, trailing: end < field.text.length, matches: nearby.map((m) => ({ ...m, start: m.start - start, end: m.end - start })) } };
+          });
+          return { total: hits.length, offset, rows };
+        }
+        async saveManifest(manifest) {
+          await this.store.setJson({ namespace: NS, table: "transactions", key: manifest.id, value: manifest });
+          if (await ttHash(await this.store.getJson({ namespace: NS, table: "transactions", key: manifest.id })) !== await ttHash(manifest)) throw Error("\u5907\u4EFD\u6E05\u5355\u590D\u8BFB\u5931\u8D25\u3002");
+        }
+        async manifest(id, { allowForeign = false } = {}) {
+          if (!/^[a-f0-9-]{36}$/.test(id)) throw Error("\u5907\u4EFD\u7F16\u53F7\u65E0\u6548\u3002");
+          const manifest = await this.store.getJson({ namespace: NS, table: "transactions", key: id });
+          if (manifest.id !== id || manifest.host !== "tt" || !manifest.dataset || typeof manifest.root !== "string" || !Array.isArray(manifest.files)) throw Error("\u5907\u4EFD\u6E05\u5355\u65E0\u6548\u3002");
+          if (!allowForeign && (manifest.dataset !== this.dataset || manifest.root !== this.root)) throw Error("\u5907\u4EFD\u5C5E\u4E8E\u8FC1\u79FB\u524D\u6216\u5176\u4ED6 TT \u8D44\u6599\u96C6\uFF0C\u7981\u6B62\u76F4\u63A5\u6062\u590D\u5230\u5F53\u524D\u8D44\u6599\uFF1B\u53EF\u4EE5\u4E0B\u8F7D\u4FDD\u7559\u3002");
+          return manifest;
+        }
+        async putValue(key, value) {
+          await this.store.setBlob({ namespace: NS, key, data: new Blob([validateValue(value)], { type: "application/json" }) });
+          if (await ttHash(await this.getValue(key)) !== await ttHash(value)) throw Error("\u539F\u6587\u5907\u4EFD\u590D\u8BFB\u6821\u9A8C\u5931\u8D25\u3002");
+        }
+        async getValue(key) {
+          if (!/^[a-f0-9-]+\.(before|after)\.json$/.test(key)) throw Error("\u5907\u4EFD\u6587\u4EF6\u540D\u65E0\u6548\u3002");
+          const blob = await this.store.getBlob({ namespace: NS, key });
+          if (blob.size > MAX_FILE) throw Error("\u5907\u4EFD\u5927\u5C0F\u65E0\u6548\u3002");
+          const value = JSON.parse(await blob.text());
+          validateValue(value);
+          return value;
+        }
+        async backups() {
+          await this.assertTarget();
+          const keys = await this.store.listKeys({ namespace: NS, table: "transactions" }), results = [];
+          for (const id of keys) {
+            try {
+              const m = await this.manifest(id, { allowForeign: true }), foreign = m.dataset !== this.dataset || m.root !== this.root;
+              results.push({ id, created: m.created, status: foreign ? "foreign" : m.status, error: foreign ? `\u5C5E\u4E8E\u8FC1\u79FB\u524D\u6216\u5176\u4ED6\u8D44\u6599\u96C6\uFF08${m.root}\uFF09\uFF1B\u4FDD\u7559\u4E0B\u8F7D\uFF0C\u7981\u6B62\u76F4\u63A5\u6062\u590D\u3002` : m.error, files: m.files.map((file) => ({ path: file.resource.relative, state: file.state, error: file.error })) });
+            } catch {
+              results.push({ id, status: "unreadable", error: "\u5907\u4EFD\u6E05\u5355\u65E0\u6CD5\u9A8C\u8BC1\uFF0C\u8BF7\u4FDD\u7559\u6269\u5C55\u5B58\u50A8\u3002" });
+            }
+          }
+          return results.sort((a, b) => String(b.created).localeCompare(String(a.created)));
+        }
+        async locked(task) {
+          if (this.busy) throw Error("\u6B63\u5728\u6267\u884C\u5176\u4ED6 TT \u5199\u5165\u3002");
+          this.busy = true;
+          try {
+            if (this.env.navigator?.locks?.request) return await this.env.navigator.locks.request(`gbr-tt-${this.dataset}`, { ifAvailable: true }, (lock) => {
+              if (!lock) throw Error("\u5176\u4ED6\u7A97\u53E3\u6B63\u5728\u6267\u884C\u6279\u91CF\u64CD\u4F5C\u3002");
+              return task();
+            });
+            return await task();
+          } finally {
+            this.busy = false;
+          }
+        }
+        async apply({ id, excludedFiles = [], excludedMatches = [] }) {
+          return this.locked(async () => {
+            await this.assertTarget();
+            const unfinished = (await this.backups()).filter((m) => ["preparing", "prepared", "committing", "restoring", "needs-attention", "unreadable"].includes(m.status));
+            if (unfinished.length) throw Error("\u53D1\u73B0\u672A\u5B8C\u6210\u4E8B\u52A1\uFF0C\u8BF7\u5148\u5728\u5907\u4EFD\u4E2D\u68C0\u67E5\u6062\u590D\u3002");
+            const job = this.job(id);
+            if (job.options.searchOnly) throw Error("\u4EC5\u67E5\u627E\u4EFB\u52A1\u7981\u6B62\u6267\u884C\u66FF\u6362\u3002");
+            if (job.status !== "ready" || job.cancelled) throw Error("\u4EFB\u52A1\u5C1A\u672A\u5C31\u7EEA\u6216\u5DF2\u6267\u884C\u3002");
+            if (!Array.isArray(excludedFiles) || !Array.isArray(excludedMatches)) throw Error("\u9009\u62E9\u683C\u5F0F\u65E0\u6548\u3002");
+            const known = new Set(job.files.flatMap((file) => file.fields.flatMap((field) => field.matches.map((m) => m.id))));
+            if (excludedFiles.some((fid) => !job.files.some((file) => file.id === fid)) || excludedMatches.some((mid) => !known.has(mid))) throw Error("\u5B58\u5728\u5931\u6548\u7684\u9009\u62E9\u3002");
+            const plan = [];
+            let totalBytes = 0;
+            for (const file of job.files) {
+              if (excludedFiles.includes(file.id)) continue;
+              const fields = file.fields.map((f) => ({ ...f, selected: f.matches.filter((m) => !excludedMatches.includes(m.id)) })).filter((f) => f.selected.length);
+              if (!fields.length) continue;
+              const before = await this.read(file);
+              if (await ttHash(before) !== file.beforeHash) throw Error(`${file.relative} \u626B\u63CF\u540E\u6709\u65B0\u53D8\u5316\uFF0C\u672A\u5199\u5165\u4EFB\u4F55\u8D44\u6E90\u3002`);
+              const after = clone(before);
+              for (const field of fields) {
+                if (getAt(after, field.path) !== field.text) throw Error("\u5339\u914D\u5B57\u6BB5\u5DF2\u6539\u53D8\u3002");
+                const text = replaceMatches(field.text, field.selected, job.compiled.rules);
+                setAt(after, field.path, text);
+                for (const alias of field.aliases) setAt(after, alias, text);
+              }
+              totalBytes += encoder.encode(validateValue(before)).length + encoder.encode(validateValue(after)).length;
+              if (totalBytes > MAX_BATCH) throw Error("\u672C\u6B21 TT \u63D0\u4EA4\u8D85\u8FC7\u5185\u5B58\u9884\u7B97\u3002");
+              plan.push({ file, before, after, afterHash: await ttHash(after), count: fields.reduce((n, f) => n + f.selected.length, 0) });
+            }
+            if (!plan.length) throw Error("\u6CA1\u6709\u9009\u4E2D\u7684\u4FEE\u6539\u3002");
+            if (plan.length > 1e3) throw Error("TT \u5355\u6279\u6700\u591A\u4FEE\u6539 1000 \u4EFD\u8D44\u6E90\uFF0C\u8BF7\u5206\u6279\u3002");
+            const tx = uuid(), manifest = { version: 1, host: "tt", id: tx, dataset: this.dataset, root: this.root, created: (/* @__PURE__ */ new Date()).toISOString(), status: "preparing", rules: job.compiled.rules, scopes: job.options.scopes, files: [] };
+            let started = false;
+            try {
+              await this.saveManifest(manifest);
+              for (const [i, item] of plan.entries()) {
+                const key = `${tx}-${i}`, record = { resource: Object.fromEntries(Object.entries(item.file).filter(([name]) => !["fields", "beforeHash", "count"].includes(name))), backup: `${key}.before.json`, after: `${key}.after.json`, beforeHash: item.file.beforeHash, afterHash: item.afterHash, count: item.count, state: "pending" };
+                await this.putValue(record.backup, item.before);
+                await this.putValue(record.after, item.after);
+                const image = await this.originalBlob(item.file);
+                if (image) {
+                  totalBytes += image.size;
+                  if (totalBytes > MAX_BATCH) throw Error("\u542B\u56FE\u7247\u7684\u5907\u4EFD\u8D85\u8FC7 128 MB \u9884\u7B97\uFF0C\u8BF7\u5206\u6279\u3002");
+                  record.image = `${key}.png`;
+                  record.imageHash = await bytesHash(await image.arrayBuffer());
+                  await this.store.setBlob({ namespace: NS, key: record.image, data: image });
+                  if (await bytesHash(await (await this.store.getBlob({ namespace: NS, key: record.image })).arrayBuffer()) !== record.imageHash) throw Error("\u539F\u59CB\u56FE\u7247\u5907\u4EFD\u9A8C\u8BC1\u5931\u8D25\u3002");
+                }
+                manifest.files.push(record);
+                await this.saveManifest(manifest);
+              }
+              manifest.status = "prepared";
+              await this.saveManifest(manifest);
+              for (const item of plan) if (await ttHash(await this.read(item.file)) !== item.file.beforeHash) throw Error("\u5907\u4EFD\u671F\u95F4\u6E90\u8D44\u6599\u6539\u53D8\uFF0C\u505C\u6B62\u63D0\u4EA4\u3002");
+              for (const [i, item] of plan.entries()) {
+                const record = manifest.files[i];
+                manifest.status = "committing";
+                record.state = "committing";
+                await this.saveManifest(manifest);
+                started = true;
+                await this.write(item.file, item.after, record.beforeHash);
+                record.state = "committed";
+                await this.saveManifest(manifest);
+              }
+              manifest.status = "complete";
+              await this.saveManifest(manifest);
+              job.status = "applied";
+              return { id: tx, files: plan.length, matches: plan.reduce((n, item) => n + item.count, 0) };
+            } catch (error) {
+              manifest.error = error.message;
+              const failed = [];
+              if (started) for (const record of [...manifest.files].reverse()) {
+                try {
+                  const currentHash = await ttHash(await this.read(record.resource));
+                  if (currentHash === record.beforeHash) {
+                    record.state = "unchanged";
+                    continue;
+                  }
+                  if (currentHash !== record.afterHash) throw Error("\u5185\u5BB9\u65E2\u975E\u539F\u6587\u4E5F\u975E\u9884\u671F\u7ED3\u679C\uFF0C\u9700\u8981\u4EBA\u5DE5\u68C0\u67E5\u3002");
+                  const before = await this.getValue(record.backup);
+                  if (await ttHash(before) !== record.beforeHash) throw Error("\u6062\u590D\u5907\u4EFD\u635F\u574F\u3002");
+                  await this.write(record.resource, before, record.afterHash);
+                  record.state = "restored";
+                } catch (restoreError) {
+                  record.state = "conflict";
+                  record.error = restoreError.message;
+                  failed.push(record.resource.relative);
+                }
+              }
+              manifest.status = failed.length ? "needs-attention" : "aborted";
+              job.status = "failed";
+              try {
+                await this.saveManifest(manifest);
+              } catch (saveError) {
+                throw Error(`\u63D0\u4EA4\u5931\u8D25\u4E14\u6062\u590D\u65E5\u5FD7\u672A\u80FD\u786E\u8BA4\uFF1A${saveError.message}\u3002\u5907\u4EFD ${tx}\uFF0C\u8BF7\u505C\u6B62\u7F16\u8F91\u5E76\u68C0\u67E5\u3002`);
+              }
+              throw Error(`TT \u6267\u884C\u505C\u6B62\uFF1A${error.message}\u3002${failed.length ? `${failed.length} \u9879\u9700\u8981\u68C0\u67E5\u6062\u590D` : started ? "\u5DF2\u63D0\u4EA4\u9879\u5DF2\u6062\u590D" : "\u672A\u5199\u5165\u4E1A\u52A1\u8D44\u6599"}\u3002\u5907\u4EFD ${tx}`);
+            }
+          });
+        }
+        async restore({ id, preserveConflicts = false, paths }) {
+          return this.locked(async () => {
+            await this.assertTarget();
+            const manifest = await this.manifest(id), plan = [], conflicts = [];
+            const inventory = await this.inventory(), known = new Map(inventory.resources.map((r) => [r.id, r]));
+            if (paths !== void 0 && (!Array.isArray(paths) || !paths.length || paths.some((p) => !manifest.files.some((record) => record.resource.relative === p)))) throw Error("\u6062\u590D\u8D44\u6E90\u9009\u62E9\u65E0\u6548\u3002");
+            for (const record of manifest.files) {
+              if (paths && !paths.includes(record.resource.relative)) continue;
+              const resource = known.get(record.resource.id);
+              if (!resource) {
+                conflicts.push(record.resource.relative);
+                continue;
+              }
+              const hash = await ttHash(await this.read(resource));
+              if (hash === record.beforeHash) {
+                record.state = "restored";
+                continue;
+              }
+              if (hash !== record.afterHash) {
+                conflicts.push(resource.relative);
+                continue;
+              }
+              const before = await this.getValue(record.backup), after = await this.getValue(record.after);
+              if (await ttHash(before) !== record.beforeHash || await ttHash(after) !== record.afterHash) throw Error("\u5907\u4EFD\u9A8C\u8BC1\u5931\u8D25\uFF0C\u672A\u6062\u590D\u4EFB\u4F55\u8D44\u6E90\u3002");
+              plan.push({ record, resource, before });
+            }
+            if (conflicts.length && !preserveConflicts) return { restored: 0, conflicts, needsConfirmation: true };
+            manifest.status = "restoring";
+            await this.saveManifest(manifest);
+            try {
+              for (const { record, resource, before } of plan) {
+                record.state = "restoring";
+                await this.saveManifest(manifest);
+                await this.write(resource, before, record.afterHash);
+                record.state = "restored";
+                await this.saveManifest(manifest);
+              }
+              manifest.status = conflicts.length || manifest.files.some((record) => record.state !== "restored") ? "partially-restored" : "restored";
+              manifest.conflicts = conflicts;
+              await this.saveManifest(manifest);
+              return { restored: plan.length, conflicts };
+            } catch (error) {
+              manifest.status = "needs-attention";
+              manifest.error = error.message;
+              await this.saveManifest(manifest);
+              throw Error(`\u6062\u590D\u672A\u5168\u90E8\u5B8C\u6210\uFF1A${error.message}\u3002\u8BF7\u67E5\u770B\u5907\u4EFD ${id}\u3002`);
+            }
+          });
+        }
+        async download(id) {
+          await this.assertTarget();
+          const manifest = await this.manifest(id, { allowForeign: true }), files = { "manifest.json": encoder.encode(JSON.stringify(manifest, null, 2)) };
+          let total = 0;
+          for (const record of manifest.files) for (const [key, hash, json] of [[record.backup, record.beforeHash, true], [record.after, record.afterHash, true], ...record.image ? [[record.image, record.imageHash, false]] : []]) {
+            const blob = await this.store.getBlob({ namespace: NS, key }), bytes = new Uint8Array(await blob.arrayBuffer());
+            total += bytes.length;
+            if (total > MAX_BATCH) throw Error("\u5907\u4EFD\u5305\u8D85\u8FC7\u5BFC\u51FA\u9884\u7B97\u3002");
+            if ((json ? await ttHash(JSON.parse(decoder.decode(bytes))) : await bytesHash(bytes)) !== hash) throw Error("\u5907\u4EFD\u6821\u9A8C\u5931\u8D25\uFF0C\u505C\u6B62\u5BFC\u51FA\u3002");
+            files[key] = bytes;
+          }
+          return new Blob([zipSync(files, { level: 0 })], { type: "application/zip" });
+        }
+        async importBackup(blob) {
+          return this.locked(() => this.importBackupUnlocked(blob));
+        }
+        async importBackupUnlocked(blob) {
+          await this.assertTarget();
+          if (blob.size > MAX_BATCH) throw Error("\u5907\u4EFD\u5305\u8FC7\u5927\u3002");
+          let bytes = 0, count = 0;
+          const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()), { filter: (file) => {
+            bytes += file.originalSize;
+            count++;
+            if (file.name !== "manifest.json" && !/^[a-f0-9-]+\.(before\.json|after\.json|png)$/.test(file.name) || file.originalSize > MAX_FILE || bytes > MAX_BATCH || count > 1e4) throw Error("\u5907\u4EFD ZIP \u8DEF\u5F84\u6216\u5C55\u5F00\u9884\u7B97\u65E0\u6548\u3002");
+            return true;
+          } });
+          if (!entries["manifest.json"]) throw Error("\u7F3A\u5C11\u5907\u4EFD\u6E05\u5355\u3002");
+          const manifest = JSON.parse(decoder.decode(entries["manifest.json"]));
+          if (manifest.version !== 1 || manifest.host !== "tt" || manifest.dataset !== this.dataset || manifest.root !== this.root || !/^[a-f0-9-]{36}$/.test(manifest.id) || !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > 1e3) throw Error("\u5907\u4EFD\u5305\u4E0D\u5C5E\u4E8E\u5F53\u524D TT \u8D44\u6599\u96C6\u6216\u683C\u5F0F\u4E0D\u517C\u5BB9\u3002");
+          if (!["complete", "restored", "partially-restored", "aborted", "preparing", "prepared", "committing", "restoring", "needs-attention"].includes(manifest.status)) throw Error("\u5907\u4EFD\u4E8B\u52A1\u72B6\u6001\u65E0\u6548\u3002");
+          const inventory = await this.inventory(), known = new Map(inventory.resources.map((r) => [r.id, r])), ids = /* @__PURE__ */ new Set();
+          for (const record of manifest.files) {
+            if (!known.has(record.resource?.id) || ids.has(record.resource.id)) throw Error("\u5907\u4EFD\u5305\u542B\u672A\u77E5\u6216\u91CD\u590D\u8D44\u6E90\u3002");
+            ids.add(record.resource.id);
+            record.resource = known.get(record.resource.id);
+            for (const [key, hash, json] of [[record.backup, record.beforeHash, true], [record.after, record.afterHash, true], ...record.image ? [[record.image, record.imageHash, false]] : []]) {
+              const value = entries[key];
+              if (!value) throw Error("\u5907\u4EFD\u5185\u5BB9\u4E0D\u5B8C\u6574\u3002");
+              if (json) {
+                const parsed = JSON.parse(decoder.decode(value));
+                validateValue(parsed);
+                if (await ttHash(parsed) !== hash) throw Error("\u5907\u4EFD JSON \u6821\u9A8C\u5931\u8D25\u3002");
+              } else if (await bytesHash(value) !== hash) throw Error("\u5907\u4EFD\u56FE\u7247\u6821\u9A8C\u5931\u8D25\u3002");
+            }
+          }
+          if ((await this.store.tryGetJson({ namespace: NS, table: "transactions", key: manifest.id })).found) throw Error("\u8BE5\u5907\u4EFD\u5DF2\u5B58\u5728\uFF0C\u65E0\u9700\u518D\u6B21\u5BFC\u5165\u3002");
+          const importKey = uuid();
+          for (const [i, record] of manifest.files.entries()) {
+            for (const [property, suffix] of [["backup", "before.json"], ["after", "after.json"], ["image", "png"]]) {
+              if (!record[property]) continue;
+              const data = entries[record[property]], key = `${importKey}-${i}.${suffix}`;
+              await this.store.setBlob({ namespace: NS, key, data });
+              if (await bytesHash(await (await this.store.getBlob({ namespace: NS, key })).arrayBuffer()) !== await bytesHash(data)) throw Error("\u5BFC\u5165\u5907\u4EFD\u590D\u8BFB\u5931\u8D25\uFF0C\u672A\u53D1\u5E03\u6E05\u5355\u3002");
+              record[property] = key;
+            }
+          }
+          manifest.importedAt = (/* @__PURE__ */ new Date()).toISOString();
+          await this.saveManifest(manifest);
+          return { id: manifest.id, files: manifest.files.length };
+        }
+        async call(name, body = {}) {
+          if (name === "inventory") return this.inventory();
+          if (name === "register-dataset") return this.registerDataset(body);
+          if (name === "scan") return this.scan(body);
+          if (name === "status") return this.status(body.id, body.filter);
+          if (name === "preview") return this.preview(body.id, body.fileId, body.offset, body.filter);
+          if (name === "cancel") {
+            const job = this.job(body.id);
+            if (job.status === "scanning") job.cancelled = true;
+            else if (job.status === "ready") {
+              job.cancelled = true;
+              job.status = "cancelled";
+            }
+            return { cancelled: true };
+          }
+          if (name === "apply") return this.apply(body);
+          if (name === "backups") return this.backups();
+          if (name === "restore") return this.restore(body);
+          throw Error("TT \u6279\u91CF\u64CD\u4F5C\u4E0D\u53D7\u652F\u6301\u3002");
+        }
+      };
+    }
+  });
+
+  // development/organizer/batch/controller.js
+  var controller_exports = {};
+  __export(controller_exports, {
+    OrganizerContent: () => OrganizerContent
+  });
+  init_batch_engine();
+
+  // development/organizer/batch/batch-runtime.js
+  function batchHost(host = globalThis) {
+    if (host.__TAURITAVERN__ || host.__TAURI_RUNNING__ === true) return "tt";
+    if (host.__TAURI_INTERNALS__ || host.__TAURI__) throw Error("\u65E0\u6CD5\u786E\u8BA4\u5F53\u524D Tauri \u5BBF\u4E3B\uFF0C\u5DF2\u505C\u6B62\u9009\u62E9\u6279\u91CF\u8BFB\u5199\u63A5\u53E3\u3002");
+    return "st";
+  }
+  async function createBatchClient(bridge, host = globalThis) {
+    if (batchHost(host) === "tt") {
+      const { TtBatchService: TtBatchService2 } = await Promise.resolve().then(() => (init_batch_tt(), batch_tt_exports));
+      const service = new TtBatchService2({ context: () => bridge.context(), host, fetcher: (...args) => host.fetch(...args) });
+      await service.init();
+      return service;
+    }
+    const request = async (name, body) => {
+      const response = await host.fetch(`/api/plugins/global-batch-replace/${name}`, { method: "POST", headers: bridge.context().getRequestHeaders(), body: JSON.stringify(body) });
+      if (response.status === 404) throw Error("\u672C\u5730\u6279\u91CF\u66FF\u6362\u6A21\u5757\u5C1A\u672A\u52A0\u8F7D\u3002\u8BF7\u5B89\u88C5 plugins/global-batch-replace\uFF0C\u5728 config.yaml \u542F\u7528 enableServerPlugins \u5E76\u91CD\u542F SillyTavern\u3002");
+      return response;
+    };
+    return {
+      host: "st",
+      async call(name, body = {}) {
+        const response = await request(name, body), data = await response.json();
+        if (!response.ok || data.error) throw Error(data.error || `\u8BF7\u6C42\u5931\u8D25\uFF08${response.status}\uFF09\u3002`);
+        return data;
+      },
+      async download(id) {
+        const response = await request("download", { id });
+        if (!response.ok) throw Error("\u5907\u4EFD\u4E0B\u8F7D\u5931\u8D25\u3002");
+        return response.blob();
+      },
+      async importBackup(blob) {
+        if (blob.size > 256 * 1024 * 1024) throw Error("\u5907\u4EFD ZIP \u8D85\u8FC7 256 MB\u3002");
+        const response = await host.fetch("/api/plugins/global-batch-replace/import", { method: "POST", headers: { ...bridge.context().getRequestHeaders(), "Content-Type": "application/zip" }, body: blob });
+        if (response.status === 404) throw Error("\u8BF7\u5B89\u88C5 TLE \u914D\u5957\u670D\u52A1\u7AEF\u63D2\u4EF6\u4EE5\u652F\u6301 ZIP \u5BFC\u5165\u3002");
+        const data = await response.json();
+        if (!response.ok || data.error) throw Error(data.error || "\u5907\u4EFD\u5BFC\u5165\u5931\u8D25\u3002");
+        return data;
+      }
+    };
+  }
+
+  // development/organizer/batch/storage.js
+  var BatchConfigStore = class {
+    constructor({ indexedDB = globalThis.indexedDB, legacy = () => globalThis.localStorage } = {}) {
+      this.factory = indexedDB;
+      this.legacy = legacy;
+      this.queues = /* @__PURE__ */ new Map();
+    }
+    open() {
+      if (!this.factory) return Promise.resolve(null);
+      if (!this.opening) this.opening = new Promise((resolve, reject) => {
+        const request = this.factory.open("global-batch-replace", 1);
+        request.onupgradeneeded = () => request.result.createObjectStore("config");
+        request.onerror = () => reject(request.error);
+        request.onblocked = () => reject(new Error("\u672C\u5730\u89C4\u5219\u914D\u7F6E\u5E93\u88AB\u5176\u4ED6\u9875\u9762\u5360\u7528\uFF0C\u8BF7\u5173\u95ED\u5176\u4ED6\u9152\u9986\u6807\u7B7E\u9875\u540E\u91CD\u8BD5\u3002"));
+        request.onsuccess = () => {
+          const db = request.result;
+          db.onversionchange = () => {
+            db.close();
+            this.opening = null;
+          };
+          resolve(db);
+        };
+      }).catch((error) => {
+        this.opening = null;
+        throw error;
+      });
+      return this.opening;
+    }
+    async readRecord(key) {
+      const db = await this.open();
+      if (!db) return void 0;
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction("config", "readonly");
+        const request = transaction.objectStore("config").get(key);
+        transaction.oncomplete = () => resolve(request.result);
+        transaction.onabort = () => reject(transaction.error || request.error || new Error("\u8BFB\u53D6\u672C\u5730\u89C4\u5219\u914D\u7F6E\u5931\u8D25"));
+        transaction.onerror = () => {
+        };
+      });
+    }
+    async writeRecord(key, value) {
+      const db = await this.open();
+      if (!db) {
+        this.legacy().setItem(key, JSON.stringify(value));
+        return;
+      }
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction("config", "readwrite");
+        const request = transaction.objectStore("config").put(value, key);
+        transaction.oncomplete = resolve;
+        transaction.onabort = () => reject(transaction.error || request.error || new Error("\u4FDD\u5B58\u672C\u5730\u89C4\u5219\u914D\u7F6E\u5931\u8D25"));
+        transaction.onerror = () => {
+        };
+      });
+      try {
+        this.legacy().removeItem(key);
+      } catch {
+      }
+    }
+    set(key, value) {
+      const copy = structuredClone(value);
+      const previous = this.queues.get(key) || Promise.resolve();
+      const next = previous.catch(() => {
+      }).then(() => this.writeRecord(key, copy));
+      this.queues.set(key, next);
+      const cleanup = () => {
+        if (this.queues.get(key) === next) this.queues.delete(key);
+      };
+      next.then(cleanup, cleanup);
+      return next;
+    }
+    async get(key) {
+      await this.queues.get(key)?.catch(() => {
+      });
+      const stored = await this.readRecord(key);
+      if (stored !== void 0) return stored;
+      let raw;
+      try {
+        raw = this.legacy().getItem(key);
+      } catch (error) {
+        if (!this.factory) throw error;
+        return null;
+      }
+      if (!raw) return null;
+      const old = JSON.parse(raw);
+      if (this.factory) {
+        try {
+          await this.set(key, old);
+        } catch {
+        }
+      }
+      return old;
+    }
+  };
+
+  // development/organizer/batch/catalog.js
+  function describeResource(resource, owner, scope, catalogs = {}) {
+    const path = resource.relative || resource.label || resource.id;
+    const basename = path.split("/").at(-1);
+    let module, key, value, label;
+    if (scope === "persona") {
+      module = "persona";
+      key = value = owner;
+      label = owner;
+    } else if (resource.adapter === "character") {
+      module = "character";
+      key = value = resource.avatar || basename;
+      label = value;
+    } else if (resource.adapter === "world") {
+      module = "worldInfo";
+      value = resource.name || basename.replace(/\.json$/i, "");
+      key = JSON.stringify(["world_info", value]);
+      label = value;
+    } else if (resource.adapter === "preset") {
+      module = path.startsWith("reasoning/") ? "reasoning" : "preset";
+      value = basename.replace(/\.json$/i, "");
+      label = value;
+      key = JSON.stringify([module === "reasoning" ? "reasoning_select" : "settings_preset_openai", value]);
+    } else {
+      module = resource.adapter === "chat" ? "chat" : "content";
+      key = value = owner || resource.id;
+      label = path;
+    }
+    if (module === "preset" && !path.startsWith("OpenAI Settings/")) {
+      module = "content";
+      key = resource.id;
+    }
+    const entry = (catalogs[module] || []).find((entry2) => entry2.key === key);
+    return { module, key, value, label, ...entry, contentKey: JSON.stringify([module, key]), resource };
+  }
+  function resolveScope(inventory, scope, currentModule, entries, selected, paths = {}) {
+    const supported = inventory.supportedScopes || Object.keys(inventory.scopes);
+    const base = { scopes: supported, mode: scope === "all" ? "global" : "local", fileIds: [], ownerIds: [], customPaths: {} };
+    if (scope === "all") {
+      for (const r of inventory.resources) {
+        if (r.adapter === "text") base.fileIds.push(r.id);
+        if (r.adapter === "custom-json" && Object.hasOwn(paths, r.relative)) {
+          base.fileIds.push(r.id);
+          base.customPaths[r.id] = paths[r.relative];
+        }
+      }
+      return base;
+    }
+    const chosen = scope === "selected" ? entries.filter((e) => selected.has(e.key)) : entries;
+    if (!chosen.length) throw Error(scope === "selected" ? "\u8BF7\u5148\u5728\u540D\u79F0\u6A21\u5F0F\u9009\u62E9\u8D44\u6E90\u3002" : "\u5F53\u524D\u7B5B\u9009\u8303\u56F4\u6CA1\u6709\u8D44\u6E90\u3002");
+    const keys = new Set(chosen.map((e) => e.key));
+    const moduleScopes = { character: ["character", "greetings", "world", "regex"], worldInfo: ["world"], persona: ["persona"], preset: ["presets", "prompts", "regex"], reasoning: ["presets"] };
+    base.scopes = (moduleScopes[currentModule] || []).filter((s) => supported.includes(s));
+    if (!base.scopes.length) throw Error("\u5F53\u524D\u5E73\u53F0\u9002\u914D\u5668\u4E0D\u652F\u6301\u6B64\u5206\u7C7B\u7684\u5185\u5BB9\u5904\u7406\uFF1B\u539F\u8D44\u6E90\u7BA1\u7406\u4ECD\u53EF\u4F7F\u7528\u3002");
+    if (currentModule === "persona") base.ownerIds = inventory.owners.filter((o) => o.type === "persona" && keys.has(o.id)).map((o) => o.id);
+    else for (const r of inventory.resources) {
+      const descriptor = describeResource(r, r.id, "", {});
+      if (descriptor.module === currentModule && keys.has(descriptor.key)) base.fileIds.push(r.id);
+    }
+    if (!base.fileIds.length && !base.ownerIds.length) throw Error("\u6240\u9009\u8D44\u6E90\u672A\u5339\u914D\u5F53\u524D\u5E73\u53F0\u7684\u53EF\u5904\u7406\u6570\u636E\uFF0C\u8BF7\u5237\u65B0\u540D\u79F0\u5217\u8868\u3002");
+    return base;
+  }
+
+  // development/organizer/batch/controller.js
+  var OrganizerContent = class {
+    constructor(host) {
+      this.h = host;
+      this.mode = "name";
+      this.scope = "all";
+      this.nameQuery = host.search.value;
+      this.rules = [{ find: "", replace: "" }];
+      this.excluded = /* @__PURE__ */ new Set();
+      this.rows = [];
+      this.groups = [];
+      this.revision = 0;
+      this.busy = false;
+      this.loaded = false;
+      this.combinations = {};
+      this.store = host.store || new BatchConfigStore({ indexedDB: host.window.indexedDB, legacy: () => host.window.localStorage });
+      this.node = (tag, cls = "", text = "") => host.node(tag, cls, text);
+      this.button = (text, action) => host.button(text, () => void this.run(action));
+      this.mount();
+      host.signal?.addEventListener("abort", () => {
+        this.disposed = true;
+        this.revision++;
+        if (this.jobId) void this.api("cancel", { id: this.jobId }).catch(() => {
+        });
+      }, { once: true });
+    }
+    get active() {
+      return this.mode === "content";
+    }
+    context() {
+      return this.h.context();
+    }
+    async api(name, body = {}) {
+      this.clientPromise ||= (this.h.createClient ? this.h.createClient() : createBatchClient({ context: () => this.context() }, this.h.window)).catch((error) => {
+        this.clientPromise = null;
+        throw error;
+      });
+      this.client = await this.clientPromise;
+      return this.client.call(name, body);
+    }
+    message(text) {
+      this.messageText = text;
+      if (this.active && !this.disposed) this.h.status.textContent = text;
+    }
+    async run(action) {
+      if (this.busy || this.disposed) return;
+      try {
+        await action();
+      } catch (error) {
+        this.message(error.message);
+      }
+    }
+    mount() {
+      const n = this.node;
+      this.searchRow = n("div", "tle-content-search-row");
+      this.target = n("select", "text_pole");
+      this.target.setAttribute("aria-label", "\u641C\u7D22\u76EE\u6807");
+      for (const [value, label] of [["name", "\u540D\u79F0"], ["content", "\u5185\u5BB9"]]) {
+        const o = n("option", "", label);
+        o.value = value;
+        this.target.append(o);
+      }
+      this.target.addEventListener("change", () => void this.run(() => this.setMode(this.target.value)));
+      this.replace = n("input", "text_pole");
+      this.replace.type = "text";
+      this.replace.placeholder = "\u66FF\u6362\u4E3A\uFF08\u7559\u7A7A\u5220\u9664\u5339\u914D\u6587\u672C\uFF09";
+      this.replace.setAttribute("aria-label", "\u66FF\u6362\u4E3A");
+      this.replace.hidden = true;
+      this.replace.addEventListener("input", () => {
+        this.rules[0].replace = this.replace.value;
+        this.invalidate();
+        void this.persist().catch(() => {
+        });
+      });
+      this.searchRow.append(this.target, this.h.searchWrap, this.replace);
+      this.controls = n("div", "tle-content-controls");
+      this.controls.hidden = true;
+      const actions = n("div", "flex-container flexWrap");
+      this.scopeSelect = n("select", "text_pole");
+      this.scopeSelect.setAttribute("aria-label", "\u5185\u5BB9\u641C\u7D22\u8303\u56F4");
+      for (const [value, label] of [["all", "\u5168\u90E8\u652F\u6301\u8D44\u6E90"], ["filtered", "\u5F53\u524D\u7B5B\u9009\u8303\u56F4"], ["selected", "\u5DF2\u9009\u8D44\u6E90"]]) {
+        const o = n("option", "", label);
+        o.value = value;
+        this.scopeSelect.append(o);
+      }
+      this.scopeSelect.addEventListener("change", () => {
+        this.scope = this.scopeSelect.value;
+        this.invalidate();
+      });
+      this.findButton = this.button("\u67E5\u627E", () => this.scan());
+      this.previewButton = this.button("\u9884\u89C8\u66FF\u6362", () => this.preview());
+      this.previewButton.disabled = true;
+      this.cancelButton = this.h.button("\u53D6\u6D88\u626B\u63CF", () => {
+        this.cancelled = true;
+        if (this.jobId) void this.api("cancel", { id: this.jobId }).catch((e) => this.message(e.message));
+      });
+      this.cancelButton.hidden = true;
+      actions.append(
+        this.scopeSelect,
+        this.findButton,
+        this.previewButton,
+        this.cancelButton,
+        this.button("\u6DFB\u52A0\u89C4\u5219", () => {
+          if (this.rules.length >= 200) throw Error("\u6700\u591A 200 \u6761\u89C4\u5219\u3002");
+          this.rules.push({ find: "", replace: "" });
+          this.ruleDetails.open = true;
+          this.invalidate();
+          this.renderRules();
+        }),
+        this.button("\u5907\u4EFD\u4E0E\u6062\u590D", () => this.backups())
+      );
+      this.ruleDetails = n("details", "tle-content-rules");
+      this.ruleDetails.append(n("summary", "", "\u89C4\u5219\u7EC4\u5408\u4E0E\u9AD8\u7EA7\u9009\u9879"));
+      this.ruleRows = n("div");
+      this.ruleDetails.append(this.ruleRows);
+      const combos = n("div", "flex-container flexWrap");
+      this.comboName = n("input", "text_pole");
+      this.comboName.placeholder = "\u89C4\u5219\u7EC4\u5408\u540D\u79F0";
+      this.comboName.setAttribute("aria-label", "\u89C4\u5219\u7EC4\u5408\u540D\u79F0");
+      this.comboSelect = n("select", "text_pole");
+      this.comboSelect.setAttribute("aria-label", "\u89C4\u5219\u7EC4\u5408");
+      combos.append(this.comboName, this.button("\u4FDD\u5B58\u7EC4\u5408", async () => {
+        validateRules(this.rules, { searchOnly: true });
+        const name = this.comboName.value.trim();
+        if (!name || ["__proto__", "prototype", "constructor"].includes(name)) throw Error("\u8BF7\u8F93\u5165\u6709\u6548\u7684\u89C4\u5219\u7EC4\u5408\u540D\u79F0\u3002");
+        this.combinations[name] = structuredClone(this.rules);
+        await this.persist();
+        this.renderCombinations();
+        this.message("\u89C4\u5219\u7EC4\u5408\u5DF2\u4FDD\u5B58\u3002");
+      }), this.comboSelect, this.button("\u8F7D\u5165\u7EC4\u5408", async () => {
+        const rules = this.combinations[this.comboSelect.value];
+        if (!rules) throw Error("\u8BF7\u9009\u62E9\u7EC4\u5408\u3002");
+        validateRules(rules, { searchOnly: true });
+        this.rules = structuredClone(rules);
+        this.syncInputs();
+        this.invalidate();
+        await this.persist();
+      }), this.button("\u5220\u9664\u7EC4\u5408", async () => {
+        delete this.combinations[this.comboSelect.value];
+        await this.persist();
+        this.renderCombinations();
+      }));
+      this.paths = n("textarea", "text_pole");
+      this.paths.rows = 2;
+      this.paths.placeholder = '{"user/files/\u6587\u4EF6.json":[["content"]]}';
+      this.paths.setAttribute("aria-label", "\u6307\u5B9A JSON/YAML \u6587\u4EF6\u5141\u8BB8\u4FEE\u6539\u7684\u5B57\u6BB5\u8DEF\u5F84");
+      this.paths.addEventListener("input", () => {
+        this.invalidate();
+        void this.persist().catch(() => {
+        });
+      });
+      this.ruleDetails.append(combos, n("small", "", "JSON/YAML \u4EC5\u626B\u63CF\u660E\u786E\u6307\u5B9A\u8DEF\u5F84\uFF1B\u672A\u77E5\u5B57\u6BB5\u4E0D\u4F1A\u9012\u5F52\u4FEE\u6539\u3002\u666E\u901A\u6587\u672C\u89C4\u5219\u533A\u5206\u5927\u5C0F\u5199\uFF0C\u91CD\u53E0\u4F18\u5148\u957F\u5339\u914D\uFF0C\u540C\u957F\u5EA6\u6309\u89C4\u5219\u987A\u5E8F\u3002"), this.paths);
+      this.selectionTools = n("div", "flex-container flexWrap");
+      this.selectionTools.append(this.button("\u5168\u9009\u5F53\u524D\u7ED3\u679C", () => this.selectAll(true)), this.button("\u53D6\u6D88\u5168\u9009", () => this.selectAll(false)));
+      this.confirm = n("div", "tle-quick-transfer-confirm");
+      this.confirm.hidden = true;
+      this.confirmText = n("p");
+      this.applyButton = this.button("\u786E\u8BA4\u66FF\u6362", () => this.apply());
+      this.confirm.append(this.confirmText, this.applyButton, this.button("\u8FD4\u56DE\u9009\u62E9", () => {
+        this.previewed = false;
+        this.confirm.hidden = true;
+        this.renderList();
+      }));
+      this.capabilities = n("small");
+      this.binding = n("div");
+      this.binding.hidden = true;
+      this.controls.append(actions, this.ruleDetails, this.capabilities, this.binding, this.selectionTools, this.confirm);
+      this.renderCombinations();
+      this.syncScope();
+    }
+    async setMode(mode) {
+      if (this.busy) return;
+      if (this.active) this.rules[0].find = this.h.search.value;
+      else this.nameQuery = this.h.search.value;
+      this.mode = mode === "content" ? "content" : "name";
+      this.target.value = this.mode;
+      this.controls.hidden = this.replace.hidden = !this.active;
+      this.h.setContentMode(this.active);
+      this.h.search.value = this.active ? this.rules[0].find : this.nameQuery;
+      this.h.search.placeholder = this.active ? "\u67E5\u627E\u5185\u5BB9\uFF08\u666E\u901A\u6587\u672C\uFF09\u2026" : this.h.namePlaceholder;
+      this.h.search.setAttribute("aria-label", this.active ? "\u67E5\u627E\u5185\u5BB9" : this.h.namePlaceholder);
+      this.h.render();
+      if (this.active && !this.loaded) {
+        this.lock(true);
+        try {
+          await this.loadConfig();
+          if (this.active) {
+            this.syncInputs();
+            this.h.render();
+          }
+        } finally {
+          this.lock(false);
+        }
+      }
+    }
+    onInput() {
+      if (!this.active) {
+        this.nameQuery = this.h.search.value;
+        return;
+      }
+      this.rules[0].find = this.h.search.value;
+      this.invalidate();
+      void this.persist().catch(() => {
+      });
+    }
+    async loadConfig() {
+      const account = this.context().accountStorage;
+      if (!account) throw Error("\u9152\u9986\u8D26\u53F7\u63A5\u53E3\u672A\u5C31\u7EEA\uFF0C\u65E0\u6CD5\u8BFB\u53D6\u89C4\u5219\u7EC4\u5408\u3002");
+      let namespace = account.getItem("global-batch-replace-browser-key");
+      if (!namespace) {
+        namespace = this.h.window.crypto.randomUUID();
+        account.setItem("global-batch-replace-browser-key", namespace);
+      }
+      this.key = `gbr:${namespace}:batch-config`;
+      const saved = await this.store.get(this.key) || {};
+      if (saved.rules?.length) {
+        if (saved.rules.some((r) => r.find)) validateRules(saved.rules.filter((r) => r.find), { searchOnly: true });
+        this.rules = saved.rules;
+      }
+      this.combinations = saved.combinations || {};
+      this.savedConfig = saved;
+      this.paths.value = saved.organizerPaths || "";
+      this.loaded = true;
+      this.renderCombinations();
+    }
+    async persist() {
+      if (!this.loaded) return;
+      try {
+        const saved = await this.store.get(this.key) || this.savedConfig || {};
+        await this.store.set(this.key, { ...saved, rules: this.rules, combinations: this.combinations, organizerPaths: this.paths.value });
+      } catch (error) {
+        this.message("\u89C4\u5219\u4FDD\u5B58\u5931\u8D25\uFF1A" + error.message);
+        throw error;
+      }
+    }
+    renderCombinations() {
+      this.comboSelect.replaceChildren();
+      for (const name of ["", ...Object.keys(this.combinations)]) {
+        const o = this.node("option", "", name || "\u9009\u62E9\u89C4\u5219\u7EC4\u5408");
+        o.value = name;
+        this.comboSelect.append(o);
+      }
+    }
+    syncInputs() {
+      this.h.search.value = this.rules[0].find;
+      this.replace.value = this.rules[0].replace;
+      this.renderRules();
+    }
+    renderRules() {
+      this.ruleRows.replaceChildren();
+      this.rules.slice(1).forEach((rule, i) => {
+        const row = this.node("div", "tle-content-rule");
+        const find = this.node("input", "text_pole"), replace = this.node("input", "text_pole");
+        find.type = replace.type = "text";
+        find.value = rule.find;
+        replace.value = rule.replace;
+        find.setAttribute("aria-label", `\u89C4\u5219 ${i + 2} \u67E5\u627E\u5185\u5BB9`);
+        replace.setAttribute("aria-label", `\u89C4\u5219 ${i + 2} \u66FF\u6362\u5185\u5BB9`);
+        find.addEventListener("input", () => {
+          rule.find = find.value;
+          this.invalidate();
+          void this.persist().catch(() => {
+          });
+        });
+        replace.addEventListener("input", () => {
+          rule.replace = replace.value;
+          this.invalidate();
+          void this.persist().catch(() => {
+          });
+        });
+        row.append(find, replace, this.button("\u5220\u9664\u89C4\u5219", async () => {
+          this.rules.splice(i + 1, 1);
+          this.invalidate();
+          this.renderRules();
+          await this.persist();
+        }));
+        this.ruleRows.append(row);
+      });
+    }
+    syncScope() {
+      const selected = this.h.scopeState().selected;
+      this.scopeSelect.querySelector('[value="selected"]').disabled = !selected.size;
+      if (this.scope === "selected" && !selected.size) {
+        this.scope = "all";
+        this.scopeSelect.value = "all";
+        this.invalidate();
+      }
+    }
+    contextChanged() {
+      this.syncScope();
+      if (this.scope !== "all") this.invalidate();
+    }
+    invalidate() {
+      this.revision++;
+      this.previewed = false;
+      this.confirm.hidden = true;
+      this.previewButton.disabled = true;
+      this.snapshot = null;
+      this.rows = [];
+      this.groups = [];
+      this.excluded.clear();
+      this.backupView = null;
+      if (this.active) {
+        this.message("\u8F93\u5165\u6216\u8303\u56F4\u5DF2\u53D8\u5316\uFF0C\u8BF7\u91CD\u65B0\u67E5\u627E\u3002");
+        this.h.render();
+      }
+    }
+    lock(value) {
+      this.busy = value;
+      this.h.lock(value);
+      for (const el of [...this.searchRow.querySelectorAll("input,select,button"), ...this.controls.querySelectorAll("input,select,textarea,button")]) {
+        if (value) {
+          el.dataset.contentDisabled = String(el.disabled);
+          el.disabled = true;
+        } else {
+          el.disabled = el.dataset.contentDisabled === "true";
+          delete el.dataset.contentDisabled;
+        }
+      }
+      this.cancelButton.hidden = !value || this.writing || !this.loaded;
+      this.cancelButton.disabled = false;
+      if (!value) {
+        this.previewButton.disabled = !this.snapshot || !this.rows.some((r) => !this.excluded.has(r.id));
+        this.syncScope();
+      }
+    }
+    async inventory() {
+      const inventory = await this.api("inventory");
+      this.inventoryData = inventory;
+      this.capabilities.textContent = this.client.host === "tt" ? "TT \u539F\u751F\u9002\u914D\uFF1A\u8EAB\u4EFD\u3001\u804A\u5929\u3001\u89D2\u8272\u8BBE\u5B9A\u3001\u5F00\u573A\u767D\u3001\u4E16\u754C\u4E66\u3002\u9884\u8BBE\u3001\u63D0\u793A\u8BCD\u3001\u6B63\u5219\u548C\u6307\u5B9A\u6587\u4EF6\u6682\u4E0D\u652F\u6301\u3002" : "PC \u670D\u52A1\u7AEF\u9002\u914D \xB7 \u4FEE\u6539\u524D\u5907\u4EFD\uFF0C\u63D0\u4EA4\u524D\u540E\u6821\u9A8C\u3002\u8BF7\u5148\u4FDD\u5B58\u539F\u7F16\u8F91\u5668\uFF0C\u6267\u884C\u671F\u95F4\u6682\u505C\u5176\u4ED6\u7A97\u53E3\u7F16\u8F91\u3002";
+      this.binding.replaceChildren();
+      this.binding.hidden = !inventory.datasetBinding;
+      if (inventory.datasetBinding) {
+        const b = inventory.datasetBinding;
+        this.binding.append(
+          this.node("p", "", `\u8D44\u6599\u96C6\u5F85\u767B\u8BB0\uFF1A\u5F53\u524D ${b.currentRoot}\uFF1B\u539F\u76EE\u5F55 ${b.previousRoot}\u3002\u65E7\u5907\u4EFD\u5C06\u4FDD\u7559\u5E76\u9694\u79BB\u6062\u590D\u3002`),
+          this.button("\u786E\u8BA4\u767B\u8BB0\u5F53\u524D\u8D44\u6599\u96C6", async () => {
+            await this.api("register-dataset", { confirm: true, previousId: b.previousId, root: b.currentRoot });
+            this.invalidate();
+            await this.inventory();
+            this.message("\u8D44\u6599\u96C6\u5DF2\u767B\u8BB0\uFF0C\u8BF7\u91CD\u65B0\u67E5\u627E\u3002");
+          })
+        );
+        throw Error("\u8BF7\u5148\u6838\u5BF9\u76EE\u5F55\u5E76\u786E\u8BA4\u767B\u8BB0\u5F53\u524D\u8D44\u6599\u96C6\u3002");
+      }
+      return inventory;
+    }
+    async collect(searchOnly, options, rules) {
+      const { id } = await this.api("scan", { ...options, rules, searchOnly });
+      this.jobId = id;
+      if (this.cancelled) await this.api("cancel", { id });
+      let snapshot;
+      do {
+        snapshot = await this.api("status", { id });
+        this.message(`\u5DF2\u626B\u63CF ${snapshot.scanned}/${snapshot.total} \u4EFD\u6570\u636E\uFF0C${snapshot.matches} \u5904\u5339\u914D\u3002`);
+        if (snapshot.status === "scanning") await new Promise((resolve) => this.h.window.setTimeout(resolve, 100));
+      } while (snapshot.status === "scanning" && !this.disposed);
+      if (this.disposed || snapshot.status !== "ready") throw Error(snapshot.error || "\u626B\u63CF\u5DF2\u53D6\u6D88\uFF0C\u672A\u4FEE\u6539\u8D44\u6599\u3002");
+      if (snapshot.files.some((f) => !/^[a-f0-9]{64}$/.test(f.beforeHash || ""))) throw Error("\u914D\u5957\u63A5\u53E3\u7F3A\u5C11\u626B\u63CF\u5B8C\u6574\u6027\u6807\u8BB0\uFF0C\u8BF7\u66F4\u65B0 TLE \u914D\u5957 PC \u670D\u52A1\u7AEF\u63D2\u4EF6\u540E\u91CD\u65B0\u67E5\u627E\u3002");
+      const rows = [];
+      for (const file of snapshot.files) {
+        for (let offset = 0; offset < file.count; ) {
+          if (this.cancelled || this.disposed) throw Error("\u5DF2\u53D6\u6D88\uFF0C\u672A\u4FEE\u6539\u8D44\u6599\u3002");
+          const page = await this.api("preview", { id, fileId: file.id, offset });
+          if (!page.rows.length) throw Error("\u5339\u914D\u5206\u9875\u4E0D\u5B8C\u6574\uFF0C\u8BF7\u91CD\u65B0\u67E5\u627E\u3002");
+          rows.push(...page.rows.map((row) => ({ ...row, fileId: file.id })));
+          offset += page.rows.length;
+        }
+      }
+      return { snapshot, rows, id };
+    }
+    async scan() {
+      if (!this.active) return;
+      const { rules } = validateRules(this.rules, { searchOnly: true });
+      this.invalidate();
+      this.cancelled = false;
+      this.lock(true);
+      try {
+        const inventory = await this.inventory();
+        const current = this.h.scopeState();
+        const paths = JSON.parse(this.paths.value || "{}");
+        this.options = resolveScope(inventory, this.scope, current.module, this.scope === "selected" ? current.entries : current.filtered, current.selected, paths);
+        const result = await this.collect(true, this.options, rules);
+        this.snapshot = result.snapshot;
+        this.rows = result.rows;
+        this.jobId = result.id;
+        this.scanRules = structuredClone(rules);
+        this.groupResults();
+        await this.persist();
+        this.message(this.summary());
+        this.h.render();
+      } finally {
+        this.lock(false);
+      }
+    }
+    groupResults() {
+      const resources = new Map(this.inventoryData.resources.map((r) => [r.id, r]));
+      const groups = /* @__PURE__ */ new Map();
+      const current = this.h.scopeState(), catalogs = { [current.module]: current.entries };
+      for (const row of this.rows) {
+        const resource = resources.get(row.fileId);
+        if (!resource) throw Error("\u626B\u63CF\u8D44\u6E90\u63CF\u8FF0\u7F3A\u5931\uFF0C\u8BF7\u5237\u65B0\u3002");
+        const d = describeResource(resource, row.owner, row.scope, catalogs);
+        if (d.module === "persona" && !(catalogs.persona || []).some((e) => e.key === d.key)) d.label = this.inventoryData.owners.find((o) => o.type === "persona" && o.id === row.owner)?.label || row.label;
+        if (!groups.has(d.contentKey)) groups.set(d.contentKey, { ...d, rows: [] });
+        groups.get(d.contentKey).rows.push(row);
+      }
+      this.groups = [...groups.values()];
+    }
+    summary() {
+      const selected = this.rows.filter((r) => !this.excluded.has(r.id));
+      const count = this.groups.filter((g) => g.rows.some((r) => !this.excluded.has(r.id))).length;
+      return `${this.groups.length} \u4E2A\u8D44\u6E90 \xB7 ${this.rows.length} \u5904\u5339\u914D \xB7 \u5DF2\u9009 ${count} \u4E2A\u8D44\u6E90\u3001${selected.length} \u5904 \xB7 \u6392\u9664 ${this.rows.length - selected.length} \u5904`;
+    }
+    selectAll(selected) {
+      this.excluded = new Set(selected ? [] : this.rows.map((r) => r.id));
+      this.selectionChanged();
+    }
+    selectionChanged() {
+      this.previewed = false;
+      this.confirm.hidden = true;
+      this.message(this.summary());
+      this.previewButton.disabled = !this.rows.some((r) => !this.excluded.has(r.id));
+      this.renderList();
+    }
+    async preview() {
+      if (!this.snapshot || !this.rows.some((r) => !this.excluded.has(r.id))) throw Error("\u8BF7\u5148\u67E5\u627E\u5E76\u9009\u62E9\u5339\u914D\u9879\u3002");
+      const original = this.snapshot;
+      this.cancelled = false;
+      this.lock(true);
+      try {
+        const next = await this.collect(false, this.options, this.scanRules);
+        const previous = new Map(original.files.map((f) => [f.id, f.beforeHash]));
+        if (next.snapshot.files.some((f) => !previous.has(f.id) || previous.get(f.id) !== f.beforeHash)) {
+          this.invalidate();
+          throw Error("\u8D44\u6599\u5728\u67E5\u627E\u540E\u53D1\u751F\u53D8\u5316\uFF0C\u8BF7\u91CD\u65B0\u67E5\u627E\u548C\u9009\u62E9\uFF1B\u672A\u5199\u5165\u8D44\u6599\u3002");
+        }
+        const nextIds = new Set(next.rows.map((r) => r.id));
+        const foundIds = new Set(this.rows.map((r) => r.id));
+        if (next.rows.some((r) => !foundIds.has(r.id))) {
+          this.invalidate();
+          throw Error("\u9884\u89C8\u51FA\u73B0\u65B0\u7684\u5339\u914D\uFF0C\u8BF7\u79FB\u9664\u524D\u540E\u76F8\u540C\u7684\u91CD\u53E0\u89C4\u5219\u540E\u91CD\u65B0\u67E5\u627E\u548C\u9009\u62E9\u3002");
+        }
+        const expected = this.rows.filter((r) => this.scanRules[r.rule].find !== this.scanRules[r.rule].replace);
+        if (expected.some((r) => !nextIds.has(r.id))) {
+          this.invalidate();
+          throw Error("\u5339\u914D\u5728\u67E5\u627E\u540E\u53D1\u751F\u53D8\u5316\uFF0C\u8BF7\u91CD\u65B0\u67E5\u627E\u3002");
+        }
+        this.snapshot = next.snapshot;
+        this.rows = next.rows;
+        this.jobId = next.id;
+        this.excluded = new Set([...this.excluded].filter((id) => nextIds.has(id)));
+        this.groupResults();
+        const chosen = this.rows.filter((r) => !this.excluded.has(r.id));
+        if (!chosen.length) throw Error("\u6240\u9009\u5339\u914D\u6CA1\u6709\u5B9E\u9645\u53D8\u5316\u3002");
+        this.previewed = true;
+        this.previewRevision = this.revision;
+        const deletion = chosen.every((r) => this.scanRules[r.rule].replace === "");
+        const resourceCount = this.groups.filter((g) => g.rows.some((r) => !this.excluded.has(r.id))).length;
+        this.confirmText.textContent = deletion ? `\u5373\u5C06\u5220\u9664 ${chosen.length} \u5904\u5339\u914D\u6587\u672C\uFF0C\u6D89\u53CA ${resourceCount} \u4E2A\u8D44\u6E90\u3002` : `\u5373\u5C06\u66FF\u6362 ${chosen.length} \u5904\u5339\u914D\u6587\u672C\uFF0C\u6D89\u53CA ${resourceCount} \u4E2A\u8D44\u6E90\u3002`;
+        this.confirmText.textContent += ` \u5DF2\u6392\u9664 ${this.rows.length - chosen.length} \u5904\u3002\u786E\u8BA4\u540E\u5148\u5907\u4EFD\u5E76\u6821\u9A8C\uFF0C\u7ED3\u675F\u540E\u91CD\u65B0\u8F7D\u5165\u9152\u9986\u4EE5\u5237\u65B0\u539F\u751F\u7F13\u5B58\u3002`;
+        this.applyButton.textContent = deletion ? "\u786E\u8BA4\u5220\u9664\u5339\u914D\u6587\u672C" : "\u786E\u8BA4\u66FF\u6362";
+        this.confirm.hidden = false;
+        this.message(this.summary());
+        this.renderList();
+      } finally {
+        this.lock(false);
+      }
+    }
+    async apply() {
+      if (!this.previewed || this.previewRevision !== this.revision || this.confirm.hidden) throw Error("\u5FC5\u987B\u5148\u9884\u89C8\u5F53\u524D\u9009\u62E9\uFF0C\u518D\u786E\u8BA4\u6267\u884C\u3002");
+      if (this.context().isGenerating || this.context().streamingProcessor) throw Error("\u8BF7\u5148\u7B49\u5F85\u56DE\u590D\u751F\u6210\u7ED3\u675F\u3002");
+      this.writing = true;
+      this.lock(true);
+      try {
+        const result = await this.api("apply", { id: this.jobId, excludedMatches: [...this.excluded], excludedFiles: [] });
+        await this.afterWrite(`\u6210\u529F ${result.matches} \u5904\uFF0C${result.files} \u4EFD\u6570\u636E\uFF1B\u5931\u8D25 0\u3002\u5907\u4EFD\u7F16\u53F7\uFF1A${result.id}\u3002`);
+      } catch (error) {
+        const count = this.groups.filter((g) => g.rows.some((r) => !this.excluded.has(r.id))).length;
+        await this.afterWrite(`\u5DF2\u786E\u8BA4\u6210\u529F 0 \u4E2A\u8D44\u6E90\uFF0C\u5931\u8D25\u6216\u4E2D\u6B62 ${count} \u4E2A\u8D44\u6E90\uFF1A${error.message}\u3002\u6062\u590D\u72B6\u6001\u53CA\u9700\u4EBA\u5DE5\u68C0\u67E5\u9879\u89C1\u5907\u4EFD\u9010\u9879\u8BB0\u5F55\u3002`);
+      } finally {
+        this.writing = false;
+      }
+    }
+    async afterWrite(message) {
+      this.previewed = false;
+      this.confirm.hidden = true;
+      this.snapshot = null;
+      this.h.saveResume(message);
+      this.message(message + " \u6B63\u5728\u5237\u65B0\u9152\u9986\u4E0E\u6574\u7406\u4FA0\u8D44\u6E90\u3002");
+      try {
+        await this.persist();
+      } finally {
+        this.h.reload();
+      }
+    }
+    renderList() {
+      if (!this.active || this.disposed) return;
+      this.selectionTools.hidden = !this.snapshot || !!this.backupView;
+      if (this.backupView) {
+        this.h.list.replaceChildren(this.backupView);
+        return;
+      }
+      const list = this.h.list, scroll = list.scrollTop;
+      const open = new Set([...list.querySelectorAll("[data-content-key][open]")].map((d) => d.dataset.contentKey));
+      list.replaceChildren();
+      for (const group of this.groups) {
+        const details = this.node("details");
+        details.dataset.contentKey = group.contentKey;
+        details.open = this.previewed || open.has(group.contentKey);
+        const chosen = group.rows.filter((r) => !this.excluded.has(r.id));
+        const summary = this.h.resourceRow(group, {
+          checked: chosen.length === group.rows.length,
+          indeterminate: chosen.length > 0 && chosen.length < group.rows.length,
+          detail: `${group.rows.length} \u5904\u5339\u914D \xB7 ${[...new Set(group.rows.map((r) => r.field))].join("\u3001")}`,
+          onSelect: (checked) => {
+            group.rows.forEach((r) => checked ? this.excluded.delete(r.id) : this.excluded.add(r.id));
+            this.selectionChanged();
+          }
+        });
+        details.append(summary);
+        const matches = this.node("div", "tle-content-matches");
+        details.append(matches);
+        let shown = 0;
+        const append = () => {
+          matches.querySelector("[data-more]")?.remove();
+          for (const row of group.rows.slice(shown, shown + 100)) {
+            const item = this.node("div", "tle-content-match");
+            const label = this.node("label", "checkbox_label");
+            const check = this.node("input", "tle-quick-item-check");
+            check.type = "checkbox";
+            check.checked = !this.excluded.has(row.id);
+            check.disabled = this.busy;
+            check.addEventListener("change", () => {
+              check.checked ? this.excluded.delete(row.id) : this.excluded.add(row.id);
+              this.selectionChanged();
+            });
+            label.append(check, this.node("span", "", `${row.label} \xB7 ${row.field} \xB7 \u4F4D\u7F6E ${row.start + 1} \xB7 \u89C4\u5219 ${row.rule + 1}`));
+            item.append(label);
+            const p = previewSegments(row.context, row.id, this.scanRules, this.excluded);
+            item.append(this.node("div", "tle-content-text", "\u539F\u6587\uFF1A" + p.prefix + p.before + p.suffix));
+            if (this.previewed) item.append(this.node("div", "tle-content-text", "\u6539\u540E\uFF1A" + p.afterPrefix + p.after + p.afterSuffix));
+            matches.append(item);
+          }
+          shown += 100;
+          if (shown < group.rows.length) {
+            const more = this.button("\u52A0\u8F7D\u540E\u7EED\u5339\u914D", append);
+            more.dataset.more = "";
+            matches.append(more);
+          }
+        };
+        details.addEventListener("toggle", () => {
+          if (details.open && !shown) append();
+        });
+        if (details.open) append();
+        list.append(details);
+      }
+      if (!this.groups.length) list.append(this.node("p", "tle-quick-empty", this.snapshot ? "\u6CA1\u6709\u547D\u4E2D\u3002" : "\u8F93\u5165\u67E5\u627E\u5185\u5BB9\u540E\u70B9\u51FB\u300C\u67E5\u627E\u300D\u3002"));
+      if (this.snapshot?.skipped?.length) {
+        const skipped = this.node("details");
+        skipped.append(this.node("summary", "", `\u8DF3\u8FC7 ${this.snapshot.skipped.length} \u9879\uFF08\u67E5\u770B\u539F\u56E0\uFF09`));
+        for (const s of this.snapshot.skipped) skipped.append(this.node("p", "", `${s.path}\uFF1A${s.error}`));
+        list.append(skipped);
+      }
+      for (const warning of this.snapshot?.warnings || []) list.append(this.node("small", "", warning));
+      list.scrollTop = scroll;
+      this.message(this.messageText || "\u8BF7\u67E5\u627E\u5185\u5BB9\u3002");
+    }
+    async backups() {
+      await this.inventory();
+      this.previewed = false;
+      this.confirm.hidden = true;
+      const backups = await this.api("backups"), area = this.node("div");
+      this.backupView = area;
+      area.append(this.button("\u8FD4\u56DE\u5185\u5BB9\u7ED3\u679C", () => {
+        this.backupView = null;
+        this.renderList();
+      }));
+      const input = this.node("input");
+      input.type = "file";
+      input.accept = ".zip,application/zip";
+      input.hidden = true;
+      input.addEventListener("change", () => void this.run(async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        this.lock(true);
+        try {
+          const result = await this.client.importBackup(file);
+          this.message(`\u5907\u4EFD ${result.id} \u5DF2\u6821\u9A8C\u5E76\u5BFC\u5165\uFF0C\u672A\u6062\u590D\u8D44\u6599\u3002`);
+          await this.backups();
+        } finally {
+          input.value = "";
+          this.lock(false);
+        }
+      }));
+      area.append(input, this.button("\u5BFC\u5165\u5907\u4EFD ZIP", () => input.click()));
+      const states = { complete: "\u5DF2\u5B8C\u6210", restored: "\u5DF2\u6062\u590D", aborted: "\u6267\u884C\u4E2D\u6B62", "partially-restored": "\u90E8\u5206\u6062\u590D", conflict: "\u51B2\u7A81", committed: "\u5DF2\u4FEE\u6539", unchanged: "\u672A\u6539\u53D8", pending: "\u5F85\u63D0\u4EA4", "needs-attention": "\u9700\u68C0\u67E5", foreign: "\u5176\u4ED6\u8D44\u6599\u96C6\uFF0C\u4EC5\u4E0B\u8F7D", unreadable: "\u6E05\u5355\u65E0\u6CD5\u8BFB\u53D6" };
+      for (const backup of backups) {
+        const details = this.node("details");
+        details.append(this.node("summary", "", `${backup.created || backup.id} \xB7 ${states[backup.status] || backup.status}`));
+        const chosen = new Set((backup.files || []).map((f) => f.path));
+        const confirmation = this.node("div");
+        confirmation.hidden = true;
+        for (const f of backup.files || []) {
+          const label = this.node("label", "checkbox_label"), check = this.node("input");
+          check.type = "checkbox";
+          check.checked = true;
+          check.addEventListener("change", () => {
+            check.checked ? chosen.add(f.path) : chosen.delete(f.path);
+            confirmation.hidden = true;
+          });
+          label.append(check, this.node("span", "", `${f.path} \xB7 ${states[f.state] || f.state}${f.error ? " \xB7 " + f.error : ""}`));
+          details.append(label);
+        }
+        if (backup.error) details.append(this.node("p", "", backup.error));
+        if (backup.status !== "unreadable") details.append(this.button("\u5BFC\u51FA\u5B8C\u6574 ZIP", async () => {
+          const blob = await this.client.download(backup.id);
+          await this.h.download(blob, `global-batch-replace-backup-${backup.id}.zip`, this.client.host);
+          this.message("\u5907\u4EFD ZIP \u5DF2\u5BFC\u51FA\u3002");
+        }));
+        if (!["unreadable", "foreign"].includes(backup.status)) {
+          const restore = async (preserveConflicts) => {
+            if (!chosen.size) throw Error("\u8BF7\u9009\u62E9\u8981\u6062\u590D\u7684\u8D44\u6E90\u3002");
+            if (this.context().isGenerating || this.context().streamingProcessor) throw Error("\u8BF7\u7B49\u5F85\u56DE\u590D\u751F\u6210\u7ED3\u675F\u3002");
+            this.writing = true;
+            this.lock(true);
+            try {
+              const result = await this.api("restore", { id: backup.id, paths: [...chosen], preserveConflicts });
+              if (result.needsConfirmation) {
+                confirmation.replaceChildren(this.node("p", "", `\u4EE5\u4E0B\u9879\u76EE\u5B58\u5728\u51B2\u7A81\uFF1A${result.conflicts.join("\u3001")}\u3002\u5C1A\u672A\u6062\u590D\u3002`), this.button("\u4FDD\u7559\u51B2\u7A81\uFF0C\u4EC5\u6062\u590D\u5176\u4F59\u6240\u9009\u8D44\u6E90", () => restore(true)));
+              } else await this.afterWrite(`\u5DF2\u6062\u590D ${result.restored} \u4EFD\u6570\u636E\uFF0C\u4FDD\u7559 ${result.conflicts.length} \u4E2A\u51B2\u7A81\u3002`);
+            } catch (e) {
+              await this.afterWrite("\u6062\u590D\u672A\u5B8C\u6210\uFF1A" + e.message);
+            } finally {
+              this.writing = false;
+              if (this.snapshot || !this.h.reloading()) this.lock(false);
+            }
+          };
+          details.append(this.button("\u6062\u590D\u6240\u9009\u8D44\u6E90\u2026", () => {
+            if (!chosen.size) throw Error("\u8BF7\u9009\u62E9\u8981\u6062\u590D\u7684\u8D44\u6E90\u3002");
+            confirmation.replaceChildren(this.node("p", "", `\u786E\u8BA4\u68C0\u67E5\u5E76\u6062\u590D\u6240\u9009 ${chosen.size} \u4EFD\u6570\u636E\uFF1F`), this.button("\u786E\u8BA4\u68C0\u67E5\u5E76\u6062\u590D", () => restore(false)));
+            confirmation.hidden = false;
+          }), confirmation);
+        }
+        area.append(details);
+      }
+      if (!backups.length) area.append(this.node("p", "", "\u5C1A\u65E0\u5185\u5BB9\u5904\u7406\u5907\u4EFD\u3002"));
+      this.renderList();
+    }
+  };
+  return __toCommonJS(controller_exports);
+})();
+  /* TLE_CONTENT_BUNDLE_END */
 
   const INSTANCE_KEY = '__TAVERN_LAYOUT_ENGINE_V02__';
   const STABLE_LOADER_KEY = '__TLE_REMOTE_LOADER_STABLE_V1__';
@@ -1750,7 +4451,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   cursor: pointer;
 }
 #tle-global-search-panel .tle-search-close:hover { background: rgb(127 127 127 / 22%); }
-.tle-search-field {
+input.tle-search-field[type="search"] {
   display: block;
   flex: 0 0 auto;
   width: 100%;
@@ -1759,10 +4460,7 @@ body.tle-global-search-open { overflow: hidden !important; }
   height: 40px;
   min-height: 40px;
   margin: 0;
-  padding: 7px 12px;
   box-sizing: border-box;
-  border-radius: 10px;
-  font: inherit;
 }
 .tle-search-field-wrap {
   display: flex;
@@ -3198,6 +5896,20 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         display: contents;
       }
       .tle-quick-manager .tle-organizer-pane-title { display: none; }
+      .tle-quick-manager .tle-content-search-row {
+        display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; flex: 0 0 auto;
+      }
+      .tle-quick-manager .tle-content-search-row > .tle-search-field-wrap { flex: 1 1 180px; min-width: 0; }
+      .tle-quick-manager .tle-content-search-row > input { flex: 1 1 160px; min-width: 0; }
+      .tle-quick-manager .tle-content-controls { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 0 0 auto; }
+      .tle-quick-manager .tle-content-rule { display: flex; flex-wrap: wrap; gap: 6px; }
+      .tle-quick-manager .tle-content-rule > input { flex: 1 1 120px; min-width: 0; }
+      .tle-quick-manager .tle-content-rules[open] { max-height: 24vh; overflow-y: auto; }
+      .tle-quick-manager .tle-content-rules textarea { width: 100%; box-sizing: border-box; }
+      .tle-quick-manager .tle-content-match { margin-block: 8px; }
+      .tle-quick-manager .tle-content-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+      .tle-quick-manager .tle-content-matches { padding-inline-start: 8px; }
+      .tle-quick-manager .tle-content-controls select { min-width: 0; max-width: 100%; }
       .tle-quick-manager .tle-quick-group-heading {
         display: flex;
         flex: 0 0 auto;
@@ -3415,7 +6127,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           min-width: 0;
           min-height: 0;
         }
-        .tle-quick-manager .tle-search-field-wrap { grid-area: search; }
+        .tle-quick-manager .tle-content-search-row { grid-area: search; }
+        .tle-quick-manager .tle-content-controls { grid-area: operations; max-height: 36vh; overflow-y: auto; }
         .tle-quick-manager .tle-quick-category-row {
           grid-area: categories;
           display: flex;
@@ -4841,6 +7554,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     node.textContent = text;
     return node;
   }
+  // Shared resource item frame for name resources and content result summaries.
+  function quickResourceItemFrame(entry, tag = 'div') {
+    return {
+      row: quickNode(tag, 'tle-quick-item'),
+      checkbox: quickNode('input', 'tle-quick-item-check'),
+      copy: quickNode('div', 'tle-quick-item-copy'),
+      title: quickNode('span', 'tle-quick-item-title', (entry.section ? entry.section + ' · ' : '') + entry.label),
+    };
+  }
   function quickButton(text, action, className = 'menu_button') {
     const button = quickNode('button', className, text);
     button.type = 'button';
@@ -5568,6 +8290,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (id === 'persona') updateWorkspaceHeader();
   }
   function closeQuickPanel(restoreFocus = true) {
+    if (quickPanel?.content?.writing) return;
     quickSequence++;
     const current = quickPanel;
     quickPanel = null;
@@ -5654,7 +8377,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return current;
   }
   function quickSearchBox(placeholder) {
-    const search = quickNode('input', 'text_pole wide100p tle-search-field');
+    const search = quickNode('input', 'tle-search-field');
     search.type = 'search'; search.placeholder = placeholder;
     search.setAttribute('aria-label', placeholder); search.autocomplete = 'off';
     return search;
@@ -5845,6 +8568,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let scanProgress = '';
     let worldInfoFilter = 'all';
     const selected = new Set();
+    let content = null;
+    let contentReloading = false;
+    const resumeKey = 'tle.organizer.content.resume.v1';
+    let resume = null;
+    try {
+      resume = JSON.parse(HOST_WIN.sessionStorage.getItem(resumeKey) || 'null');
+      HOST_WIN.sessionStorage.removeItem(resumeKey);
+      if (resume && Date.now() - resume.at < 60000) {
+        module = QUICK_RESOURCE_MODULES.some(item => item.id === resume.module) ? resume.module : module;
+        viewGroup = resume.viewGroup; targetGroup = resume.targetGroup; worldInfoFilter = resume.worldInfoFilter;
+        statusMessage = resume.message || '';
+      } else resume = null;
+    } catch { resume = null; }
 
     const hint = quickNode(
       'small',
@@ -6034,7 +8770,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         viewGroup = '*';
         selected.clear();
         groupName.value = '';
-        search.value = '';
+        if (!content?.active) search.value = '';
+        content?.contextChanged();
         deleteConfirm.hidden = true;
         manageRow.hidden = true;
         manageButton.textContent = '管理分组';
@@ -6078,7 +8815,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     function getVisibleEntries(data = readQuickGroups()) {
-      const query = search.value.trim().toLocaleLowerCase();
+      const query = content?.active ? '' : search.value.trim().toLocaleLowerCase();
       const groups = currentGroups(data);
       return entries.filter(entry => {
         if (module === 'worldInfo' && !matchesWorldInfoFilter(entry, worldInfoFilter, worldInfoCatalogMeta.unloadedCount)) return false;
@@ -6096,8 +8833,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const group = currentGroups().find(item => item.id === id);
       targetGroup = group?.id || '';
       groupName.value = group?.name || '';
-      search.value = '';
+      if (!content?.active) search.value = '';
       selected.clear();
+      content?.contextChanged();
       statusMessage = '';
       render();
     }
@@ -6157,6 +8895,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       for (const filter of filters) {
         const button = quickButton(`${filter.label} · ${counts[filter.id]}`, () => {
           worldInfoFilter = filter.id;
+          content?.contextChanged();
           render();
         }, 'tle-worldbook-filter');
         button.title = filter.title;
@@ -6167,12 +8906,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     function renderList(data) {
+      if (content?.active) { content.renderList(); return; }
       const previousScrollTop = list.scrollTop;
       list.replaceChildren();
       const visible = getVisibleEntries(data);
       for (const entry of visible) {
-        const row = quickNode('div', 'tle-quick-item');
-        const checkbox = quickNode('input', 'tle-quick-item-check');
+        const { row, checkbox, copy, title } = quickResourceItemFrame(entry);
         checkbox.type = 'checkbox';
         checkbox.checked = selected.has(entry.key);
         checkbox.setAttribute('aria-label', `选择 ${entry.label}`);
@@ -6184,15 +8923,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           ungroupButton.disabled = selected.size === 0;
           clearSelectionButton.disabled = selected.size === 0;
           refreshTargetSelect();
+          content?.syncScope();
           status.textContent = `${getVisibleEntries().length} / ${entries.length} 项 · 已选 ${selected.size} 项${viewGroup === '*' ? '' : ' · 已按分组筛选'}`;
         });
         row.append(checkbox);
 
         if (entry.avatarKind) row.append(quickAvatarNode(entry));
 
-        const copy = quickNode('div', 'tle-quick-item-copy');
         copy.title = entry.detail || entry.label;
-        const title = quickNode('span', 'tle-quick-item-title', `${entry.section ? entry.section + ' · ' : ''}${entry.label}`);
         if (entry.statusLabel) {
           const titleRow = quickNode('div', 'tle-quick-item-title-row');
           titleRow.append(title);
@@ -6255,6 +8993,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const target = groups.find(group => group.id === targetGroup);
       if (target && HOST_DOC.activeElement !== groupName) groupName.value = target.name;
       if (!target && HOST_DOC.activeElement !== groupName) groupName.value = '';
+      content?.syncScope();
       renderList(data);
     }
 
@@ -6270,6 +9009,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     function requestDeleteSelected() {
+      if (content?.active || content?.busy) return;
       const chosen = entries.filter(entry => selected.has(entry.key));
       if (!chosen.length) {
         statusMessage = '请先勾选需要删除的资源。';
@@ -6307,7 +9047,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     async function deleteSelectedResources() {
-      if (deleteBusy || scanBusy) return;
+      if (deleteBusy || scanBusy || content?.active || content?.busy) return;
       const selectedKeys = [...selected];
       const chosen = entries.filter(entry => selected.has(entry.key));
       const blockedReason = quickDeleteDisabledReason(module, chosen);
@@ -6701,6 +9441,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         const next = await quickManagerCatalog(module, current.abort.signal);
         if (quickPanel !== current || token !== loading) return;
         entries = next;
+        content?.contextChanged();
         statusMessage = '';
         render();
         if (!entries.length) statusMessage = '列表尚未加载；可先打开该分类的原生面板，再回来刷新。';
@@ -6943,6 +9684,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const group = currentGroups().find(item => item.id === targetGroup);
       groupName.value = group?.name || '';
       if (group) viewGroup = group.id;
+      content?.contextChanged();
       render();
     });
     groupName.addEventListener('keydown', event => {
@@ -6954,20 +9696,73 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     });
     current.onSearchInput = () => {
       if (quickPanel !== current) return;
+      content?.onInput();
       list.scrollTop = 0;
       render();
     };
 
+    content = new TLEBatchLibrary.OrganizerContent({
+      window: HOST_WIN, signal: current.abort.signal, search, searchWrap: current.searchWrap,
+      namePlaceholder: search.placeholder, node: quickNode, button: quickButton, list, status,
+      context: () => HOST_WIN.SillyTavern?.getContext?.() || {},
+      scopeState: () => ({ module, entries, filtered: getVisibleEntries(), selected }),
+      render,
+      setContentMode(active) {
+        toolbar.hidden = operations.hidden = active;
+        deleteConfirm.hidden = true;
+        if (active) transferConfirm.hidden = true;
+      },
+      lock(locked) {
+        for (const el of body.querySelectorAll('button,input,select,textarea')) {
+          if (content.controls.contains(el) || content.searchRow.contains(el)) continue;
+          if (locked) { el.dataset.contentLockDisabled = String(el.disabled); el.disabled = true; }
+          else { el.disabled = el.dataset.contentLockDisabled === 'true'; delete el.dataset.contentLockDisabled; }
+        }
+        list.inert = locked;
+      },
+      resourceRow(entry, selection) {
+        const { row, checkbox, copy, title } = quickResourceItemFrame(entry, 'summary');
+        checkbox.type = 'checkbox';
+        checkbox.checked = selection.checked; checkbox.indeterminate = selection.indeterminate;
+        checkbox.setAttribute('aria-label', '选择 ' + entry.label + ' 的全部匹配');
+        checkbox.addEventListener('click', event => event.stopPropagation());
+        checkbox.addEventListener('change', () => selection.onSelect(checkbox.checked));
+        row.append(checkbox);
+        if (entry.avatarKind) row.append(quickAvatarNode(entry));
+        copy.append(title, quickNode('small', 'tle-quick-item-detail', selection.detail));
+        row.append(copy); return row;
+      },
+      saveResume(message) {
+        try { HOST_WIN.sessionStorage.setItem(resumeKey, JSON.stringify({ at: Date.now(), module, viewGroup, targetGroup, worldInfoFilter, nameQuery: content.nameQuery, message })); } catch {}
+      },
+      reloading: () => contentReloading,
+      reload() { contentReloading = true; HOST_WIN.setTimeout(() => HOST_WIN.location.reload(), 1800); },
+      async download(blob, name, host) {
+        if (host === 'tt') {
+          const native = await quickImport('/scripts/utils.js');
+          const result = await native.download(blob, name, 'application/zip', { throwOnFailure: true });
+          if (!result?.delivered) throw Error('备份保存未完成。');
+        } else {
+          const url = HOST_WIN.URL.createObjectURL(blob), a = HOST_DOC.createElement('a');
+          a.href = url; a.download = name; HOST_DOC.body.append(a); a.click(); a.remove();
+          HOST_WIN.setTimeout(() => HOST_WIN.URL.revokeObjectURL(url), 1000);
+        }
+      },
+    });
+    current.content = content;
+    HOST_WIN.addEventListener('beforeunload', event => { if (content.writing) { event.preventDefault(); event.returnValue = ''; } }, { signal: current.abort.signal });
+    if (resume) { search.value = resume.nameQuery || ''; content.nameQuery = search.value; }
+
     categoryPane.append(categoryHeading, categoryRow);
     groupPane.append(groupHeader, groupActions, manageRow, groupFilters);
     resourcePane.append(
-      resourceHeading, current.searchWrap, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
+      resourceHeading, content.searchRow, content.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
       operations, list, status
     );
     workspace.append(categoryPane, groupPane, resourcePane);
     body.append(workspace);
     refreshQuickHorizontalIndicators();
-    void load();
+    void load().then(() => { if (resume?.message) { statusMessage = resume.message; render(); } });
     // The Organizer reuses the single search field above the view; it never creates a second one.
   }
   const FOLD_STORAGE_KEY = 'tle.optionalFolds.v2';
@@ -7843,14 +10638,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.231 · 整理侠工具栏归位与滚动条修正</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.234 · 搜索框统一继承主题原生样式</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.231</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.234</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -10826,7 +13621,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       </section>
       <section class="tle-chat-tools-page" data-chat-tools-page="recent" hidden>
         <div class="tle-chat-tools-recent-toolbar">
-          <input type="search" class="text_pole" data-chat-tools-recent-search placeholder="搜索角色名、聊天名称或消息" autocomplete="off" spellcheck="false" aria-label="搜索最近聊天">
+          <input type="search" class="tle-search-field" data-chat-tools-recent-search placeholder="搜索角色名、聊天名称或消息" autocomplete="off" spellcheck="false" aria-label="搜索最近聊天">
           <button type="button" class="menu_button" data-chat-tools-current-filter aria-pressed="false">当前角色</button>
           <button type="button" class="menu_button menu_button_icon" data-chat-tools-recent-refresh title="刷新最近聊天" aria-label="刷新最近聊天">
             <i class="fa-solid fa-rotate" aria-hidden="true"></i>
@@ -11834,7 +14629,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           </header>
           <div class="tle-search-input-wrap tle-search-field-wrap">
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-            <input class="text_pole tle-search-field" type="text" role="searchbox" enterkeyhint="search"
+            <input class="tle-search-field" type="search" role="searchbox" enterkeyhint="search"
               autocomplete="off" spellcheck="false" placeholder="搜索设置、角色、User 身份、预设和正则…"
               aria-label="搜索设置、角色、User 身份、预设和正则" aria-controls="tle-search-results" />
             <button type="button" class="tle-search-clear" aria-label="清除搜索" hidden>×</button>
@@ -11962,7 +14757,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         </header>
         <div class="tle-search-input-wrap tle-search-field-wrap">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-          <input class="text_pole tle-search-field" type="text" enterkeyhint="search"
+          <input class="tle-search-field" type="search" enterkeyhint="search"
             autocomplete="off" spellcheck="false" placeholder="筛选当前分类资源名称、备注或标签…"
             aria-label="筛选当前分类资源名称、备注或标签" />
           <button type="button" class="tle-search-clear" aria-label="清除筛选" hidden>×</button>
@@ -11991,6 +14786,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         panel.setAttribute('aria-hidden', String(!isOpen));
       });
       state.organizerObserver.observe(panel, { attributes: true, attributeFilter: ['class'] });
+      try {
+        const resume = JSON.parse(HOST_WIN.sessionStorage.getItem('tle.organizer.content.resume.v1') || 'null');
+        if (resume && Date.now() - resume.at < 60000) HOST_WIN.setTimeout(() => {
+          if (!state.destroyed) setOrganizerDrawerOpen(true);
+        }, 1500);
+      } catch { /* A missing resume record does not change ordinary startup. */ }
     } catch (error) {
       state.organizerPanel?.remove();
       state.organizerPanel = null;
@@ -12277,7 +15078,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function setOrganizerDrawerOpen(open) {
     const panel = state.organizerPanel;
     const toggle = state.organizerEntry?.querySelector(':scope > .drawer-toggle');
-    if (!panel || !toggle) return;
+    if (!panel || !toggle || quickPanel?.content?.writing) return;
 
     const expanded = Boolean(open);
     const wasOpen = panel.classList.contains('openDrawer');
@@ -13826,7 +16627,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.231',
+    version: '0.3.234',
     ready: false,
     destroy,
     state,
@@ -14276,5 +17077,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.231 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.234 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

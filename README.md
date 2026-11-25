@@ -2,6 +2,14 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
+## 开发分支测试版 v0.3.234 · 整理侠内容处理
+
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.234/TLE-0.3.234-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
+
+整理侠名称/内容共用一个搜索框和原资源列表。支持跨资源查找、多规则、逐处选择、原位预览、确认替换及空字符串删除；原资源批量删除继续留在名称模式。PC 需安装 [配套服务端插件](plugins/global-batch-replace/README-TLE.md) 并重启；TT 使用 Core 内置原生适配。
+
+[安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md) · [本版日志](releases/v0.3.234/CHANGELOG.md)。四类 ST/TT 平台本次均未实机验证；正式发布通道仍为下文版本。
+
 ## 一次安装，后续自动更新
 
 正式发布：**Core v0.3.220 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
