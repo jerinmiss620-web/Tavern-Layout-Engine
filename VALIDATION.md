@@ -4,6 +4,17 @@
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
 
+## 2026-11-25 · Core v0.3.225 整理侠 PC 三栏资源工作区（已发布测试候选）
+
+- 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Stable Core 仍为 v0.3.220；正式 `latest.json`、正式 Loader 清单、Bootstrap、安装包与正式发布计划均未修改。
+- PC 宽屏（`min-width: 1001px`）整理侠改为三栏：左栏资源类型，中栏当前类型的「全部项目 / 未分组 / 各命名分组」，右栏资源列表、搜索、世界书状态筛选、目标分组与批量操作。
+- 搜索框从整理侠抽屉顶层移动到右侧资源栏。关闭嵌入式管理器时会把搜索框恢复到原始位置；重新打开时再次移入右栏，避免清空管理器 DOM 时丢失搜索控件。
+- 左侧资源类型、中间分组目录、右侧资源列表各自拥有独立滚动区域；右侧资源列表继续占据剩余高度。PC 使用三栏网格，不修改原生抽屉宽度/高度或滚动所有权。
+- `max-width: 1000px` 下三栏容器使用 `display: contents` 展平为原有单栏纵向流程，保留移动端分类/分组筛选和现有操作顺序，不复制第二套管理器。
+- 原有分组数据结构、搜索过滤、世界书绑定筛选、扫描、批量删除与安全确认、导入/导出全部分组方案均复用，不迁移或重写数据。
+- 新增回归断言覆盖三栏 DOM 归属、PC 三列断点、窄屏单栏回退、独立滚动契约，以及搜索框移入右栏和关闭时恢复。源码语法与隔离 JS harness 定向测试通过。GitHub Actions run `45570073432`（job `validate`）通过：完整 `npm test`、全源码更新模拟/兼容性与发布守卫、Organizer Branch Test Loader 兼容检查均通过；Stable-only 远端发布验证与 runtime replay 在该分支事件中按工作流条件跳过。PC/移动端 ST/TT 实机验收仍待执行。
+- 不可变测试源码 Commit `de24d55b87aba4a2a4f2cbce7380015f01e41722`，SHA-256 `5aa8d9cb0110e9329eea9d84b927e28e414998ec7992d0e8dc701cfe50effae5`，UTF-8 字节数 `647699`；测试清单更新 Commit `1087964928173cb82b85e6eab77cdd6f25e15e6b`。GitHub Raw 实际下载文件、分支开发源码、禁用状态测试导入包逐字节一致，摘要与长度核对通过。Test Loader v0.3.0 不变；正式 Stable Core v0.3.220、Stable Loader v0.3.6 与 Bootstrap v1.0.6 未修改。
+
 ## 2026-11-25 · Core v0.3.224 修复整理侠抽屉点击无响应 / 移除嵌套容器（已发布测试候选，历史记录）
 
 - 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Stable Core 仍为 v0.3.220；正式 `latest.json`、正式 Loader 清单、Bootstrap、安装包与发布计划均未修改。
