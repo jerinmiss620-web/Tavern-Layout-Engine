@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.236
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.239
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3046,6 +3046,7 @@ var TLEBatchLibrary = (() => {
       renderMode: null,
       wallpaperObserver: null,
       wallpaperParentObserver: null,
+      wallpaperThemeObserver: null,
       wallpaperParent: null,
       resizeObserver: null,
       resizeChat: null,
@@ -5962,6 +5963,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         display: contents;
       }
       .tle-quick-manager .tle-organizer-pane-title { display: none; }
+      .tle-quick-manager .tle-organizer-divider { display: none; }
       /* Only result wrapping belongs to TLE; input/button visuals and sizing
          come from the host's search controls, menu_button and flex utilities. */
       .tle-quick-manager .tle-content-text { white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -6049,11 +6051,30 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       @media screen and (min-width: 1001px) {
         .tle-quick-manager .tle-organizer-workspace {
           display: grid;
-          grid-template-columns: minmax(138px, .78fr) minmax(168px, .92fr) minmax(360px, 2.3fr);
-          gap: 10px;
+          grid-template-columns: minmax(138px, .78fr) 1px minmax(168px, .92fr) 1px minmax(360px, 2.3fr);
+          column-gap: 6px;
+          row-gap: 0;
           flex: 1 1 auto;
           min-width: 0;
           min-height: 0;
+        }
+        /* Real HR elements use vertical writing mode so their logical block-start
+           border becomes a full-height vertical rule without transform geometry. */
+        .tle-quick-manager .tle-organizer-divider {
+          display: block;
+          align-self: stretch;
+          justify-self: center;
+          box-sizing: border-box;
+          width: 1px;
+          min-width: 1px;
+          height: auto;
+          min-height: 0;
+          margin: 0;
+          padding: 0;
+          border: 0;
+          border-block-start: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 22%));
+          writing-mode: vertical-rl;
+          opacity: .58;
         }
         .tle-quick-manager .tle-organizer-pane {
           display: flex;
@@ -6064,8 +6085,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           overflow: hidden;
           padding: 10px;
           border: 0;
-          border-radius: 10px;
-          background: rgb(from var(--SmartThemeQuoteColor) r g b / .12);
+          border-radius: 0;
+          background: transparent;
         }
         .tle-quick-manager .tle-organizer-pane-title {
           display: block;
@@ -8324,6 +8345,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (!current) return;
     current.abort.abort();
     if (current.embedded) {
+      // The organizer header is outside the replaceable resource body. Release
+      // its per-session actions here so reopening cannot leave stale toolbars.
+      current.node?.querySelector('.tle-search-heading-tools')?.replaceChildren();
       const searchWrap = current.searchWrap;
       current.body?.replaceChildren();
       current.body?.classList.remove('tle-quick-manager');
@@ -8751,7 +8775,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     themeImportRow.append(readThemeManagerButton);
     const headingTools = state.organizerPanel.querySelector('.tle-search-heading-tools');
     if (!headingTools) return;
-    headingTools.append(themeImportRow, backupRow);
+    // This header survives manager open/close cycles; replace the session-owned
+    // controls instead of appending a fresh copy every time the drawer is opened.
+    headingTools.replaceChildren(themeImportRow, backupRow);
 
     const categoryRow = quickNode('div', 'tle-quick-category-row');
     categoryRow.title = hint.title;
@@ -8795,6 +8821,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     groupHeader.append(groupHeading);
     const resourcePane = quickNode('section', 'tle-organizer-pane tle-organizer-resource-pane');
     resourcePane.setAttribute('aria-label', '资源列表');
+    const categoryDivider = quickNode('hr', 'tle-organizer-divider');
+    categoryDivider.setAttribute('aria-hidden', 'true');
+    const groupDivider = quickNode('hr', 'tle-organizer-divider');
+    groupDivider.setAttribute('aria-hidden', 'true');
     const resourceHeading = quickNode('strong', '', '资源列表');
     const resourceHeader = quickNode('div', 'tle-content-heading flex-container alignItemsCenter justifySpaceBetween');
     resourceHeader.append(resourceHeading);
@@ -9798,7 +9828,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       resourceHeader, content.searchRow, content.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
       operations, list, status
     );
-    workspace.append(categoryPane, groupPane, resourcePane);
+    workspace.append(categoryPane, categoryDivider, groupPane, groupDivider, resourcePane);
     body.append(workspace);
     refreshQuickHorizontalIndicators();
     void load().then(() => { if (resume?.message) { statusMessage = resume.message; render(); } });
@@ -10677,14 +10707,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.236 · 搜索框统一继承主题原生样式</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.239 · 搜索框统一继承主题原生样式</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.236</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.239</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11738,6 +11768,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     state.chatFade.wallpaperObserver = null;
     state.chatFade.wallpaperParentObserver?.disconnect();
     state.chatFade.wallpaperParentObserver = null;
+    state.chatFade.wallpaperThemeObserver?.disconnect();
+    state.chatFade.wallpaperThemeObserver = null;
     state.chatFade.resizeObserver?.disconnect();
     state.chatFade.resizeObserver = null;
     state.chatFade.resizeChat = null;
@@ -11921,16 +11953,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const hasResizeObserver = typeof HOST_WIN.ResizeObserver === 'function';
     const resizeBindingReady = !hasResizeObserver
       || Boolean(state.chatFade.resizeObserver && state.chatFade.resizeChat === chat);
+    const themeBindingReady = Boolean(state.chatFade.wallpaperThemeObserver);
     if (state.chatFade.bg1 === bg1 &&
         state.chatFade.wallpaperObserver &&
         state.chatFade.wallpaperParent === bg1.parentElement &&
-        resizeBindingReady) return;
+        resizeBindingReady && themeBindingReady) return;
 
     state.chatFade.wallpaperObserver?.disconnect();
     state.chatFade.wallpaperParentObserver?.disconnect();
+    state.chatFade.wallpaperThemeObserver?.disconnect();
     state.chatFade.resizeObserver?.disconnect();
     state.chatFade.wallpaperObserver = null;
     state.chatFade.wallpaperParentObserver = null;
+    state.chatFade.wallpaperThemeObserver = null;
     state.chatFade.resizeObserver = null;
     state.chatFade.resizeChat = null;
 
@@ -11964,6 +11999,46 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       parentObserver.observe(parent, { childList: true });
       state.chatFade.wallpaperParentObserver = parentObserver;
     }
+
+    // #bg1 can keep the same node and inline style while a theme changes an
+    // inherited CSS variable/class or swaps a stylesheet. Observe only its
+    // ancestor chain plus stylesheet nodes in <head>; never poll the document.
+    const themeAncestors = new Set();
+    const isStylesheetNode = node => node?.nodeType === 1 && (
+      node.tagName === 'STYLE'
+      || (node.tagName === 'LINK' && node.relList?.contains('stylesheet'))
+    );
+    const containsStylesheetNode = node => isStylesheetNode(node)
+      || Boolean(node?.querySelector?.('style, link[rel~="stylesheet"]'));
+    const themeObserver = new HOST_WIN.MutationObserver(records => {
+      const relevant = records.some(record => {
+        if (record.type === 'attributes' && themeAncestors.has(record.target)) return true;
+        const target = record.target?.nodeType === 1
+          ? record.target
+          : record.target?.parentElement;
+        if (isStylesheetNode(target)) return true;
+        return [...record.addedNodes, ...record.removedNodes].some(containsStylesheetNode);
+      });
+      if (relevant) scheduleChatFadeWallpaperSync();
+    });
+    for (let ancestor = bg1.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      themeAncestors.add(ancestor);
+      themeObserver.observe(ancestor, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme', 'data-theme-name', 'data-theme-mode'],
+      });
+      if (ancestor === HOST_DOC.documentElement) break;
+    }
+    if (HOST_DOC.head) {
+      themeObserver.observe(HOST_DOC.head, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['href', 'rel', 'disabled', 'media'],
+        characterData: true,
+      });
+    }
+    state.chatFade.wallpaperThemeObserver = themeObserver;
 
     if (hasResizeObserver) {
       const resizeObserver = new HOST_WIN.ResizeObserver(scheduleChatFadeWallpaperSync);
@@ -12933,6 +13008,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     };
     render();
   }
+  function companionUnavailableReason(field, target, error) {
+    const errorText = String(error?.message || '').trim();
+    if (errorText) return errorText;
+    if (field.id === 'profile') {
+      const select = quickSelect('connection_profiles');
+      if (!select) return '连接配置控件尚未加载；原生 API 设置尚未就绪';
+      if (![...select.options].some(option => option.value)) return '连接配置列表尚未加载或为空';
+      return '当前连接配置列表中找不到该配置';
+    }
+    if (field.id === 'source') {
+      const select = quickSelect('chat_completion_source');
+      if (!select) return '接口来源控件尚未加载；原生 API 设置尚未就绪';
+      if (![...select.options].some(option => option.value)) return '接口来源列表尚未加载或为空';
+      return '当前接口来源列表中找不到该来源';
+    }
+    if (field.id === 'model') {
+      const modelSelects = quickModelSelects();
+      const hasModelOptions = modelSelects.some(select => [...select.options].some(option => option.value));
+      return hasModelOptions
+        ? '当前已加载的模型列表中找不到该模型；可能是模型名称已变化或当前 API 未提供该模型'
+        : '模型列表尚未加载；API 可能未连接、模型控件尚未挂载或服务商尚未返回模型';
+    }
+    return '当前列表中不存在该项，或对应原生控件暂不可用';
+  }
+
   async function companionApply(id, automatic = false) {
     if (state.destroyed) return;
     const role = companionCurrentRole();
@@ -12957,20 +13057,36 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     companionRefreshList();
     let finished = 0;
     try {
+      const skipped = [];
       for (const field of COMPANION_FIELDS) {
         const target = plan.fields[field.id];
         if (!target) continue;
         if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
-        const catalog = await quickCatalog(field.type, field.type === 'api' || field.type === 'preset', state.abort.signal);
-        if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
-        const fresh = catalog.find(item => item.selectId === target.selectId && item.value === target.value && companionEntryId(field, item));
-        if (!fresh || fresh.disabled) throw new Error(field.name + ' 不存在或当前不可用：' + (target.label || target.value));
-        await applyQuickChoice(field.type, fresh, state.abort.signal);
-        finished++;
+        try {
+          // Read each field afresh: changing an API profile/source can rebuild the
+          // model selector, so a cached API catalog would be stale for the next field.
+          const catalog = await quickCatalog(field.type, field.type === 'api' || field.type === 'preset', state.abort.signal);
+          if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
+          const fresh = (Array.isArray(catalog) ? catalog : [])
+            .find(item => item.selectId === target.selectId && item.value === target.value && companionEntryId(field, item));
+          if (!fresh) throw new Error('');
+          if (fresh.disabled) throw new Error('该选项当前被宿主控件禁用');
+          await applyQuickChoice(field.type, fresh, state.abort.signal);
+          finished++;
+        } catch (error) {
+          // Role changes and teardown are cancellation, not a missing plan item.
+          if (state.destroyed || companionCurrentRole()?.key !== role.key) throw error;
+          skipped.push({
+            name: field.name,
+            target: String(target.label || target.value || '未命名项目'),
+            reason: companionUnavailableReason(field, target, error),
+          });
+          console.warn('[配套侠] 跳过不可用项目：' + field.name, error);
+        }
       }
       if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
-      companionRuntime.lastApplied.set(role.key, id);
-      if (!automatic) {
+      if (finished > 0) companionRuntime.lastApplied.set(role.key, id);
+      if (!automatic && finished > 0) {
         const fresh = companionRead();
         const slot = companionScheduleState(fresh, role);
         if (slot) {
@@ -12978,7 +13094,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           companionSave(fresh);
         }
       }
-      companionNotice('success', '已应用「' + plan.name + '」；绑定壁纸跟随 UI 主题。');
+      if (skipped.length) {
+        const details = skipped.map(item => item.name + '「' + item.target + '」：' + item.reason).join('；');
+        const status = finished > 0 ? '部分应用完成' : '未能应用任何项目';
+        companionNotice('warning', '「' + plan.name + '」' + status + '：成功 ' + finished + ' 项，跳过 ' + skipped.length + ' 项。未应用项目：' + details);
+      } else if (finished > 0) {
+        companionNotice('success', '已应用「' + plan.name + '」；绑定壁纸跟随 UI 主题。');
+      } else {
+        companionNotice('warning', '该方案没有可应用的配置项。');
+      }
     } catch (error) {
       const superseded = automatic && companionCurrentRole()?.key !== role.key;
       if (superseded) {
@@ -16261,6 +16385,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         renderMode: state.chatFade.renderMode,
         wallpaperObserverPresent: Boolean(state.chatFade.wallpaperObserver),
         parentObserverPresent: Boolean(state.chatFade.wallpaperParentObserver),
+        themeObserverPresent: Boolean(state.chatFade.wallpaperThemeObserver),
         resizeObserverPresent: Boolean(state.chatFade.resizeObserver),
         legacyMirrorNodePresent: Boolean(HOST_DOC.getElementById('tle-chat-fade-wallpaper-anchor')?.isConnected),
       },
@@ -16664,7 +16789,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.236',
+    version: '0.3.239',
     ready: false,
     destroy,
     state,
@@ -17105,7 +17230,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }, { signal: state.abort.signal });
   HOST_DOC.addEventListener('change', event => {
     if (event.target?.id === 'your_name') updateWorkspaceHeader();
-  }, { signal: state.abort.signal });
+    if (event.target?.matches?.('select#themes')) scheduleChatFadeWallpaperSync();
+  }, { capture: true, signal: state.abort.signal });
+  HOST_DOC.addEventListener('load', event => {
+    const target = event.target;
+    if (target?.matches?.('link[rel~="stylesheet"]')
+      || (target?.tagName === 'IMG' && state.chatFade.bg1?.contains(target))) {
+      scheduleChatFadeWallpaperSync();
+    }
+  }, { capture: true, signal: state.abort.signal });
   HOST_WIN.addEventListener('preset_changed', queueInfoRefresh, { signal: state.abort.signal });
   HOST_WIN.addEventListener('resize', queueFloorZeroClearanceSync, { passive: true, signal: state.abort.signal });
 
@@ -17114,5 +17247,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.236 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.239 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
