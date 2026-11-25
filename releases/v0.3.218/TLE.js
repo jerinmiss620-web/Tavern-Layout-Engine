@@ -5382,7 +5382,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     readThemeManagerButton.append(themeImportIcon, HOST_DOC.createTextNode('同步'));
     themeImportRow.append(readThemeManagerButton);
     themeImportRow.hidden = true;
-    searchRow.append(themeImportRow, search);
     const deleteConfirm = quickNode('div', 'tle-quick-transfer-confirm');
     deleteConfirm.hidden = true;
     const deleteMessage = quickNode('p', 'tle-quick-transfer-message');
