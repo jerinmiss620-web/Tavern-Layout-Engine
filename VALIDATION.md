@@ -1,59 +1,16 @@
-# 自动更新验证记录 — 2026-11-25
+# 自动更新验证记录 — 2026-11-26
 
-当前发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core 0.3.220。
+当前发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core 0.3.239。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
 
-## 2026-11-25 · Core v0.3.225 整理侠 PC 三栏资源工作区（已发布测试候选）
+## 2026-11-26 · Core v0.3.239 整理侠三栏分隔线与稳定性修复
 
-- 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Stable Core 仍为 v0.3.220；正式 `latest.json`、正式 Loader 清单、Bootstrap、安装包与正式发布计划均未修改。
-- PC 宽屏（`min-width: 1001px`）整理侠改为三栏：左栏资源类型，中栏当前类型的「全部项目 / 未分组 / 各命名分组」，右栏资源列表、搜索、世界书状态筛选、目标分组与批量操作。
-- 搜索框从整理侠抽屉顶层移动到右侧资源栏。关闭嵌入式管理器时会把搜索框恢复到原始位置；重新打开时再次移入右栏，避免清空管理器 DOM 时丢失搜索控件。
-- 左侧资源类型、中间分组目录、右侧资源列表各自拥有独立滚动区域；右侧资源列表继续占据剩余高度。PC 使用三栏网格，不修改原生抽屉宽度/高度或滚动所有权。
-- `max-width: 1000px` 下三栏容器使用 `display: contents` 展平为原有单栏纵向流程，保留移动端分类/分组筛选和现有操作顺序，不复制第二套管理器。
-- 原有分组数据结构、搜索过滤、世界书绑定筛选、扫描、批量删除与安全确认、导入/导出全部分组方案均复用，不迁移或重写数据。
-- 新增回归断言覆盖三栏 DOM 归属、PC 三列断点、窄屏单栏回退、独立滚动契约，以及搜索框移入右栏和关闭时恢复。源码语法与隔离 JS harness 定向测试通过。GitHub Actions run `45570073432`（job `validate`）通过：完整 `npm test`、全源码更新模拟/兼容性与发布守卫、Organizer Branch Test Loader 兼容检查均通过；Stable-only 远端发布验证与 runtime replay 在该分支事件中按工作流条件跳过。PC/移动端 ST/TT 实机验收仍待执行。
-- 不可变测试源码 Commit `de24d55b87aba4a2a4f2cbce7380015f01e41722`，SHA-256 `5aa8d9cb0110e9329eea9d84b927e28e414998ec7992d0e8dc701cfe50effae5`，UTF-8 字节数 `647699`；测试清单更新 Commit `1087964928173cb82b85e6eab77cdd6f25e15e6b`。GitHub Raw 实际下载文件、分支开发源码、禁用状态测试导入包逐字节一致，摘要与长度核对通过。Test Loader v0.3.0 不变；正式 Stable Core v0.3.220、Stable Loader v0.3.6 与 Bootstrap v1.0.6 未修改。
-
-## 2026-11-25 · Core v0.3.224 修复整理侠抽屉点击无响应 / 移除嵌套容器（已发布测试候选，历史记录）
-
-- 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Stable Core 仍为 v0.3.220；正式 `latest.json`、正式 Loader 清单、Bootstrap、安装包与发布计划均未修改。
-- 根因：v0.3.223 为新增的 Organizer toggle 注册的点击回调只在下一帧读取 `openDrawer` 状态并尝试渲染管理器，却没有实际切换 `openDrawer / closedDrawer`。新增 DOM 未可靠接入酒馆原生静态抽屉点击监听，导致导航图标、文字标签和全局搜索跳转均无法展开。
-- 修复：新增 `setOrganizerDrawerOpen()` / `toggleOrganizerDrawer()`，由 Organizer 自己显式切换其直接 `.drawer-content` 的开合类与 ARIA 状态；点击事件直接进入控制器。打开时关闭全局搜索、其他普通原生抽屉及 TLE 控制面板；移动端收起导航仍复用现有原生导航事件流程。
-- 结构：删除 Organizer 内层 `.tle-search-surface`，标题栏、独立资源筛选框和资源列表直接成为 `#tle-organizer-panel.drawer-content` 的子元素。CSS 不再为 Organizer 内层 wrapper 设置第二套宽高与滚动容器，保留原生 drawer-content 的定位与滚动机制；全局搜索弹窗仍保留自己的 `.tle-search-surface`。
-- 回归：新增抽屉开合控制器的开/关测试，验证 class、ARIA、管理器启动与关闭路径；保留全局搜索/Organizer 分离及世界书分类测试。源码语法检查与隔离 JS harness 回归通过。补齐禁用状态的 `TLE-0.3.224-TEST-import.json`，其源码与不可变 release 文件逐字节一致。GitHub Actions run `45564378196`（job `validate`）通过：完整 `npm test`、Organizer branch Test Loader 兼容检查、测试通道固定安装包与远端源码 SHA-256/字节数验证均通过；Stable-only 发布验证与 runtime replay 步骤在该分支事件中按工作流条件跳过。PC/移动端 ST/TT 实机验收仍待执行。
-- 发布后发现测试清单中的 SHA-256 与 Loader 校验不一致；原因是首次生成摘要时我使用了错误的 SHA-256 常量。已用通过 `abc` 与空字符串标准向量验证的实现重新计算不可变 release 源码，并修正 `channels/test.json`。随后从 `raw.githubusercontent.com` 重新读取固定 Commit 的源码，摘要与清单一致（`11eaa689f4ebbecaf8b96fedf90eb64f855e55f69538c1fdab7e131caa05c95c`），UTF-8 字节数仍为 `643748`；测试 Loader 的远端校验步骤已通过。
-- 分支测试通道已发布 Core v0.3.224：release 源码 Commit `4f52df1f034641b6b26c153dec3e9a0dcf20ef58`，SHA-256 `11eaa689f4ebbecaf8b96fedf90eb64f855e55f69538c1fdab7e131caa05c95c`，UTF-8 字节数 `643748`；Test manifest 更新 Commit `47468d110fc1430a342531c6618f9ecae9496d1f`。Test Loader v0.3.0 不变且继续使用独立缓存。正式 Stable 通道和正式 Core 不受影响。
-
-## 2026-11-25 · Core v0.3.223 全局搜索与整理侠分离 / 世界书快速筛选（v0.3.223 先前候选，历史记录）
-
-- 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Core 仍为 v0.3.220，正式 `latest.json`、安装包和 release-plan 未修改。
-- 全局搜索恢复为工作区顶栏独立按钮和独立居中弹窗；保留原搜索索引、结果跳转、清空与刷新行为。弹窗增加「整理侠」跳转入口，只负责导航，不承载资源管理。
-- 整理侠仍为侧边栏第十个原生形态抽屉，独立持有 `.drawer-content`、资源筛选输入框、分组和批量管理。搜索弹窗与整理侠不共享输入框、视图状态或资源管理内容。
-- 世界书增加「全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用」快速筛选。主要绑定和额外绑定决定角色卡绑定状态；全局启用独立统计，允许与已绑定或未绑定筛选重叠。
-- 孤儿判断只依据仍存在的额外绑定记录中无法匹配到现存角色卡的引用。主要绑定随角色卡文件一并消失且无残留记录时不可追溯，仍标记未绑定；懒加载角色卡未扫描前，未知项目不误判为未绑定或孤儿。
-- 新增可单独测试的 `matchesWorldInfoFilter`，更新 `tests/tle-organizer-worldbook.test.mjs`，覆盖全局-only、角色主要/额外绑定、混合遗留引用、未绑定及懒加载待核对筛选。当前源码已通过语法解析，世界书分类/筛选使用合成数据完成定向核对；更新后的 `tests/tle-organizer-worldbook.test.mjs` 已在隔离 JS harness 通过。本轮完整 `npm test`、CI 与 PC/移动端 ST/TT 实机验收仍待执行。
-- 全局搜索与替换的后续整合留待 Codex 单独处理，不属于本候选版本。
-- 分支测试通道已发布 Core v0.3.223：release 源码 Commit `c3436e7410375dd67df94d75baf95e3b6375c641`，SHA-256 `5d8b3e3af91d232b3b76f7f74d8f2d0918f0b4fa3c8c050eec908b6896f1415d`，UTF-8 字节数 `643005`；测试清单更新 Commit `289021ed51f0484f49ae9a377cbfd4d5871548e6`。Test Loader v0.3.0 仍使用独立缓存。正式 Stable 通道和正式 Core 不受影响。
-
-## 2026-11-25 · 整理侠独立导航与统一世界书管理（v0.3.222 先前候选，历史记录）
-
-- 开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式版 `latest.json`、导入包和 release-plan 未修改，正式 Core 仍为 v0.3.220。
-- 本轮不实现新的首页画廊，也不接管原生角色管理/预览区；首页入口需求与整理侠资源管理分开设计。
-- 整理侠成为侧边栏第十个一级原生形态抽屉，紧接角色管理下方；拥有自己的 `.drawer-toggle` 与 `.drawer-content`，复用 `openDrawer / closedDrawer`，不再创建 popup/modal。原全局搜索仍为默认页面，资源管理继续嵌入同一面板。
-- 世界书管理统一读取完整 `world_names`，显示全局选择、角色卡主要绑定、额外绑定、未绑定及疑似孤儿状态；信息站原有「全局世界书」选择器不变。
-- 世界书分组键从原生选项索引迁移为世界书名称，避免删除一本书后索引变化导致其他世界书分组错位。
-- 懒加载角色卡不会被直接判为孤儿；用户可主动扫描，逐张调用酒馆公开上下文中的 `unshallowCharacter` 读取元数据。扫描不自动运行，并显示进度与内存占用提示。
-- 世界书批量删除继续调用酒馆原生 `deleteWorldInfo`；删除前同步清理 `charLore.extraBooks` 额外绑定，且先确认可保存设置再修改关联记录。
-- 新增 `tests/tle-organizer-worldbook.test.mjs`，覆盖全局/主要/额外绑定、失效角色额外绑定、未绑定候选、懒加载待核对、分组键迁移、额外绑定清理及导航入口。GitHub Actions run 45549955361（job `validate`）通过。
-- **识别限制：** 角色卡删除后，若主要世界书引用只存在于该卡文件且未留下其他绑定元数据，无法追溯原角色；该书会显示为「未绑定」，而不是被断言为孤儿。当前也不扫描聊天级或身份级引用。疑似孤儿状态只基于仍存在但指向不存在角色的额外绑定记录。
-- 自动化通过不代表真实宿主验收通过；PC ST、移动端 ST、iPhone TT 的导航显示、窄屏空间、主题继承和世界书原生删除流程仍待实机验收。
-- 已建立分支专用测试通道：Core v0.3.222，清单位于本分支 `channels/test.json`；导入包 `loader/TLE-Remote-Loader-Test-0.3.0.json` 默认禁用，Loader 使用独立的 `TLE_Organizer_Branch_Test_Cache` 与独立缓存键，不覆盖 Stable Bootstrap/Loader 缓存。Loader 固定 Commit：`8f6534c1a2839e561998d5e4d984f871074d720b`；安装包固定 Commit：`08527064995cc13ce39d64f53528ffdc163a66a1`；Core 固定 Commit：`ad9e8dd7f827c15909d022e5e402cbc7612d9254`。
-- 测试 Loader 只读取开发分支的 `channels/test.json`；正式根目录 `latest.json`、`loader/latest.json`、`release-plan.json` 未改动。测试前先禁用 Bootstrap 1.0.6 并完整刷新；恢复正式版时禁用测试 Loader、启用 Bootstrap 1.0.6 并完整刷新，由正式 Loader 从自己的 LKG 缓存恢复 Core v0.3.220。
-- 测试步骤见 `development/organizer/TESTING.md`。分支 CI 增加 `node loader/verify-test-channel.mjs --remote`，验证测试 Core、Loader、安装 JSON 的 Commit pin、UTF-8 字节数、SHA-256 与安装包源码同步。
-- 分支 CI run 45555232799（job `validate`）通过：`npm test` 全量回归通过；测试通道远端验证通过，Core v0.3.221（637738 UTF-8 bytes）、Test Loader v0.3.0（39896 UTF-8 bytes）、固定 Commit、SHA-256 与远端安装 JSON 内容均通过校验。正式 Stable release verification 仍确认 Core v0.3.220。
-- 分支 CI run 45557624063（job `validate`）通过：`npm test` 全量回归与 release metadata 检查通过；Organizer 第十个 `.drawer` / 独立 `.drawer-content` 结构断言通过；测试通道远端验证通过，Core v0.3.222（635991 UTF-8 bytes，SHA-256 `03dad8a12804e71003e50880e28a573698d29ee80741a0fbc4c55f55fae4aabd`）、Test Loader v0.3.0（39896 UTF-8 bytes）、固定 Commit、禁用状态 Core 备份安装包与远端安装 JSON 内容均通过校验。正式 Stable release verification 仍确认 Core v0.3.220。
-
+- 正式候选源码：`releases/v0.3.239/TLE.js`；不可变源码 Commit：`ea96c1af669108507fc1c3773d1bcbab42e20821`。
+- SHA-256：`cf10fec53fccedeb62364e358fdca6b1747a3b76e8726e2c9d1eb66996edd98b`；UTF-8 字节数：`810236`。
+- 禁用状态酒馆助手备份安装包与 Core 源码逐字节一致；正式 Core 清单与 release-plan 已指向 v0.3.239；Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
+- 用户已提供 PC 整理侠三栏 HR 分隔线布局截图并接受该视觉方案；这只确认该次 PC 界面布局，不代表配套侠、渐隐侠及所有资源操作已完成全平台实机验收。
+- GitHub Actions 正式发布 PR #21 / Run #633（Node 24）已通过：依赖安装、完整源码更新模拟、兼容性检查及发布守卫全部成功。PR 工作流中的「已发布清单与不可变 GitHub 文件验证」和「下载发布字节后的运行链重放」步骤按工作流条件跳过；合并后已从 main 重新读取源码与导入包，确认导入包内容逐字节匹配源码，SHA-256 与 UTF-8 字节数均和 latest.json 一致。未声称已执行 raw URL 运行链重放。ST/TT 的配套侠部分应用、壁纸同步、重复打开整理侠工具栏等真实运行验收仍需持续补充。
 
 ## 2026-11-25 · Core v0.3.220 整理侠资源管理界面重排
 
@@ -178,3 +135,11 @@
 - iPhone TT（iOS 18.7）用户确认：v0.3.215 在原生控件不可读取时阻止滑屏；v0.3.216 恢复滑屏，手动切换原生手势后同步；v0.3.217 无需手动切换即可正常工作。
 - 正式 Core 与 v0.3.217 真机验证源码一致，仅调整版本说明。新增自动回归覆盖原生复选框、宿主设置接口、延迟加载、恢复、明确冲突、重试上限及卸载清理。
 - 本轮未额外验证安卓真机、其他 TT 版本或所有 ST 宿主；保持既有兼容性说明。
+
+## 2026-11-26 · Core v0.3.240 信息站总开关并入导航模式（测试候选）
+
+- 测试通道：`channels/test.json`，版本 `0.3.240`；源码：`releases/v0.3.240/TLE.js`。
+- SHA-256：`68d13fb4da69fd6ba8f6ce0abe59a5ed7e0c0e535726488f212efe2beba7448b`；UTF-8 字节数：`809590`；测试导入包默认禁用，内容与源码逐字节一致。
+- 删除独立信息站总开关；导航栏「图标 + 文字 + 信息站」成为唯一开关；新用户默认勾选所有可用的显示/快切/跳转选项，已有逐项自定义值保留。
+- 新增 `tests/tle-info-station-mode.test.mjs`，覆盖导航模式门控、默认值、旧设置保留和角色世界书仅跳转约束；静态断言已通过模型侧核对，尚未完成 GitHub CI 或 ST/TT 实机运行验收。
+
