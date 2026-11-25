@@ -10,7 +10,7 @@
     "source_commit": "e1feaa0f5331cf3eadb499892333f099fcdea2ab",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e1feaa0f5331cf3eadb499892333f099fcdea2ab/releases/v0.3.229/TLE.js",
     "changelog_path": "releases/v0.3.229/CHANGELOG.md",
-    "sha256": "df387a399f29ba75905228b54040b40a3d89f0b7d79647dc645a3e3e8854ae4a",
+    "sha256": "00890ed5ce812cc07a9e162842d7ff1a6109a72e5ffb3abac9886b354bd7f4e3",
     "size_bytes": 656232
   },
   "status": "TEST v0.3.229: Organizer no longer has a redundant header close X; it uses native drawer controls. Theme-group sync, full group import, and full group export are grouped at the right side of the heading (sync appears only in the UI theme category). Mobile category, group, and worldbook filters retain horizontal touch scrolling and show a persistent 3px indicator without reserving a 15px native scrollbar. Batch action buttons use a compact three-column layout with 30px height, margin:0, 3px row gap, and 4px column gap. PC three-column workspace, search, group data, worldbook binding logic, and deletion permissions are unchanged.",
