@@ -4,7 +4,7 @@
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
 
-## 2026-11-25 · Core v0.3.224 修复整理侠抽屉点击无响应 / 移除嵌套容器（开发分支，未发布）
+## 2026-11-25 · Core v0.3.224 修复整理侠抽屉点击无响应 / 移除嵌套容器（已发布测试候选，历史记录）
 
 - 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Stable Core 仍为 v0.3.220；正式 `latest.json`、正式 Loader 清单、Bootstrap、安装包与发布计划均未修改。
 - 根因：v0.3.223 为新增的 Organizer toggle 注册的点击回调只在下一帧读取 `openDrawer` 状态并尝试渲染管理器，却没有实际切换 `openDrawer / closedDrawer`。新增 DOM 未可靠接入酒馆原生静态抽屉点击监听，导致导航图标、文字标签和全局搜索跳转均无法展开。
