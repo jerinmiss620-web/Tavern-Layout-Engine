@@ -12,7 +12,7 @@ const searchStart = source.indexOf('function createGlobalSearch()');
 const searchEnd = source.indexOf('function createRailControls()', searchStart);
 const searchMarkup = source.slice(searchStart, searchEnd);
 
-assert.equal(plan.core, '0.3.218');
+assert.equal(plan.core, '0.3.219');
 new vm.Script(source, { filename: 'TLE.js' });
 
 // One existing rail control is renamed; no second Organizer button is introduced.
@@ -38,19 +38,30 @@ assert.match(source, /const QUICK_GROUP_KEY = 'tle\.quickGroups\.v2'/);
 assert.match(manager, /quickButton\('删除分组'/);
 assert.match(manager, /其中项目已恢复为未分组/);
 
-// Only verified resource categories can be batch-deleted.
-assert.match(source, /const QUICK_DELETE_MODULES = Object\.freeze\(\{\s*character: true,\s*worldInfo: true,\s*preset: true,\s*reasoning: true,/);
-assert.match(source, /API 连接、接口来源与模型属于运行配置，只能分组，不提供删除/);
-assert.match(source, /User 身份由酒馆原生身份管理器负责删除/);
-assert.match(source, /UI 主题请通过酒馆原生主题管理器删除/);
+// Resource-management tabs are limited to resources with native delete operations.
+// The complete QUICK_MODULES schema still preserves hidden search-only group data.
+assert.ok(source.includes("persona: true,\n    theme: true,"));
+assert.ok(source.includes("const QUICK_RESOURCE_MODULES = QUICK_MODULES.filter(item => QUICK_DELETE_MODULES[item.id] === true);"));
+assert.ok(source.includes("const QUICK_MODULES = INFO_MODULES.filter(item => item.id !== 'characterWorldBook');"));
+assert.ok(source.includes("for (const item of QUICK_MODULES) groupsByModule[item.id]"));
+assert.ok(manager.includes("for (const item of QUICK_RESOURCE_MODULES)"));
+assert.ok(!manager.includes("for (const item of QUICK_MODULES) {\n      const button = quickButton(item.title"));
+assert.ok(source.includes("API 连接、接口来源与模型仅允许搜索，不参与分组或删除。"));
+assert.ok(!source.includes("整理侠暂不开放批量删除"));
 assert.match(source, /正则继续由正则侠管理/);
 assert.match(manager, /quickButton\('批量删除资源'/);
-assert.match(manager, /native\.deleteCharacter\(freshChosen\.map\(entry => entry\.value\), \{ deleteChats: false \}\)/);
-assert.match(manager, /native\.deleteWorldInfo\(entry\.value\)/);
-assert.match(manager, /native\.deletePreset\(entry\.label\.trim\(\)\)/);
-assert.match(manager, /至少保留一个预设或推理格式/);
-assert.match(source, /请先退出当前角色或群聊/);
-
+assert.ok(manager.includes("native.deleteCharacter(freshChosen.map(entry => entry.value), { deleteChats: false })"));
+assert.ok(manager.includes("native.deleteWorldInfo(entry.value)"));
+assert.ok(manager.includes("native.deletePreset(entry.label.trim())"));
+assert.ok(manager.includes("/persona-delete persona=" + "$" + "{JSON.stringify(String(entry.value))} silent=true"));
+assert.ok(manager.includes("executeTLESlashCommand(command, context)"));
+assert.ok(manager.includes("'/api/themes/delete'"));
+assert.ok(manager.includes("HOST_WIN.setTimeout(() => HOST_WIN.location.reload(), 900)"));
+assert.ok(!source.includes("quickHasActiveConversation"));
+assert.ok(!source.includes("请先退出当前角色或群聊"));
+assert.ok(!source.includes("至少保留一个预设或推理格式"));
+assert.ok(source.includes("GUI 预设是酒馆原生保留项，不能删除"));
+assert.ok(source.includes("const isGuiPreset = module === 'preset' || module === 'reasoning';"));
 // The README carries the agreed third-party layout-plugin boundary.
 assert.match(readme, /第三方布局插件兼容性/);
 assert.match(readme, /不保证与第三方布局管理插件同时启用时的兼容性/);
