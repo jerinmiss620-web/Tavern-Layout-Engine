@@ -49,7 +49,7 @@ assert.match(manager, /native\.deleteCharacter\(freshChosen\.map\(entry => entry
 assert.match(manager, /native\.deleteWorldInfo\(entry\.value\)/);
 assert.match(manager, /native\.deletePreset\(entry\.label\.trim\(\)\)/);
 assert.match(manager, /至少保留一个预设或推理格式/);
-assert.match(manager, /请先退出当前角色或群聊/);
+assert.match(source, /请先退出当前角色或群聊/);
 
 // The README carries the agreed third-party layout-plugin boundary.
 assert.match(readme, /第三方布局插件兼容性/);
