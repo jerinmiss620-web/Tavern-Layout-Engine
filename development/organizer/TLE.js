@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.227
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.228
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -1697,18 +1697,34 @@ body.tle-global-search-open { overflow: hidden !important; }
   padding-bottom: 10px;
   border-bottom: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 22%));
 }
-#tle-global-search-panel .tle-search-heading-copy,
-#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
+#tle-global-search-panel .tle-search-heading-copy {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
   gap: 3px;
 }
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  min-width: 0;
+  gap: 8px;
+}
 #tle-global-search-panel .tle-search-title,
 #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-title { font-size: 1.08em; font-weight: 700; }
-#tle-global-search-panel .tle-search-subtitle,
-#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-subtitle { font-size: .78em; opacity: .62; }
+#tle-global-search-panel .tle-search-subtitle { font-size: .78em; opacity: .62; }
+#tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-subtitle {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .78em;
+  opacity: .62;
+}
 #tle-global-search-panel .tle-search-close,
 #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-close {
   display: grid;
@@ -3275,7 +3291,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           padding: 10px;
           border: 0;
           border-radius: 10px;
-          background: rgb(from var(--SmartThemeQuoteColor) r g b / .2);
+          background: rgb(from var(--SmartThemeQuoteColor) r g b / .12);
         }
         .tle-quick-manager .tle-organizer-pane-title {
           display: block;
@@ -3371,18 +3387,176 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0 !important; }
       }
       @media (max-width: 1000px) {
-        .tle-quick-manager .tle-quick-category-row { order: 1; }
-        .tle-quick-manager .tle-quick-group-heading { order: 2; }
-        .tle-quick-manager .tle-worldbook-filter-bar { order: 2; }
-        .tle-quick-manager .tle-quick-filter-bar { order: 3; }
-        .tle-quick-manager .tle-quick-toolbar { order: 4; }
-        .tle-quick-manager .tle-quick-group-actions { order: 5; }
-        .tle-quick-manager .tle-quick-manage-row { order: 6; }
-        .tle-quick-manager .tle-quick-import-confirm { order: 7; }
-        .tle-quick-manager .tle-quick-delete-confirm { order: 8; }
-        .tle-quick-manager .tle-quick-operations { order: 9; }
-        .tle-quick-manager .tle-quick-list { order: 10; }
-        .tle-quick-manager .tle-quick-status { order: 11; }
+        /* The mobile workspace is a compact control grid, not a vertical stack of desktop rows. */
+        #tle-organizer-panel.drawer-content > .tle-organizer-resources.tle-quick-manager {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          grid-template-rows: auto 34px 32px 34px auto auto auto auto auto minmax(0, 1fr) auto;
+          grid-template-areas:
+            "search search"
+            "categories categories"
+            "groups backup"
+            "target actions"
+            "manage manage"
+            "world world"
+            "operations operations"
+            "import import"
+            "delete delete"
+            "list list"
+            "status status";
+          align-content: stretch;
+          align-items: stretch;
+          gap: 6px 8px;
+          min-width: 0;
+          min-height: 0;
+        }
+        .tle-quick-manager .tle-search-field-wrap { grid-area: search; }
+        .tle-quick-manager .tle-quick-category-row {
+          grid-area: categories;
+          height: 34px;
+          max-height: 34px;
+          overflow: hidden;
+        }
+        .tle-quick-manager .tle-quick-category-row .tle-quick-tabs {
+          display: flex;
+          align-items: center;
+          height: 34px;
+          max-height: 34px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 0;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        .tle-quick-manager .tle-quick-category-row .tle-quick-tabs::-webkit-scrollbar,
+        .tle-quick-manager .tle-quick-filter-bar::-webkit-scrollbar,
+        .tle-quick-manager .tle-worldbook-filter-bar::-webkit-scrollbar {
+          display: none;
+          width: 0;
+          height: 0;
+        }
+        .tle-quick-manager .tle-quick-category-row .tle-quick-tabs > button {
+          flex: 0 0 auto;
+          height: 30px;
+          min-height: 30px;
+          padding-block: 4px;
+        }
+        .tle-quick-manager .tle-quick-filter-bar {
+          grid-area: groups;
+          display: flex;
+          flex: 1 1 auto;
+          flex-wrap: nowrap;
+          align-items: center;
+          height: 32px;
+          min-height: 32px;
+          max-height: 32px;
+          min-width: 0;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 0;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        .tle-quick-manager .tle-quick-group-heading {
+          grid-area: backup;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          min-width: 0;
+          gap: 0;
+        }
+        .tle-quick-manager .tle-quick-backup-row { gap: 3px; }
+        .tle-quick-manager .tle-quick-backup-row > .tle-quick-icon-action {
+          flex: 0 0 28px;
+          width: 28px;
+          min-width: 28px;
+          height: 28px;
+        }
+        .tle-quick-manager .tle-quick-toolbar {
+          grid-area: target;
+          display: flex;
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+        .tle-quick-manager .tle-quick-toolbar > select {
+          width: 100%;
+          min-width: 0;
+          height: 34px;
+          min-height: 34px;
+          margin: 0;
+        }
+        .tle-quick-manager .tle-quick-group-actions {
+          grid-area: actions;
+          display: flex;
+          flex: 0 0 auto;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 4px;
+          min-width: 0;
+        }
+        .tle-quick-manager .tle-quick-group-actions > button {
+          flex: 0 0 auto;
+          min-height: 34px;
+          padding-inline: 6px;
+          font-size: .78em;
+          white-space: nowrap;
+        }
+        .tle-quick-manager .tle-quick-manage-row {
+          grid-area: manage;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 5px;
+          min-width: 0;
+          padding: 0;
+        }
+        .tle-quick-manager .tle-quick-manage-row > input {
+          grid-column: 1 / -1;
+          min-width: 0;
+        }
+        .tle-quick-manager .tle-quick-manage-row > button {
+          min-width: 0;
+          padding-inline: 4px;
+          font-size: .8em;
+        }
+        .tle-quick-manager .tle-worldbook-filter-bar {
+          grid-area: world;
+          height: 32px;
+          min-height: 32px;
+          max-height: 32px;
+          padding: 0;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .tle-quick-manager .tle-quick-operations {
+          grid-area: operations;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          align-items: stretch;
+          gap: 5px;
+          width: 100%;
+          min-width: 0;
+        }
+        .tle-quick-manager .tle-quick-operations > button {
+          width: 100%;
+          min-width: 0;
+          min-height: 32px;
+          padding: 5px 3px;
+          font-size: .78em;
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .tle-quick-manager .tle-quick-import-confirm { grid-area: import; }
+        .tle-quick-manager .tle-quick-delete-confirm { grid-area: delete; }
+        .tle-quick-manager .tle-quick-list {
+          grid-area: list;
+          min-height: 0 !important;
+          align-self: stretch;
+        }
+        .tle-quick-manager .tle-quick-status { grid-area: status; }
       }
 
       .tle-quick-manager .tle-quick-filter,
@@ -7609,14 +7783,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.227 · 整理侠成为第十个原生导航抽屉</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.228 · 整理侠移动端布局优化</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.227</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.228</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11722,7 +11896,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         <header class="tle-search-heading">
           <div class="tle-search-heading-copy">
             <strong class="tle-search-title">整理侠</strong>
-            <span class="tle-search-subtitle">资源分组 · 批量管理 · 世界书绑定核对</span>
+            <span class="tle-search-subtitle">资源分组 · 批量管理</span>
           </div>
           <button type="button" class="tle-search-close" data-organizer-close aria-label="关闭整理侠">×</button>
         </header>
@@ -13594,7 +13768,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.227',
+    version: '0.3.228',
     ready: false,
     destroy,
     state,
