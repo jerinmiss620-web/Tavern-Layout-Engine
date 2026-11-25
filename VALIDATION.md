@@ -4,7 +4,16 @@
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
 
-## 2026-11-25 · Core v0.3.223 全局搜索与整理侠分离 / 世界书快速筛选（开发分支，未发布）
+## 2026-11-25 · Core v0.3.224 修复整理侠抽屉点击无响应 / 移除嵌套容器（开发分支，未发布）
+
+- 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Stable Core 仍为 v0.3.220；正式 `latest.json`、正式 Loader 清单、Bootstrap、安装包与发布计划均未修改。
+- 根因：v0.3.223 为新增的 Organizer toggle 注册的点击回调只在下一帧读取 `openDrawer` 状态并尝试渲染管理器，却没有实际切换 `openDrawer / closedDrawer`。新增 DOM 未可靠接入酒馆原生静态抽屉点击监听，导致导航图标、文字标签和全局搜索跳转均无法展开。
+- 修复：新增 `setOrganizerDrawerOpen()` / `toggleOrganizerDrawer()`，由 Organizer 自己显式切换其直接 `.drawer-content` 的开合类与 ARIA 状态；点击事件直接进入控制器。打开时关闭全局搜索、其他普通原生抽屉及 TLE 控制面板；移动端收起导航仍复用现有原生导航事件流程。
+- 结构：删除 Organizer 内层 `.tle-search-surface`，标题栏、独立资源筛选框和资源列表直接成为 `#tle-organizer-panel.drawer-content` 的子元素。CSS 不再为 Organizer 内层 wrapper 设置第二套宽高与滚动容器，保留原生 drawer-content 的定位与滚动机制；全局搜索弹窗仍保留自己的 `.tle-search-surface`。
+- 回归：新增抽屉开合控制器的开/关测试，验证 class、ARIA、管理器启动与关闭路径；保留全局搜索/Organizer 分离及世界书分类测试。源码语法检查与隔离 JS harness 回归通过。完整 `npm test`、CI 和 PC/移动端 ST/TT 实机验收仍待执行。
+- 测试通道已准备发布 Core v0.3.224；测试 Loader v0.3.0 不变且继续使用独立缓存。正式 Stable 通道和正式 Core 不受影响。
+
+## 2026-11-25 · Core v0.3.223 全局搜索与整理侠分离 / 世界书快速筛选（v0.3.223 先前候选，历史记录）
 
 - 工作分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`。正式 Core 仍为 v0.3.220，正式 `latest.json`、安装包和 release-plan 未修改。
 - 全局搜索恢复为工作区顶栏独立按钮和独立居中弹窗；保留原搜索索引、结果跳转、清空与刷新行为。弹窗增加「整理侠」跳转入口，只负责导航，不承载资源管理。
