@@ -12,7 +12,7 @@ export class OrganizerContent {
         this.revision = 0; this.busy = false; this.loaded = false; this.combinations = {};
         this.store = host.store || new BatchConfigStore({ indexedDB: host.window.indexedDB, legacy: () => host.window.localStorage });
         this.node = (tag, cls = '', text = '') => host.node(tag, cls, text);
-        this.button = (text, action) => host.button(text, () => void this.run(action));
+        this.button = (text, action) => { const button = host.button(text, () => void this.run(action)); button.classList.add('menu_button_icon'); return button; };
         this.mount();
         host.signal?.addEventListener('abort', () => { this.disposed = true; this.revision++; if (this.jobId) void this.api('cancel', { id: this.jobId }).catch(() => {}); }, { once: true });
     }
@@ -30,25 +30,34 @@ export class OrganizerContent {
     }
     mount() {
         const n = this.node;
-        this.searchRow = n('div', 'tle-content-search-row');
-        this.target = n('select', 'text_pole'); this.target.setAttribute('aria-label', '搜索目标');
-        for (const [value, label] of [['name', '名称'], ['content', '内容']]) { const o = n('option', '', label); o.value = value; this.target.append(o); }
-        this.target.addEventListener('change', () => void this.run(() => this.setMode(this.target.value)));
-        this.replace = n('input', 'text_pole'); this.replace.type = 'text'; this.replace.placeholder = '替换为（留空删除匹配文本）'; this.replace.setAttribute('aria-label', '替换为'); this.replace.hidden = true;
+        this.searchRow = n('div', 'tle-content-search-row flex-container flexFlowColumn');
+        this.target = n('div', 'flex-container'); this.target.setAttribute('role', 'group'); this.target.setAttribute('aria-label', '搜索方式');
+        for (const [value, text] of [['name', '资源名称'], ['content', '查找与替换']]) {
+            const label = n('label', 'checkbox_label'), radio = n('input'); radio.type = 'radio'; radio.name = 'tle-organizer-search-mode'; radio.value = value; radio.checked = value === this.mode;
+            radio.addEventListener('change', () => { if (radio.checked) void this.run(() => this.setMode(value)); });
+            label.append(radio, n('span', '', text)); this.target.append(label);
+        }
+        this.replace = n('input', 'text_pole flex1'); this.replace.type = 'text'; this.replace.size = 1; this.replace.placeholder = '留空删除匹配文本'; this.replace.setAttribute('aria-label', '替换为'); this.replace.hidden = true;
         this.replace.addEventListener('input', () => { this.rules[0].replace = this.replace.value; this.invalidate(); void this.persist().catch(() => {}); });
-        this.searchRow.append(this.target, this.h.searchWrap, this.replace);
-        this.controls = n('div', 'tle-content-controls'); this.controls.hidden = true;
+        this.findRow = n('div', 'flex-container flexnowrap alignItemsCenter');
+        this.h.searchWrap.classList.add('flex1');
+        this.replaceRow = n('div', 'flex-container flexnowrap alignItemsCenter'); this.replaceRow.hidden = true;
+        this.controls = n('div', 'tle-content-controls flex-container flexFlowColumn'); this.controls.hidden = true;
         const actions = n('div', 'flex-container flexWrap');
         this.scopeSelect = n('select', 'text_pole'); this.scopeSelect.setAttribute('aria-label', '内容搜索范围');
         for (const [value, label] of [['all', '全部支持资源'], ['filtered', '当前筛选范围'], ['selected', '已选资源']]) { const o = n('option', '', label); o.value = value; this.scopeSelect.append(o); }
         this.scopeSelect.addEventListener('change', () => { this.scope = this.scopeSelect.value; this.invalidate(); });
-        this.findButton = this.button('查找', () => this.scan());
+        this.findButton = this.button('查找', () => this.scan()); this.findButton.hidden = true;
         this.previewButton = this.button('预览替换', () => this.preview()); this.previewButton.disabled = true;
+        this.findRow.append(this.h.searchWrap, this.findButton);
+        const replaceLabel = n('label', 'flex-container flexnowrap alignItemsCenter flex1'); replaceLabel.append(n('span', '', '替换为'), this.replace);
+        this.replaceRow.append(replaceLabel, this.previewButton);
+        this.searchRow.append(this.target, this.findRow, this.replaceRow);
         this.cancelButton = this.h.button('取消扫描', () => { this.cancelled = true; if (this.jobId) void this.api('cancel', { id: this.jobId }).catch(e => this.message(e.message)); }); this.cancelButton.hidden = true;
-        actions.append(this.scopeSelect, this.findButton, this.previewButton, this.cancelButton,
-            this.button('添加规则', () => { if (this.rules.length >= 200) throw Error('最多 200 条规则。'); this.rules.push({ find: '', replace: '' }); this.ruleDetails.open = true; this.invalidate(); this.renderRules(); }),
+        actions.append(this.scopeSelect, this.cancelButton,
             this.button('备份与恢复', () => this.backups()));
         this.ruleDetails = n('details', 'tle-content-rules'); this.ruleDetails.append(n('summary', '', '规则组合与高级选项'));
+        this.ruleDetails.append(this.button('添加规则', () => { if (this.rules.length >= 200) throw Error('最多 200 条规则。'); this.rules.push({ find: '', replace: '' }); this.invalidate(); this.renderRules(); }));
         this.ruleRows = n('div'); this.ruleDetails.append(this.ruleRows);
         const combos = n('div', 'flex-container flexWrap');
         this.comboName = n('input', 'text_pole'); this.comboName.placeholder = '规则组合名称'; this.comboName.setAttribute('aria-label', '规则组合名称');
@@ -78,8 +87,9 @@ export class OrganizerContent {
     async setMode(mode) {
         if (this.busy) return;
         if (this.active) this.rules[0].find = this.h.search.value; else this.nameQuery = this.h.search.value;
-        this.mode = mode === 'content' ? 'content' : 'name'; this.target.value = this.mode;
-        this.controls.hidden = this.replace.hidden = !this.active;
+        this.mode = mode === 'content' ? 'content' : 'name';
+        for (const radio of this.target.querySelectorAll('input')) radio.checked = radio.value === this.mode;
+        this.controls.hidden = this.replace.hidden = this.replaceRow.hidden = this.findButton.hidden = !this.active;
         this.h.setContentMode(this.active);
         this.h.search.value = this.active ? this.rules[0].find : this.nameQuery;
         this.h.search.placeholder = this.active ? '查找内容（普通文本）…' : this.h.namePlaceholder;
@@ -122,7 +132,7 @@ export class OrganizerContent {
     renderRules() {
         this.ruleRows.replaceChildren();
         this.rules.slice(1).forEach((rule, i) => {
-            const row = this.node('div', 'tle-content-rule');
+            const row = this.node('div', 'tle-content-rule flex-container');
             const find = this.node('input', 'text_pole'), replace = this.node('input', 'text_pole');
             find.type = replace.type = 'text'; find.value = rule.find; replace.value = rule.replace;
             find.setAttribute('aria-label', `规则 ${i + 2} 查找内容`); replace.setAttribute('aria-label', `规则 ${i + 2} 替换内容`);
@@ -175,7 +185,8 @@ export class OrganizerContent {
             if (snapshot.status === 'scanning') await new Promise(resolve => this.h.window.setTimeout(resolve, 100));
         } while (snapshot.status === 'scanning' && !this.disposed);
         if (this.disposed || snapshot.status !== 'ready') throw Error(snapshot.error || '扫描已取消，未修改资料。');
-        if (snapshot.files.some(f => !/^[a-f0-9]{64}$/.test(f.beforeHash || ''))) throw Error('配套接口缺少扫描完整性标记，请更新 TLE 配套 PC 服务端插件后重新查找。');
+        // Upstream v1.1.0 keeps file hashes inside the server job, not in status.
+        // Missing optional hashes must never prevent a read-only search.
         const rows = [];
         for (const file of snapshot.files) {
             for (let offset = 0; offset < file.count;) {
@@ -226,7 +237,7 @@ export class OrganizerContent {
             // A separate writable job is created only by the explicit preview action.
             const next = await this.collect(false, this.options, this.scanRules);
             const previous = new Map(original.files.map(f => [f.id, f.beforeHash]));
-            if (next.snapshot.files.some(f => !previous.has(f.id) || previous.get(f.id) !== f.beforeHash)) {
+            if (next.snapshot.files.some(f => !previous.has(f.id) || (previous.get(f.id) && f.beforeHash && previous.get(f.id) !== f.beforeHash))) {
                 this.invalidate(); throw Error('资料在查找后发生变化，请重新查找和选择；未写入资料。');
             }
             const nextIds = new Set(next.rows.map(r => r.id));
@@ -234,6 +245,14 @@ export class OrganizerContent {
             if (next.rows.some(r => !foundIds.has(r.id))) { this.invalidate(); throw Error('预览出现新的匹配，请移除前后相同的重叠规则后重新查找和选择。'); }
             const expected = this.rows.filter(r => this.scanRules[r.rule].find !== this.scanRules[r.rule].replace);
             if (expected.some(r => !nextIds.has(r.id))) { this.invalidate(); throw Error('匹配在查找后发生变化，请重新查找。'); }
+            // Compare the upstream preview contract as well as IDs: its IDs encode
+            // location, not the surrounding text. The writable job still performs
+            // upstream's full-file hash checks before backup, commit and reread.
+            const oldRows = new Map(this.rows.map(r => [r.id, r]));
+            if (next.rows.some(r => {
+                const old = oldRows.get(r.id);
+                return old.fileId !== r.fileId || old.field !== r.field || old.start !== r.start || old.context.text !== r.context.text || old.context.leading !== r.context.leading || old.context.trailing !== r.context.trailing;
+            })) { this.invalidate(); throw Error('匹配内容在查找后发生变化，请重新查找；未写入资料。'); }
             this.snapshot = next.snapshot; this.rows = next.rows; this.jobId = next.id;
             this.excluded = new Set([...this.excluded].filter(id => nextIds.has(id))); this.groupResults();
             const chosen = this.rows.filter(r => !this.excluded.has(r.id)); if (!chosen.length) throw Error('所选匹配没有实际变化。');
@@ -317,7 +336,9 @@ export class OrganizerContent {
             try { const result = await this.client.importBackup(file); this.message(`备份 ${result.id} 已校验并导入，未恢复资料。`); await this.backups(); }
             finally { input.value = ''; this.lock(false); }
         }));
-        area.append(input, this.button('导入备份 ZIP', () => input.click()));
+        const extended = this.client.host === 'tt' || this.inventoryData.capabilities?.selectedRestore === true;
+        if (this.client.host === 'tt' || this.inventoryData.capabilities?.zipImport === true) area.append(input, this.button('导入备份 ZIP', () => input.click()));
+        else area.append(this.node('small', '', '原版服务端支持查找、替换、备份导出与整份恢复；ZIP 导入及按文件恢复需配套插件。'));
         const states = { complete: '已完成', restored: '已恢复', aborted: '执行中止', 'partially-restored': '部分恢复', conflict: '冲突', committed: '已修改', unchanged: '未改变', pending: '待提交', 'needs-attention': '需检查', foreign: '其他资料集，仅下载', unreadable: '清单无法读取' };
         for (const backup of backups) {
             const details = this.node('details'); details.append(this.node('summary', '', `${backup.created || backup.id} · ${states[backup.status] || backup.status}`));
@@ -325,6 +346,7 @@ export class OrganizerContent {
             const confirmation = this.node('div'); confirmation.hidden = true;
             for (const f of backup.files || []) {
                 const label = this.node('label', 'checkbox_label'), check = this.node('input'); check.type = 'checkbox'; check.checked = true;
+                check.disabled = !extended;
                 check.addEventListener('change', () => { check.checked ? chosen.add(f.path) : chosen.delete(f.path); confirmation.hidden = true; });
                 label.append(check, this.node('span', '', `${f.path} · ${states[f.state] || f.state}${f.error ? ' · ' + f.error : ''}`)); details.append(label);
             }
@@ -339,14 +361,14 @@ export class OrganizerContent {
                     if (this.context().isGenerating || this.context().streamingProcessor) throw Error('请等待回复生成结束。');
                     this.writing = true; this.lock(true);
                     try {
-                        const result = await this.api('restore', { id: backup.id, paths: [...chosen], preserveConflicts });
+                        const result = await this.api('restore', { id: backup.id, ...(extended ? { paths: [...chosen] } : {}), preserveConflicts });
                         if (result.needsConfirmation) {
                             confirmation.replaceChildren(this.node('p', '', `以下项目存在冲突：${result.conflicts.join('、')}。尚未恢复。`), this.button('保留冲突，仅恢复其余所选资源', () => restore(true)));
                         } else await this.afterWrite(`已恢复 ${result.restored} 份数据，保留 ${result.conflicts.length} 个冲突。`);
                     } catch (e) { await this.afterWrite('恢复未完成：' + e.message); }
                     finally { this.writing = false; if (this.snapshot || !this.h.reloading()) this.lock(false); }
                 };
-                details.append(this.button('恢复所选资源…', () => {
+                details.append(this.button(extended ? '恢复所选资源…' : '恢复整份备份…', () => {
                     if (!chosen.size) throw Error('请选择要恢复的资源。');
                     confirmation.replaceChildren(this.node('p', '', `确认检查并恢复所选 ${chosen.size} 份数据？`), this.button('确认检查并恢复', () => restore(false))); confirmation.hidden = false;
                 }), confirmation);

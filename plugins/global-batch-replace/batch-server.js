@@ -212,7 +212,7 @@ export class BatchService {
                 } catch (error) { skipped.push({ path: resource.relative, error: error.message }); }
             }
         }
-        return { resources, owners, skipped, scopes: BATCH_SCOPES, version: 1 };
+        return { resources, owners, skipped, scopes: BATCH_SCOPES, version: 1, capabilities: { scanHash: true, selectedRestore: true, zipImport: true } };
     }
     startScan(options) {
         if (this.busy) fail('正在写入或恢复，请稍后再扫描。');

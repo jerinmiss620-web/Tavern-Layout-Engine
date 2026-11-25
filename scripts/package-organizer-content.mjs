@@ -31,7 +31,7 @@ const sourceName=`TLE-${version}-source.zip`;
 execFileSync('git',['archive','--format=zip','--output='+path.join(output,sourceName),head]);
 const payload=[['TLE.js',core],[importer,blob(`releases/v${version}/${importer}`)],['channels/test.json',blob('channels/test.json')],...plugin,...tt,
  ['README.md',blob('development/organizer/CONTENT-INTEGRATION.md')],['VALIDATION.md',blob('development/organizer/CONTENT-VALIDATION.md')],['CHANGELOG.md',blob(`releases/v${version}/CHANGELOG.md`)],['source/'+sourceName,fs.readFileSync(path.join(output,sourceName))]];
-for(const folder of ['browser-qa','test-results']){
+for(const folder of ['browser-qa','test-results','pc-acceptance','pc-paired-acceptance']){
  const dir=path.join(output,folder);if(fs.existsSync(dir))for(const name of fs.readdirSync(dir))if(fs.statSync(path.join(dir,name)).isFile())payload.push([folder+'/'+name,fs.readFileSync(path.join(dir,name))]);
 }
 const record=([name,data])=>({path:name,size_bytes:data.length,sha256:createHash('sha256').update(data).digest('hex')});

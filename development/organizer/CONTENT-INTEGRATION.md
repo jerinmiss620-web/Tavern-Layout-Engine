@@ -1,4 +1,4 @@
-# 整理侠内容处理整合 · v0.3.234 TEST
+# 整理侠内容处理整合 · v0.3.235 TEST
 
 ## 基线与结构
 
@@ -11,23 +11,25 @@
 
 ## 使用与安装
 
-测试通道使用 `channels/test.json`；手动备用安装包为 `releases/v0.3.234/TLE-0.3.234-TEST-import.json`（默认禁用）。只启用一条 TLE 加载链，避免独立 Core 与 Test Loader 重复执行。
+测试通道使用 `channels/test.json`；手动备用安装包为 `releases/v0.3.235/TLE-0.3.235-TEST-import.json`（默认禁用）。只启用一条 TLE 加载链，避免独立 Core 与 Test Loader 重复执行。
 
-PC SillyTavern：把配套 ZIP 的 `plugins/global-batch-replace` 放入酒馆根目录，在 `config.yaml` 中启用 `enableServerPlugins: true`，重启酒馆。定制酒馆缺少依赖时在插件目录执行 `npm ci --omit=dev`。旧 v1.1.0 插件需更新为本包，以提供扫描指纹、ZIP 导入和指定文件恢复；旧备份仍保留。
+PC SillyTavern：已安装且能运行的原版 Global Batch Replace v1.1.0 服务端可直接使用，更新 Core 即可查找、预览、替换、导出备份及整份恢复。v0.3.234 错误地要求原版没有返回的扫描指纹，导致结果被拦截；本版已修复，不必为了查找更换服务端。
+
+尚未安装服务端，或需要 ZIP 导入和按文件恢复时，把配套 ZIP 的 `plugins/global-batch-replace` 放入酒馆根目录，在 `config.yaml` 中启用 `enableServerPlugins: true`，重启酒馆。定制酒馆缺少依赖时在插件目录执行 `npm ci --omit=dev`。原备份保留。配套版本 1.1.0-tle.2 声明扩展能力；1.1.0-tle.1 也能查找替换，但更新至 .2 才显示扩展备份操作。
 
 TT：Core 已内置 `batch-tt.js`，不用安装 Node 插件。不支持的 ABI、缺失的原生接口、未知 Tauri 宿主和资料集不一致均停止处理，不回退到 PC。迁移后在整理侠内容工具中核对新旧目录并登记资料集。
 
-在整理侠右栏把「名称」切换为「内容」，填写同一搜索框和替换框。替换框为空表示删除匹配文本。依次查找、选择资源或逐处匹配、预览替换、确认执行。预览显示在原资源列表项目内；改变规则、范围或匹配选择后必须重新预览。
+在整理侠直接选择「查找与替换」，填写同一搜索框，点击旁边的「查找」。第二行的「替换为」留空表示删除匹配文本，右侧按钮用于预览。依次选择资源或逐处匹配、预览替换、确认执行。预览显示在原资源列表项目内；改变规则、范围或匹配选择后必须重新预览。搜索框、替换框与按钮采用酒馆原生类，不强制控件高度、颜色、字体、背景和边框；搜索框内使用酒馆原生清除按钮。
 
 默认范围「全部支持资源」跨当前平台支持的类型；「当前筛选范围」遵循现有资源类型、分组及世界书状态；「已选资源」使用名称模式明确勾选的资源，未选择时禁用。原名称查询与内容查询分别保存。内容模式不显示资源删除工具；切回名称模式恢复原工具和选择。
 
-「添加规则」展开原位规则编辑区；「规则组合与高级选项」默认折叠。规则为区分大小写的普通文本，沿用最长匹配优先、同长度按规则顺序、原文非级联算法，最多 200 条。JSON/YAML 必须按资源相对路径填写明确字段路径，例如 `{"user/files/example.json":[["content"]]}`；未指定的自定义 JSON/YAML 不参与扫描。TXT 只限原适配器的 `user/files` 目录。
+「规则组合与高级选项」默认折叠，展开后可添加规则。规则为区分大小写的普通文本，沿用最长匹配优先、同长度按规则顺序、原文非级联算法，最多 200 条。JSON/YAML 必须按资源相对路径填写明确字段路径，例如 `{"user/files/example.json":[["content"]]}`；未指定的自定义 JSON/YAML 不参与扫描。TXT 只限原适配器的 `user/files` 目录。
 
-「备份与恢复」在同一列表中显示备份。可导出 ZIP、导入并验证 ZIP、勾选需要恢复的数据文件、检查冲突后确认恢复。PC 恢复以物理文件为单位；多个身份可能共享 `settings.json`，确认恢复前应核对文件范围。TT 沿用逐原生资源的恢复单位。
+「备份与恢复」在同一列表中显示备份。原版 PC 插件可导出 ZIP 和恢复整份备份；配套 .2 插件及 TT 还能导入并验证 ZIP、勾选需要恢复的文件。界面根据接口能力展示对应操作，避免原版忽略 paths 参数而意外全量恢复。PC 恢复以物理文件为单位；多个身份可能共享 `settings.json`，确认恢复前应核对文件范围。TT 沿用逐原生资源的恢复单位。
 
 ## 数据与兼容性
 
-- 查找创建服务端/TT 只读任务，处理层拒绝对此任务提交。预览另建可提交任务，并核对查找指纹及匹配身份；不会自动接受新出现的命中。
+- 查找创建服务端/TT 只读任务，处理层拒绝对此任务提交。预览另建可提交任务，核对匹配身份、位置、上下文；接口返回文件指纹时也核对指纹。原版不返回指纹但仍在服务端任务内部完整保留提交校验；不会自动接受新出现的命中。原版查找至预览间非命中区域的变化按新预览任务处理，提交时仍以该任务的完整文件哈希为准。
 - 执行仍由原服务负责重读、冲突校验、备份、提交、复读和失败恢复。白名单之外字段、头像 ID、引用关系、未知扩展数据不参与递归替换。
 - PC 保留 `/api/plugins/global-batch-replace` 和登录用户根目录隔离。新增 `POST /import` 接收 `application/zip`，验证目录绑定、路径、重复记录、展开预算及内容哈希，清单最后发布，不覆盖旧备份。
 - 新增 `restore.paths` 可指定备份内的文件/资源路径；缺省时保留原全量恢复行为。冲突保留仍要求第二次明确确认。
@@ -37,7 +39,7 @@ TT：Core 已内置 `batch-tt.js`，不用安装 Node 插件。不支持的 ABI�
 
 ## 验证与限制
 
-自动化验证使用临时 PC 数据目录、模拟 TT 原生接口和真实 Chromium 的模拟宿主。详见 `CONTENT-VALIDATION.md`。这些测试不代替实机验收：PC SillyTavern、PC TauriTavern、iPhone TauriTavern、Android SillyTavern 本次均未实机验证。
+除临时目录服务测试、TT 模拟测试外，本版新增真实 PC SillyTavern 1.19.0 完整页面验收，使用隔离资料和本机实际安装的原版服务端，验证查找、替换、部分删除及备份恢复。详见 `CONTENT-VALIDATION.md`。这不代表所有扩展组合通过；PC TauriTavern、iPhone TauriTavern、Android SillyTavern 仍未实机验证。
 
 TT 逐资源保存，不提供跨资源原子事务。执行期间应暂停其他窗口、设备和同步编辑。PC ZIP 只允许导回同一用户资料根目录；原备份可重新导出获得当前目录绑定。TT ZIP 继续只允许同一资料集导入。
 
@@ -52,7 +54,10 @@ npm ci
 node scripts/build-organizer-content.mjs
 npm test
 node tests/organizer-browser.mjs
+node scripts/prepare-st-acceptance.mjs
+# 在独立 st-acceptance 目录启动 node server.js 后：
+node tests/organizer-st-acceptance.mjs
 node loader/verify-test-channel.mjs --remote
 ```
 
-浏览器检查默认使用 Windows Chrome；其他环境可设置 `CHROME_PATH`。`TLE_QA_OUTPUT` 指定截图目录。来源与权利归属见 `batch/CREDITS.md`；fflate 许可见 `batch/vendor/fflate-LICENSE`。
+浏览器检查默认使用 Windows Chrome；其他环境可设置 `CHROME_PATH`。`TLE_QA_OUTPUT` 指定截图目录；`TLE_ST_SOURCE` 指定本机 SillyTavern 安装，`TLE_ST_FIXTURE` 必须是独立的 st-acceptance 目录，`TLE_ST_PUBLIC` 指定控制器夹具使用的真实 CSS 目录。准备脚本只复制程序、默认内容和原插件，不复制真实用户 data。来源与权利归属见 `batch/CREDITS.md`；fflate 许可见 `batch/vendor/fflate-LICENSE`。

@@ -7,11 +7,12 @@ import { JSDOM } from 'jsdom';
 import { OrganizerContent } from '../development/organizer/batch/controller.js';
 import { resolveScope, describeResource } from '../development/organizer/batch/catalog.js';
 import { BatchService } from '../plugins/global-batch-replace/batch-server.js';
+import { BatchService as OriginalService } from './fixtures/upstream-pc-1.1.0/batch-server.js';
 import { TtBatchService, ttHash } from '../development/organizer/batch/batch-tt.js';
 import { zipSync } from '../development/organizer/batch/vendor/fflate.js';
 import { createHash, randomUUID } from 'node:crypto';
 
-function fixture(t) {
+function fixture(t, Service = BatchService) {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tle-content-'));
     t.after(() => { if (path.basename(root).startsWith('tle-content-')) fs.rmSync(root, { recursive: true, force: true }); });
     const write = (p, value) => { fs.mkdirSync(path.dirname(path.join(root, p)), { recursive: true }); fs.writeFileSync(path.join(root,p), typeof value === 'string' ? value : JSON.stringify(value)); };
@@ -21,7 +22,7 @@ function fixture(t) {
     write('worlds/B.json', { entries: { 0: { uid: 0, content: 'old world', key: ['old'] } }, binding: 'old ID' });
     write('OpenAI Settings/P.json', { main_prompt: 'old prompt' });
     write('TextGen Settings/P.json', { main_prompt: 'old other provider' });
-    const service = new BatchService(root), calls = [];
+    const service = new Service(root), calls = [];
     const client = { host: 'st', async call(name, body = {}) {
         calls.push(name);
         if (name === 'inventory') return service.inventory();
@@ -125,12 +126,35 @@ test('preview cannot silently select new shorter matches hidden by an unchanged 
     const f=fixture(t); await f.ready(); f.c.rules=[{find:'old old',replace:'old old'},{find:'old',replace:'X'}]; f.c.syncInputs(); f.c.scope='selected';
     await f.c.scan(); await assert.rejects(f.c.preview(),/新的匹配/); assert.equal(f.calls.includes('apply'),false);
 });
-test('missing/old PC plugin and unsupported Tauri fail closed with actionable errors', async t=>{
+test('missing PC plugin reports install steps, upstream status without optional hash remains supported', async t=>{
     const f=fixture(t); await f.ready(); const call=f.client.call.bind(f.client);
     f.client.call=async(name,body)=>{if(name==='inventory')throw Error('请安装 plugins/global-batch-replace 并启用 enableServerPlugins');return call(name,body);};
     await assert.rejects(f.c.scan(),/enableServerPlugins/); assert.equal(f.c.busy,false); assert.equal(f.calls.includes('apply'),false);
     f.client.call=async(name,body)=>{const r=await call(name,body);if(name==='status')r.files.forEach(f=>delete f.beforeHash);return r;};
-    await assert.rejects(f.c.scan(),/更新 TLE 配套/);assert.equal(f.calls.includes('apply'),false);
+    await f.c.scan(); assert.ok(f.c.rows.length > 0); assert.equal(f.calls.includes('apply'),false);
+});
+test('unmodified upstream v1.1.0 supports search, partial empty replacement, backup and restore', async t=>{
+    const f=fixture(t,OriginalService); await f.ready(''); f.c.scope='selected'; const before=f.read('characters/A.json');
+    await f.c.scan(); assert.equal(f.c.snapshot.files[0].beforeHash,undefined); assert.equal(f.c.rows.length,3);
+    f.c.excluded.add(f.c.rows[1].id); await f.c.preview(); await f.c.apply();
+    assert.equal(JSON.parse(f.read('characters/A.json')).data.description,' old text');
+    const backups=f.service.backups(); assert.equal(backups.length,1);
+    await f.c.backups(); assert.match(f.h.list.textContent,/恢复整份备份/);
+    assert.equal(f.h.list.querySelector('input[type=checkbox]').disabled,true);
+    assert.equal(f.service.restore({id:backups[0].id}).restored,1);assert.equal(f.read('characters/A.json'),before);
+});
+test('upstream compatibility detects changed preview context, and original server rejects post-preview conflicts',async t=>{
+    const f=fixture(t,OriginalService); await f.ready(); f.c.scope='selected'; await f.c.scan();
+    f.write('characters/A.json',{data:{description:'old old changed',first_mes:'old greeting'}});
+    await assert.rejects(f.c.preview(),/发生变化/); assert.equal(f.calls.includes('apply'),false);
+    await f.c.scan();await f.c.preview();f.write('characters/A.json',{data:{description:'concurrent value'}});
+    await f.c.apply();assert.match(f.read('characters/A.json'),/concurrent value/);assert.match(f.resume(),/失败/);
+});
+test('visible search mode and adjacent native controls retain one shared search field', t=>{
+    const f=fixture(t);
+    assert.match(f.c.target.textContent,/查找与替换/);assert.equal(f.c.target.tagName,'DIV');
+    assert.equal(f.c.findButton.parentElement,f.c.findRow);assert.equal(f.h.searchWrap.parentElement,f.c.findRow);
+    assert.equal(f.c.previewButton.parentElement,f.c.replaceRow);
 });
 test('TT capabilities exclude unsupported types and descriptor resolves stable world/persona IDs',()=>{
     const inv={supportedScopes:['persona','chats','character','greetings','world'],resources:[],owners:[],scopes:{}};
@@ -169,6 +193,7 @@ test('development build preserves a single Organizer, protected resource deletio
     assert.match(s,/if \(content\?\.active\) \{ content.renderList\(\); return; \}/);
     assert.match(s,/content\?\.active \|\| content\?\.busy/);
     assert.match(s,/persona: true/); assert.match(s,/theme: true/);
-    const shared=s.match(/input\.tle-search-field\[type="search"\]\s*\{([^}]*)\}/)[1];
-    assert.doesNotMatch(shared,/(?:^|\n)\s*(?:padding|background|border|font|color)\s*:/); assert.match(shared,/height: 40px/);
+    assert.doesNotMatch(s,/input\.tle-search-field\[type="search"\]\s*\{/);
+    const panel=s.slice(s.indexOf('  function createOrganizerPanel()'),s.indexOf('  function createRailControls()'));
+    assert.doesNotMatch(panel,/<button[^>]*tle-search-clear/);
 });

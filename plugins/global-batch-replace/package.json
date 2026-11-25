@@ -1,6 +1,6 @@
 {
   "name": "tavern-global-batch-replace-server",
-  "version": "1.1.0-tle.1",
+  "version": "1.1.0-tle.2",
   "private": true,
   "type": "module",
   "dependencies": {
