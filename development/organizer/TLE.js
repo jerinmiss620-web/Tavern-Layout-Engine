@@ -3424,7 +3424,39 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .tle-quick-manager .tle-quick-item-detail {
+      .tle-quick-manager 
+.tle-quick-item-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.tle-quick-item-title-row .tle-quick-item-title { min-width: 0; }
+.tle-quick-item-status {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 1px 6px;
+  border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 25%));
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1.35;
+  white-space: nowrap;
+  opacity: .82;
+}
+.tle-quick-item-status.is-orphan {
+  color: var(--SmartThemeEmColor, #c66);
+  border-color: color-mix(in srgb, var(--SmartThemeEmColor, #c66) 38%, transparent);
+}
+.tle-quick-item-status.is-warning { color: var(--SmartThemeQuoteColor, currentColor); }
+.tle-quick-item-status.is-pending { opacity: .64; }
+.tle-quick-item-worldbook .tle-quick-item-detail {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+.tle-quick-item-detail {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -4570,7 +4602,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
   // Shared TLE picker. Information-station selectors use the same centered
   // modal shell and search-field treatment as the global search dialog.
-  const QUICK_MODULES = INFO_MODULES.filter(item => item.id !== 'characterWorldBook');
+  const QUICK_MODULES = INFO_MODULES.filter(item => item.id !== 'characterWorldBook').map(item => item.id === 'worldInfo' ? { ...item, title: '世界书' } : item);
   const QUICK_GROUP_KEY = 'tle.quickGroups.v2';
   const QUICK_GROUP_LEGACY_KEY = 'tle.quickGroups.v1';
   let quickPanel = null;
@@ -4836,6 +4868,160 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       multiple: select.multiple,
     }));
   }
+
+  function migrateQuickWorldInfoGroupAssignments(items) {
+    try {
+      const data = readQuickGroups();
+      const map = data.assignments?.worldInfo || Object.create(null);
+      let changed = false;
+      for (const item of items) {
+        const legacyKey = item.legacyKey;
+        if (!legacyKey || legacyKey === item.key || !Object.hasOwn(map, legacyKey)) continue;
+        if (!Object.hasOwn(map, item.key)) map[item.key] = map[legacyKey];
+        delete map[legacyKey];
+        changed = true;
+      }
+      if (changed) {
+        data.assignments.worldInfo = map;
+        saveQuickGroups(data);
+      }
+    } catch (error) {
+      console.warn('[TLE] Worldbook group-key migration failed:', error);
+    }
+  }
+
+  function quickWorldInfoSelectItems() {
+    const items = quickSelectItems('world_info').map(item => ({
+      ...item,
+      legacyKey: item.key,
+      key: JSON.stringify(['world_info', item.label]),
+      resourceName: item.label,
+      selectValue: item.value,
+    }));
+    migrateQuickWorldInfoGroupAssignments(items);
+    return items;
+  }
+
+  function buildWorldInfoCatalog(worldNames, context, worldInfo, selectedWorldInfo, worldInfoSelect) {
+    const names = [...new Set((Array.isArray(worldNames) ? worldNames : [])
+      .map(value => String(value || '').trim()).filter(Boolean))];
+    const options = worldInfoSelect ? [...worldInfoSelect.options] : [];
+    const optionValues = new Map(options.map(option => [String(option.textContent || '').trim(), String(option.value)]));
+    const globalNames = new Set([
+      ...(Array.isArray(selectedWorldInfo) ? selectedWorldInfo : []),
+      ...(Array.isArray(worldInfo?.globalSelect) ? worldInfo.globalSelect : []),
+    ].map(value => String(value || '').trim()).filter(Boolean));
+    const characters = Array.isArray(context?.characters) ? context.characters : [];
+    const currentByFilename = new Map();
+    const primaryByBook = new Map(names.map(name => [name, new Set()]));
+    const extraByBook = new Map(names.map(name => [name, new Set()]));
+    const orphanByBook = new Map(names.map(name => [name, new Set()]));
+    const unloadedIndices = [];
+
+    for (const [index, character] of characters.entries()) {
+      const avatar = String(character?.avatar || '').trim();
+      const filename = avatar.replace(/\.[^/.]+$/, '');
+      if (filename) currentByFilename.set(filename, character);
+      if (character?.shallow === true) {
+        unloadedIndices.push(index);
+        continue;
+      }
+      const primary = String(character?.data?.extensions?.world || character?.json_data?.extensions?.world || '').trim();
+      if (primary && primaryByBook.has(primary)) {
+        primaryByBook.get(primary).add(String(character?.name || avatar || filename).trim());
+      }
+    }
+
+    for (const record of Array.isArray(worldInfo?.charLore) ? worldInfo.charLore : []) {
+      const ownerName = String(record?.name || '').trim();
+      if (!ownerName) continue;
+      const currentOwner = currentByFilename.get(ownerName);
+      for (const rawBook of Array.isArray(record?.extraBooks) ? record.extraBooks : []) {
+        const bookName = String(rawBook || '').trim();
+        if (!extraByBook.has(bookName)) continue;
+        (currentOwner ? extraByBook : orphanByBook).get(bookName).add(
+          currentOwner ? String(currentOwner.name || currentOwner.avatar || ownerName).trim() : ownerName
+        );
+      }
+    }
+
+    const entries = names.map((name, index) => {
+      const primary = [...(primaryByBook.get(name) || [])];
+      const extra = [...(extraByBook.get(name) || [])];
+      const orphan = [...(orphanByBook.get(name) || [])];
+      const global = globalNames.has(name);
+      const hasCurrent = global || primary.length > 0 || extra.length > 0;
+      let statusLabel = '未发现角色绑定';
+      let statusTone = 'neutral';
+      if (orphan.length && !hasCurrent && unloadedIndices.length === 0) {
+        statusLabel = '孤儿';
+        statusTone = 'orphan';
+      } else if (orphan.length && hasCurrent) {
+        statusLabel = '含遗留关联';
+        statusTone = 'warning';
+      } else if (unloadedIndices.length) {
+        statusLabel = hasCurrent ? '部分扫描' : '待核对';
+        statusTone = 'pending';
+      } else if (hasCurrent) {
+        statusLabel = '已关联';
+        statusTone = 'linked';
+      } else if (orphan.length) {
+        statusLabel = '待核对';
+        statusTone = 'pending';
+      }
+
+      const details = [];
+      if (global) details.push('全局');
+      if (primary.length) details.push('主要绑定：' + primary.join('、'));
+      if (extra.length) details.push('额外绑定：' + extra.join('、'));
+      if (orphan.length) details.push('遗留角色记录：' + orphan.join('、'));
+      if (unloadedIndices.length) details.push('尚有 ' + unloadedIndices.length + ' 张角色卡未加载，主要绑定待核对');
+      if (!details.length) details.push('未发现全局或角色卡绑定');
+
+      const optionValue = optionValues.get(name) ?? String(index);
+      const detail = details.join(' · ');
+      return {
+        key: JSON.stringify(['world_info', name]),
+        legacyKey: JSON.stringify(['world_info', optionValue]),
+        value: name,
+        selectValue: optionValue,
+        selectId: 'world_info',
+        label: name,
+        detail,
+        search: [name, detail, statusLabel].join(' '),
+        selected: global,
+        disabled: false,
+        multiple: true,
+        statusLabel,
+        statusTone,
+        binding: { global, primary, extra, orphan },
+      };
+    });
+
+    return {
+      entries,
+      meta: {
+        totalCharacters: characters.length,
+        unloadedCount: unloadedIndices.length,
+        unloadedIndices,
+      },
+    };
+  }
+
+  function removeWorldInfoExtraLinks(worldInfo, worldName) {
+    const records = worldInfo?.charLore;
+    if (!Array.isArray(records)) return false;
+    let changed = false;
+    for (let index = records.length - 1; index >= 0; index--) {
+      const record = records[index];
+      if (!Array.isArray(record?.extraBooks) || !record.extraBooks.includes(worldName)) continue;
+      const remaining = record.extraBooks.filter(name => name !== worldName);
+      if (remaining.length) record.extraBooks = remaining;
+      else records.splice(index, 1);
+      changed = true;
+    }
+    return changed;
+  }
   // Match Theme Manager's catalog contract: every non-empty native value is a
   // theme name. A hidden option/select (including an iOS shield) is not a
   // missing theme. Keep the existing keys so saved quick groups still match.
@@ -5017,6 +5203,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       return true;
     });
   }
+  let worldInfoCatalogMeta = { totalCharacters: 0, unloadedCount: 0, unloadedIndices: [] };
+
   async function quickCatalog(id, mount = true, signal = state.abort.signal) {
     if (id === 'theme') return quickThemeCatalog(signal);
     if (id === 'reasoning') return (await withQuickReasoningControl(quickReasoningItems, signal)) || [];
@@ -5071,8 +5259,34 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         ...quickModelSelects().flatMap(select => quickSelectItems(select.id, '模型')),
       ];
     }
+    if (id === 'worldInfo') return quickWorldInfoSelectItems();
     return quickSelectItems(ids[id]);
   }
+  async function quickManagerCatalog(id, signal = state.abort.signal) {
+    if (id !== 'worldInfo') return quickCatalog(id, false, signal);
+    if (state.destroyed || signal?.aborted) return [];
+    const native = await quickImport('/scripts/world-info.js');
+    if (state.destroyed || signal?.aborted) return [];
+    const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+    const select = quickSelect('world_info');
+    const fallbackNames = select
+      ? [...select.options].map(option => String(option.textContent || '').trim()).filter(Boolean)
+      : [];
+    const names = Array.isArray(native.world_names) && native.world_names.length
+      ? native.world_names
+      : fallbackNames;
+    const catalog = buildWorldInfoCatalog(
+      names,
+      context,
+      native.world_info || {},
+      native.selected_world_info || [],
+      select
+    );
+    worldInfoCatalogMeta = catalog.meta;
+    migrateQuickWorldInfoGroupAssignments(catalog.entries);
+    return catalog.entries;
+  }
+
   async function applyQuickChoice(id, item, signal = state.abort.signal) {
     if (state.destroyed || signal.aborted) return;
     const context = HOST_WIN.SillyTavern?.getContext?.() || {};
@@ -5395,6 +5609,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let entries = [];
     let loading = 0;
     let statusMessage = '';
+    let scanBusy = false;
+    let scanProgress = '';
     const selected = new Set();
 
     const hint = quickNode(
@@ -5454,11 +5670,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const assignButton = quickButton('归入目标分组', () => assignSelected());
     const ungroupButton = quickButton('移回未分组', () => ungroupSelected());
     const deleteSelectedButton = quickButton('批量删除资源', () => requestDeleteSelected());
-    const deleteScopeHint = '可批量删除：角色卡、全局世界书、预设、推理格式、User 身份、UI 主题。API/模型及其他不可删除配置仅支持搜索；正则继续由正则侠管理。';
+    const deleteScopeHint = '可批量删除：角色卡、世界书、预设、推理格式、User 身份、UI 主题。API/模型及其他不可删除配置仅支持搜索；正则继续由正则侠管理。';
     deleteSelectedButton.title = deleteScopeHint;
     deleteSelectedButton.setAttribute('aria-description', deleteScopeHint);
     const refreshButton = quickButton('刷新列表', () => void load());
-    operations.append(selectVisibleButton, clearSelectionButton, assignButton, ungroupButton, deleteSelectedButton, refreshButton);
+    const scanButton = quickButton('扫描绑定', () => void scanWorldInfoBindings());
+    scanButton.hidden = true;
+    scanButton.title = '逐张加载尚未读取的角色卡元数据，以核对主要世界书绑定。只读取、不修改角色卡；可能增加当前会话内存占用。';
+    operations.append(selectVisibleButton, clearSelectionButton, assignButton, ungroupButton, deleteSelectedButton, refreshButton, scanButton);
 
     const backupRow = quickNode('div', 'tle-quick-backup-row');
     const importBackupButton = quickButton('', () => backupFile.click(), 'menu_button tle-quick-icon-action');
@@ -5649,9 +5868,20 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (entry.avatarKind) row.append(quickAvatarNode(entry));
 
         const copy = quickNode('div', 'tle-quick-item-copy');
+        copy.title = entry.detail || entry.label;
         const title = quickNode('span', 'tle-quick-item-title', `${entry.section ? entry.section + ' · ' : ''}${entry.label}`);
-        copy.append(title);
+        if (entry.statusLabel) {
+          const titleRow = quickNode('div', 'tle-quick-item-title-row');
+          titleRow.append(title);
+          const statusBadge = quickNode('span', 'tle-quick-item-status is-' + (entry.statusTone || 'neutral'), entry.statusLabel);
+          statusBadge.title = entry.detail || entry.statusLabel;
+          titleRow.append(statusBadge);
+          copy.append(titleRow);
+        } else {
+          copy.append(title);
+        }
         if (entry.detail) copy.append(quickNode('small', 'tle-quick-item-detail', entry.detail));
+        row.classList.toggle('tle-quick-item-worldbook', module === 'worldInfo');
         row.append(copy);
 
         const assigned = quickAssignment(data, module, entry.key);
@@ -5670,6 +5900,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       list.scrollTop = previousScrollTop;
       status.textContent = `${visible.length} / ${entries.length} 项 · 已选 ${selected.size} 项${viewGroup === '*' ? '' : ' · 已按分组筛选'}`;
+      if (module === 'worldInfo' && worldInfoCatalogMeta.unloadedCount) status.textContent += ` · ${worldInfoCatalogMeta.unloadedCount} 张角色卡尚未加载，主要绑定待核对`;
       if (statusMessage) status.textContent += ` · ${statusMessage}`;
     }
 
@@ -5684,6 +5915,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         button.setAttribute('aria-pressed', String(button.dataset.quickCategory === module));
       });
       themeImportRow.hidden = module !== 'theme';
+      scanButton.hidden = module !== 'worldInfo' || !worldInfoCatalogMeta.unloadedCount;
+      scanButton.disabled = scanBusy;
+      scanButton.textContent = scanBusy ? '扫描 ' + scanProgress : '扫描绑定';
 
       if (viewGroup !== '*' && viewGroup !== '' && !groups.some(group => group.id === viewGroup)) viewGroup = '*';
       renderGroupFilters(data);
@@ -5730,7 +5964,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const extra = deletable.length > 5 ? ` 等另外 ${deletable.length - 5} 项` : '';
       const warnings = {
         character: '通过酒馆原生角色删除接口处理；聊天记录会保留，当前会话由酒馆原生逻辑关闭或切换。',
-        worldInfo: '将通过酒馆原生世界书删除接口处理，并清理关联设置。',
+        worldInfo: '将通过酒馆原生世界书删除接口处理，并同步清理额外世界书绑定记录。删除前请核对列表中的角色主绑定关系。',
         preset: '将通过酒馆原生预设管理器删除；若包含当前预设，酒馆会按原生逻辑切换，GUI 预设受原生保护。',
         reasoning: '将通过酒馆原生推理格式管理器删除；GUI 预设受原生保护。',
         persona: '将通过酒馆原生 User 身份删除命令处理；默认身份及聊天绑定信息由酒馆原生逻辑清理。',
@@ -5744,7 +5978,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     async function deleteSelectedResources() {
-      if (deleteBusy) return;
+      if (deleteBusy || scanBusy) return;
       const selectedKeys = [...selected];
       const chosen = entries.filter(entry => selected.has(entry.key));
       const blockedReason = quickDeleteDisabledReason(module, chosen);
@@ -5775,7 +6009,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       let skipped = 0;
       let reloadAfterThemeDelete = false;
       try {
-        const freshEntries = await quickCatalog(module, false, state.abort.signal);
+        const freshEntries = await quickManagerCatalog(module, current.abort.signal);
         const freshChosen = freshEntries.filter(entry => selectedKeys.includes(entry.key));
         skipped += chosen.length - freshChosen.length;
         if (!freshChosen.length) throw new Error('所选资源已变化或不存在，请刷新列表后重试。');
@@ -5800,8 +6034,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           if (typeof native.deleteWorldInfo !== 'function') {
             throw new Error('当前酒馆未提供可用的原生世界书删除接口，未执行删除。');
           }
+          const context = HOST_WIN.SillyTavern?.getContext?.() || {};
           for (const entry of freshChosen) {
             try {
+              if (removeWorldInfoExtraLinks(native.world_info, entry.value)) {
+                if (typeof context.saveSettingsDebounced !== 'function') {
+                  throw new Error('无法保存世界书额外绑定清理，已跳过该项删除。');
+                }
+                context.saveSettingsDebounced();
+              }
               if (await native.deleteWorldInfo(entry.value)) successfulKeys.add(entry.key);
               else failed++;
             } catch { failed++; }
@@ -5880,7 +6121,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             } catch { failed++; }
           }
         }
-        const refreshed = await quickCatalog(module, false, state.abort.signal);
+        const refreshed = await quickManagerCatalog(module, current.abort.signal);
         const refreshedKeys = new Set(refreshed.map(entry => entry.key));
         const removedKeys = [...successfulKeys].filter(key => !refreshedKeys.has(key));
         failed += successfulKeys.size - removedKeys.length;
@@ -5899,7 +6140,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (reloadAfterThemeDelete) statusMessage += ' 酒馆将自动刷新以同步原生主题列表。';
       } catch (error) {
         statusMessage = `批量删除未完成：${error?.message || error}`;
-        try { entries = await quickCatalog(module, false, state.abort.signal); } catch {}
+        try { entries = await quickManagerCatalog(module, current.abort.signal); } catch {}
       } finally {
         deleteBusy = false;
         busyControls.forEach((control, index) => { control.disabled = busyDisabled[index]; });
@@ -6129,7 +6370,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       try {
         // Only read the active category's existing catalog; never open or mutate
         // native resource panels just to manage grouping metadata.
-        const next = await quickCatalog(module, false, current.abort.signal);
+        const next = await quickManagerCatalog(module, current.abort.signal);
         if (quickPanel !== current || token !== loading) return;
         entries = next;
         statusMessage = '';
@@ -6141,6 +6382,68 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           statusMessage = `读取失败：${error.message}`;
           render();
         }
+      }
+    }
+
+    async function scanWorldInfoBindings() {
+      if (scanBusy || deleteBusy || module !== 'worldInfo') return;
+      const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+      const characters = Array.isArray(context.characters) ? context.characters : [];
+      const pending = characters
+        .map((character, index) => ({ character, index }))
+        .filter(item => item.character?.shallow === true);
+      if (!pending.length) {
+        statusMessage = '没有尚未加载的角色卡需要扫描。';
+        await load();
+        render();
+        return;
+      }
+      if (typeof context.unshallowCharacter !== 'function') {
+        statusMessage = '当前酒馆未提供角色卡懒加载读取接口，无法完整扫描。';
+        render();
+        return;
+      }
+
+      scanBusy = true;
+      const controls = [
+        ...tabs.querySelectorAll('button'),
+        ...operations.querySelectorAll('button'),
+        ...manageRow.querySelectorAll('button'),
+        targetSelect, manageButton, autoGroupButton,
+      ].filter(Boolean);
+      const disabledBefore = controls.map(control => control.disabled);
+      controls.forEach(control => { control.disabled = true; });
+      let loaded = 0;
+      let failed = 0;
+      try {
+        for (let index = 0; index < pending.length; index++) {
+          if (quickPanel !== current || current.abort.signal.aborted) break;
+          scanProgress = (index + 1) + '/' + pending.length;
+          scanButton.textContent = '扫描 ' + scanProgress;
+          status.textContent = '正在读取角色卡元数据 ' + scanProgress + '…';
+          try {
+            await context.unshallowCharacter(pending[index].index);
+            loaded++;
+          } catch {
+            failed++;
+          }
+        }
+        if (quickPanel !== current || current.abort.signal.aborted) return;
+        await load();
+        const remaining = worldInfoCatalogMeta.unloadedCount || 0;
+        statusMessage = remaining
+          ? '扫描结束：已读取 ' + loaded + ' 张，仍有 ' + remaining + ' 张未加载。'
+          : '已读取 ' + loaded + ' 张角色卡，主要世界书绑定已重新核对。';
+        if (failed) statusMessage += ' 读取失败 ' + failed + ' 张。';
+        render();
+      } catch (error) {
+        statusMessage = '扫描失败：' + (error?.message || error);
+        render();
+      } finally {
+        scanBusy = false;
+        scanProgress = '';
+        controls.forEach((control, index) => { control.disabled = disabledBefore[index]; });
+        if (quickPanel === current) render();
       }
     }
 
