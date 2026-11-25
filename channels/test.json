@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.235",
+  "latest_version": "0.3.236",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.235",
-    "source_path": "releases/v0.3.235/TLE.js",
-    "source_commit": "b868a1649d76a31b81a1936fbe717f073b719cc9",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b868a1649d76a31b81a1936fbe717f073b719cc9/releases/v0.3.235/TLE.js",
-    "changelog_path": "releases/v0.3.235/CHANGELOG.md",
-    "sha256": "fbc02d47bc0f3eefe63b807edc79c39dae73ce009808aab5182af3e75e412ce8",
-    "size_bytes": 799854
+    "version": "0.3.236",
+    "source_path": "releases/v0.3.236/TLE.js",
+    "source_commit": "d49d1a90810366143a597a049f0ebccacc03314f",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d49d1a90810366143a597a049f0ebccacc03314f/releases/v0.3.236/TLE.js",
+    "changelog_path": "releases/v0.3.236/CHANGELOG.md",
+    "sha256": "035ef190def6af696fe0bdf9fa5bc5b451b6fcdd78ad52906b1e9af152a6dc3a",
+    "size_bytes": 803383
   },
-  "status": "TEST v0.3.235: Fix original v1.1.0 PC plugin compatibility; optional scan hashes no longer block searches. Visible Find and Replace mode, adjacent find/preview controls, native theme input classes and in-field search cancellation; no forced input height. Original server commit integrity checks retained. Actual PC SillyTavern 1.19.0 isolated-profile search, partial text deletion, replacement and byte-identical backup restore verified in Chrome with two native themes. PC TT, iPhone TT and Android ST remain unverified on-device. Stable Core/Loader/Bootstrap unchanged.",
+  "status": "TEST v0.3.236: Restore typed content-result groups with per-group, resource and match selection. Native host layout classes place mode beside category heading, combine search/replacement on wide screens and scope/backup on one row; keep new-group creation visible and management/confirmation actions horizontal. Original PC compatibility and integrity checks retained. Actual isolated PC SillyTavern 1.19.0 with original and paired plugins tested for search, replacement, partial text deletion, byte-identical restore, grouping and two native themes. PC TT, iPhone TT and Android ST remain unverified on-device. Stable Core/Loader/Bootstrap unchanged.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
