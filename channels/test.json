@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.229",
+  "latest_version": "0.3.230",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.229",
-    "source_path": "releases/v0.3.229/TLE.js",
-    "source_commit": "e1feaa0f5331cf3eadb499892333f099fcdea2ab",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e1feaa0f5331cf3eadb499892333f099fcdea2ab/releases/v0.3.229/TLE.js",
-    "changelog_path": "releases/v0.3.229/CHANGELOG.md",
-    "sha256": "00890ed5ce812cc07a9e162842d7ff1a6109a72e5ffb3abac9886b354bd7f4e3",
-    "size_bytes": 656232
+    "version": "0.3.230",
+    "source_path": "releases/v0.3.230/TLE.js",
+    "source_commit": "b52d9236e5f44a2eb112e7e26651f0547c32ec70",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b52d9236e5f44a2eb112e7e26651f0547c32ec70/releases/v0.3.230/TLE.js",
+    "changelog_path": "releases/v0.3.230/CHANGELOG.md",
+    "sha256": "e013a92a10a01524328099f978fc195d0ea601e7fb136e7db0751ba7d30864e5",
+    "size_bytes": 655849
   },
-  "status": "TEST v0.3.229: Organizer no longer has a redundant header close X; it uses native drawer controls. Theme-group sync, full group import, and full group export are grouped at the right side of the heading (sync appears only in the UI theme category). Mobile category, group, and worldbook filters retain horizontal touch scrolling and show a persistent 3px indicator without reserving a 15px native scrollbar. Batch action buttons use a compact three-column layout with 30px height, margin:0, 3px row gap, and 4px column gap. PC three-column workspace, search, group data, worldbook binding logic, and deletion permissions are unchanged.",
+  "status": "TEST v0.3.230: Organizer's Theme Manager group sync button is always visible beside full-group JSON import/export in the heading. It retains the existing importThemeManagerGroups() implementation, reads the local Theme Manager group data, asks for confirmation, updates only TLE's UI theme groups and assignments, and switches to the UI theme category after success. Other resource-category group data is unchanged. PC three-column layout, mobile 3px horizontal scroll indicators, compact batch actions, search, worldbook binding logic, and deletion permissions are retained. JavaScript syntax and static sync-path checks passed; ST/TT visual and data-preservation acceptance remains pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
