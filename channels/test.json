@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.239",
+  "latest_version": "0.3.240",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.239",
-    "source_path": "releases/v0.3.239/TLE.js",
-    "source_commit": "546a1354e86fb8d31c6438e97cd18004884f190c",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/546a1354e86fb8d31c6438e97cd18004884f190c/releases/v0.3.239/TLE.js",
-    "changelog_path": "releases/v0.3.239/CHANGELOG.md",
-    "sha256": "cf10fec53fccedeb62364e358fdca6b1747a3b76e8726e2c9d1eb66996edd98b",
-    "size_bytes": 810236
+    "version": "0.3.240",
+    "source_path": "releases/v0.3.240/TLE.js",
+    "source_commit": "2761b9ccaf26371b5efd71ff9c78aad0f4a75818",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2761b9ccaf26371b5efd71ff9c78aad0f4a75818/releases/v0.3.240/TLE.js",
+    "changelog_path": "releases/v0.3.240/CHANGELOG.md",
+    "sha256": "68d13fb4da69fd6ba8f6ce0abe59a5ed7e0c0e535726488f212efe2beba7448b",
+    "size_bytes": 809590
   },
-  "status": "TEST v0.3.239: PC Organizer keeps its three-column layout but removes the three tinted pane backgrounds and uses two semantic HR elements as vertical dividers, styled with vertical writing mode and the active Tavern theme border color. Mobile single-column layout is unchanged. Retains v0.3.238 duplicate-toolbar fix and v0.3.237 companion/fade-wallpaper fixes. ST/TT/iPhone runtime visual acceptance pending.",
+  "status": "TEST v0.3.240: Information Station is enabled exclusively by the navigation display mode '图标 + 文字 + 信息站'. The standalone enable checkbox and its storage gate are removed. New users default all supported display/quick/jump options to checked; saved per-item choices are preserved. Current character worldbook remains jump-only. Adds a focused regression test for the mode gate and settings migration. ST/TT runtime acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
