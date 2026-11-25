@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.230
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.231
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -1777,8 +1777,8 @@ body.tle-global-search-open { overflow: hidden !important; }
   font-size: 14px;
 }
 .tle-search-field-wrap input.tle-search-field { flex: 1 1 auto; }
-#tle-global-search-panel button,
-#tle-organizer-panel.drawer-content button { color: inherit; border: 0; cursor: pointer; font: inherit; }
+#tle-global-search-panel button { color: inherit; border: 0; cursor: pointer; font: inherit; }
+#tle-organizer-panel.drawer-content button:not(.menu_button) { color: inherit; border: 0; cursor: pointer; font: inherit; }
 #tle-global-search-panel .tle-search-clear,
 #tle-organizer-panel.drawer-content .tle-search-field-wrap .tle-search-clear {
   display: grid;
@@ -3259,21 +3259,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         min-width: 0;
       }
       #tle-organizer-panel .tle-search-heading-tools .tle-quick-backup-row > .tle-quick-icon-action {
-        display: grid;
-        place-items: center;
-        flex: 0 0 28px;
-        width: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
         min-width: 28px;
-        height: 28px;
         min-height: 28px;
-        padding: 0;
-        margin: 0;
-        border: 0;
-        border-radius: 8px;
-        background: rgb(127 127 127 / 12%);
-        font-size: .9em;
-        line-height: 1;
-        cursor: pointer;
       }
       #tle-organizer-panel .tle-search-heading-tools .tle-quick-theme-import {
         display: flex;
@@ -3286,16 +3277,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         align-items: center;
         justify-content: center;
         gap: 4px;
-        height: 28px;
-        min-height: 28px;
-        padding: 0 7px;
-        margin: 0;
-        border: 0;
-        border-radius: 8px;
-        background: rgb(127 127 127 / 12%);
         white-space: nowrap;
-        font-size: .78em;
-        line-height: 1;
       }
       @media screen and (min-width: 1001px) {
         .tle-quick-manager .tle-organizer-workspace {
@@ -7861,14 +7843,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.230 · 整理侠工具栏归位与滚动条修正</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.231 · 整理侠工具栏归位与滚动条修正</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.230</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.231</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13844,7 +13826,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.230',
+    version: '0.3.231',
     ready: false,
     destroy,
     state,
@@ -14294,5 +14276,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.230 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.231 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
