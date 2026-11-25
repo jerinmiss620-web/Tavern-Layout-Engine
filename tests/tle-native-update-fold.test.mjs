@@ -141,7 +141,8 @@ assert.match(source, /\.tle-quick-manager \.tle-quick-toolbar \{\s*display: grid
 assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-filters-wrap \{/);
 assert.doesNotMatch(manager, /backupHint/);
 assert.doesNotMatch(manager, /search\.focus\(\{ preventScroll: true \}\);/);
-assert.match(source, /\.tle-quick-manager \.tle-quick-manage-row > input \{ grid-column: 1 \/ -1; \}/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-group-editor \{ grid-area: manage; \}/,
+  'group editor must occupy the dedicated middle-pane management area');
 // All TLE-generated scroll regions leave scrollbar appearance to the host's
 // global theme rules. Width/color and WebKit pseudo-element rules are not
 // inherited like normal text properties; TLE must not override them.
