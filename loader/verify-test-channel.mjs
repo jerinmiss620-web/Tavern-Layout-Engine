@@ -149,7 +149,14 @@ assert.ok(tleSource.includes('buttonReceivesHit'));
 // exercise catalog classification, stable group-key migration and cleanup behavior.
 assert.ok(tleSource.includes("organizerEntry: 'tle-organizer-entry'"), 'Dedicated Organizer navigation entry missing');
 assert.ok(tleSource.includes('state.organizerEntry = organizerEntry'), 'Organizer navigation item is not created');
-assert.ok(tleSource.includes('holder.append(station, state.organizerEntry, state.navEntry)'), 'Organizer is not placed in the side rail');
+assert.ok(tleSource.includes("organizerEntry.className = 'drawer'"), 'Organizer must be a tenth native-shaped drawer');
+assert.ok(tleSource.includes("organizerToggle.className = 'drawer-toggle interactable'"), 'Organizer must own a native drawer toggle');
+assert.ok(tleSource.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable'"), 'Organizer must use a native drawer icon');
+assert.ok(tleSource.includes("panel.className = 'drawer-content closedDrawer'"), 'Organizer must own a drawer-content');
+assert.ok(tleSource.includes('state.organizerEntry?.appendChild(panel)'), 'Organizer content must be nested inside its drawer');
+assert.ok(tleSource.includes('holder.insertBefore(state.organizerEntry, organizerPosition)'), 'Organizer must follow the nine native drawers');
+assert.ok(!tleSource.includes('tle-global-search-overlay'), 'Organizer must not use the old popup overlay');
+assert.ok(!tleSource.includes('z-index: 10090'), 'Organizer must not create a modal scrim');
 assert.ok(tleSource.includes('const available = globalSearchEnabled;'), 'Organizer visibility must not depend on navigation mode');
 assert.ok(tleSource.includes('function buildWorldInfoCatalog('), 'Unified World Info catalog missing');
 assert.ok(tleSource.includes('function quickManagerCatalog('), 'Resource manager is not using the unified catalog');
