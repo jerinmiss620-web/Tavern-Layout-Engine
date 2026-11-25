@@ -3,7 +3,7 @@
 - 整理侠作为第十个 `.drawer` 插入原生九个导航抽屉之后，位置在角色管理下方；拥有独立 `.drawer-toggle` 和 `.drawer-content`，按原生抽屉状态展开/收起。
 - 原全局搜索页面迁入该 `.drawer-content` 并保持默认视图；资源管理仍嵌入同一面板；移除旧居中 popup/modal 结构与遮罩。
 - 导航行高、紧凑双列布局和移动端汉堡导航改为按十个抽屉计数；TLE Engine Hub 仍保留底部位置。
-- 本次源码与远端测试通道验证交由分支 CI 执行；正式 Stable Core 保持 v0.3.220。
+- GitHub Actions run 45557624063（job `validate`）通过：全量回归、release metadata、原生第十抽屉结构断言及远端测试通道 SHA/字节数校验通过；正式 Stable Core 保持 v0.3.220。
 
 # TLE 更新日志
 
