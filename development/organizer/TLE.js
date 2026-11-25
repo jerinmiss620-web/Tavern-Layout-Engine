@@ -278,6 +278,7 @@
     diagnosticButtonRepairFrame: 0,
     globalSearchPanel: null,
     organizerPanel: null,
+    organizerObserver: null,
     globalSearchOpen: false,
     globalSearchView: 'search',
     globalSearchIndex: [],
@@ -3792,7 +3793,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
   applyNavIconOpacity();
 
-  HOST_DOC.body.toggleAttribute('data-tle-search-available', globalSearchEnabled && navigationMode !== 'icons');
+  HOST_DOC.body.toggleAttribute('data-tle-search-available', globalSearchEnabled);
 
   function setNavigationMode(mode) {
     navigationMode = ['icons', 'labels', 'info'].includes(mode) ? mode : 'icons';
@@ -11676,6 +11677,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         }
       }, { signal: state.abort.signal });
       state.organizerEntry?.appendChild(panel);
+      state.organizerObserver = new HOST_WIN.MutationObserver(() => {
+        const isOpen = panel.classList.contains('openDrawer');
+        state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.setAttribute('aria-expanded', String(isOpen));
+        panel.setAttribute('aria-hidden', String(!isOpen));
+      });
+      state.organizerObserver.observe(panel, { attributes: true, attributeFilter: ['class'] });
     } catch (error) {
       state.organizerPanel?.remove();
       state.organizerPanel = null;
@@ -13406,6 +13413,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (state.chatFade.refreshRaf) HOST_WIN.cancelAnimationFrame(state.chatFade.refreshRaf);
     state.chatFade.refreshRaf = 0;
     search.observer?.disconnect();
+    state.organizerObserver?.disconnect();
+    state.organizerObserver = null;
     search.jumpAbort?.abort();
     HOST_WIN.clearTimeout(search.refreshTimer);
     HOST_WIN.clearTimeout(search.renderTimer);
