@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.218 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.219 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -23,19 +23,21 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.218/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.219/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；故障注入及长期可靠性仍未实机覆盖。
+- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；Core v0.3.219 新增的批量删除流程仍待实机验收，故障注入及长期可靠性也未全部覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
 
-### Core v0.3.218 · 整理侠统一入口与资源管理
+### Core v0.3.219 · 整理侠原生删除权限校正
 
-原顶部放大镜升级为整理侠的**唯一入口**，不新增第二个按钮。打开后默认显示原全局搜索页面，原索引、搜索范围和跳转能力保留；资源管理切换页与搜索页共用同一个输入框，不再另设一套搜索。
+整理侠继续作为原全局搜索的**唯一入口**，默认打开原搜索页；原搜索索引、范围和跳转能力保持不变，资源管理与搜索共用同一输入框。快切分组管理继续沿用 `tle.quickGroups.v2`，分类内分组、自动归组及全部分组方案导入/导出保持原样。
 
-原快速切换分组管理迁入整理侠，保留 `tle.quickGroups.v2` 数据结构、分类分组、自动归组及全部分组方案导入/导出。新增批量删除与二次确认，仅开放角色卡、全局世界书、预设和推理格式；API/模型、User 身份、UI 主题不开放批量删除，正则继续由正则侠管理。角色卡删除保留聊天记录，并要求先退出当前角色/群聊。
+资源管理只展示酒馆原生确实提供删除能力的资源：角色卡、全局世界书、预设、推理格式、User 身份、UI 主题。上述资源统一进入批量删除与二次确认；角色卡由原生逻辑处理当前会话，聊天记录保留；User 身份走原生 `persona-delete`，UI 主题走原生删除接口。删除 UI 主题后自动刷新酒馆，以同步主题目录。
+
+API/模型等原生不可删除的运行配置只允许搜索，不出现在资源管理分类中；既有完整分组数据结构和全部分组备份保留，隐藏分类的旧数据不会被本次升级清除。GUI 预设继续遵循酒馆原生保护规则；不再额外要求退出当前会话或至少保留一个预设/推理格式。正则继续由正则侠管理。
 
 Bootstrap v1.0.6 与 Loader Runtime v0.3.6 不变。
 
