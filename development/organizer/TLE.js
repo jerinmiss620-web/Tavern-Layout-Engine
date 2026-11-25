@@ -3185,14 +3185,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         min-width: 0;
       }
       .tle-quick-manager .tle-quick-group-actions > button { flex: 0 0 auto; }
-      .tle-quick-manager .tle-quick-group-controls {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
-        align-items: center;
-        gap: 8px;
-        flex: 0 0 auto;
-        min-width: 0;
-      }
       .tle-quick-manager .tle-quick-filter-bar {
         display: flex;
         flex: 1 1 auto;
