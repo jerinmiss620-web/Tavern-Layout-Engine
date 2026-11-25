@@ -28,7 +28,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 ## 当前开发分支（未发布）
 
-开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.230）。
+开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.231）。
 
 整理侠的资源管理现在直接位于自己的原生形态 `.drawer-content` 内，不再套用第二层 `.tle-search-surface`。抽屉图标、导航文字与全局搜索弹窗的跳转入口统一调用明确的开合控制器，直接维护 `openDrawer / closedDrawer`；打开时先关闭其他普通抽屉和 TLE 控制面板，移动端仍由原生导航生命周期收起侧栏。
 
@@ -38,9 +38,9 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 **孤儿识别边界：** 若角色卡删除后，唯一的主要世界书引用也随角色卡文件一并消失，酒馆没有留下可追溯关联，TLE 无法还原它原来绑定的角色；这类世界书会显示为「未绑定」，供人工核对。仍保留在酒馆额外绑定记录中的失效角色关联可标记为「疑似孤儿」。聊天级或身份级引用不属于本轮角色绑定判定范围。懒加载扫描仅在用户主动点击时执行，逐张读取角色元数据，可能增加当前会话内存占用。
 
-**独立测试入口已准备：** [v0.3.230 候选更新日志](releases/v0.3.230/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
+**独立测试入口已准备：** [v0.3.231 候选更新日志](releases/v0.3.231/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
-此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.230 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.220。
+此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.231 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。标题栏的同步、导入、导出按钮恢复继承酒馆 `menu_button` 主题样式，不再覆盖主题底色、边框、圆角、内边距和字体；按钮仅保留必要的排列与对齐规则。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.220。
 
 ## 发布与验证
 
