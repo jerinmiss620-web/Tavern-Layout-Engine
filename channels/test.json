@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.204",
+  "latest_version": "0.3.221",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.204",
-    "source_path": "releases/v0.3.204/TLE.js",
-    "source_commit": "caf5cb6aef942946a2091540de4854a876100617",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/caf5cb6aef942946a2091540de4854a876100617/releases/v0.3.204/TLE.js",
-    "changelog_path": "releases/v0.3.204/CHANGELOG.md",
-    "sha256": "1cb93e490c2fdd0c551088dccdc624f26fd72aa3a17a06ac81d48e7052762bc8",
-    "size_bytes": 497156
+    "version": "0.3.221",
+    "source_path": "releases/v0.3.221/TLE.js",
+    "source_commit": "d88c8f492204982f4b00a3fe1e372c464f123540",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d88c8f492204982f4b00a3fe1e372c464f123540/releases/v0.3.221/TLE.js",
+    "changelog_path": "releases/v0.3.221/CHANGELOG.md",
+    "sha256": "53a8009b7f3d87ce498e436707d58a3388a87076221d3c21f1b66523ec3d56ec",
+    "size_bytes": 624147
   },
-  "status": "TEST v0.3.204: compatible update UI for existing Test Loader 0.3.0 and Stable Loader 0.3.1, with current version, user-triggered check/update, and complete script info. Stable latest.json intentionally remains v0.3.203 pending ST/TT confirmation.",
+  "status": "TEST v0.3.221: companion plans now apply available items and report skipped items with reasons; Fade Assistant wallpaper mirror syncs on ancestor theme/style changes and image load. Manual ST/TT and iPhone validation required.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
