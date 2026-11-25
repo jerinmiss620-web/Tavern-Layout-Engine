@@ -10,7 +10,7 @@
     "source_commit": "7860f6b140793f7577d74212a5649715a4d595a5",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/7860f6b140793f7577d74212a5649715a4d595a5/releases/v0.3.228/TLE.js",
     "changelog_path": "releases/v0.3.228/CHANGELOG.md",
-    "sha256": "a80ec918f15a68182950f00394584640843da77cc6e542edf6dafd93d38bd5e6",
+    "sha256": "b86bf8c0a07b15136196c55bf4360cdccab36d7b338882e4c6b31124502d6584",
     "size_bytes": 652942
   },
   "status": "TEST v0.3.228: Organizer heading/subtitle now share one line and the subtitle no longer mentions worldbook binding checks. PC keeps the three-column workspace with pane tint at 0.12. Mobile uses a compact grid: fixed-height horizontal category/group filters with hidden scrollbars, group filters share a row with backup controls, target-group selection shares a row with group actions, batch actions use three columns/two rows, and the resource list fills the remaining height. Existing search, grouping data, worldbook binding logic, and deletion permissions are unchanged.",
