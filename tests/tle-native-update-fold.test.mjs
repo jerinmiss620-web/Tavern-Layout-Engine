@@ -91,8 +91,16 @@ assert.match(manager, /const search = state\.globalSearchPanel\.querySelector\('
   'resource management must reuse the Organizer search field');
 assert.match(manager, /toolbar\.append\(targetSelect, manageButton, autoGroupButton\)/,
   'resource toolbar must not create another search field');
-assert.match(manager, /body\.append\(\s*hint, backupRow, tabs, groupFilters, themeImportRow, toolbar, manageRow/,
-  'resource manager must append its existing controls inside the unified panel');
+assert.match(manager, /const categoryRow = quickNode\('div', 'tle-quick-category-row'\);/);
+assert.match(manager, /categoryRow\.append\(tabs, themeImportRow, backupRow\)/,
+  'resource categories, theme sync and full backup must share one toolbar row');
+assert.match(manager, /const groupControlsRow = quickNode\('div', 'tle-quick-group-controls'\);/);
+assert.match(manager, /groupControlsRow\.append\(groupFilters, toolbar\)/,
+  'group filters and target-group controls must share one row');
+assert.match(manager, /body\.append\(\s*categoryRow, groupControlsRow, manageRow, transferConfirm, deleteConfirm,\s*operations, list, status/,
+  'resource manager must append compact toolbars before the flexible resource list');
+assert.doesNotMatch(manager, /body\.append\(\s*hint, backupRow, tabs, groupFilters/,
+  'standalone hint and backup rows must not consume list height');
 assert.doesNotMatch(manager, /searchRow|quickSearchBox|tle-quick-search-row/,
   'resource manager must not create a duplicate search row');
 assert.doesNotMatch(manager, /groupFiltersWrap|tle-quick-filters-wrap/,
@@ -155,5 +163,5 @@ for (const selector of scrollableSurfaces) {
 }
 assert.equal((source.match(/scrollbar-gutter: stable;/g) || []).length, 2,
   'preserve wide workspace scroll layout, which is not a scrollbar skin');
-console.log('Core 0.3.218: Theme sync in unified resource view, shared search, full-width group pills and scrollbar skin audit passed.');
+console.log('Core 0.3.220: compact Organizer resource controls and Theme sync, shared search, full-width group pills and scrollbar skin audit passed.');
 
