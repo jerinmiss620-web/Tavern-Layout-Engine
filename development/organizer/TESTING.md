@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.224`
+Current test Core: `v0.3.225`
 
 ## Import once
 
@@ -16,8 +16,8 @@ The installer is disabled by default. It reads the test manifest from this devel
 2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
 3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
 4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.224**.
-6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.224**.
+5. Confirm the native prompt to install **TLE Core v0.3.225**.
+6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.225**.
 
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
 
@@ -35,6 +35,9 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 - Verify a globally enabled book with no character binding appears in both **未绑定** and **全局启用**. Verify stale extra-book references are marked **疑似孤儿** (or **含遗留关联** when the book also has a current character binding).
 - Use **扫描绑定** only when you want to load the remaining character-card metadata. It is opt-in and may increase session memory use.
 - Test grouping, searching, selection, and batch deletion only on disposable test resources first. Verify native Tavern behavior and the remaining bindings after each deletion.
+- On PC (viewport wider than 1000px), confirm the Organizer has three columns: **资源类型** at left, **分组目录** in the middle, and **资源列表** at right. Selecting a resource type refreshes the middle group list; selecting **未分组** or a named group filters only the right-hand list.
+- Confirm the resource search field is inside the right-hand resource column; worldbook status filters, target-group selection and batch actions remain in that column. The left category list, middle group list and right resource list must scroll independently without horizontal overflow.
+- At 1000px and narrower, confirm the three pane wrappers flatten back into the original single-column mobile flow; category/group navigation remains available and no desktop sidebars consume the resource list height.
 - Check PC and mobile layouts separately, then repeat in ST and TT as applicable.
 
 ## Return to stable
