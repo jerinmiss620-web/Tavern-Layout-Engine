@@ -16,6 +16,10 @@
 - 新增 `tests/tle-organizer-worldbook.test.mjs`，覆盖全局/主要/额外绑定、失效角色额外绑定、未绑定候选、懒加载待核对、分组键迁移、额外绑定清理及导航入口。GitHub Actions run 45549955361（job `validate`）通过。
 - **识别限制：** 角色卡删除后，若主要世界书引用只存在于该卡文件且未留下其他绑定元数据，无法追溯原角色；该书会显示为「未绑定」，而不是被断言为孤儿。当前也不扫描聊天级或身份级引用。疑似孤儿状态只基于仍存在但指向不存在角色的额外绑定记录。
 - 自动化通过不代表真实宿主验收通过；PC ST、移动端 ST、iPhone TT 的导航显示、窄屏空间、主题继承和世界书原生删除流程仍待实机验收。
+- 已建立分支专用测试通道：Core v0.3.221，清单位于本分支 `channels/test.json`；导入包 `loader/TLE-Remote-Loader-Test-0.3.0.json` 默认禁用，Loader 使用独立的 `TLE_Organizer_Branch_Test_Cache` 与独立缓存键，不覆盖 Stable Bootstrap/Loader 缓存。Loader 固定 Commit：`8f6534c1a2839e561998d5e4d984f871074d720b`；安装包固定 Commit：`08527064995cc13ce39d64f53528ffdc163a66a1`；Core 固定 Commit：`9eb720d09802e2d6c991d1ff9cf11348ca45c244`。
+- 测试 Loader 只读取开发分支的 `channels/test.json`；正式根目录 `latest.json`、`loader/latest.json`、`release-plan.json` 未改动。测试前先禁用 Bootstrap 1.0.6 并完整刷新；恢复正式版时禁用测试 Loader、启用 Bootstrap 1.0.6 并完整刷新，由正式 Loader 从自己的 LKG 缓存恢复 Core v0.3.220。
+- 测试步骤见 `development/organizer/TESTING.md`。分支 CI 增加 `node loader/verify-test-channel.mjs --remote`，验证测试 Core、Loader、安装 JSON 的 Commit pin、UTF-8 字节数、SHA-256 与安装包源码同步。
+
 
 ## 2026-11-25 · Core v0.3.220 整理侠资源管理界面重排
 
