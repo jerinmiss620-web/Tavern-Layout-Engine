@@ -78,6 +78,9 @@ try{
  assert.equal(await page.getByRole('button',{name:'批量删除资源',exact:true}).isVisible(),true);
  await page.locator('.tle-quick-list .tle-quick-item-check').check();assert.equal(await page.getByRole('button',{name:'批量删除资源',exact:true}).isEnabled(),true);
  await page.getByRole('button',{name:'批量删除资源',exact:true}).click();assert.equal(await page.getByRole('button',{name:'确认删除 1 项',exact:true}).isVisible(),true);
+ const confirmBox=await page.getByRole('button',{name:'确认删除 1 项',exact:true}).boundingBox(),cancelBox=await page.getByRole('button',{name:'取消',exact:true}).boundingBox();
+ assert(Math.abs(confirmBox.y-cancelBox.y)<6,'Resource delete confirmation buttons share a row');
+ await page.screenshot({path:path.join(output,'resource-delete-confirmation.png'),fullPage:true});
  await page.getByRole('button',{name:'取消',exact:true}).click();
  assert.deepEqual(errors,[]);fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({passed:true,viewports:[1440,320,375,390,768],browser:await browser.version(),realPlatformsTested:[],errors},null,2));
  console.log('Real Chromium Organizer wiring/preview/mobile/name-delete regression passed. Host APIs are fixtures; this is not ST/TT device acceptance.');

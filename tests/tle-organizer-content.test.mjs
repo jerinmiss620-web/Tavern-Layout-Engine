@@ -162,6 +162,21 @@ test('TT capabilities exclude unsupported types and descriptor resolves stable w
     assert.throws(()=>resolveScope(inv,'filtered','preset',[{key:'p'}],new Set()),/不支持/);
     assert.equal(describeResource({id:'tt:world:a',name:'a',adapter:'world',relative:'世界书 · a'},'','world').key,JSON.stringify(['world_info','a']));
 });
+test('typed result groups keep embedded lore separate and group selection affects only its matches',async t=>{
+    const f=fixture(t);f.write('characters/A.json',{data:{description:'old character',first_mes:'old greeting',character_book:{entries:[{content:'old embedded lore'}]}}});
+    f.write('chats/A/test.jsonl',JSON.stringify({user_name:'User',character_name:'A'})+'\n'+JSON.stringify({mes:'old chat',is_user:true})+'\n');
+    await f.ready();await f.c.scan();
+    const sections=f.c.resultSections();assert.deepEqual(sections.map(s=>s.key),['character','chats','world','persona','presets']);
+    const lore=sections.find(s=>s.key==='world');assert.equal(lore.groups.length,2);
+    const selectedBefore=f.c.rows.length;
+    f.c.selectRows(lore.rows,false);assert.equal(f.c.excluded.size,lore.rows.length);assert.ok(f.c.rows.filter(r=>r.scope!=='world').every(r=>!f.c.excluded.has(r.id)));
+    let parent=f.h.list.querySelector('[data-content-section="world"] > summary input');assert.equal(parent.checked,false);
+    f.c.selectRows([lore.rows[0]],true);parent=f.h.list.querySelector('[data-content-section="world"] > summary input');assert.equal(parent.indeterminate,true);
+    const section=f.h.list.querySelector('[data-content-section="chats"]');section.open=false;
+    f.c.selectRows(lore.rows,true);assert.equal(f.h.list.querySelector('[data-content-section="chats"]').open,false);
+    assert.equal(f.c.rows.filter(r=>!f.c.excluded.has(r.id)).length,selectedBefore);
+    await f.c.preview();f.c.selectRows(lore.rows,false);assert.equal(f.c.confirm.hidden,true);await assert.rejects(f.c.apply(),/预览/);
+});
 test('PC selected restore and ZIP reimport are verified, isolated, non-overwriting and reject foreign/corrupt archives',async t=>{
     const f=fixture(t); const job=f.service.startScan({rules:[{find:'old',replace:'new'}],scopes:['character','world'],mode:'global'}); await f.service.job(job.id).done;
     const result=f.service.apply(job); const manifest=f.service.manifest(result.id);

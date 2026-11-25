@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.235
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.236
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2123,7 +2123,7 @@ var TLEBatchLibrary = (() => {
     }
     mount() {
       const n = this.node;
-      this.searchRow = n("div", "tle-content-search-row flex-container flexFlowColumn");
+      this.searchRow = n("div", "tle-content-search-row flex-container");
       this.target = n("div", "flex-container");
       this.target.setAttribute("role", "group");
       this.target.setAttribute("aria-label", "\u641C\u7D22\u65B9\u5F0F");
@@ -2151,14 +2151,14 @@ var TLEBatchLibrary = (() => {
         void this.persist().catch(() => {
         });
       });
-      this.findRow = n("div", "flex-container flexnowrap alignItemsCenter");
+      this.findRow = n("div", "flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
       this.h.searchWrap.classList.add("flex1");
-      this.replaceRow = n("div", "flex-container flexnowrap alignItemsCenter");
+      this.replaceRow = n("div", "flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
       this.replaceRow.hidden = true;
       this.controls = n("div", "tle-content-controls flex-container flexFlowColumn");
       this.controls.hidden = true;
-      const actions = n("div", "flex-container flexWrap");
-      this.scopeSelect = n("select", "text_pole");
+      const actions = n("div", "flex-container flexnowrap alignItemsCenter");
+      this.scopeSelect = n("select", "text_pole flex1");
       this.scopeSelect.setAttribute("aria-label", "\u5185\u5BB9\u641C\u7D22\u8303\u56F4");
       for (const [value, label] of [["all", "\u5168\u90E8\u652F\u6301\u8D44\u6E90"], ["filtered", "\u5F53\u524D\u7B5B\u9009\u8303\u56F4"], ["selected", "\u5DF2\u9009\u8D44\u6E90"]]) {
         const o = n("option", "", label);
@@ -2177,7 +2177,9 @@ var TLEBatchLibrary = (() => {
       const replaceLabel = n("label", "flex-container flexnowrap alignItemsCenter flex1");
       replaceLabel.append(n("span", "", "\u66FF\u6362\u4E3A"), this.replace);
       this.replaceRow.append(replaceLabel, this.previewButton);
-      this.searchRow.append(this.target, this.findRow, this.replaceRow);
+      if (this.h.heading) this.h.heading.append(this.target);
+      else this.searchRow.append(this.target);
+      this.searchRow.append(this.findRow, this.replaceRow);
       this.cancelButton = this.h.button("\u53D6\u6D88\u626B\u63CF", () => {
         this.cancelled = true;
         if (this.jobId) void this.api("cancel", { id: this.jobId }).catch((e) => this.message(e.message));
@@ -2188,7 +2190,7 @@ var TLEBatchLibrary = (() => {
         this.cancelButton,
         this.button("\u5907\u4EFD\u4E0E\u6062\u590D", () => this.backups())
       );
-      this.ruleDetails = n("details", "tle-content-rules");
+      this.ruleDetails = n("details");
       this.ruleDetails.append(n("summary", "", "\u89C4\u5219\u7EC4\u5408\u4E0E\u9AD8\u7EA7\u9009\u9879"));
       this.ruleDetails.append(this.button("\u6DFB\u52A0\u89C4\u5219", () => {
         if (this.rules.length >= 200) throw Error("\u6700\u591A 200 \u6761\u89C4\u5219\u3002");
@@ -2241,15 +2243,18 @@ var TLEBatchLibrary = (() => {
       this.confirm.hidden = true;
       this.confirmText = n("p");
       this.applyButton = this.button("\u786E\u8BA4\u66FF\u6362", () => this.apply());
-      this.confirm.append(this.confirmText, this.applyButton, this.button("\u8FD4\u56DE\u9009\u62E9", () => {
+      const confirmActions = n("div", "flex-container");
+      confirmActions.append(this.applyButton, this.button("\u8FD4\u56DE\u9009\u62E9", () => {
         this.previewed = false;
         this.confirm.hidden = true;
         this.renderList();
       }));
-      this.capabilities = n("small");
+      this.confirm.append(this.confirmText, confirmActions);
+      this.capabilities = n("div");
       this.binding = n("div");
       this.binding.hidden = true;
-      this.controls.append(actions, this.ruleDetails, this.capabilities, this.binding, this.selectionTools, this.confirm);
+      this.ruleDetails.append(this.capabilities);
+      this.controls.append(actions, this.ruleDetails, this.binding, this.selectionTools, this.confirm);
       this.renderCombinations();
       this.syncScope();
     }
@@ -2393,7 +2398,7 @@ var TLEBatchLibrary = (() => {
     lock(value) {
       this.busy = value;
       this.h.lock(value);
-      for (const el of [...this.searchRow.querySelectorAll("input,select,button"), ...this.controls.querySelectorAll("input,select,textarea,button")]) {
+      for (const el of [...this.target.querySelectorAll("input"), ...this.searchRow.querySelectorAll("input,select,button"), ...this.controls.querySelectorAll("input,select,textarea,button")]) {
         if (value) {
           el.dataset.contentDisabled = String(el.disabled);
           el.disabled = true;
@@ -2500,6 +2505,28 @@ var TLEBatchLibrary = (() => {
       this.excluded = new Set(selected ? [] : this.rows.map((r) => r.id));
       this.selectionChanged();
     }
+    selectRows(rows, selected) {
+      rows.forEach((r) => selected ? this.excluded.delete(r.id) : this.excluded.add(r.id));
+      this.selectionChanged();
+    }
+    resultSections() {
+      const titles = { character: "\u89D2\u8272\u5361", chats: "\u804A\u5929\u8BB0\u5F55", world: "\u4E16\u754C\u4E66", persona: "\u7528\u6237\u8EAB\u4EFD", presets: "\u9884\u8BBE", prompts: "\u63D0\u793A\u8BCD", regex: "\u6B63\u5219", other: "\u5176\u4ED6\u6587\u4EF6" };
+      const sections = new Map(Object.entries(titles).map(([key, title]) => [key, { key, title, groups: [], rows: [] }]));
+      for (const group of this.groups) {
+        const parts = /* @__PURE__ */ new Map();
+        for (const row of group.rows) {
+          const type = row.scope === "greetings" ? "character" : Object.hasOwn(titles, row.scope) ? row.scope : "other";
+          if (!parts.has(type)) parts.set(type, []);
+          parts.get(type).push(row);
+        }
+        for (const [type, rows] of parts) {
+          const section = sections.get(type);
+          section.groups.push({ ...group, rows });
+          section.rows.push(...rows);
+        }
+      }
+      return [...sections.values()].filter((section) => section.rows.length);
+    }
     selectionChanged() {
       this.previewed = false;
       this.confirm.hidden = true;
@@ -2595,57 +2622,80 @@ var TLEBatchLibrary = (() => {
       }
       const list = this.h.list, scroll = list.scrollTop;
       const open = new Set([...list.querySelectorAll("[data-content-key][open]")].map((d) => d.dataset.contentKey));
+      const closedSections = new Set([...list.querySelectorAll("[data-content-section]:not([open])")].map((d) => d.dataset.contentSection));
       list.replaceChildren();
-      for (const group of this.groups) {
-        const details = this.node("details");
-        details.dataset.contentKey = group.contentKey;
-        details.open = this.previewed || open.has(group.contentKey);
-        const chosen = group.rows.filter((r) => !this.excluded.has(r.id));
-        const summary = this.h.resourceRow(group, {
-          checked: chosen.length === group.rows.length,
-          indeterminate: chosen.length > 0 && chosen.length < group.rows.length,
-          detail: `${group.rows.length} \u5904\u5339\u914D \xB7 ${[...new Set(group.rows.map((r) => r.field))].join("\u3001")}`,
-          onSelect: (checked) => {
-            group.rows.forEach((r) => checked ? this.excluded.delete(r.id) : this.excluded.add(r.id));
-            this.selectionChanged();
-          }
-        });
-        details.append(summary);
-        const matches = this.node("div", "tle-content-matches");
-        details.append(matches);
-        let shown = 0;
-        const append = () => {
-          matches.querySelector("[data-more]")?.remove();
-          for (const row of group.rows.slice(shown, shown + 100)) {
-            const item = this.node("div", "tle-content-match");
-            const label = this.node("label", "checkbox_label");
-            const check = this.node("input", "tle-quick-item-check");
-            check.type = "checkbox";
-            check.checked = !this.excluded.has(row.id);
-            check.disabled = this.busy;
-            check.addEventListener("change", () => {
-              check.checked ? this.excluded.delete(row.id) : this.excluded.add(row.id);
+      for (const section of this.resultSections()) {
+        const sectionNode = this.node("details");
+        sectionNode.dataset.contentSection = section.key;
+        sectionNode.open = !closedSections.has(section.key);
+        const sectionSummary = this.node("summary");
+        const sectionCheck = this.node("input");
+        sectionCheck.type = "checkbox";
+        const sectionSelected = section.rows.filter((r) => !this.excluded.has(r.id)).length;
+        sectionCheck.checked = sectionSelected === section.rows.length;
+        sectionCheck.indeterminate = sectionSelected > 0 && sectionSelected < section.rows.length;
+        sectionCheck.setAttribute("aria-label", `\u9009\u62E9${section.title}\u5168\u90E8\u5339\u914D`);
+        sectionCheck.addEventListener("click", (e) => e.stopPropagation());
+        sectionCheck.addEventListener("change", () => this.selectRows(section.rows, sectionCheck.checked));
+        const sectionLabel = this.node("span", "inline-flex alignItemsCenter");
+        sectionLabel.append(sectionCheck, this.node("strong", "", ` ${section.title} \xB7 ${section.groups.length} \u4E2A\u8D44\u6E90 \xB7 \u5DF2\u9009 ${sectionSelected}/${section.rows.length} \u5904`));
+        sectionSummary.append(sectionLabel);
+        const sectionTools = this.node("div", "flex-container");
+        sectionTools.append(this.button("\u5168\u9009\u672C\u7EC4", () => this.selectRows(section.rows, true)), this.button("\u53D6\u6D88\u672C\u7EC4", () => this.selectRows(section.rows, false)));
+        sectionNode.append(sectionSummary, sectionTools);
+        list.append(sectionNode);
+        for (const group of section.groups) {
+          const contentKey = JSON.stringify([section.key, group.contentKey]);
+          const details = this.node("details");
+          details.dataset.contentKey = contentKey;
+          details.open = this.previewed || open.has(contentKey);
+          const chosen = group.rows.filter((r) => !this.excluded.has(r.id));
+          const summary = this.h.resourceRow(group, {
+            checked: chosen.length === group.rows.length,
+            indeterminate: chosen.length > 0 && chosen.length < group.rows.length,
+            detail: `${group.rows.length} \u5904\u5339\u914D \xB7 ${[...new Set(group.rows.map((r) => r.field))].join("\u3001")}`,
+            onSelect: (checked) => {
+              group.rows.forEach((r) => checked ? this.excluded.delete(r.id) : this.excluded.add(r.id));
               this.selectionChanged();
-            });
-            label.append(check, this.node("span", "", `${row.label} \xB7 ${row.field} \xB7 \u4F4D\u7F6E ${row.start + 1} \xB7 \u89C4\u5219 ${row.rule + 1}`));
-            item.append(label);
-            const p = previewSegments(row.context, row.id, this.scanRules, this.excluded);
-            item.append(this.node("div", "tle-content-text", "\u539F\u6587\uFF1A" + p.prefix + p.before + p.suffix));
-            if (this.previewed) item.append(this.node("div", "tle-content-text", "\u6539\u540E\uFF1A" + p.afterPrefix + p.after + p.afterSuffix));
-            matches.append(item);
-          }
-          shown += 100;
-          if (shown < group.rows.length) {
-            const more = this.button("\u52A0\u8F7D\u540E\u7EED\u5339\u914D", append);
-            more.dataset.more = "";
-            matches.append(more);
-          }
-        };
-        details.addEventListener("toggle", () => {
-          if (details.open && !shown) append();
-        });
-        if (details.open) append();
-        list.append(details);
+            }
+          });
+          details.append(summary);
+          const matches = this.node("div", "tle-content-matches");
+          details.append(matches);
+          let shown = 0;
+          const append = () => {
+            matches.querySelector("[data-more]")?.remove();
+            for (const row of group.rows.slice(shown, shown + 100)) {
+              const item = this.node("div", "tle-content-match");
+              const label = this.node("label", "checkbox_label");
+              const check = this.node("input", "tle-quick-item-check");
+              check.type = "checkbox";
+              check.checked = !this.excluded.has(row.id);
+              check.disabled = this.busy;
+              check.addEventListener("change", () => {
+                check.checked ? this.excluded.delete(row.id) : this.excluded.add(row.id);
+                this.selectionChanged();
+              });
+              label.append(check, this.node("span", "", `${row.label} \xB7 ${row.field} \xB7 \u4F4D\u7F6E ${row.start + 1} \xB7 \u89C4\u5219 ${row.rule + 1}`));
+              item.append(label);
+              const p = previewSegments(row.context, row.id, this.scanRules, this.excluded);
+              item.append(this.node("div", "tle-content-text", "\u539F\u6587\uFF1A" + p.prefix + p.before + p.suffix));
+              if (this.previewed) item.append(this.node("div", "tle-content-text", "\u6539\u540E\uFF1A" + p.afterPrefix + p.after + p.afterSuffix));
+              matches.append(item);
+            }
+            shown += 100;
+            if (shown < group.rows.length) {
+              const more = this.button("\u52A0\u8F7D\u540E\u7EED\u5339\u914D", append);
+              more.dataset.more = "";
+              matches.append(more);
+            }
+          };
+          details.addEventListener("toggle", () => {
+            if (details.open && !shown) append();
+          });
+          if (details.open) append();
+          sectionNode.append(details);
+        }
       }
       if (!this.groups.length) list.append(this.node("p", "tle-quick-empty", this.snapshot ? "\u6CA1\u6709\u547D\u4E2D\u3002" : "\u8F93\u5165\u67E5\u627E\u5185\u5BB9\u540E\u70B9\u51FB\u300C\u67E5\u627E\u300D\u3002"));
       if (this.snapshot?.skipped?.length) {
@@ -6089,17 +6139,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           padding-inline: 6px;
           white-space: nowrap;
         }
-        .tle-quick-manager .tle-quick-manage-row {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 5px;
-          padding: 6px;
-        }
-        .tle-quick-manager .tle-quick-manage-row > input { grid-column: 1 / -1; }
-        .tle-quick-manager .tle-quick-manage-row > button {
-          min-width: 0;
-          padding-inline: 4px;
-          font-size: .84em;
-        }
         .tle-quick-manager .tle-quick-toolbar {
           display: flex;
           flex: 0 0 auto;
@@ -6113,8 +6152,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         #tle-organizer-panel.drawer-content > .tle-organizer-resources.tle-quick-manager {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto;
-          grid-template-rows: auto 38px 36px 34px auto auto auto auto auto minmax(0, 1fr) auto;
+          grid-template-rows: auto auto 38px 36px 34px auto auto auto auto auto minmax(0, 1fr) auto;
           grid-template-areas:
+            "heading heading"
             "search search"
             "categories categories"
             "groups groups"
@@ -6132,6 +6172,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           min-width: 0;
           min-height: 0;
         }
+        .tle-quick-manager .tle-content-heading { grid-area: heading; }
         .tle-quick-manager .tle-content-search-row { grid-area: search; }
         .tle-quick-manager .tle-content-controls { grid-area: operations; max-height: 36vh; overflow-y: auto; }
         .tle-quick-manager .tle-quick-category-row {
@@ -6223,27 +6264,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           font-size: .78em;
           white-space: nowrap;
         }
-        .tle-quick-manager .tle-quick-manage-row {
-          grid-area: manage;
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 4px;
-          min-width: 0;
-          padding: 0;
-        }
-        .tle-quick-manager .tle-quick-manage-row > input {
-          grid-column: 1 / -1;
-          min-width: 0;
-          margin: 0;
-        }
-        .tle-quick-manager .tle-quick-manage-row > button {
-          min-width: 0;
-          min-height: 30px;
-          height: 30px;
-          margin: 0;
-          padding-inline: 4px;
-          font-size: .8em;
-        }
+        .tle-quick-manager .tle-quick-group-editor { grid-area: manage; }
         .tle-quick-manager .tle-worldbook-filter-bar {
           grid-area: world;
           position: relative;
@@ -8634,14 +8655,23 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     current.abort.signal.addEventListener('abort', () => horizontalIndicatorResizeObserver?.disconnect(), { once: true });
 
     const groupName = quickNode('input', 'text_pole');
-    groupName.placeholder = '新分组名称 / 重命名名称';
-    groupName.setAttribute('aria-label', '新分组名称或重命名名称');
-    const createButton = quickButton('创建', () => createGroup());
+    groupName.placeholder = '重命名分组';
+    groupName.setAttribute('aria-label', '重命名分组');
+    const newGroupName = quickNode('input', 'text_pole flex1');
+    newGroupName.placeholder = '新分组名称'; newGroupName.size = 1;
+    newGroupName.setAttribute('aria-label', '新分组名称');
+    const createButton = quickButton('新建分组', () => createGroup());
+    const createRow = quickNode('div', 'flex-container flexnowrap alignItemsCenter');
+    createRow.append(newGroupName, createButton);
     const renameButton = quickButton('重命名', () => renameGroup());
     const deleteButton = quickButton('删除分组', () => deleteGroup());
-    const manageRow = quickNode('div', 'tle-quick-manage-row');
+    const manageRow = quickNode('div', 'flex-container flexFlowColumn');
     manageRow.hidden = true;
-    manageRow.append(groupName, createButton, renameButton, deleteButton);
+    const manageActions = quickNode('div', 'flex-container');
+    manageActions.append(renameButton, deleteButton);
+    manageRow.append(groupName, manageActions);
+    const groupEditor = quickNode('div', 'tle-quick-group-editor flex-container flexFlowColumn');
+    groupEditor.append(createRow, manageRow);
 
     const search = state.organizerPanel.querySelector('.tle-search-field');
     if (!search) return;
@@ -8731,7 +8761,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const deleteConfirm = quickNode('div', 'tle-quick-transfer-confirm tle-quick-delete-confirm');
     deleteConfirm.hidden = true;
     const deleteMessage = quickNode('p', 'tle-quick-transfer-message');
-    const deleteActions = quickNode('div', 'tle-quick-transfer-actions');
+    const deleteActions = quickNode('div', 'tle-quick-transfer-actions flex-container');
     const deleteCancelButton = quickButton('取消', () => { deleteConfirm.hidden = true; });
     const deleteConfirmButton = quickButton('确认删除', () => void deleteSelectedResources());
     deleteActions.append(deleteCancelButton, deleteConfirmButton);
@@ -8741,7 +8771,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const transferConfirm = quickNode('div', 'tle-quick-transfer-confirm tle-quick-import-confirm');
     transferConfirm.hidden = true;
     const transferMessage = quickNode('p', 'tle-quick-transfer-message');
-    const transferActions = quickNode('div', 'tle-quick-transfer-actions');
+    const transferActions = quickNode('div', 'tle-quick-transfer-actions flex-container');
     const transferCancelButton = quickButton('取消', () => settleTransferConfirm(false));
     const transferConfirmButton = quickButton('确认导入', () => settleTransferConfirm(true));
     transferActions.append(transferCancelButton, transferConfirmButton);
@@ -8765,7 +8795,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     groupHeader.append(groupHeading);
     const resourcePane = quickNode('section', 'tle-organizer-pane tle-organizer-resource-pane');
     resourcePane.setAttribute('aria-label', '资源列表');
-    const resourceHeading = quickNode('strong', 'tle-organizer-pane-title', '资源列表');
+    const resourceHeading = quickNode('strong', '', '资源列表');
+    const resourceHeader = quickNode('div', 'tle-content-heading flex-container alignItemsCenter justifySpaceBetween');
+    resourceHeader.append(resourceHeading);
 
     for (const item of QUICK_RESOURCE_MODULES) {
       const button = quickButton(item.title, () => {
@@ -9071,7 +9103,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const busyControls = [
         ...tabs.querySelectorAll('button'),
         ...operations.querySelectorAll('button'),
-        ...manageRow.querySelectorAll('button'),
+        ...groupEditor.querySelectorAll('button,input'),
         targetSelect, manageButton, autoGroupButton,
       ];
       const busyDisabled = busyControls.map(control => control.disabled);
@@ -9228,7 +9260,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     function createGroup() {
-      const name = groupName.value.trim();
+      const name = newGroupName.value.trim();
       if (!name) { statusMessage = '请填写新分组名称。'; render(); return; }
       const data = readQuickGroups();
       const groups = currentGroups(data);
@@ -9246,6 +9278,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       manageButton.setAttribute('aria-expanded', 'false');
       saveAndRender(data, `已创建「${name}」分组。`);
       groupName.value = name;
+      newGroupName.value = '';
     }
 
     function renameGroup() {
@@ -9483,7 +9516,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const controls = [
         ...tabs.querySelectorAll('button'),
         ...operations.querySelectorAll('button'),
-        ...manageRow.querySelectorAll('button'),
+        ...groupEditor.querySelectorAll('button,input'),
         targetSelect, manageButton, autoGroupButton,
       ].filter(Boolean);
       const disabledBefore = controls.map(control => control.disabled);
@@ -9696,10 +9729,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     groupName.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        if (targetGroup) renameGroup();
-        else createGroup();
+        renameGroup();
       }
     });
+    newGroupName.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); createGroup(); } });
     current.onSearchInput = () => {
       if (quickPanel !== current) return;
       content?.onInput();
@@ -9708,7 +9741,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     };
 
     content = new TLEBatchLibrary.OrganizerContent({
-      window: HOST_WIN, signal: current.abort.signal, search, searchWrap: current.searchWrap,
+      window: HOST_WIN, signal: current.abort.signal, search, searchWrap: current.searchWrap, heading: resourceHeader,
       namePlaceholder: search.placeholder, node: quickNode, button: quickButton, list, status,
       context: () => HOST_WIN.SillyTavern?.getContext?.() || {},
       scopeState: () => ({ module, entries, filtered: getVisibleEntries(), selected }),
@@ -9720,7 +9753,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       },
       lock(locked) {
         for (const el of body.querySelectorAll('button,input,select,textarea')) {
-          if (content.controls.contains(el) || content.searchRow.contains(el)) continue;
+          if (content.controls.contains(el) || content.searchRow.contains(el) || content.target.contains(el)) continue;
           if (locked) { el.dataset.contentLockDisabled = String(el.disabled); el.disabled = true; }
           else { el.disabled = el.dataset.contentLockDisabled === 'true'; delete el.dataset.contentLockDisabled; }
         }
@@ -9760,9 +9793,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (resume) { search.value = resume.nameQuery || ''; content.nameQuery = search.value; }
 
     categoryPane.append(categoryHeading, categoryRow);
-    groupPane.append(groupHeader, groupActions, manageRow, groupFilters);
+    groupPane.append(groupHeader, groupActions, groupEditor, groupFilters);
     resourcePane.append(
-      resourceHeading, content.searchRow, content.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
+      resourceHeader, content.searchRow, content.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
       operations, list, status
     );
     workspace.append(categoryPane, groupPane, resourcePane);
@@ -10644,14 +10677,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.235 · 搜索框统一继承主题原生样式</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.236 · 搜索框统一继承主题原生样式</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.235</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.236</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -16631,7 +16664,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.235',
+    version: '0.3.236',
     ready: false,
     destroy,
     state,
@@ -17081,5 +17114,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.235 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.236 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

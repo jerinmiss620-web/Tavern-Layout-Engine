@@ -275,10 +275,10 @@ assert.ok(managerSource.includes("const categoryPane = quickNode('section', 'tle
 assert.ok(managerSource.includes("const groupPane = quickNode('section', 'tle-organizer-pane tle-organizer-group-pane')"));
 assert.ok(managerSource.includes("const resourcePane = quickNode('section', 'tle-organizer-pane tle-organizer-resource-pane')"));
 assert.ok(managerSource.includes('categoryPane.append(categoryHeading, categoryRow)'), 'First column must contain resource types');
-assert.ok(managerSource.includes('groupPane.append(groupHeader, groupActions, manageRow, groupFilters)'), 'Second column must contain ungrouped and named groups');
+assert.ok(managerSource.includes('groupPane.append(groupHeader, groupActions, groupEditor, groupFilters)'), 'Second column must contain ungrouped and named groups with always-visible creation');
 assert.ok(managerSource.includes('resourcePane.append(') && managerSource.includes('operations, list, status'), 'Third column must contain resource rows and batch actions');
 assert.ok(managerSource.includes('current.searchWrap = search.parentElement;'), 'Search wrapper must be moved into the resource column');
-assert.ok(managerSource.includes('resourceHeading, content.searchRow, content.controls, worldFilterBar'), 'Search must sit above the right-hand resource list');
+assert.ok(managerSource.includes('resourceHeader, content.searchRow, content.controls, worldFilterBar'), 'Search must sit below the combined heading and mode controls');
 assert.ok(source.includes('current.node.insertBefore(searchWrap, current.body)'), 'Closing Organizer must restore the search field to its original shell');
 assert.ok(managerSource.includes("resourceHeading.textContent = QUICK_RESOURCE_MODULES.find(item => item.id === module)?.title"), 'Resource column heading must follow the active type');
 assert.ok(source.includes('grid-template-columns: minmax(138px, .78fr) minmax(168px, .92fr) minmax(360px, 2.3fr)'), 'Desktop Organizer must use three columns');

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
-const version='0.3.235',dir=`releases/v${version}`;
+const version='0.3.236',dir=`releases/v${version}`;
 fs.mkdirSync(dir,{recursive:true});
 const source=fs.readFileSync('development/organizer/TLE.js','utf8');
 fs.writeFileSync(`${dir}/TLE.js`,source);
@@ -9,14 +9,14 @@ installer.name=`Tavern Layout Engine · v${version} TEST（整理侠内容处理
 installer.info='**简介：** 整理侠在同一个搜索框与资源列表内提供跨资源查找与替换，修复原版 PC 插件兼容性。\n\n**使用方式：** 由现有 TLE Test Loader 更新；此包是手动备用安装包。PC 已安装 Global Batch Replace v1.1.0 服务端即可查找、预览、替换和整份备份恢复；ZIP 导入与按文件恢复使用配套插件。TT 使用内置适配。\n\n**注意事项：** 默认禁用；仅测试通道。正式 Core/Loader/Bootstrap 不变。平台验证范围详见 VALIDATION.md。\n\n**作者：** 小松鼠 & ChatGPT（小松7）。';
 installer.content=source;installer.enabled=false;
 fs.writeFileSync(`${dir}/TLE-${version}-TEST-import.json`,JSON.stringify(installer,null,2)+'\n');
-const notes=`# Core v${version} TEST · 原版 PC 接口兼容与原生控件修复
+const notes=`# Core v${version} TEST · 内容结果分组与原生紧凑布局
 
-- 修复 v0.3.234 将可选 beforeHash 状态字段当作必需字段、导致原版 PC 服务扫描成功仍无法显示结果的问题。
-- 原版 v1.1.0 PC 服务直接支持查找、部分匹配替换/文本删除、预览、备份导出与整份恢复；保持服务端文件哈希、备份和提交复读校验。搜索转预览还会核对匹配位置及上下文。
-- 配套插件明确声明 ZIP 导入和按文件恢复能力；原版插件界面不提供它不能执行的部分恢复操作。
-- “资源名称 / 查找与替换”直接可见；查找紧邻搜索框，预览紧邻替换输入。使用酒馆原生内嵌清除按钮，移除自绘外置圆形清除按钮及强制 40px 输入高度。
-- 输入和按钮继承宿主原生样式与 flex 工具类；不覆盖控件高度、颜色、背景、边框、字体。
-- 新增未修改的原版 PC 服务回归夹具，覆盖无 beforeHash 的查找→部分删除→恢复及前后冲突。平台执行证据与限制见 CONTENT-VALIDATION.md。
+- “资源名称 / 查找与替换”移到分类标题右侧；宽屏搜索和替换合行，范围和备份合行，窄屏按宿主原生布局换行。
+- 新建分组常驻管理区外；重命名和删除分组横排，删除资源与替换确认按钮横排。
+- 恢复角色卡、聊天记录、世界书等类型小组；每组可折叠、全选、取消，保留资源和逐处选择，混合选择显示半选。
+- 角色内嵌世界书按内容类型进入世界书小组，物理资源总数不重复计数；更改选择后必须重新预览。
+- 控件继续继承宿主原生样式与布局工具类；高级提示移入折叠区，不增加控件高度、颜色、背景、边框和字体覆盖。
+- 保留 v0.3.235 的原版 PC 接口兼容修复；原版与配套服务端使用实际隔离 PC 酒馆验证。平台范围见 CONTENT-VALIDATION.md。
 - 仅更新开发分支测试通道；正式 latest.json、Stable Core/Loader、Bootstrap 不变。
 
 安装、来源与限制详见 development/organizer/CONTENT-INTEGRATION.md；验证矩阵详见 CONTENT-VALIDATION.md。
@@ -34,7 +34,7 @@ const section=`## 开发分支测试版 v${version} · 整理侠内容处理
 `;
 if(!readme.includes('## 开发分支测试版 v'+version))fs.writeFileSync('README.md',readme.replace(/## 开发分支测试版[\s\S]*?(?=## 一次安装，后续自动更新)/,section));
 const changelog=fs.readFileSync('CHANGELOG.md','utf8');
-if(!changelog.includes('Core v'+version))fs.writeFileSync('CHANGELOG.md',`## 2026-11-26 · Core v${version} · PC 接口兼容与原生控件修复（开发分支）\n\n详见 [本版完整日志](${dir}/CHANGELOG.md)。修复原版接口查找被拦截；恢复原生搜索框清除、控件尺寸与主题继承；补充原版服务端和真实 PC 宿主验证。\n\n`+changelog);
+if(!changelog.includes('Core v'+version))fs.writeFileSync('CHANGELOG.md',`## 2026-11-26 · Core v${version} · 内容结果分组与原生紧凑布局（开发分支）\n\n详见 [本版完整日志](${dir}/CHANGELOG.md)。恢复类型小组及组内选择，调整标题、搜索替换和分组管理布局，沿用宿主原生控件与布局类。\n\n`+changelog);
 const provenance={upstream:'https://github.com/jerinmiss620-web/global-batch-replace',commit:'6b4ab84',version:'1.1.0',unchanged:{}};
 for(const name of ['batch-engine.js','batch-adapters.js','storage.js','vendor/fflate.js','vendor/fflate-LICENSE'])provenance.unchanged[name]=createHash('sha256').update(fs.readFileSync('development/organizer/batch/'+name,'utf8').replaceAll('\r\n','\n')).digest('hex');
 provenance.adapted=['batch-runtime.js: explicit host bridge + PC ZIP import','batch-tt.js: scan hash + paths restore + per-resource errors','server-plugin/batch-server.js: scan hash + verified ZIP import + paths restore'];

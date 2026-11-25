@@ -30,7 +30,7 @@ export class OrganizerContent {
     }
     mount() {
         const n = this.node;
-        this.searchRow = n('div', 'tle-content-search-row flex-container flexFlowColumn');
+        this.searchRow = n('div', 'tle-content-search-row flex-container');
         this.target = n('div', 'flex-container'); this.target.setAttribute('role', 'group'); this.target.setAttribute('aria-label', '搜索方式');
         for (const [value, text] of [['name', '资源名称'], ['content', '查找与替换']]) {
             const label = n('label', 'checkbox_label'), radio = n('input'); radio.type = 'radio'; radio.name = 'tle-organizer-search-mode'; radio.value = value; radio.checked = value === this.mode;
@@ -39,12 +39,12 @@ export class OrganizerContent {
         }
         this.replace = n('input', 'text_pole flex1'); this.replace.type = 'text'; this.replace.size = 1; this.replace.placeholder = '留空删除匹配文本'; this.replace.setAttribute('aria-label', '替换为'); this.replace.hidden = true;
         this.replace.addEventListener('input', () => { this.rules[0].replace = this.replace.value; this.invalidate(); void this.persist().catch(() => {}); });
-        this.findRow = n('div', 'flex-container flexnowrap alignItemsCenter');
+        this.findRow = n('div', 'flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px');
         this.h.searchWrap.classList.add('flex1');
-        this.replaceRow = n('div', 'flex-container flexnowrap alignItemsCenter'); this.replaceRow.hidden = true;
+        this.replaceRow = n('div', 'flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px'); this.replaceRow.hidden = true;
         this.controls = n('div', 'tle-content-controls flex-container flexFlowColumn'); this.controls.hidden = true;
-        const actions = n('div', 'flex-container flexWrap');
-        this.scopeSelect = n('select', 'text_pole'); this.scopeSelect.setAttribute('aria-label', '内容搜索范围');
+        const actions = n('div', 'flex-container flexnowrap alignItemsCenter');
+        this.scopeSelect = n('select', 'text_pole flex1'); this.scopeSelect.setAttribute('aria-label', '内容搜索范围');
         for (const [value, label] of [['all', '全部支持资源'], ['filtered', '当前筛选范围'], ['selected', '已选资源']]) { const o = n('option', '', label); o.value = value; this.scopeSelect.append(o); }
         this.scopeSelect.addEventListener('change', () => { this.scope = this.scopeSelect.value; this.invalidate(); });
         this.findButton = this.button('查找', () => this.scan()); this.findButton.hidden = true;
@@ -52,11 +52,13 @@ export class OrganizerContent {
         this.findRow.append(this.h.searchWrap, this.findButton);
         const replaceLabel = n('label', 'flex-container flexnowrap alignItemsCenter flex1'); replaceLabel.append(n('span', '', '替换为'), this.replace);
         this.replaceRow.append(replaceLabel, this.previewButton);
-        this.searchRow.append(this.target, this.findRow, this.replaceRow);
+        if (this.h.heading) this.h.heading.append(this.target);
+        else this.searchRow.append(this.target);
+        this.searchRow.append(this.findRow, this.replaceRow);
         this.cancelButton = this.h.button('取消扫描', () => { this.cancelled = true; if (this.jobId) void this.api('cancel', { id: this.jobId }).catch(e => this.message(e.message)); }); this.cancelButton.hidden = true;
         actions.append(this.scopeSelect, this.cancelButton,
             this.button('备份与恢复', () => this.backups()));
-        this.ruleDetails = n('details', 'tle-content-rules'); this.ruleDetails.append(n('summary', '', '规则组合与高级选项'));
+        this.ruleDetails = n('details'); this.ruleDetails.append(n('summary', '', '规则组合与高级选项'));
         this.ruleDetails.append(this.button('添加规则', () => { if (this.rules.length >= 200) throw Error('最多 200 条规则。'); this.rules.push({ find: '', replace: '' }); this.invalidate(); this.renderRules(); }));
         this.ruleRows = n('div'); this.ruleDetails.append(this.ruleRows);
         const combos = n('div', 'flex-container flexWrap');
@@ -78,10 +80,13 @@ export class OrganizerContent {
         this.selectionTools.append(this.button('全选当前结果', () => this.selectAll(true)), this.button('取消全选', () => this.selectAll(false)));
         this.confirm = n('div', 'tle-quick-transfer-confirm'); this.confirm.hidden = true;
         this.confirmText = n('p'); this.applyButton = this.button('确认替换', () => this.apply());
-        this.confirm.append(this.confirmText, this.applyButton, this.button('返回选择', () => { this.previewed = false; this.confirm.hidden = true; this.renderList(); }));
-        this.capabilities = n('small');
+        const confirmActions = n('div', 'flex-container');
+        confirmActions.append(this.applyButton, this.button('返回选择', () => { this.previewed = false; this.confirm.hidden = true; this.renderList(); }));
+        this.confirm.append(this.confirmText, confirmActions);
+        this.capabilities = n('div');
         this.binding = n('div'); this.binding.hidden = true;
-        this.controls.append(actions, this.ruleDetails, this.capabilities, this.binding, this.selectionTools, this.confirm);
+        this.ruleDetails.append(this.capabilities);
+        this.controls.append(actions, this.ruleDetails, this.binding, this.selectionTools, this.confirm);
         this.renderCombinations(); this.syncScope();
     }
     async setMode(mode) {
@@ -154,7 +159,7 @@ export class OrganizerContent {
     }
     lock(value) {
         this.busy = value; this.h.lock(value);
-        for (const el of [...this.searchRow.querySelectorAll('input,select,button'), ...this.controls.querySelectorAll('input,select,textarea,button')]) {
+        for (const el of [...this.target.querySelectorAll('input'), ...this.searchRow.querySelectorAll('input,select,button'), ...this.controls.querySelectorAll('input,select,textarea,button')]) {
             if (value) { el.dataset.contentDisabled = String(el.disabled); el.disabled = true; }
             else { el.disabled = el.dataset.contentDisabled === 'true'; delete el.dataset.contentDisabled; }
         }
@@ -229,6 +234,21 @@ export class OrganizerContent {
         return `${this.groups.length} 个资源 · ${this.rows.length} 处匹配 · 已选 ${count} 个资源、${selected.length} 处 · 排除 ${this.rows.length - selected.length} 处`;
     }
     selectAll(selected) { this.excluded = new Set(selected ? [] : this.rows.map(r => r.id)); this.selectionChanged(); }
+    selectRows(rows, selected) { rows.forEach(r => selected ? this.excluded.delete(r.id) : this.excluded.add(r.id)); this.selectionChanged(); }
+    resultSections() {
+        const titles = { character: '角色卡', chats: '聊天记录', world: '世界书', persona: '用户身份', presets: '预设', prompts: '提示词', regex: '正则', other: '其他文件' };
+        const sections = new Map(Object.entries(titles).map(([key, title]) => [key, { key, title, groups: [], rows: [] }]));
+        for (const group of this.groups) {
+            const parts = new Map();
+            for (const row of group.rows) {
+                const type = row.scope === 'greetings' ? 'character' : Object.hasOwn(titles, row.scope) ? row.scope : 'other';
+                if (!parts.has(type)) parts.set(type, []);
+                parts.get(type).push(row);
+            }
+            for (const [type, rows] of parts) { const section = sections.get(type); section.groups.push({ ...group, rows }); section.rows.push(...rows); }
+        }
+        return [...sections.values()].filter(section => section.rows.length);
+    }
     selectionChanged() { this.previewed = false; this.confirm.hidden = true; this.message(this.summary()); this.previewButton.disabled = !this.rows.some(r => !this.excluded.has(r.id)); this.renderList(); }
     async preview() {
         if (!this.snapshot || !this.rows.some(r => !this.excluded.has(r.id))) throw Error('请先查找并选择匹配项。');
@@ -288,9 +308,26 @@ export class OrganizerContent {
         if (this.backupView) { this.h.list.replaceChildren(this.backupView); return; }
         const list = this.h.list, scroll = list.scrollTop;
         const open = new Set([...list.querySelectorAll('[data-content-key][open]')].map(d => d.dataset.contentKey));
+        const closedSections = new Set([...list.querySelectorAll('[data-content-section]:not([open])')].map(d => d.dataset.contentSection));
         list.replaceChildren();
-        for (const group of this.groups) {
-            const details = this.node('details'); details.dataset.contentKey = group.contentKey; details.open = this.previewed || open.has(group.contentKey);
+        for (const section of this.resultSections()) {
+            const sectionNode = this.node('details'); sectionNode.dataset.contentSection = section.key; sectionNode.open = !closedSections.has(section.key);
+            const sectionSummary = this.node('summary');
+            const sectionCheck = this.node('input'); sectionCheck.type = 'checkbox';
+            const sectionSelected = section.rows.filter(r => !this.excluded.has(r.id)).length;
+            sectionCheck.checked = sectionSelected === section.rows.length; sectionCheck.indeterminate = sectionSelected > 0 && sectionSelected < section.rows.length;
+            sectionCheck.setAttribute('aria-label', `选择${section.title}全部匹配`);
+            sectionCheck.addEventListener('click', e => e.stopPropagation());
+            sectionCheck.addEventListener('change', () => this.selectRows(section.rows, sectionCheck.checked));
+            const sectionLabel = this.node('span', 'inline-flex alignItemsCenter');
+            sectionLabel.append(sectionCheck, this.node('strong', '', ` ${section.title} · ${section.groups.length} 个资源 · 已选 ${sectionSelected}/${section.rows.length} 处`));
+            sectionSummary.append(sectionLabel);
+            const sectionTools = this.node('div', 'flex-container');
+            sectionTools.append(this.button('全选本组', () => this.selectRows(section.rows, true)), this.button('取消本组', () => this.selectRows(section.rows, false)));
+            sectionNode.append(sectionSummary, sectionTools); list.append(sectionNode);
+        for (const group of section.groups) {
+            const contentKey = JSON.stringify([section.key, group.contentKey]);
+            const details = this.node('details'); details.dataset.contentKey = contentKey; details.open = this.previewed || open.has(contentKey);
             const chosen = group.rows.filter(r => !this.excluded.has(r.id));
             const summary = this.h.resourceRow(group, { checked: chosen.length === group.rows.length, indeterminate: chosen.length > 0 && chosen.length < group.rows.length,
                 detail: `${group.rows.length} 处匹配 · ${[...new Set(group.rows.map(r => r.field))].join('、')}`,
@@ -315,7 +352,8 @@ export class OrganizerContent {
             };
             details.addEventListener('toggle', () => { if (details.open && !shown) append(); });
             if (details.open) append();
-            list.append(details);
+            sectionNode.append(details);
+        }
         }
         if (!this.groups.length) list.append(this.node('p', 'tle-quick-empty', this.snapshot ? '没有命中。' : '输入查找内容后点击「查找」。'));
         if (this.snapshot?.skipped?.length) {
