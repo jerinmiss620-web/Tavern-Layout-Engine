@@ -727,6 +727,7 @@ body[data-tle-nav] #top-settings-holder#top-settings-holder > .drawer > .drawer-
     outline: none;
   }
   #${ID.organizerEntry} > button:active { transform: translateY(1px); }
+  #${ID.organizerEntry} > button[aria-expanded="true"] { border-color: var(--SmartThemeQuoteColor, currentColor); background: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 12%, var(--SmartThemeBlurTintColor, transparent)); }
   #${ID.organizerEntry} .tle-organizer-mark {
     display: grid;
     flex: 0 0 30px;
@@ -3451,7 +3452,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 }
 .tle-quick-item-status.is-warning { color: var(--SmartThemeQuoteColor, currentColor); }
 .tle-quick-item-status.is-pending { opacity: .64; }
-.tle-quick-item-worldbook .tle-quick-item-detail {
+.tle-quick-manager .tle-quick-item-worldbook .tle-quick-item-detail {
   white-space: normal;
   overflow-wrap: anywhere;
   line-height: 1.35;
@@ -4951,7 +4952,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const orphan = [...(orphanByBook.get(name) || [])];
       const global = globalNames.has(name);
       const hasCurrent = global || primary.length > 0 || extra.length > 0;
-      let statusLabel = '未发现角色绑定';
+      let statusLabel = '未绑定';
       let statusTone = 'neutral';
       if (orphan.length && !hasCurrent && unloadedIndices.length === 0) {
         statusLabel = '疑似孤儿';
@@ -4976,7 +4977,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (extra.length) details.push('额外绑定：' + extra.join('、'));
       if (orphan.length) details.push('遗留角色绑定：' + orphan.join('、'));
       if (unloadedIndices.length) details.push('尚有 ' + unloadedIndices.length + ' 张角色卡未加载，主要绑定待核对');
-      if (!details.length) details.push('未发现全局或角色卡绑定');
+      if (!details.length) details.push('未发现全局或角色卡绑定；可能是独立世界书，也可能是删除角色卡后遗留，请人工核对');
 
       const optionValue = optionValues.get(name) ?? String(index);
       const detail = details.join(' · ');
@@ -6037,12 +6038,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           const context = HOST_WIN.SillyTavern?.getContext?.() || {};
           for (const entry of freshChosen) {
             try {
-              if (removeWorldInfoExtraLinks(native.world_info, entry.value)) {
-                if (typeof context.saveSettingsDebounced !== 'function') {
-                  throw new Error('无法保存世界书额外绑定清理，已跳过该项删除。');
-                }
-                context.saveSettingsDebounced();
+              const hasExtraLink = Array.isArray(native.world_info?.charLore) && native.world_info.charLore.some(record => Array.isArray(record?.extraBooks) && record.extraBooks.includes(entry.value));
+              if (hasExtraLink && typeof context.saveSettingsDebounced !== 'function') {
+                throw new Error('无法保存世界书额外绑定清理，已跳过该项删除。');
               }
+              if (removeWorldInfoExtraLinks(native.world_info, entry.value)) context.saveSettingsDebounced();
               if (await native.deleteWorldInfo(entry.value)) successfulKeys.add(entry.key);
               else failed++;
             } catch { failed++; }
@@ -11459,6 +11459,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     HOST_DOC.body.classList.remove('tle-global-search-open');
     state.globalSearchOpen = false;
+    state.organizerEntry?.querySelector('#' + ID.searchToggle)?.setAttribute('aria-expanded', 'false');
     if (restoreFocus) {
       state.organizerEntry?.querySelector('#' + ID.searchToggle)?.focus({ preventScroll: true });
     }
@@ -11472,6 +11473,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     panel.hidden = false;
     panel.setAttribute('aria-hidden', 'false');
     state.globalSearchOpen = true;
+    state.organizerEntry?.querySelector('#' + ID.searchToggle)?.setAttribute('aria-expanded', 'true');
     HOST_DOC.body.classList.add('tle-global-search-open');
     const input = panel.querySelector('input');
     setGlobalSearchView('search');
