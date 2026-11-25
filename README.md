@@ -28,22 +28,24 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 ## 当前开发分支（未发布）
 
-开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.223）。
+开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.224）。
 
-本分支将全局搜索与整理侠拆分为两个独立功能：全局搜索恢复为工作区顶栏的独立按钮和居中弹窗，保留原有搜索能力；弹窗内提供「进入整理侠」跳转入口，但不承载资源管理。整理侠仍是侧边栏第十个一级功能抽屉，位于角色管理下方，拥有独立 `.drawer-content`、自己的资源筛选输入框、分组和批量管理功能，按 `openDrawer / closedDrawer` 展开收起。世界书采用统一清单，分别识别全局启用、角色主要绑定、额外绑定、未绑定和疑似孤儿，并提供「全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用」快速筛选；全局启用与角色绑定是可重叠的独立状态。懒加载角色卡仍支持按需扫描，扫描未完成时不把未知绑定误判为未绑定。本轮不实现新的首页画廊，也不改造酒馆原生角色预览区；首页画廊需求单独讨论。世界书分组使用名称作为稳定标识，并迁移旧索引键；批量删除仍调用酒馆原生接口，不另建世界书编辑器或角色管理系统。 全局搜索与替换的后续整合留待 Codex 单独处理，不在本候选版本混入。
+整理侠的资源管理现在直接位于自己的原生形态 `.drawer-content` 内，不再套用第二层 `.tle-search-surface`。抽屉图标、导航文字与全局搜索弹窗的跳转入口统一调用明确的开合控制器，直接维护 `openDrawer / closedDrawer`；打开时先关闭其他普通抽屉和 TLE 控制面板，移动端仍由原生导航生命周期收起侧栏。
+
+本分支将全局搜索与整理侠拆分为两个独立功能：全局搜索恢复为工作区顶栏的独立按钮和居中弹窗，保留原有搜索能力；弹窗内提供「进入整理侠」跳转入口，但不承载资源管理。整理侠仍是侧边栏第十个一级功能抽屉，位于角色管理下方，拥有独立 `.drawer-content`、自己的资源筛选输入框、分组和批量管理功能，按 `openDrawer / closedDrawer` 展开收起。世界书采用统一清单，分别识别全局启用、角色主要绑定、额外绑定、未绑定和疑似孤儿，并提供「全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用」快速筛选；全局启用与角色绑定是可重叠的独立状态。懒加载角色卡仍支持按需扫描，扫描未完成时不把未知绑定误判为未绑定。本轮不实现新的首页画廊，也不改造酒馆原生角色预览区；首页画廊需求单独讨论。世界书分组使用名称作为稳定标识，并迁移旧索引键；批量删除仍调用酒馆原生接口，不另建世界书编辑器或角色管理系统。全局搜索与替换的后续整合留待 Codex 单独处理，不在本候选版本混入。
 
 **孤儿识别边界：** 若角色卡删除后，唯一的主要世界书引用也随角色卡文件一并消失，酒馆没有留下可追溯关联，TLE 无法还原它原来绑定的角色；这类世界书会显示为「未绑定」，供人工核对。仍保留在酒馆额外绑定记录中的失效角色关联可标记为「疑似孤儿」。聊天级或身份级引用不属于本轮角色绑定判定范围。懒加载扫描仅在用户主动点击时执行，逐张读取角色元数据，可能增加当前会话内存占用。
 
-**独立测试入口已准备：** [v0.3.223 候选更新日志](releases/v0.3.223/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
+**独立测试入口已准备：** [v0.3.224 候选更新日志](releases/v0.3.224/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
-此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.222 候选的开发回归已通过；v0.3.223 的入口拆分与世界书筛选已更新源码和回归断言，本轮完整 CI 与 PC/移动端 SillyTavern、TauriTavern 的真实界面验收仍待进行。当前正式版仍为 Core v0.3.220。
+此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 候选的入口拆分与世界书筛选已保留；v0.3.224 修复了整理侠抽屉点击无响应的问题，并移除了嵌套视觉容器。源码语法和定向回归已通过，完整 CI 与 PC/移动端 SillyTavern、TauriTavern 的真实界面验收仍待进行。当前正式版仍为 Core v0.3.220。
 
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
 - [Core 变更日志](releases/v0.3.220/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；Core v0.3.223 的全局搜索/整理侠分离与世界书快速筛选仍待桌面与移动端视觉验收，Core v0.3.219 新增的批量删除流程仍待实机验收，故障注入及长期可靠性也未全部覆盖。
+- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；Core v0.3.224 的整理侠抽屉激活与直接 `.drawer-content` 布局仍待桌面与移动端视觉验收，Core v0.3.219 新增的批量删除流程仍待实机验收，故障注入及长期可靠性也未全部覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
