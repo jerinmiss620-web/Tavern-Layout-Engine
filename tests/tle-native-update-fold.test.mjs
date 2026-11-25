@@ -79,21 +79,24 @@ const backupStart = manager.indexOf("const backupRow = quickNode('div', 'tle-qui
 const backupEnd = manager.indexOf("const themeImportRow = quickNode('div', 'tle-quick-theme-import')", backupStart);
 const globalBackup = manager.slice(backupStart, backupEnd);
 assert.match(globalBackup, /backupRow\.append\(importBackupButton, exportBackupButton, backupFile\)/,
-  'global header must retain only full-scheme import/export');
+  'full-scheme import/export controls must remain grouped in the backup row');
 assert.doesNotMatch(globalBackup, /readThemeManagerButton/,
-  'category-specific theme import must be absent from global header');
+  'theme sync must remain a distinct control, not be nested inside the backup row');
 assert.match(manager, /const themeImportRow = quickNode\('div', 'tle-quick-theme-import'\);/);
 assert.match(manager, /themeImportRow\.append\(readThemeManagerButton\)/);
-assert.match(manager, /themeImportRow\.hidden = true;/);
-assert.match(manager, /themeImportRow\.hidden = module !== 'theme';/,
-  'category-specific action must appear only in the Theme tab');
-assert.match(manager, /const search = state\.globalSearchPanel\.querySelector\('\.tle-search-field'\)/,
+assert.match(manager, /const headingTools = state\.organizerPanel\.querySelector\('\.tle-search-heading-tools'\)/);
+assert.match(manager, /headingTools\.replaceChildren\(themeImportRow, backupRow\)/,
+  'theme sync and full-scheme backup controls must be mounted together in the persistent title toolbar');
+assert.doesNotMatch(manager, /themeImportRow\.hidden/,
+  'theme sync remains visible for every resource category');
+assert.match(manager, /const search = state\.organizerPanel\.querySelector\('\.tle-search-field'\)/,
   'resource management must reuse the Organizer search field');
 assert.match(manager, /toolbar\.append\(targetSelect, manageButton, autoGroupButton\)/,
   'resource toolbar must not create another search field');
 assert.match(manager, /const categoryRow = quickNode\('div', 'tle-quick-category-row'\);/);
-assert.match(manager, /categoryRow\.append\(tabs, themeImportRow, backupRow\)/,
-  'resource categories, theme sync and full backup must share one toolbar row');
+assert.match(manager, /categoryRow\.append\(tabs\)/);
+assert.doesNotMatch(manager, /categoryRow\.append\(tabs, themeImportRow, backupRow\)/,
+  'title toolbar actions must not consume the resource-category row');
 assert.match(manager, /const groupControlsRow = quickNode\('div', 'tle-quick-group-controls'\);/);
 assert.match(manager, /groupControlsRow\.append\(groupFilters, toolbar\)/,
   'group filters and target-group controls must share one row');
@@ -106,7 +109,7 @@ assert.doesNotMatch(manager, /searchRow|quickSearchBox|tle-quick-search-row/,
 assert.doesNotMatch(manager, /groupFiltersWrap|tle-quick-filters-wrap/,
   'old filter/sync wrapper must be removed');
 assert.match(manager, /const readThemeManagerButton = quickButton\('', \(\) => void importThemeManagerGroups\(\)\)/);
-assert.match(manager, /readThemeManagerButton\.setAttribute\('aria-label', '读取主题管理分组，仅替换当前 UI 主题分类'\)/);
+assert.match(manager, /readThemeManagerButton\.setAttribute\('aria-label', '同步 UI 主题分组，仅替换 TLE 当前 UI 主题分类'\)/);
 assert.match(manager, /readThemeManagerButton\.append\(themeImportIcon, HOST_DOC\.createTextNode\('同步'\)\)/);
 assert.match(manager, /if \(!await confirmGroupTransfer\(message, '导入 UI 主题分组'\)\) return;/,
   'existing confirmation must remain');
