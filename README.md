@@ -40,7 +40,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 **独立测试入口已准备：** [v0.3.225 候选更新日志](releases/v0.3.225/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
-此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复均保留。v0.3.225 将 PC 整理侠改为三栏工作区：资源类型、分组目录、资源列表；搜索框移入右侧资源栏，三栏分别滚动。窄屏和移动端继续使用原有单栏流程。源码语法和定向回归已通过；完整分支 CI 与 ST/TT 桌面、移动端实机验收仍待进行。正式 Stable 仍为 Core v0.3.220。
+此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复均保留。v0.3.225 将 PC 整理侠改为三栏工作区：资源类型、分组目录、资源列表；搜索框移入右侧资源栏，三栏分别滚动。窄屏和移动端继续使用原有单栏流程。源码语法、定向回归、完整 `npm test` 与 Organizer Test 通道 CI 已通过（Actions run `45570073432`）；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.220。
 
 ## 发布与验证
 
