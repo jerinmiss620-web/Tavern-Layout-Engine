@@ -12,7 +12,7 @@ const searchStart = source.indexOf('function createGlobalSearch()');
 const searchEnd = source.indexOf('function createRailControls()', searchStart);
 const searchMarkup = source.slice(searchStart, searchEnd);
 
-assert.equal(plan.core, '0.3.219');
+assert.equal(plan.core, '0.3.220');
 new vm.Script(source, { filename: 'TLE.js' });
 
 // One existing rail control is renamed; no second Organizer button is introduced.
@@ -26,8 +26,8 @@ assert.match(source, /function openGlobalSearch\(\)/);
 assert.match(source, /function renderGlobalSearchResults\(/);
 assert.match(source, /function setGlobalSearchView\(view\)/);
 assert.match(searchMarkup, /<strong class="tle-search-title">整理侠<\/strong>/);
-assert.match(searchMarkup, /data-organizer-tab="search"/);
-assert.match(searchMarkup, /data-organizer-tab="resources"/);
+assert.match(searchMarkup, /<header class="tle-search-heading">[\s\S]*<nav class="tle-organizer-tabs"[\s\S]*data-organizer-tab="search"[\s\S]*data-organizer-tab="resources"[\s\S]*tle-search-close[\s\S]*<\/header>/);
+assert.equal((searchMarkup.match(/<nav class="tle-organizer-tabs"/g) || []).length, 1);
 assert.equal((searchMarkup.match(/class="text_pole tle-search-field"/g) || []).length, 1);
 assert.match(manager, /const search = state\.globalSearchPanel\.querySelector\('\.tle-search-field'\)/);
 assert.doesNotMatch(manager, /quickSearchBox|tle-quick-search-row/);
@@ -50,6 +50,21 @@ assert.ok(source.includes("API 连接、接口来源与模型仅允许搜索，�
 assert.ok(!source.includes("整理侠暂不开放批量删除"));
 assert.match(source, /正则继续由正则侠管理/);
 assert.match(manager, /quickButton\('批量删除资源'/);
+assert.ok(manager.includes("const categoryRow = quickNode('div', 'tle-quick-category-row');"));
+assert.ok(manager.includes("categoryRow.append(tabs, themeImportRow, backupRow);"));
+assert.ok(manager.includes("const groupControlsRow = quickNode('div', 'tle-quick-group-controls');"));
+assert.ok(manager.includes("groupControlsRow.append(groupFilters, toolbar);"));
+assert.ok(manager.includes("body.append(\\n      categoryRow, groupControlsRow, manageRow, transferConfirm, deleteConfirm,\\n      operations, list, status\\n    );"));
+assert.ok(!manager.includes("deleteHint, list, status"));
+assert.ok(!manager.includes("hint, backupRow, tabs, groupFilters"));
+assert.ok(source.includes(".tle-quick-category-row .tle-quick-tabs"));
+assert.ok(source.includes("grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);"));
+assert.ok(source.includes(".tle-quick-group-controls {\\n          grid-template-columns: minmax(0, 1fr);"));
+assert.ok(source.includes("margin-inline-start: auto;"));
+assert.ok(source.includes("order: 3;\\n    flex: 0 0 100%;"));
+assert.ok(manager.includes("deleteSelectedButton.setAttribute('aria-description', deleteScopeHint);"));
+assert.ok(!manager.includes("const deleteHint = quickNode"));
+assert.ok(manager.includes("categoryRow.title = hint.title;"));
 assert.ok(manager.includes("native.deleteCharacter(freshChosen.map(entry => entry.value), { deleteChats: false })"));
 assert.ok(manager.includes("native.deleteWorldInfo(entry.value)"));
 assert.ok(manager.includes("native.deletePreset(entry.label.trim())"));
