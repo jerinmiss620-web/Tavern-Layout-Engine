@@ -1757,7 +1757,7 @@ body.tle-global-search-open { overflow: hidden !important; }
 #tle-global-search-panel button,
 #tle-organizer-panel.drawer-content button { color: inherit; border: 0; cursor: pointer; font: inherit; }
 #tle-global-search-panel .tle-search-clear,
-#tle-organizer-panel.drawer-content > .tle-search-field-wrap .tle-search-clear {
+#tle-organizer-panel.drawer-content .tle-search-field-wrap .tle-search-clear {
   display: grid;
   place-items: center;
   flex: 0 0 30px;
@@ -5366,8 +5366,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (!current) return;
     current.abort.abort();
     if (current.embedded) {
+      const searchWrap = current.searchWrap;
       current.body?.replaceChildren();
       current.body?.classList.remove('tle-quick-manager');
+      if (searchWrap && current.node && current.body) {
+        current.node.insertBefore(searchWrap, current.body);
+      }
       const input = current.node?.querySelector('.tle-search-field');
       if (input) input.value = '';
       const clear = current.node?.querySelector('.tle-search-clear');
@@ -5660,6 +5664,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const search = state.organizerPanel.querySelector('.tle-search-field');
     if (!search) return;
+    current.searchWrap = search.parentElement;
     search.placeholder = '筛选当前分类资源名称、备注或标签…';
     search.setAttribute('aria-label', '筛选当前分类资源名称、备注或标签');
 
@@ -6710,7 +6715,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     categoryPane.append(categoryHeading, categoryRow);
     groupPane.append(groupHeading, groupActions, manageRow, groupFilters);
     resourcePane.append(
-      resourceHeading, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
+      resourceHeading, current.searchWrap, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
       operations, list, status
     );
     workspace.append(categoryPane, groupPane, resourcePane);
