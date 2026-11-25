@@ -101,6 +101,7 @@ const organizerCloseSandbox = {
   managerCloses: 0,
   closeGlobalSearch() {},
   closeMobileNativeDrawers() {},
+  setPanelOpen() {},
   openQuickGroupManager() {},
   HOST_WIN: { requestAnimationFrame(callback) { callback(); } },
   isMobileViewport() { return false; },
