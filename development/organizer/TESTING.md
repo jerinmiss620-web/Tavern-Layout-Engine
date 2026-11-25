@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.221`
+Current test Core: `v0.3.222`
 
 ## Import once
 
@@ -16,14 +16,15 @@ The installer is disabled by default. It reads the test manifest from this devel
 2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
 3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
 4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.221**.
-6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.221**.
+5. Confirm the native prompt to install **TLE Core v0.3.222**.
+6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.222**.
 
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
 
 ## Test the current build
 
-- Confirm the new **整理侠** entry appears as a dedicated item in the TLE side navigation, including icon-only navigation mode.
+- Confirm **整理侠** is the tenth `.drawer` directly below **角色管理**, with its own `.drawer-toggle` and `.drawer-content`; it must not open a centered popup or modal.
+- Confirm the tenth icon participates in icon-only, icon+label, compact two-column, and mobile hamburger navigation modes. Clicking it opens/closes the drawer like the other native icons; on mobile, the rail folds away while the opened drawer remains visible.
 - Confirm the original global search is still the default page and uses the same search field.
 - Open the resource manager's **世界书** category. Check global selection, primary character bindings, extra-book bindings, unbound books, and suspected orphan references.
 - Confirm shallow-loaded character cards are marked **待核对** until the optional scan is run.
