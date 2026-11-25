@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.238",
+  "latest_version": "0.3.239",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.238",
-    "source_path": "releases/v0.3.238/TLE.js",
-    "source_commit": "81cd66d6c82de18e16d7be51b426f28b6bcc8ac1",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/81cd66d6c82de18e16d7be51b426f28b6bcc8ac1/releases/v0.3.238/TLE.js",
-    "changelog_path": "releases/v0.3.238/CHANGELOG.md",
-    "sha256": "e4e789d0ba9f1b1ea7536c7ac00425572bb22f21e0ae0a7c1cda3502a0e68d6c",
-    "size_bytes": 809226
+    "version": "0.3.239",
+    "source_path": "releases/v0.3.239/TLE.js",
+    "source_commit": "546a1354e86fb8d31c6438e97cd18004884f190c",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/546a1354e86fb8d31c6438e97cd18004884f190c/releases/v0.3.239/TLE.js",
+    "changelog_path": "releases/v0.3.239/CHANGELOG.md",
+    "sha256": "6d6a8f757704364a020d6338eb47f82f908032b8e6310d668d63a28bc66873ea",
+    "size_bytes": 810236
   },
-  "status": "TEST v0.3.238: Fixes duplicate organizer header toolbars. The organizer's sync/import/export controls are now replaced as one idempotent set when the manager opens and cleared when the embedded manager closes. Also retains v0.3.237 companion partial-apply diagnostics and event-driven fade wallpaper synchronization. ST/TT/mobile runtime acceptance pending.",
+  "status": "TEST v0.3.239: PC Organizer keeps its three-column layout but removes the three tinted pane backgrounds and uses two semantic HR elements as vertical dividers, styled with vertical writing mode and the active Tavern theme border color. Mobile single-column layout is unchanged. Retains v0.3.238 duplicate-toolbar fix and v0.3.237 companion/fade-wallpaper fixes. ST/TT/iPhone runtime visual acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
