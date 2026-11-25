@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.221",
+  "latest_version": "0.3.222",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.221",
-    "source_path": "releases/v0.3.221/TLE.js",
-    "source_commit": "9eb720d09802e2d6c991d1ff9cf11348ca45c244",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/9eb720d09802e2d6c991d1ff9cf11348ca45c244/releases/v0.3.221/TLE.js",
-    "changelog_path": "releases/v0.3.221/CHANGELOG.md",
-    "sha256": "ae0f34ae0dc9e6cfd84554960140686927f835b838c8e6d0a006a70dcd8bd8c5",
-    "size_bytes": 637738
+    "version": "0.3.222",
+    "source_path": "releases/v0.3.222/TLE.js",
+    "source_commit": "ad9e8dd7f827c15909d022e5e402cbc7612d9254",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ad9e8dd7f827c15909d022e5e402cbc7612d9254/releases/v0.3.222/TLE.js",
+    "changelog_path": "releases/v0.3.222/CHANGELOG.md",
+    "sha256": "03dad8a12804e71003e50880e28a573698d29ee80741a0fbc4c55f55fae4aabd",
+    "size_bytes": 635991
   },
-  "status": "TEST v0.3.221: dedicated Organizer branch test build. Does not change stable latest.json or the stable Bootstrap/Loader channel.",
+  "status": "TEST v0.3.222: Organizer is the tenth native sidebar drawer with its own .drawer-content. Stable latest.json and the stable Bootstrap/Loader channel are unchanged.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
