@@ -3,11 +3,11 @@
   "commit": "6b4ab84",
   "version": "1.1.0",
   "unchanged": {
-    "batch-engine.js": "9c7ceb54d2977570537cd4c255f478423a4ad680ed575d2ffb65eef7cab2e3fb",
-    "batch-adapters.js": "f54c785029d4453a9442b5a84c9ec1c5f966b236774046b78a09df0ca6c69219",
-    "storage.js": "ea64d076c8c2e8862cf64f324d809cf1009de9f5fb498a49335eace6268bf780",
-    "vendor/fflate.js": "12ba1b34823232b3aab126545839d0d19e8f5a9c66ddfdb14b0dbd81a7af7ad4",
-    "vendor/fflate-LICENSE": "d3268a8f7476666635fe067d0094ee68f9fa1412eb77263520619c980e1e535c"
+    "batch-engine.js": "1625b882a814c8292357704945bd90b791304d229922d7963856cbffcd826a4e",
+    "batch-adapters.js": "97885a839a27a4be4da64ba0b9d5c49f93b09a908f9800f1a55a0e3b6d9738dd",
+    "storage.js": "ffb02d7b9e5ac2f52950d55393a8f3c58ba5317df0845dd35e9f3c67258d2316",
+    "vendor/fflate.js": "8cc1f687e0159e977addb6b85e274dbd11e622cf151f4fcb7b85d49622ea43e7",
+    "vendor/fflate-LICENSE": "805f6cb28bb8b6d3a0badd83c93bccd9671fa01a3b4b92b7042b0743325ac243"
   },
   "adapted": [
     "batch-runtime.js: explicit host bridge + PC ZIP import",

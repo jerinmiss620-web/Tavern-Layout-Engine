@@ -6,7 +6,7 @@ const source=fs.readFileSync('development/organizer/TLE.js','utf8');
 fs.writeFileSync(`${dir}/TLE.js`,source);
 const installer=JSON.parse(fs.readFileSync('releases/v0.3.233/TLE-0.3.233-TEST-import.json','utf8'));
 installer.name=`Tavern Layout Engine · v${version} TEST（整理侠内容处理）`;
-installer.info='**简介：** 整理侠在同一个搜索框与资源列表内提供跨资源内容查找、多规则替换、删除匹配文本、逐处选择、原位预览及备份恢复。\n\n**安装：** PC 需安装配套 plugins/global-batch-replace 并启用服务端插件；TT 使用内置原生适配。\n\n**注意：** 默认禁用；仅测试通道。正式 Core/Loader/Bootstrap 不变。四类 ST/TT 实机尚未验收。';
+installer.info='**简介：** 整理侠在同一个搜索框与资源列表内提供跨资源内容查找、多规则替换、删除匹配文本、逐处选择、原位预览及备份恢复。\n\n**使用方式：** 由现有 TLE Test Loader 更新；此包是手动备用安装包。PC 需安装配套 plugins/global-batch-replace 并启用服务端插件；TT 使用内置原生适配。\n\n**注意事项：** 默认禁用；仅测试通道。正式 Core/Loader/Bootstrap 不变。四类 ST/TT 实机尚未验收。\n\n**作者：** 小松鼠 & ChatGPT（小松7）。';
 installer.content=source;installer.enabled=false;
 fs.writeFileSync(`${dir}/TLE-${version}-TEST-import.json`,JSON.stringify(installer,null,2)+'\n');
 const notes=`# Core v${version} TEST · 整理侠跨资源内容处理
@@ -37,7 +37,7 @@ if(!readme.includes('## 开发分支测试版 v'+version))fs.writeFileSync('READ
 const changelog=fs.readFileSync('CHANGELOG.md','utf8');
 if(!changelog.includes('Core v'+version))fs.writeFileSync('CHANGELOG.md',`## 2026-11-25 · Core v${version} · 整理侠跨资源内容处理（开发分支）\n\n详见 [本版完整日志](${dir}/CHANGELOG.md)。复用原引擎，单搜索框、单列表、逐处预览确认及 PC/TT 备份恢复；仅测试通道，实机验收待完成。\n\n`+changelog);
 const provenance={upstream:'https://github.com/jerinmiss620-web/global-batch-replace',commit:'6b4ab84',version:'1.1.0',unchanged:{}};
-for(const name of ['batch-engine.js','batch-adapters.js','storage.js','vendor/fflate.js','vendor/fflate-LICENSE'])provenance.unchanged[name]=createHash('sha256').update(fs.readFileSync('development/organizer/batch/'+name)).digest('hex');
+for(const name of ['batch-engine.js','batch-adapters.js','storage.js','vendor/fflate.js','vendor/fflate-LICENSE'])provenance.unchanged[name]=createHash('sha256').update(fs.readFileSync('development/organizer/batch/'+name,'utf8').replaceAll('\r\n','\n')).digest('hex');
 provenance.adapted=['batch-runtime.js: explicit host bridge + PC ZIP import','batch-tt.js: scan hash + paths restore + per-resource errors','server-plugin/batch-server.js: scan hash + verified ZIP import + paths restore'];
 fs.writeFileSync('development/organizer/batch/PROVENANCE.json',JSON.stringify(provenance,null,2)+'\n');
 fs.copyFileSync('development/organizer/batch/CREDITS.md','plugins/global-batch-replace/CREDITS.md');
