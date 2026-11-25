@@ -50,6 +50,7 @@ const organizerToggleSandbox = {
   closeGlobalSearch: () => { organizerToggleSandbox.state.globalSearchOpen = false; },
   closeQuickPanel: () => { throw new Error('unexpected quick-panel close while opening Organizer'); },
   closeMobileNativeDrawers: () => { organizerToggleSandbox.nativeDrawerCloses++; },
+  setPanelOpen: () => {},
   openQuickGroupManager: () => { organizerToggleSandbox.managerOpens++; },
   HOST_WIN: { requestAnimationFrame(callback) { callback(); } },
   isMobileViewport() { return false; },
