@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.218",
+  "latest_version": "0.3.219",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.218",
-    "source_path": "releases/v0.3.218/TLE.js",
-    "source_commit": "9d3def06834467cf11d14820edc83ec0ea5eb17c",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/9d3def06834467cf11d14820edc83ec0ea5eb17c/releases/v0.3.218/TLE.js",
-    "changelog_path": "releases/v0.3.218/CHANGELOG.md",
-    "sha256": "8084d7f4cf5902f76b30c3b6dd6161bfb2230933b7bdcb79026cc2cff851424e",
-    "size_bytes": 617694
+    "version": "0.3.219",
+    "source_path": "releases/v0.3.219/TLE.js",
+    "source_commit": "58fce53e2b5b569f4652ea7ab5719dde580d97e8",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/58fce53e2b5b569f4652ea7ab5719dde580d97e8/releases/v0.3.219/TLE.js",
+    "changelog_path": "releases/v0.3.219/CHANGELOG.md",
+    "sha256": "7480c7d8766e99f7018741a0a2d6df283d14b9de587a046d8c7f29cb93547d28",
+    "size_bytes": 619893
   },
-  "notes": "整理侠：原全局搜索入口升级为统一面板，默认搜索页；资源分组与批量管理共用单一搜索框；批量删除采用资源白名单与酒馆原生接口。Bootstrap、Loader 不变。"
+  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
 }

@@ -13,5 +13,5 @@
     "sha256": "344df210747a2d9813f948ebed672fc9ad6004649a5be14ea49978f21dcfa48d",
     "size_bytes": 52840
   },
-  "notes": "Loader v0.3.6 与 Bootstrap v1.0.6 保持不变；Core v0.3.217 修复 TT 滑屏及原生手势同步。"
+  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
 }
