@@ -48,12 +48,12 @@ const organizerToggleSandbox = {
   managerOpens: 0,
   managerCloses: 0,
   nativeDrawerCloses: 0,
-  closeGlobalSearch() { this.state.globalSearchOpen = false; },
-  closeQuickPanel() { this.quickPanel = null; this.managerCloses++; },
-  closeMobileNativeDrawers() { this.nativeDrawerCloses++; },
-  openQuickGroupManager() {
-    this.managerOpens++;
-    this.quickPanel = { embedded: true, module: 'groups', node: this.state.organizerPanel };
+  closeGlobalSearch: () => { organizerToggleSandbox.state.globalSearchOpen = false; },
+  closeQuickPanel: () => { organizerToggleSandbox.quickPanel = null; organizerToggleSandbox.managerCloses++; },
+  closeMobileNativeDrawers: () => { organizerToggleSandbox.nativeDrawerCloses++; },
+  openQuickGroupManager: () => {
+    organizerToggleSandbox.managerOpens++;
+    organizerToggleSandbox.quickPanel = { embedded: true, module: 'groups', node: organizerToggleSandbox.state.organizerPanel };
   },
   HOST_WIN: { requestAnimationFrame(callback) { callback(); } },
   isMobileViewport() { return false; },
