@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.224",
+  "latest_version": "0.3.225",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.224",
-    "source_path": "releases/v0.3.224/TLE.js",
-    "source_commit": "4f52df1f034641b6b26c153dec3e9a0dcf20ef58",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4f52df1f034641b6b26c153dec3e9a0dcf20ef58/releases/v0.3.224/TLE.js",
-    "changelog_path": "releases/v0.3.224/CHANGELOG.md",
-    "sha256": "11eaa689f4ebbecaf8b96fedf90eb64f855e55f69538c1fdab7e131caa05c95c",
-    "size_bytes": 643748
+    "version": "0.3.225",
+    "source_path": "releases/v0.3.225/TLE.js",
+    "source_commit": "de24d55b87aba4a2a4f2cbce7380015f01e41722",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/de24d55b87aba4a2a4f2cbce7380015f01e41722/releases/v0.3.225/TLE.js",
+    "changelog_path": "releases/v0.3.225/CHANGELOG.md",
+    "sha256": "5aa8d9cb0110e9329eea9d84b927e28e414998ec7992d0e8dc701cfe50effae5",
+    "size_bytes": 647699
   },
-  "status": "TEST v0.3.224: Organizer drawer now toggles its own openDrawer/closedDrawer state and uses its direct native .drawer-content as the root, without a nested .tle-search-surface. Global search and Organizer remain independent. Includes worldbook quick filters. Stable latest.json and stable Bootstrap/Loader channel are unchanged.",
+  "status": "TEST v0.3.225: PC Organizer now uses three columns (resource types, group directory, resource list); search and batch operations are in the right resource column. Each desktop column scrolls independently. At 1000px and below, the same UI returns to the single-column mobile flow. Existing grouping data, worldbook filters, batch operations, and global search remain unchanged. Stable Core v0.3.220 and Stable Loader/Bootstrap are unchanged.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
