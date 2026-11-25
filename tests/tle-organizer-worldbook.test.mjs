@@ -263,7 +263,7 @@ assert.equal(source.includes('state.organizerEntry.hidden = !available'), false,
 assert.ok(source.includes('tle-worldbook-filter-bar'));
 assert.ok(source.includes('全局启用'));
 assert.ok(source.includes('疑似孤儿'));
-assert.ok(source.includes("title: '世界书'"));
+assert.ok(source.includes("title: item.id === 'worldInfo' ? '世界书'"), "Worldbook catalog labels must distinguish the global World Info entry");
 assert.ok(source.includes("id: 'worldInfo', title: '全局世界书'"));
 assert.ok(source.includes('function quickManagerCatalog'));
 const managerStart = source.indexOf('  function openQuickGroupManager(trigger)');

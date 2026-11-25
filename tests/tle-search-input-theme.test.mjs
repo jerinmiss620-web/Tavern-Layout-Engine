@@ -4,8 +4,9 @@ import { readFileSync } from 'node:fs';
 const channel = JSON.parse(readFileSync('channels/test.json', 'utf8'));
 const source = readFileSync(channel.release.source_path, 'utf8');
 
-const fieldCss = source.match(/\.tle-search-field\s*\{([^}]*)\}/)?.[1];
+const fieldCss = source.match(/input\.tle-search-field\[type="search"\]\s*\{([^}]*)\}/)?.[1];
 assert.ok(fieldCss, 'Shared TLE search-field rule is missing');
+assert.match(source, /input\.tle-search-field\[type="search"\]/, 'Fixed layout constraints must target TLE search inputs specifically');
 assert.match(fieldCss, /height:\s*40px;/, 'Search field height must remain fixed at 40px');
 assert.match(fieldCss, /min-height:\s*40px;/, 'Search field min-height must remain fixed at 40px');
 assert.doesNotMatch(fieldCss, /(?:^|\n)\s*(?:padding(?:-[\w-]+)?|border(?:-[\w-]+)?|background(?:-[\w-]+)?|color|font(?:-[\w-]+)?)\s*:/i,
