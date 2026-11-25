@@ -4875,6 +4875,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return items;
   }
 
+  function matchesWorldInfoFilter(entry, filter, unloadedCount = 0) {
+    const binding = entry?.binding || {};
+    const hasOrphan = entry?.statusLabel === '疑似孤儿' || entry?.statusLabel === '含遗留关联';
+    if (filter === 'bound') return Boolean(binding.bound);
+    if (filter === 'unbound') return !binding.bound && !binding.orphan?.length && !unloadedCount;
+    if (filter === 'orphan') return hasOrphan;
+    if (filter === 'global') return Boolean(binding.global);
+    return true;
+  }
+
   function buildWorldInfoCatalog(worldNames, context, worldInfo, selectedWorldInfo, worldInfoSelect) {
     const names = [...new Set((Array.isArray(worldNames) ? worldNames : [])
       .map(value => String(value || '').trim()).filter(Boolean))];
@@ -5771,14 +5781,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const query = search.value.trim().toLocaleLowerCase();
       const groups = currentGroups(data);
       return entries.filter(entry => {
-        if (module === 'worldInfo' && worldInfoFilter !== 'all') {
-          const binding = entry.binding || {};
-          const hasOrphan = entry.statusLabel === '疑似孤儿' || entry.statusLabel === '含遗留关联';
-          if (worldInfoFilter === 'bound' && !binding.bound) return false;
-          if (worldInfoFilter === 'unbound' && (binding.bound || binding.orphan?.length || worldInfoCatalogMeta.unloadedCount)) return false;
-          if (worldInfoFilter === 'orphan' && !hasOrphan) return false;
-          if (worldInfoFilter === 'global' && !binding.global) return false;
-        }
+        if (module === 'worldInfo' && !matchesWorldInfoFilter(entry, worldInfoFilter, worldInfoCatalogMeta.unloadedCount)) return false;
         const assigned = quickAssignment(data, module, entry.key);
         if (viewGroup !== '*' && assigned !== viewGroup) return false;
         if (!query) return true;
@@ -5834,13 +5837,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         worldFilterBar.replaceChildren();
         return;
       }
-      const hasKnownOrphan = entry => entry.statusLabel === '疑似孤儿' || entry.statusLabel === '含遗留关联';
       const counts = {
-        all: entries.length,
-        bound: entries.filter(entry => entry.binding?.bound).length,
-        unbound: entries.filter(entry => !entry.binding?.bound && !entry.binding?.orphan?.length && !worldInfoCatalogMeta.unloadedCount).length,
-        orphan: entries.filter(hasKnownOrphan).length,
-        global: entries.filter(entry => entry.binding?.global).length,
+        all: entries.filter(entry => matchesWorldInfoFilter(entry, 'all', worldInfoCatalogMeta.unloadedCount)).length,
+        bound: entries.filter(entry => matchesWorldInfoFilter(entry, 'bound', worldInfoCatalogMeta.unloadedCount)).length,
+        unbound: entries.filter(entry => matchesWorldInfoFilter(entry, 'unbound', worldInfoCatalogMeta.unloadedCount)).length,
+        orphan: entries.filter(entry => matchesWorldInfoFilter(entry, 'orphan', worldInfoCatalogMeta.unloadedCount)).length,
+        global: entries.filter(entry => matchesWorldInfoFilter(entry, 'global', worldInfoCatalogMeta.unloadedCount)).length,
       };
       const filters = [
         { id: 'all', label: '全部', title: '显示全部世界书。' },
