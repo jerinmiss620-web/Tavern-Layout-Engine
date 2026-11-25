@@ -155,8 +155,13 @@ assert.ok(tleSource.includes("organizerIcon.className = 'drawer-icon fa-solid fa
 assert.ok(tleSource.includes("panel.className = 'drawer-content closedDrawer'"), 'Organizer must own a drawer-content');
 assert.ok(tleSource.includes('state.organizerEntry?.appendChild(panel)'), 'Organizer content must be nested inside its drawer');
 assert.ok(tleSource.includes('holder.insertBefore(state.organizerEntry, organizerPosition)'), 'Organizer must follow the nine native drawers');
-assert.ok(!tleSource.includes('tle-global-search-overlay'), 'Organizer must not use the old popup overlay');
-assert.ok(!tleSource.includes('z-index: 10090'), 'Organizer must not create a modal scrim');
+assert.ok(tleSource.includes("panel.className = 'tle-global-search-overlay'"), 'Original global search must retain its independent modal');
+const organizerStart = tleSource.indexOf('function createOrganizerPanel()');
+const organizerEnd = tleSource.indexOf('function createRailControls()', organizerStart);
+assert.ok(organizerStart >= 0 && organizerEnd > organizerStart, 'Organizer panel factory must be present');
+const organizerFactory = tleSource.slice(organizerStart, organizerEnd);
+assert.ok(!organizerFactory.includes('tle-global-search-overlay'), 'Organizer must not use the global-search modal overlay');
+assert.ok(!organizerFactory.includes('tle-search-surface'), 'Organizer must not use a nested search surface');
 assert.ok(tleSource.includes('const available = globalSearchEnabled;'), 'Organizer visibility must not depend on navigation mode');
 assert.ok(tleSource.includes('function buildWorldInfoCatalog('), 'Unified World Info catalog missing');
 assert.ok(tleSource.includes('function quickManagerCatalog('), 'Resource manager is not using the unified catalog');
