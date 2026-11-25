@@ -19,6 +19,7 @@
 - 已建立分支专用测试通道：Core v0.3.221，清单位于本分支 `channels/test.json`；导入包 `loader/TLE-Remote-Loader-Test-0.3.0.json` 默认禁用，Loader 使用独立的 `TLE_Organizer_Branch_Test_Cache` 与独立缓存键，不覆盖 Stable Bootstrap/Loader 缓存。Loader 固定 Commit：`8f6534c1a2839e561998d5e4d984f871074d720b`；安装包固定 Commit：`08527064995cc13ce39d64f53528ffdc163a66a1`；Core 固定 Commit：`9eb720d09802e2d6c991d1ff9cf11348ca45c244`。
 - 测试 Loader 只读取开发分支的 `channels/test.json`；正式根目录 `latest.json`、`loader/latest.json`、`release-plan.json` 未改动。测试前先禁用 Bootstrap 1.0.6 并完整刷新；恢复正式版时禁用测试 Loader、启用 Bootstrap 1.0.6 并完整刷新，由正式 Loader 从自己的 LKG 缓存恢复 Core v0.3.220。
 - 测试步骤见 `development/organizer/TESTING.md`。分支 CI 增加 `node loader/verify-test-channel.mjs --remote`，验证测试 Core、Loader、安装 JSON 的 Commit pin、UTF-8 字节数、SHA-256 与安装包源码同步。
+- 分支 CI run 45555232799（job `validate`）通过：`npm test` 全量回归通过；测试通道远端验证通过，Core v0.3.221（637738 UTF-8 bytes）、Test Loader v0.3.0（39896 UTF-8 bytes）、固定 Commit、SHA-256 与远端安装 JSON 内容均通过校验。正式 Stable release verification 仍确认 Core v0.3.220。
 
 
 ## 2026-11-25 · Core v0.3.220 整理侠资源管理界面重排
