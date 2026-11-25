@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.222",
+  "latest_version": "0.3.223",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.222",
-    "source_path": "releases/v0.3.222/TLE.js",
-    "source_commit": "ad9e8dd7f827c15909d022e5e402cbc7612d9254",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ad9e8dd7f827c15909d022e5e402cbc7612d9254/releases/v0.3.222/TLE.js",
-    "changelog_path": "releases/v0.3.222/CHANGELOG.md",
-    "sha256": "03dad8a12804e71003e50880e28a573698d29ee80741a0fbc4c55f55fae4aabd",
-    "size_bytes": 635991
+    "version": "0.3.223",
+    "source_path": "releases/v0.3.223/TLE.js",
+    "source_commit": "c3436e7410375dd67df94d75baf95e3b6375c641",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c3436e7410375dd67df94d75baf95e3b6375c641/releases/v0.3.223/TLE.js",
+    "changelog_path": "releases/v0.3.223/CHANGELOG.md",
+    "sha256": "5d8b3e3af91d232b3b76f7f74d8f2d0918f0b4fa3c8c050eec908b6896f1415d",
+    "size_bytes": 643005
   },
-  "status": "TEST v0.3.222: Organizer is the tenth native sidebar drawer with its own .drawer-content. Stable latest.json and the stable Bootstrap/Loader channel are unchanged.",
+  "status": "TEST v0.3.223: Global search is restored as an independent header button and modal; Organizer is a separate tenth native drawer with its own resource manager. Adds overlapping worldbook filters for bound, unbound, suspected orphan, and enabled global books. Stable latest.json and the stable Bootstrap/Loader channel are unchanged.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
