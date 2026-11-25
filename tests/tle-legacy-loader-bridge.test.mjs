@@ -37,6 +37,11 @@ assert.match(tle, /organizerIcon\.className = 'drawer-icon fa-solid fa-layer-gro
 assert.match(tle, /panel\.className = 'drawer-content closedDrawer'/, 'Organizer must own its drawer-content');
 assert.match(tle, /state\.organizerEntry\?\.appendChild\(panel\)/, 'Organizer content must be nested inside its drawer');
 assert.match(tle, /holder\.insertBefore\(state\.organizerEntry, organizerPosition\)/, 'Organizer must follow the nine native drawers');
-assert.doesNotMatch(tle, /tle-global-search-overlay/, 'Organizer must not use the legacy popup overlay');
-assert.doesNotMatch(tle, /z-index: 10090/, 'Organizer must not create a modal scrim layer');
+assert.match(tle, /panel\.className = 'tle-global-search-overlay'/, 'Original global search must retain its independent modal');
+const organizerStart = tle.indexOf('function createOrganizerPanel()');
+const organizerEnd = tle.indexOf('function createRailControls()', organizerStart);
+assert.ok(organizerStart >= 0 && organizerEnd > organizerStart, 'Organizer panel factory must be present');
+const organizerSection = tle.slice(organizerStart, organizerEnd);
+assert.doesNotMatch(organizerSection, /tle-global-search-overlay|tle-search-surface/, 'Organizer must use its direct drawer content without a nested search surface');
+assert.match(tle, /#tle-organizer-panel\.drawer-content\.openDrawer/, 'Organizer must be styled as its native drawer content');
 console.log('TLE Organizer branch Test Loader compatibility checks passed: v' + version);
