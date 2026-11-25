@@ -3557,33 +3557,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           scrollbar-width: none;
           -ms-overflow-style: none;
         }
-        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::before,
-        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::before,
-        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::before,
-        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::after,
-        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::after,
-        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::after {
-          content: "";
-          position: absolute;
-          bottom: 1px;
-          height: 3px;
-          border-radius: 999px;
-          pointer-events: none;
-          z-index: 2;
-        }
-        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::before,
-        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::before,
-        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::before {
-          left: 0;
-          right: 0;
-          background: rgb(127 127 127 / 16%);
-        }
-        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow::after,
-        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow::after,
-        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow::after {
-          left: var(--tle-scrollbar-thumb-left, 0px);
-          width: var(--tle-scrollbar-thumb-width, 0px);
-          background: rgb(from var(--SmartThemeQuoteColor, #8bbfd0) r g b / .62);
+        .tle-quick-manager .tle-quick-tabs.tle-has-horizontal-overflow,
+        .tle-quick-manager .tle-quick-filter-bar.tle-has-horizontal-overflow,
+        .tle-quick-manager .tle-worldbook-filter-bar.tle-has-horizontal-overflow {
+          background-image:
+            linear-gradient(rgb(127 127 127 / 16%), rgb(127 127 127 / 16%)),
+            linear-gradient(rgb(from var(--SmartThemeQuoteColor, #8bbfd0) r g b / .62), rgb(from var(--SmartThemeQuoteColor, #8bbfd0) r g b / .62));
+          background-position: left bottom, var(--tle-scrollbar-thumb-left, 0px) bottom;
+          background-size: 100% 3px, var(--tle-scrollbar-thumb-width, 0px) 3px;
+          background-repeat: no-repeat;
         }
         .tle-quick-manager .tle-quick-operations {
           grid-area: operations;
@@ -14318,5 +14300,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.224 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.229 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
