@@ -275,7 +275,7 @@ assert.ok(managerSource.includes("const categoryPane = quickNode('section', 'tle
 assert.ok(managerSource.includes("const groupPane = quickNode('section', 'tle-organizer-pane tle-organizer-group-pane')"));
 assert.ok(managerSource.includes("const resourcePane = quickNode('section', 'tle-organizer-pane tle-organizer-resource-pane')"));
 assert.ok(managerSource.includes('categoryPane.append(categoryHeading, categoryRow)'), 'First column must contain resource types');
-assert.ok(managerSource.includes('groupPane.append(groupHeading, groupActions, manageRow, groupFilters)'), 'Second column must contain ungrouped and named groups');
+assert.ok(managerSource.includes('groupPane.append(groupHeader, groupActions, manageRow, groupFilters)'), 'Second column must contain ungrouped and named groups');
 assert.ok(managerSource.includes('resourcePane.append(') && managerSource.includes('operations, list, status'), 'Third column must contain resource rows and batch actions');
 assert.ok(managerSource.includes('current.searchWrap = search.parentElement;'), 'Search wrapper must be moved into the resource column');
 assert.ok(managerSource.includes('resourceHeading, current.searchWrap, worldFilterBar'), 'Search must sit above the right-hand resource list');
