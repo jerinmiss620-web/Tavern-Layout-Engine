@@ -143,15 +143,16 @@ assert.doesNotMatch(manager, /backupHint/);
 assert.doesNotMatch(manager, /search\.focus\(\{ preventScroll: true \}\);/);
 assert.match(source, /\.tle-quick-manager \.tle-quick-group-editor \{ grid-area: manage; \}/,
   'group editor must occupy the dedicated middle-pane management area');
-// All TLE-generated scroll regions leave scrollbar appearance to the host's
-// global theme rules. Width/color and WebKit pseudo-element rules are not
-// inherited like normal text properties; TLE must not override them.
-assert.doesNotMatch(source, /scrollbar-width\s*:/,
-  'TLE must not force thin/default scrollbar widths on Firefox or Chromium');
+// Vertical scroll surfaces inherit the host theme. Only the three horizontal
+// category/filter strips suppress native bars to show their dedicated 3px scroll indicator.
+const scrollbarWidthValues = [...source.matchAll(/scrollbar-width\s*:\s*([^;]+);/g)]
+  .map(match => match[1].trim()).sort();
+assert.deepEqual(scrollbarWidthValues, ['none', 'none', 'none', 'thin'],
+  'only the horizontal filter strip may use a thin native bar; compact horizontal strips hide theirs for the 3px indicator');
 assert.doesNotMatch(source, /scrollbar-color\s*:/,
   'TLE must not override theme thumb and track colors');
-assert.doesNotMatch(source, /::-(?:webkit|moz)-scrollbar(?:-[a-z-]+)?\s*\{/,
-  'TLE must not generate competing vendor-specific scrollbar style rules');
+assert.match(source, /\.tle-quick-manager \.tle-quick-category-row \.tle-quick-tabs::-webkit-scrollbar,\s*\.tle-quick-manager \.tle-quick-filter-bar::-webkit-scrollbar,\s*\.tle-quick-manager \.tle-worldbook-filter-bar::-webkit-scrollbar\s*\{\s*display: none;/,
+  'vendor scrollbar suppression is limited to the horizontal indicator strips');
 const scrollableSurfaces = [
   '#${ID.chatToolsPanel} .tle-chat-tools-page {',
   '#${ID.chatToolsPanel} .tle-chat-tools-range-value {',
