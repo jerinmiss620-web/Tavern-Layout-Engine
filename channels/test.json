@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.237",
     "source_path": "releases/v0.3.237/TLE.js",
-    "source_commit": "19d77cdd2f65e023936463de9499c22713e1d249",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/19d77cdd2f65e023936463de9499c22713e1d249/releases/v0.3.237/TLE.js",
+    "source_commit": "b3693fd0aeaa4f5e49bc9cb3371242af3fc9758d",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b3693fd0aeaa4f5e49bc9cb3371242af3fc9758d/releases/v0.3.237/TLE.js",
     "changelog_path": "releases/v0.3.237/CHANGELOG.md",
-    "sha256": "08f1376a94778e018a50696342ec82a27fdeb7e2c46d9947793930de86e7dc70",
-    "size_bytes": 808517
+    "sha256": "8311e2082c059f696b9bdfa0a3c48f5e7b5336b599ed2bc82be785e2b1f33f4b",
+    "size_bytes": 808810
   },
   "status": "TEST v0.3.237: Companion plans now apply each available item independently and report every skipped item with a field-specific reason; Fade Assistant refreshes the wallpaper mirror on #bg1, ancestor theme/style, stylesheet, theme-select and wallpaper-image changes. Sync is coalesced to one animation frame and uses event/DOM observation only; no polling. ST/TT and mobile runtime acceptance remains pending.",
   "recommended_loader_version": "0.3.0",
