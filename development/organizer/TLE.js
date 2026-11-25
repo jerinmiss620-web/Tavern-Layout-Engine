@@ -11466,6 +11466,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     renderGlobalSearchResults('');
     HOST_DOC.body.classList.remove('tle-global-search-open');
     state.globalSearchOpen = false;
+    state.workspaceHeader?.querySelector('#' + ID.searchToggle)?.setAttribute('aria-expanded', 'false');
     if (restoreFocus) {
       state.workspaceHeader?.querySelector('#' + ID.searchToggle)?.focus({ preventScroll: true });
     }
@@ -11485,6 +11486,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     panel.hidden = false;
     panel.setAttribute('aria-hidden', 'false');
     state.globalSearchOpen = true;
+    state.workspaceHeader?.querySelector('#' + ID.searchToggle)?.setAttribute('aria-expanded', 'true');
     state.globalSearchView = 'search';
     HOST_DOC.body.classList.add('tle-global-search-open');
     const input = panel.querySelector('.tle-search-field');
@@ -11707,7 +11709,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       </div>
       <div class="tle-workspace-actions">
         <button id="${ID.searchToggle}" class="tle-workspace-icon-button" type="button"
-          aria-label="打开全局搜索" aria-haspopup="dialog" aria-controls="tle-global-search-panel" title="全局搜索">
+          aria-label="打开全局搜索" aria-haspopup="dialog" aria-controls="tle-global-search-panel" aria-expanded="false" title="全局搜索">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         </button>
         <button id="${ID.dockToggle}" class="tle-workspace-icon-button" type="button"
