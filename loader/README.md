@@ -1,6 +1,6 @@
 # TLE 自动更新运行时
 
-当前安装入口是 [固定 Bootstrap 1.0.6](bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)。它通过 [独立清单](latest.json) 加载 Loader Runtime v0.3.6；Loader 通过根目录 latest.json 自动维护 Core v0.3.217。
+当前安装入口是 [固定 Bootstrap 1.0.6](bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)。它通过 [独立清单](latest.json) 加载 Loader Runtime v0.3.6；Loader 通过根目录 latest.json 自动维护 Core v0.3.218。
 
 首次迁移只需最后导入一次 Bootstrap，禁用旧独立 Loader/Core 并保留备份；以后常规更新不再导入 JSON，不需要控制台命令。保留旧数据库、LKG/Previous 和用户设置。两个更新层共用默认开启的自动安装开关。
 

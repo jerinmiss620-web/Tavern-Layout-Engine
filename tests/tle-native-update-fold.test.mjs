@@ -73,10 +73,10 @@ assert.match(helpBlock, /grid-column: 1 \/ -1;/, 'range hint must span both inpu
 assert.doesNotMatch(helpBlock, /grid-column: 2 \/ -1;/);
 
 const groupManagerStart = source.indexOf('function openQuickGroupManager(');
-const groupManagerEnd = source.indexOf("HOST_DOC.addEventListener('click',event=>", groupManagerStart);
+const groupManagerEnd = source.indexOf('const FOLD_STORAGE_KEY', groupManagerStart);
 const manager = source.slice(groupManagerStart, groupManagerEnd);
 const backupStart = manager.indexOf("const backupRow = quickNode('div', 'tle-quick-backup-row')");
-const backupEnd = manager.indexOf('current.headingActions.append(backupRow)', backupStart);
+const backupEnd = manager.indexOf("const themeImportRow = quickNode('div', 'tle-quick-theme-import')", backupStart);
 const globalBackup = manager.slice(backupStart, backupEnd);
 assert.match(globalBackup, /backupRow\.append\(importBackupButton, exportBackupButton, backupFile\)/,
   'global header must retain only full-scheme import/export');
@@ -87,12 +87,14 @@ assert.match(manager, /themeImportRow\.append\(readThemeManagerButton\)/);
 assert.match(manager, /themeImportRow\.hidden = true;/);
 assert.match(manager, /themeImportRow\.hidden = module !== 'theme';/,
   'category-specific action must appear only in the Theme tab');
-assert.match(manager, /searchRow\.append\(themeImportRow, search\)/,
-  'theme sync must appear before the search box');
-assert.match(manager, /toolbar\.append\(searchRow, targetSelect, manageButton, autoGroupButton\)/,
-  'search row must share the existing toolbar with controls');
-assert.match(manager, /hint, tabs, groupFilters, toolbar, manageRow/,
-  'group filter pills must take their full-width scrolling row');
+assert.match(manager, /const search = state\.globalSearchPanel\.querySelector\('\.tle-search-field'\)/,
+  'resource management must reuse the Organizer search field');
+assert.match(manager, /toolbar\.append\(targetSelect, manageButton, autoGroupButton\)/,
+  'resource toolbar must not create another search field');
+assert.match(manager, /body\.append\(\s*hint, backupRow, tabs, groupFilters, themeImportRow, toolbar, manageRow/,
+  'resource manager must append its existing controls inside the unified panel');
+assert.doesNotMatch(manager, /searchRow|quickSearchBox|tle-quick-search-row/,
+  'resource manager must not create a duplicate search row');
 assert.doesNotMatch(manager, /groupFiltersWrap|tle-quick-filters-wrap/,
   'old filter/sync wrapper must be removed');
 assert.match(manager, /const readThemeManagerButton = quickButton\('', \(\) => void importThemeManagerGroups\(\)\)/);
@@ -117,10 +119,11 @@ assert.match(globalBackup, /fa-solid fa-file-import/);
 assert.match(globalBackup, /fa-solid fa-file-export/);
 assert.match(globalBackup, /importBackupButton\.setAttribute\('aria-label', '导入全部分组方案文件'\)/);
 assert.match(globalBackup, /exportBackupButton\.setAttribute\('aria-label', '导出全部快切分类的分组方案'\)/);
-assert.match(manager, /const searchRow = quickNode\('div', 'tle-quick-search-row'\)/);
-assert.match(source, /\.tle-quick-manager \.tle-quick-search-row \{/);
-assert.match(source, /\.tle-quick-manager \.tle-quick-toolbar > \.tle-quick-search-row \{\s*grid-column: 1 \/ -1;/);
-assert.match(source, /\.tle-quick-manager \.tle-quick-search \{\s*flex: 1 1 0;/);
+assert.doesNotMatch(manager, /searchRow|quickSearchBox/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-search-row \{/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-toolbar > \.tle-quick-search-row/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-search \{/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-toolbar \{\s*display: grid;\s*grid-template-columns: minmax\(0, 1fr\) auto auto;/);
 assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-filters-wrap \{/);
 assert.doesNotMatch(manager, /backupHint/);
 assert.doesNotMatch(manager, /search\.focus\(\{ preventScroll: true \}\);/);
@@ -152,5 +155,5 @@ for (const selector of scrollableSurfaces) {
 }
 assert.equal((source.match(/scrollbar-gutter: stable;/g) || []).length, 2,
   'preserve wide workspace scroll layout, which is not a scrollbar skin');
-console.log('Core 0.3.211: Theme sync beside search, full-width group pills, scrollbar skin audit passed.');
+console.log('Core 0.3.218: Theme sync in unified resource view, shared search, full-width group pills and scrollbar skin audit passed.');
 
