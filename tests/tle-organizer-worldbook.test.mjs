@@ -112,7 +112,16 @@ assert.equal(Object.hasOwn(savedData.assignments.worldInfo, JSON.stringify(['wor
 
 assert.ok(source.includes("organizerEntry: 'tle-organizer-entry'"));
 assert.ok(source.includes('state.organizerEntry = organizerEntry'));
-assert.ok(source.includes('holder.append(station, state.organizerEntry, state.navEntry)'));
+assert.ok(source.includes("organizerEntry.className = 'drawer'"), 'Organizer must be the tenth native-shaped drawer');
+assert.ok(source.includes("organizerToggle.className = 'drawer-toggle interactable'"));
+assert.ok(source.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable'"));
+assert.ok(source.includes("panel.className = 'drawer-content closedDrawer'"), 'Organizer must own its drawer-content');
+assert.ok(source.includes('state.organizerEntry?.appendChild(panel)'), 'Global search must live inside Organizer drawer-content');
+assert.ok(source.includes('holder.insertBefore(state.organizerEntry, organizerPosition)'), 'Organizer must be positioned after the nine native drawers');
+assert.ok(!source.includes('tle-global-search-overlay'), 'Organizer must not be a popup overlay');
+assert.ok(!source.includes('z-index: 10090'), 'Organizer must not create a modal scrim');
+assert.ok(source.includes('panel.classList.add(\'openDrawer\')'));
+assert.ok(source.includes('panel.classList.add(\'closedDrawer\')'));
 assert.ok(source.includes('const available = globalSearchEnabled;'));
 assert.ok(source.includes('if (!globalSearchEnabled || !state.globalSearchPanel) return;'));
 assert.ok(source.includes('body[data-tle-nav="icons"]'));
