@@ -22,11 +22,13 @@ const OWNER = 'jerinmiss620-web';
 const REPO = 'Tavern-Layout-Engine';
 const REMOTE = process.argv.includes('--remote');
 
-const legacyFiles = {
+const readRawText = path => readFileSync(join(ROOT, path), 'utf8');
+const manifest = JSON.parse(readRawText('channels/test.json'));
+const legacyFiles = manifest.release?.version === '0.3.204' ? {
   'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.json': 'tests/fixtures/legacy/test-loader-v0.3.0.json',
-};
+} : {};
 function readText(path) {
   return readFileSync(join(ROOT, legacyFiles[path] || path), 'utf8');
 }
@@ -67,7 +69,6 @@ async function checkRemoteSource(url, expectedHash, expectedSize, label) {
   return bytes;
 }
 
-const manifest = JSON.parse(readText('channels/test.json'));
 assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
 assert.equal(manifest.channel, 'test');
