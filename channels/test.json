@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.236",
+  "latest_version": "0.3.237",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.236",
-    "source_path": "releases/v0.3.236/TLE.js",
-    "source_commit": "d49d1a90810366143a597a049f0ebccacc03314f",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d49d1a90810366143a597a049f0ebccacc03314f/releases/v0.3.236/TLE.js",
-    "changelog_path": "releases/v0.3.236/CHANGELOG.md",
-    "sha256": "035ef190def6af696fe0bdf9fa5bc5b451b6fcdd78ad52906b1e9af152a6dc3a",
-    "size_bytes": 803383
+    "version": "0.3.237",
+    "source_path": "releases/v0.3.237/TLE.js",
+    "source_commit": "19d77cdd2f65e023936463de9499c22713e1d249",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/19d77cdd2f65e023936463de9499c22713e1d249/releases/v0.3.237/TLE.js",
+    "changelog_path": "releases/v0.3.237/CHANGELOG.md",
+    "sha256": "08f1376a94778e018a50696342ec82a27fdeb7e2c46d9947793930de86e7dc70",
+    "size_bytes": 808517
   },
-  "status": "TEST v0.3.236: Restore typed content-result groups with per-group, resource and match selection. Native host layout classes place mode beside category heading, combine search/replacement on wide screens and scope/backup on one row; keep new-group creation visible and management/confirmation actions horizontal. Original PC compatibility and integrity checks retained. Actual isolated PC SillyTavern 1.19.0 with original and paired plugins tested for search, replacement, partial text deletion, byte-identical restore, grouping and two native themes. PC TT, iPhone TT and Android ST remain unverified on-device. Stable Core/Loader/Bootstrap unchanged.",
+  "status": "TEST v0.3.237: Companion plans now apply each available item independently and report every skipped item with a field-specific reason; Fade Assistant refreshes the wallpaper mirror on #bg1, ancestor theme/style, stylesheet, theme-select and wallpaper-image changes. Sync is coalesced to one animation frame and uses event/DOM observation only; no polling. ST/TT and mobile runtime acceptance remains pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
