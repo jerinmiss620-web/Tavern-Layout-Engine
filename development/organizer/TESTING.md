@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.229`
+Current test Core: `v0.3.230`
 
 ## Import once
 
@@ -16,8 +16,8 @@ The installer is disabled by default. It reads the test manifest from this devel
 2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
 3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
 4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.229**.
-6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.229**.
+5. Confirm the native prompt to install **TLE Core v0.3.230**.
+6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.230**.
 
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
 
@@ -40,7 +40,8 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 - At 1000px and narrower, confirm the three pane wrappers flatten back into the original single-column mobile flow; category/group navigation remains available and no desktop sidebars consume the resource list height.
 - On mobile, confirm the Organizer title and short description stay on one line; the description reads only **资源分组 · 批量管理**.
 - Confirm category tabs and group filters remain horizontally swipeable and show a persistent **3px** scroll indicator; no 15px native scrollbar is reserved.
-- Confirm the header has no redundant close X. The **同步 / 导入 / 导出** controls sit together at the right side of the title row; the sync control appears only in the UI theme category.
+- Confirm the header has no redundant close X. The **同步 / 导入 / 导出** controls are always visible together at the right side of the title row, regardless of the currently selected resource category.
+- Click **同步** from a non-theme category. Confirm it reads the existing Theme Manager groups, asks for confirmation, changes only TLE's UI theme groups/assignments, then switches to the UI theme category. Confirm preset, worldbook, character, and other group data are unchanged.
 - Confirm the target-group selector shares a row with **管理分组 / 自动分组**.
 - Confirm batch actions use a compact **three-column** layout; buttons are 30px high with no default margins or oversized row gaps, and the resource list expands into the remaining panel height.
 - On desktop, confirm the original three-column workspace remains unchanged and pane tint uses `rgb(from var(--SmartThemeQuoteColor) r g b / .12)`.
