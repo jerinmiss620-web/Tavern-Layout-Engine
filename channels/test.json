@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.228",
+  "latest_version": "0.3.229",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.228",
-    "source_path": "releases/v0.3.228/TLE.js",
-    "source_commit": "7860f6b140793f7577d74212a5649715a4d595a5",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/7860f6b140793f7577d74212a5649715a4d595a5/releases/v0.3.228/TLE.js",
-    "changelog_path": "releases/v0.3.228/CHANGELOG.md",
-    "sha256": "b86bf8c0a07b15136196c55bf4360cdccab36d7b338882e4c6b31124502d6584",
-    "size_bytes": 652942
+    "version": "0.3.229",
+    "source_path": "releases/v0.3.229/TLE.js",
+    "source_commit": "e1feaa0f5331cf3eadb499892333f099fcdea2ab",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e1feaa0f5331cf3eadb499892333f099fcdea2ab/releases/v0.3.229/TLE.js",
+    "changelog_path": "releases/v0.3.229/CHANGELOG.md",
+    "sha256": "df387a399f29ba75905228b54040b40a3d89f0b7d79647dc645a3e3e8854ae4a",
+    "size_bytes": 656232
   },
-  "status": "TEST v0.3.228: Organizer heading/subtitle now share one line and the subtitle no longer mentions worldbook binding checks. PC keeps the three-column workspace with pane tint at 0.12. Mobile uses a compact grid: fixed-height horizontal category/group filters with hidden scrollbars, group filters share a row with backup controls, target-group selection shares a row with group actions, batch actions use three columns/two rows, and the resource list fills the remaining height. Existing search, grouping data, worldbook binding logic, and deletion permissions are unchanged.",
+  "status": "TEST v0.3.229: Organizer no longer has a redundant header close X; it uses native drawer controls. Theme-group sync, full group import, and full group export are grouped at the right side of the heading (sync appears only in the UI theme category). Mobile category, group, and worldbook filters retain horizontal touch scrolling and show a persistent 3px indicator without reserving a 15px native scrollbar. Batch action buttons use a compact three-column layout with 30px height, margin:0, 3px row gap, and 4px column gap. PC three-column workspace, search, group data, worldbook binding logic, and deletion permissions are unchanged.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
