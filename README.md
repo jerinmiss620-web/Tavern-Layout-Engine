@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.219 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.220 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -23,23 +23,21 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.219/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.220/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；Core v0.3.219 新增的批量删除流程仍待实机验收，故障注入及长期可靠性也未全部覆盖。
+- [实际验证范围](VALIDATION.md)：完整源码运行模拟覆盖升级、回滚、持久化、离线刷新、旧版迁移和单实例；PC SillyTavern、Android Pad SillyTavern、iPhone TauriTavern 已有用户实机启动成功反馈；Core v0.3.220 的整理侠新布局仍待桌面与移动端视觉验收，Core v0.3.219 新增的批量删除流程仍待实机验收，故障注入及长期可靠性也未全部覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
 
-### Core v0.3.219 · 整理侠原生删除权限校正
+### Core v0.3.220 · 整理侠资源管理界面重排
 
-整理侠继续作为原全局搜索的**唯一入口**，默认打开原搜索页；原搜索索引、范围和跳转能力保持不变，资源管理与搜索共用同一输入框。快切分组管理继续沿用 `tle.quickGroups.v2`，分类内分组、自动归组及全部分组方案导入/导出保持原样。
+整理侠继续保留原全局搜索唯一入口、共享搜索框和完整搜索能力。本次集中重排资源管理界面：桌面端将「搜索 / 资源管理」导航并入标题行；资源分类与全部分组导入/导出共用一行；分组筛选与目标分组、管理分组、自动分组控件共用一行；批量操作保留独立工具行。
 
-资源管理只展示酒馆原生确实提供删除能力的资源：角色卡、全局世界书、预设、推理格式、User 身份、UI 主题。上述资源统一进入批量删除与二次确认；角色卡由原生逻辑处理当前会话，聊天记录保留；User 身份走原生 `persona-delete`，UI 主题走原生删除接口。删除 UI 主题后自动刷新酒馆，以同步主题目录。
+移除占用列表空间的重复说明行，删除范围说明保留在批量删除按钮提示与辅助描述中。资源列表继续占据面板剩余高度并独立滚动；大量分组筛选项只在自身区域横向滚动，不再挤压目标分组控件。移动端允许标题导航自然换行，工具行按窄屏布局堆叠。
 
-API/模型等原生不可删除的运行配置只允许搜索，不出现在资源管理分类中；既有完整分组数据结构和全部分组备份保留，隐藏分类的旧数据不会被本次升级清除。GUI 预设继续遵循酒馆原生保护规则；不再额外要求退出当前会话或至少保留一个预设/推理格式。正则继续由正则侠管理。
-
-Bootstrap v1.0.6 与 Loader Runtime v0.3.6 不变。
+原分类、分组统计、全部分组备份、主题分组同步、批量操作、二次确认和数据结构均保留。Bootstrap v1.0.6 与 Loader Runtime v0.3.6 不变。
 
 ### 首次加载提示与下载线路
 
