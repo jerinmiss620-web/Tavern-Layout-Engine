@@ -3155,8 +3155,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         overflow-wrap: anywhere;
       }
 
-      /* Organizer controls: category navigation and backup share one row;
-         group filters and target-group actions share another. */
+      /* Organizer workspace: desktop gets three independently scrollable columns.
+         Narrow screens flatten the same controls back into the existing single-column flow. */
+      .tle-quick-manager .tle-organizer-workspace,
+      .tle-quick-manager .tle-organizer-pane {
+        display: contents;
+      }
+      .tle-quick-manager .tle-organizer-pane-title { display: none; }
       .tle-quick-manager .tle-quick-category-row {
         display: flex;
         flex: 0 0 auto;
@@ -3172,6 +3177,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       .tle-quick-manager .tle-quick-category-row .tle-quick-theme-import {
         flex: 0 0 auto;
       }
+      .tle-quick-manager .tle-quick-group-actions {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-quick-group-actions > button { flex: 0 0 auto; }
       .tle-quick-manager .tle-quick-group-controls {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
@@ -3193,7 +3206,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       .tle-quick-manager .tle-quick-toolbar {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-columns: minmax(0, 1fr);
         align-items: center;
         gap: 7px;
         flex: 0 0 auto;
@@ -3244,79 +3257,133 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         white-space: nowrap;
         font-size: .9em;
       }
-      .tle-quick-manager .tle-quick-transfer-confirm {
-        display: flex;
-        flex: 0 0 auto;
-        flex-direction: column;
-        gap: 8px;
-        min-width: 0;
-        padding: 9px;
-        border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 24%));
-        border-radius: 8px;
-        background: rgb(127 127 127 / 7%);
-      }
-      .tle-quick-manager .tle-quick-transfer-confirm[hidden] { display: none !important; }
-      .tle-quick-manager .tle-quick-transfer-message {
-        margin: 0;
-        white-space: pre-line;
-        overflow-wrap: anywhere;
-        font-size: .88em;
-        line-height: 1.45;
-      }
-      .tle-quick-manager .tle-quick-transfer-actions {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 6px;
-      }
-      .tle-quick-manager .tle-quick-transfer-actions > button { white-space: nowrap; }
-      .tle-quick-manager .tle-quick-manage-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto auto;
-        align-items: center;
-        gap: 7px;
-        flex: 0 0 auto;
-        min-width: 0;
-        padding: 7px;
-        border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 20%));
-        border-radius: 8px;
-        background: rgb(127 127 127 / 4%);
-      }
-      .tle-quick-manager .tle-quick-manage-row[hidden] { display: none !important; }
-      .tle-quick-manager .tle-quick-manage-row > input {
-        width: 100%;
-        min-width: 0;
-        margin: 0;
-      }
-      .tle-quick-manager .tle-quick-operations {
-        flex-wrap: wrap;
-        overflow: visible;
-        padding-bottom: 2px;
-      }
-      .tle-quick-manager .tle-quick-operations > button {
-        flex: 0 0 auto;
-      }
-      @media (max-width: 680px) {
-        .tle-quick-manager .tle-quick-group-controls {
-          grid-template-columns: minmax(0, 1fr);
+      @media screen and (min-width: 1001px) {
+        .tle-quick-manager .tle-organizer-workspace {
+          display: grid;
+          grid-template-columns: minmax(138px, .78fr) minmax(168px, .92fr) minmax(360px, 2.3fr);
+          gap: 10px;
+          flex: 1 1 auto;
+          min-width: 0;
+          min-height: 0;
+        }
+        .tle-quick-manager .tle-organizer-pane {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          min-width: 0;
+          min-height: 0;
+          overflow: hidden;
+          padding: 10px;
+          border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 20%));
+          border-radius: 10px;
+          background: rgb(127 127 127 / 4%);
+        }
+        .tle-quick-manager .tle-organizer-pane-title {
+          display: block;
+          flex: 0 0 auto;
+          padding-bottom: 7px;
+          border-bottom: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 18%));
+          font-size: .88em;
+          font-weight: 650;
+          opacity: .76;
+        }
+        .tle-quick-manager .tle-quick-category-row {
+          flex: 1 1 auto;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+          min-height: 0;
+          overflow: hidden;
+        }
+        .tle-quick-manager .tle-quick-category-row .tle-quick-tabs {
+          display: flex;
+          flex: 1 1 auto;
+          flex-direction: column;
+          flex-wrap: nowrap;
+          align-items: stretch;
           gap: 5px;
+          min-width: 0;
+          min-height: 0;
+          overflow-x: hidden;
+          overflow-y: auto;
+          padding: 0 2px 2px 0;
         }
-        .tle-quick-manager .tle-quick-toolbar {
-          grid-template-columns: minmax(0, 1fr) auto auto;
+        .tle-quick-manager .tle-quick-category-row .tle-quick-tabs > button {
+          flex: 0 0 auto;
+          width: 100%;
+          min-width: 0;
+          justify-content: flex-start;
+          text-align: left;
+          white-space: normal;
         }
-        .tle-quick-manager .tle-quick-toolbar > select {
-          grid-column: 1;
+        .tle-quick-manager .tle-quick-category-row .tle-quick-theme-import { align-self: stretch; }
+        .tle-quick-manager .tle-quick-category-row .tle-quick-theme-import > button { width: 100%; }
+        .tle-quick-manager .tle-quick-category-row .tle-quick-backup-row { justify-content: flex-start; }
+        .tle-quick-manager .tle-quick-filter-bar {
+          display: flex;
+          flex: 1 1 auto;
+          flex-direction: column;
+          flex-wrap: nowrap;
+          align-items: stretch;
+          gap: 5px;
+          min-width: 0;
+          min-height: 0;
+          max-height: none;
+          overflow-x: hidden;
+          overflow-y: auto;
+          padding: 0 2px 2px 0;
+        }
+        .tle-quick-manager .tle-quick-filter-bar > button {
+          flex: 0 0 auto;
+          width: 100%;
+          max-width: none;
+          justify-content: flex-start;
+          padding: 7px 9px;
+          border-radius: 8px;
+          text-align: left;
+          white-space: normal;
+        }
+        .tle-quick-manager .tle-quick-group-actions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 6px;
+        }
+        .tle-quick-manager .tle-quick-group-actions > button {
+          min-width: 0;
+          padding-inline: 6px;
+          white-space: nowrap;
         }
         .tle-quick-manager .tle-quick-manage-row {
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 5px;
-          padding: 5px;
+          padding: 6px;
         }
         .tle-quick-manager .tle-quick-manage-row > input { grid-column: 1 / -1; }
         .tle-quick-manager .tle-quick-manage-row > button {
           min-width: 0;
-          padding-inline: 6px;
+          padding-inline: 4px;
+          font-size: .84em;
         }
+        .tle-quick-manager .tle-quick-toolbar {
+          display: flex;
+          flex: 0 0 auto;
+          min-width: 0;
+        }
+        .tle-quick-manager .tle-quick-operations { flex: 0 0 auto; }
+        .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0 !important; }
+      }
+      @media (max-width: 1000px) {
+        .tle-quick-manager .tle-quick-category-row { order: 1; }
+        .tle-quick-manager .tle-worldbook-filter-bar { order: 2; }
+        .tle-quick-manager .tle-quick-filter-bar { order: 3; }
+        .tle-quick-manager .tle-quick-toolbar { order: 4; }
+        .tle-quick-manager .tle-quick-group-actions { order: 5; }
+        .tle-quick-manager .tle-quick-manage-row { order: 6; }
+        .tle-quick-manager .tle-quick-import-confirm { order: 7; }
+        .tle-quick-manager .tle-quick-delete-confirm { order: 8; }
+        .tle-quick-manager .tle-quick-operations { order: 9; }
+        .tle-quick-manager .tle-quick-list { order: 10; }
+        .tle-quick-manager .tle-quick-status { order: 11; }
       }
 
       .tle-quick-manager .tle-quick-filter,
@@ -5582,10 +5649,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     );
     hint.title = '资源管理只显示酒馆原生支持删除的资源；模型、API 与其他不可删除配置仅保留在搜索页。现有隐藏分类分组数据仍保留在全部分组备份中。右上角图标可导入/导出全部分组方案。';
     const tabs = quickNode('div', 'flex-container flexWrap tle-quick-tabs');
+    tabs.setAttribute('aria-label', '资源类型');
     const worldFilterBar = quickNode('div', 'tle-worldbook-filter-bar');
     worldFilterBar.hidden = true;
     worldFilterBar.setAttribute('aria-label', '世界书绑定状态筛选');
     const groupFilters = quickNode('div', 'flex-container flexWrap tle-quick-filter-bar');
+    groupFilters.setAttribute('aria-label', '当前资源类型的分组目录');
 
     const groupName = quickNode('input', 'text_pole');
     groupName.placeholder = '新分组名称 / 重命名名称';
@@ -5617,10 +5686,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     autoGroupButton.title = '识别当前分类中名称具有相同开头的项目；只整理未分组项目，不覆盖已有分组归属。';
 
     const toolbar = quickNode('div', 'tle-quick-toolbar');
-    toolbar.append(targetSelect, manageButton, autoGroupButton);
+    toolbar.append(targetSelect);
 
-    const groupControlsRow = quickNode('div', 'tle-quick-group-controls');
-    groupControlsRow.append(groupFilters, toolbar);
+    const groupActions = quickNode('div', 'tle-quick-group-actions');
+    groupActions.append(manageButton, autoGroupButton);
 
     const operations = quickNode('div', 'flex-container flexWrap tle-quick-operations');
     const selectVisibleButton = quickButton('全选当前结果', () => {
@@ -5679,7 +5748,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     categoryRow.setAttribute('aria-label', '资源分类、主题分组同步与全部分组备份');
     categoryRow.append(tabs, themeImportRow, backupRow);
 
-    const deleteConfirm = quickNode('div', 'tle-quick-transfer-confirm');
+    const deleteConfirm = quickNode('div', 'tle-quick-transfer-confirm tle-quick-delete-confirm');
     deleteConfirm.hidden = true;
     const deleteMessage = quickNode('p', 'tle-quick-transfer-message');
     const deleteActions = quickNode('div', 'tle-quick-transfer-actions');
@@ -5689,7 +5758,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     deleteConfirm.append(deleteMessage, deleteActions);
     let deleteBusy = false;
 
-    const transferConfirm = quickNode('div', 'tle-quick-transfer-confirm');
+    const transferConfirm = quickNode('div', 'tle-quick-transfer-confirm tle-quick-import-confirm');
     transferConfirm.hidden = true;
     const transferMessage = quickNode('p', 'tle-quick-transfer-message');
     const transferActions = quickNode('div', 'tle-quick-transfer-actions');
@@ -5703,6 +5772,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     list.classList.add('tle-quick-list');
     const status = quickNode('small', 'tle-quick-status');
     status.setAttribute('role', 'status');
+
+    const workspace = quickNode('div', 'tle-organizer-workspace');
+    const categoryPane = quickNode('section', 'tle-organizer-pane tle-organizer-category-pane');
+    categoryPane.setAttribute('aria-label', '资源类型');
+    const categoryHeading = quickNode('strong', 'tle-organizer-pane-title', '资源类型');
+    const groupPane = quickNode('section', 'tle-organizer-pane tle-organizer-group-pane');
+    groupPane.setAttribute('aria-label', '分组目录');
+    const groupHeading = quickNode('strong', 'tle-organizer-pane-title', '分组目录');
+    const resourcePane = quickNode('section', 'tle-organizer-pane tle-organizer-resource-pane');
+    resourcePane.setAttribute('aria-label', '资源列表');
+    const resourceHeading = quickNode('strong', 'tle-organizer-pane-title', '资源列表');
 
     for (const item of QUICK_RESOURCE_MODULES) {
       const button = quickButton(item.title, () => {
@@ -5914,6 +5994,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (clear) clear.hidden = !search.value;
       const data = readQuickGroups();
       const groups = currentGroups(data);
+      resourceHeading.textContent = QUICK_RESOURCE_MODULES.find(item => item.id === module)?.title || '资源列表';
 
       tabs.querySelectorAll('button').forEach(button => {
         button.setAttribute('aria-pressed', String(button.dataset.quickCategory === module));
@@ -6634,10 +6715,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       render();
     };
 
-    body.append(
-      categoryRow, worldFilterBar, groupControlsRow, manageRow, transferConfirm, deleteConfirm,
+    categoryPane.append(categoryHeading, categoryRow);
+    groupPane.append(groupHeading, groupActions, manageRow, groupFilters);
+    resourcePane.append(
+      resourceHeading, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
       operations, list, status
     );
+    workspace.append(categoryPane, groupPane, resourcePane);
+    body.append(workspace);
     void load();
     // The Organizer reuses the single search field above the view; it never creates a second one.
   }
@@ -13499,7 +13584,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.224',
+    version: '0.3.225',
     ready: false,
     destroy,
     state,
