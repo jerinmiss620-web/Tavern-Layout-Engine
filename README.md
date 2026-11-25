@@ -38,7 +38,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 **独立测试入口已准备：** [v0.3.224 候选更新日志](releases/v0.3.224/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
-此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 候选的入口拆分与世界书筛选已保留；v0.3.224 修复了整理侠抽屉点击无响应的问题，并移除了嵌套视觉容器。源码语法和定向回归已通过，完整 CI 与 PC/移动端 SillyTavern、TauriTavern 的真实界面验收仍待进行。当前正式版仍为 Core v0.3.220。
+此开发分支尚未合并，也未修改正式版 `latest.json`、正式安装包或正式发布计划。此前 v0.3.223 候选的入口拆分与世界书筛选已保留；v0.3.224 修复了整理侠抽屉点击无响应的问题，并移除了嵌套视觉容器。源码语法、定向回归和分支 CI 已通过；PC/移动端 SillyTavern、TauriTavern 的真实界面验收仍待进行。当前正式版仍为 Core v0.3.220。
 
 ## 发布与验证
 
