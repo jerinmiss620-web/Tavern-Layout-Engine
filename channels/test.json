@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.237",
+  "latest_version": "0.3.238",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.237",
-    "source_path": "releases/v0.3.237/TLE.js",
-    "source_commit": "b3693fd0aeaa4f5e49bc9cb3371242af3fc9758d",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b3693fd0aeaa4f5e49bc9cb3371242af3fc9758d/releases/v0.3.237/TLE.js",
-    "changelog_path": "releases/v0.3.237/CHANGELOG.md",
-    "sha256": "8311e2082c059f696b9bdfa0a3c48f5e7b5336b599ed2bc82be785e2b1f33f4b",
-    "size_bytes": 808810
+    "version": "0.3.238",
+    "source_path": "releases/v0.3.238/TLE.js",
+    "source_commit": "81cd66d6c82de18e16d7be51b426f28b6bcc8ac1",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/81cd66d6c82de18e16d7be51b426f28b6bcc8ac1/releases/v0.3.238/TLE.js",
+    "changelog_path": "releases/v0.3.238/CHANGELOG.md",
+    "sha256": "e4e789d0ba9f1b1ea7536c7ac00425572bb22f21e0ae0a7c1cda3502a0e68d6c",
+    "size_bytes": 809226
   },
-  "status": "TEST v0.3.237: Companion plans now apply each available item independently and report every skipped item with a field-specific reason; Fade Assistant refreshes the wallpaper mirror on #bg1, ancestor theme/style, stylesheet, theme-select and wallpaper-image changes. Sync is coalesced to one animation frame and uses event/DOM observation only; no polling. ST/TT and mobile runtime acceptance remains pending.",
+  "status": "TEST v0.3.238: Fixes duplicate organizer header toolbars. The organizer's sync/import/export controls are now replaced as one idempotent set when the manager opens and cleared when the embedded manager closes. Also retains v0.3.237 companion partial-apply diagnostics and event-driven fade wallpaper synchronization. ST/TT/mobile runtime acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
