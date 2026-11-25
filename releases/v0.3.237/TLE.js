@@ -12981,23 +12981,27 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
   function companionUnavailableReason(field, target, error) {
     const errorText = String(error?.message || '').trim();
-    const suffix = errorText ? '；' + errorText : '';
+    if (errorText) return errorText;
     if (field.id === 'profile') {
-      return quickSelect('connection_profiles')
-        ? '当前连接配置列表中找不到该配置或该配置已不可用' + suffix
-        : '连接配置控件尚未加载；原生 API 设置尚未就绪' + suffix;
+      const select = quickSelect('connection_profiles');
+      if (!select) return '连接配置控件尚未加载；原生 API 设置尚未就绪';
+      if (![...select.options].some(option => option.value)) return '连接配置列表尚未加载或为空';
+      return '当前连接配置列表中找不到该配置';
     }
     if (field.id === 'source') {
-      return quickSelect('chat_completion_source')
-        ? '当前接口来源列表中找不到该来源或该来源已不可用' + suffix
-        : '接口来源控件尚未加载；原生 API 设置尚未就绪' + suffix;
+      const select = quickSelect('chat_completion_source');
+      if (!select) return '接口来源控件尚未加载；原生 API 设置尚未就绪';
+      if (![...select.options].some(option => option.value)) return '接口来源列表尚未加载或为空';
+      return '当前接口来源列表中找不到该来源';
     }
     if (field.id === 'model') {
-      return quickModelSelects().length
-        ? '当前已加载的模型列表中找不到该模型；可能是模型名称已变化或当前 API 未提供该模型' + suffix
-        : '模型列表尚未加载；API 可能未连接、模型控件尚未挂载或服务商尚未返回模型' + suffix;
+      const modelSelects = quickModelSelects();
+      const hasModelOptions = modelSelects.some(select => [...select.options].some(option => option.value));
+      return hasModelOptions
+        ? '当前已加载的模型列表中找不到该模型；可能是模型名称已变化或当前 API 未提供该模型'
+        : '模型列表尚未加载；API 可能未连接、模型控件尚未挂载或服务商尚未返回模型';
     }
-    return errorText || '当前列表中不存在该项，或对应原生控件暂不可用';
+    return '当前列表中不存在该项，或对应原生控件暂不可用';
   }
 
   async function companionApply(id, automatic = false) {
