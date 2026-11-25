@@ -11964,6 +11964,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (expanded) {
       if (state.globalSearchOpen) closeGlobalSearch(false);
       if (quickPanel) closeQuickPanel(false);
+      setPanelOpen(false);
       closeMobileNativeDrawers();
     }
 
@@ -11974,13 +11975,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     if (expanded) {
       openQuickGroupManager(null);
-      if (state.mobileNav.open && isMobileViewport()) {
-        HOST_WIN.requestAnimationFrame(() => {
-          if (!state.destroyed && panel.classList.contains('openDrawer')) {
-            setMobileNavOpen(false, true);
-          }
-        });
-      }
     } else if (quickPanel?.embedded && quickPanel.node === panel) {
       closeQuickPanel(false);
     }
