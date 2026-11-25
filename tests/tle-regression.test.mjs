@@ -66,7 +66,7 @@ const loader = verifyPinnedRelease(
 );
 assert.equal(loaderRelease.version, '0.3.0');
 assert.match(loader, /const LOADER_VERSION = '0\.3\.0'/);
-if (manifest.release.version === '0.3.221') {
+if (manifest.release.version === '0.3.222') {
   assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
   assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
   assert.match(loader, /tle\.loader\.organizerBranchTest\.lastKnownGood\.v1/);
