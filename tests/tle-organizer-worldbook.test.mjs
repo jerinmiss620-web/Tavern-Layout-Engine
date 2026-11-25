@@ -13,6 +13,9 @@ function extractFunction(name, nextMarker) {
   return source.slice(start, end).trim();
 }
 
+const matchesWorldInfoFilter = vm.runInNewContext(
+  '(' + extractFunction('matchesWorldInfoFilter', '  function buildWorldInfoCatalog') + ')'
+);
 const buildWorldInfoCatalog = vm.runInNewContext(
   '(' + extractFunction('buildWorldInfoCatalog', '  function removeWorldInfoExtraLinks') + ')'
 );
@@ -46,16 +49,35 @@ const catalog = buildWorldInfoCatalog(
 const byName = new Map(catalog.entries.map(entry => [entry.value, entry]));
 assert.equal(catalog.meta.totalCharacters, 2);
 assert.equal(catalog.meta.unloadedCount, 0);
-assert.equal(byName.get('Global').statusLabel, '已关联');
-assert.match(byName.get('Global').detail, /全局/);
+assert.equal(byName.get('Global').statusLabel, '未绑定');
+assert.equal(byName.get('Global').binding.bound, false);
+assert.equal(byName.get('Global').binding.global, true);
+assert.match(byName.get('Global').detail, /全局启用/);
+assert.equal(matchesWorldInfoFilter(byName.get('Global'), 'bound', 0), false);
+assert.equal(matchesWorldInfoFilter(byName.get('Global'), 'unbound', 0), true);
+assert.equal(matchesWorldInfoFilter(byName.get('Global'), 'global', 0), true);
+assert.equal(matchesWorldInfoFilter(byName.get('Global'), 'orphan', 0), false);
+assert.equal(byName.get('Primary').statusLabel, '已绑定');
+assert.equal(byName.get('Primary').binding.bound, true);
+assert.equal(matchesWorldInfoFilter(byName.get('Primary'), 'bound', 0), true);
+assert.equal(matchesWorldInfoFilter(byName.get('Primary'), 'unbound', 0), false);
+assert.equal(matchesWorldInfoFilter(byName.get('Primary'), 'global', 0), false);
 assert.match(byName.get('Primary').detail, /主要绑定：Char A/);
+assert.equal(byName.get('Extra').statusLabel, '已绑定');
+assert.equal(matchesWorldInfoFilter(byName.get('Extra'), 'bound', 0), true);
 assert.match(byName.get('Extra').detail, /额外绑定：Char B/);
 assert.equal(byName.get('Orphan').statusLabel, '疑似孤儿');
+assert.equal(matchesWorldInfoFilter(byName.get('Orphan'), 'orphan', 0), true);
+assert.equal(matchesWorldInfoFilter(byName.get('Orphan'), 'unbound', 0), false);
 assert.match(byName.get('Orphan').detail, /遗留角色绑定：deleted-card/);
 assert.equal(byName.get('Mixed').statusLabel, '含遗留关联');
+assert.equal(matchesWorldInfoFilter(byName.get('Mixed'), 'orphan', 0), true);
+assert.equal(matchesWorldInfoFilter(byName.get('Mixed'), 'bound', 0), true);
 assert.match(byName.get('Mixed').detail, /Char B/);
 assert.match(byName.get('Mixed').detail, /deleted-card/);
 assert.equal(byName.get('Unbound').statusLabel, '未绑定');
+assert.equal(matchesWorldInfoFilter(byName.get('Unbound'), 'unbound', 0), true);
+assert.equal(matchesWorldInfoFilter(byName.get('Unbound'), 'global', 0), false);
 assert.match(byName.get('Unbound').detail, /可能是独立世界书/);
 assert.equal(byName.get('Global').key, JSON.stringify(['world_info', 'Global']));
 assert.equal(byName.get('Global').legacyKey, JSON.stringify(['world_info', '0']));
@@ -72,6 +94,8 @@ assert.equal(shallowCatalog.meta.unloadedCount, 1);
 assert.equal(shallowCatalog.entries[0].statusLabel, '待核对');
 assert.match(shallowCatalog.entries[0].detail, /1 张角色卡未加载/);
 assert.notEqual(shallowCatalog.entries[0].statusLabel, '疑似孤儿');
+assert.equal(matchesWorldInfoFilter(shallowCatalog.entries[0], 'orphan', 1), false);
+assert.equal(matchesWorldInfoFilter(shallowCatalog.entries[0], 'unbound', 1), false);
 
 const worldInfoForCleanup = {
   charLore: [
@@ -111,22 +135,29 @@ assert.equal(savedData.assignments.worldInfo[JSON.stringify(['world_info', 'Extr
 assert.equal(Object.hasOwn(savedData.assignments.worldInfo, JSON.stringify(['world_info', '0'])), false);
 
 assert.ok(source.includes("organizerEntry: 'tle-organizer-entry'"));
+assert.ok(source.includes("organizerPanel: 'tle-organizer-panel'"));
 assert.ok(source.includes('state.organizerEntry = organizerEntry'));
 assert.ok(source.includes("organizerEntry.className = 'drawer'"), 'Organizer must be the tenth native-shaped drawer');
 assert.ok(source.includes("organizerToggle.className = 'drawer-toggle interactable'"));
 assert.ok(source.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable'"));
 assert.ok(source.includes("panel.className = 'drawer-content closedDrawer'"), 'Organizer must own its drawer-content');
-assert.ok(source.includes('state.organizerEntry?.appendChild(panel)'), 'Global search must live inside Organizer drawer-content');
+assert.ok(source.includes('state.organizerEntry?.appendChild(panel)'), 'Organizer owns its independent resource panel');
 assert.ok(source.includes('holder.insertBefore(state.organizerEntry, organizerPosition)'), 'Organizer must be positioned after the nine native drawers');
-assert.ok(!source.includes('tle-global-search-overlay'), 'Organizer must not be a popup overlay');
-assert.ok(!source.includes('z-index: 10090'), 'Organizer must not create a modal scrim');
-assert.ok(source.includes('panel.classList.add(\'openDrawer\')'));
-assert.ok(source.includes('state.globalSearchPanel?.classList.add(\'closedDrawer\')'));
+assert.ok(source.includes("panel.className = 'tle-global-search-overlay'"), 'Global search must remain its own modal overlay');
+assert.ok(source.includes('z-index: 10090'), 'Global search modal must retain its scrim layer');
+assert.ok(source.includes('HOST_DOC.body.appendChild(panel)'), 'Global search modal must be independent from the Organizer drawer');
+assert.ok(source.includes('data-search-organizer-jump'), 'Global search modal must link to Organizer');
+assert.ok(source.includes('function createOrganizerPanel()'));
+assert.ok(source.includes("state.organizerPanel.querySelector('.tle-search-field')"), 'Organizer has its own resource filter field');
 assert.ok(source.includes('const available = globalSearchEnabled;'));
 assert.ok(source.includes('if (!globalSearchEnabled || !state.globalSearchPanel) return;'));
 assert.ok(source.includes('body[data-tle-nav="icons"]'));
 assert.ok(source.includes('tle-organizer-entry'));
-assert.equal(source.includes('<button id="${ID.searchToggle}" class="tle-workspace-icon-button"'), false);
+assert.ok(source.includes('<button id="${ID.searchToggle}" class="tle-workspace-icon-button"'), 'The original global-search header button must be restored');
+assert.ok(source.includes('function matchesWorldInfoFilter'));
+assert.ok(source.includes('tle-worldbook-filter-bar'));
+assert.ok(source.includes('全局启用'));
+assert.ok(source.includes('疑似孤儿'));
 assert.ok(source.includes("title: '世界书'"));
 assert.ok(source.includes("id: 'worldInfo', title: '全局世界书'"));
 assert.ok(source.includes('function quickManagerCatalog'));
