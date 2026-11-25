@@ -20,6 +20,7 @@
 - 测试 Loader 只读取开发分支的 `channels/test.json`；正式根目录 `latest.json`、`loader/latest.json`、`release-plan.json` 未改动。测试前先禁用 Bootstrap 1.0.6 并完整刷新；恢复正式版时禁用测试 Loader、启用 Bootstrap 1.0.6 并完整刷新，由正式 Loader 从自己的 LKG 缓存恢复 Core v0.3.220。
 - 测试步骤见 `development/organizer/TESTING.md`。分支 CI 增加 `node loader/verify-test-channel.mjs --remote`，验证测试 Core、Loader、安装 JSON 的 Commit pin、UTF-8 字节数、SHA-256 与安装包源码同步。
 - 分支 CI run 45555232799（job `validate`）通过：`npm test` 全量回归通过；测试通道远端验证通过，Core v0.3.221（637738 UTF-8 bytes）、Test Loader v0.3.0（39896 UTF-8 bytes）、固定 Commit、SHA-256 与远端安装 JSON 内容均通过校验。正式 Stable release verification 仍确认 Core v0.3.220。
+- 分支 CI run 45557624063（job `validate`）通过：`npm test` 全量回归与 release metadata 检查通过；Organizer 第十个 `.drawer` / 独立 `.drawer-content` 结构断言通过；测试通道远端验证通过，Core v0.3.222（635991 UTF-8 bytes，SHA-256 `03dad8a12804e71003e50880e28a573698d29ee80741a0fbc4c55f55fae4aabd`）、Test Loader v0.3.0（39896 UTF-8 bytes）、固定 Commit、禁用状态 Core 备份安装包与远端安装 JSON 内容均通过校验。正式 Stable release verification 仍确认 Core v0.3.220。
 
 
 ## 2026-11-25 · Core v0.3.220 整理侠资源管理界面重排
