@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.221
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.222
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -418,8 +418,7 @@ body[data-tle-nav] {
   --tle-row-gap: 2px;
   --tle-row-preferred: 44px;
   --tle-engine-size: 36px;
-  --tle-organizer-size: 36px;
-  --tle-row-height: min(var(--tle-row-preferred), calc((100dvh - var(--tle-rail-top) - var(--tle-rail-bottom) - var(--tle-rail-header) - var(--tle-engine-size) - var(--tle-organizer-size) - 22px) / var(--tle-rows, 9) - var(--tle-row-gap)));
+  --tle-row-height: min(var(--tle-row-preferred), calc((100dvh - var(--tle-rail-top) - var(--tle-rail-bottom) - var(--tle-rail-header) - var(--tle-engine-size) - 22px) / var(--tle-rows, 10) - var(--tle-row-gap)));
   --tle-row-align: center;
   --tle-first-row-end: 0px;
   --tle-hamburger-left: 8px;
@@ -625,7 +624,7 @@ body[data-tle-overlay="closed"] :is(#top-bar#top-bar, #top-settings-holder#top-s
   pointer-events: none !important;
 }
 body[data-tle-overlay="closed"] #top-settings-holder#top-settings-holder > .drawer:not(:has(> .openDrawer)),
-body[data-tle-overlay="closed"] #top-settings-holder > :is(.tle-sidebar-info, #${ID.organizerEntry}, #${ID.nav}) {
+body[data-tle-overlay="closed"] #top-settings-holder > :is(.tle-sidebar-info, #${ID.nav}) {
   display: none !important;
 }
 body[data-tle-overlay="closed"] #top-settings-holder > .drawer:has(> .openDrawer) {
@@ -689,80 +688,6 @@ body[data-tle-nav] #top-settings-holder#top-settings-holder > .drawer > .drawer-
   visibility: visible !important;
   pointer-events: auto !important;
 }
-  #${ID.organizerEntry} {
-    display: flex;
-    flex: 0 0 var(--tle-organizer-size);
-    align-self: stretch;
-    width: 100%;
-    min-width: 0;
-    height: var(--tle-organizer-size);
-    margin: 0;
-    padding: 0 8px;
-    box-sizing: border-box;
-  }
-  #${ID.organizerEntry}[hidden] { display: none !important; }
-  #${ID.organizerEntry} > button {
-    display: flex;
-    flex: 1 1 auto;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    padding: 3px 7px;
-    border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 24%));
-    border-radius: 11px;
-    color: var(--SmartThemeBodyColor, inherit);
-    background: var(--SmartThemeBlurTintColor, rgb(127 127 127 / 9%));
-    box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
-    text-align: start;
-    cursor: pointer;
-    transition: background-color .16s ease, border-color .16s ease, transform .16s ease;
-  }
-  #${ID.organizerEntry} > button:hover,
-  #${ID.organizerEntry} > button:focus-visible {
-    border-color: var(--SmartThemeQuoteColor, currentColor);
-    background: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 10%, var(--SmartThemeBlurTintColor, transparent));
-    outline: none;
-  }
-  #${ID.organizerEntry} > button:active { transform: translateY(1px); }
-  #${ID.organizerEntry} > button[aria-expanded="true"] { border-color: var(--SmartThemeQuoteColor, currentColor); background: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 12%, var(--SmartThemeBlurTintColor, transparent)); }
-  #${ID.organizerEntry} .tle-organizer-mark {
-    display: grid;
-    flex: 0 0 30px;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
-    opacity: .88;
-  }
-  #${ID.organizerEntry} .tle-organizer-copy {
-    display: flex;
-    flex: 1 1 auto;
-    min-width: 0;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1px;
-    text-align: left;
-    line-height: 1.1;
-  }
-  #${ID.organizerEntry} .tle-organizer-copy strong { font-size: 11px; font-weight: 750; }
-  #${ID.organizerEntry} .tle-organizer-copy small { font-size: 9px; opacity: .62; letter-spacing: .035em; }
-  body[data-tle-nav="icons"] #${ID.organizerEntry} {
-    align-self: center;
-    justify-self: center;
-    width: var(--tle-organizer-size);
-    margin-inline: auto;
-    padding: 0;
-  }
-  body[data-tle-nav="icons"] #${ID.organizerEntry} > button {
-    justify-content: center;
-    margin-inline: auto;
-    padding: 2px;
-    border-radius: 11px;
-  }
-  body[data-tle-nav="icons"] #${ID.organizerEntry} .tle-organizer-copy { display: none !important; }
 #${ID.nav} {
   display: flex;
   flex: 0 0 var(--tle-engine-size);
@@ -829,7 +754,6 @@ body[data-tle-nav="icons"] #${ID.nav} > button {
 body[data-tle-nav="icons"] #${ID.nav} .tle-engine-mark { width: 30px; height: 30px; flex-basis: 30px; }
 body[data-tle-nav="icons"] #${ID.nav} .tle-engine-copy { display: none !important; }
 body[data-tle-nav="labels"] #${ID.nav}, body[data-tle-nav="info"] #${ID.nav} { --tle-engine-size: 48px; }
-body[data-tle-nav="labels"] #${ID.organizerEntry}, body[data-tle-nav="info"] #${ID.organizerEntry} { --tle-organizer-size: 48px; }
 #${ID.mobileToggle} {
   position: absolute;
   inset: calc(var(--tle-rail-top) + 4px) auto auto var(--tle-hamburger-left);
@@ -1696,7 +1620,7 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
 
 @media (max-height: 530px) {
   body[data-tle-nav][data-tle-compact] {
-    --tle-row-height: min(var(--tle-row-preferred), calc((100dvh - var(--tle-rail-top) - var(--tle-rail-bottom) - var(--tle-rail-header) - var(--tle-engine-size) - var(--tle-organizer-size) - 28px) / var(--tle-half-rows, 6) - var(--tle-row-gap)));
+    --tle-row-height: min(var(--tle-row-preferred), calc((100dvh - var(--tle-rail-top) - var(--tle-rail-bottom) - var(--tle-rail-header) - var(--tle-engine-size) - 28px) / var(--tle-half-rows, 5) - var(--tle-row-gap)));
   }
   body[data-tle-nav="icons"][data-tle-compact] { --tle-rail-width: 96px; }
   body[data-tle-nav][data-tle-compact] #${ID.workspaceHeader} {
@@ -1709,41 +1633,38 @@ body[data-tle-nav]:not([data-tle-floor-zero-measuring]) #chat {
     padding-top: calc(var(--tle-rail-top) + var(--tle-rail-header) + 2px) !important;
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(var(--tle-half-rows, 6), max(1px, var(--tle-row-height))) minmax(0, 1fr) auto auto;
+    grid-template-rows: repeat(var(--tle-half-rows, 5), max(1px, var(--tle-row-height))) minmax(0, 1fr) auto;
     align-content: start;
     column-gap: 4px !important;
   }
   body[data-tle-compact] #top-settings-holder > .drawer:first-child { padding-right: 0; }
-  body[data-tle-compact] #top-settings-holder > .tle-sidebar-info { grid-area: -4 / 1 / -3 / -1; align-self: start; max-height: 100%; }
-  body[data-tle-compact] #${ID.organizerEntry} { grid-area: -3 / 1 / -2 / -1; }
+  body[data-tle-compact] #top-settings-holder > .tle-sidebar-info { grid-area: -3 / 1 / -2 / -1; align-self: start; max-height: 100%; }
   body[data-tle-compact] #${ID.nav} { grid-area: -2 / 1 / -1 / -1; }
 }
 
 
-/* Global search: a centered modal independent from the navigation rail. */
-body.tle-global-search-open { overflow: hidden !important; }
-#tle-global-search-panel {
-  position: fixed;
-  inset: 0;
-  z-index: 10090;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  box-sizing: border-box;
+/* Organizer: the tenth native-shaped drawer below Character Management. */
+#tle-global-search-panel.drawer-content {
+  display: none !important;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 !important;
+  overflow: hidden !important;
   color: var(--SmartThemeBodyColor, inherit);
-  /* The scrim only dims the page; the dialog surface itself is opaque. */
-  background: rgb(0 0 0 / 48%);
 }
+#tle-global-search-panel.drawer-content.openDrawer { display: flex !important; }
 #tle-global-search-panel[hidden] { display: none !important; }
 #tle-global-search-panel .tle-search-surface {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 12px;
-  width: min(560px, calc(100vw - 32px));
-  height: min(700px, 70dvh);
-  max-height: calc(100dvh - 32px);
-  min-height: 280px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   min-width: 0;
+  max-width: none;
   padding: 16px;
   box-sizing: border-box;
   overflow: hidden;
@@ -1897,32 +1818,12 @@ body.tle-global-search-open { overflow: hidden !important; }
 #tle-global-search-panel .tle-organizer-resources { gap: 5px; }
 #tle-global-search-panel .tle-organizer-search-view[hidden],
 #tle-global-search-panel .tle-organizer-resources[hidden] { display: none !important; }
-#tle-global-search-panel.is-resource-view .tle-search-surface {
-  width: min(960px, calc(100vw - 32px));
-  max-width: min(960px, calc(100vw - 32px));
-  height: min(780px, calc(100dvh - 40px));
-  max-height: calc(100dvh - 32px);
-}
 #tle-global-search-panel .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0; }
 
 @media (max-width: 700px) {
-  #tle-global-search-panel { padding: 8px; }
   #tle-global-search-panel .tle-search-surface {
-    width: 85dvw;
-    height: 80dvh;
-    max-width: 85dvw;
-    max-height: 80dvh;
-    min-height: 240px;
     padding: 12px;
     gap: 10px;
-    border-radius: 12px;
-  }
-  #tle-global-search-panel.is-resource-view .tle-search-surface {
-    width: calc(100vw - 16px);
-    height: calc(100dvh - 16px);
-    max-width: calc(100vw - 16px);
-    max-height: calc(100dvh - 16px);
-    min-height: 240px;
   }
   #tle-global-search-panel .tle-search-heading { flex-wrap: wrap; row-gap: 8px; }
   #tle-global-search-panel .tle-search-heading-copy {
@@ -3688,11 +3589,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const available = globalSearchEnabled;
     HOST_DOC.body.toggleAttribute('data-tle-search-available', available);
     if (state.organizerEntry) state.organizerEntry.hidden = !available;
-    const searchButton = state.organizerEntry?.querySelector('#' + ID.searchToggle);
-    if (searchButton) searchButton.hidden = !available;
     if (!available && state.globalSearchOpen) closeGlobalSearch();
     const setting = state.panel?.querySelector('[data-tle-setting="global-search"]');
     if (setting) setting.checked = globalSearchEnabled;
+    if (state.organizerEntry?.isConnected) syncRail();
   }
   function setGlobalSearchEnabled(enabled) {
     globalSearchEnabled = Boolean(enabled);
@@ -7510,14 +7410,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.221 · TT 滑屏与原生手势同步修复</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.222 · TT 滑屏与原生手势同步修复</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.221</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.222</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -7818,7 +7718,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     updateDockToggle();
   }
 
-  function setMobileNavOpen(open) {
+  function setMobileNavOpen(open, preserveDrawer = false) {
     const mode = usesHamburger();
     const nextOpen = mode && Boolean(open);
 
@@ -7827,7 +7727,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     // hidden .openDrawer panels or their backdrop effects mounted underneath.
     if (nextOpen && isMobileViewport()) closeMobileNativeDrawers();
 
-    if (!nextOpen) closeGlobalSearch();
+    if (!nextOpen && !preserveDrawer) closeGlobalSearch();
     state.mobileNav.open = nextOpen;
     const body = HOST_DOC.body;
     body.toggleAttribute('data-tle-docked', state.mobileNav.docked);
@@ -8135,9 +8035,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     'extensions-settings-button': '扩展程序',
     'persona-management-button': '用户设定管理',
     'rightNavHolder': '角色管理',
+    'tle-organizer-entry': '整理侠',
   };
   const drawerFallbackLabels = ['预设管理', 'API 连接配置', '高级格式化设置', '世界/知识书',
-    '用户设置', '背景', '扩展程序', '用户设定管理', '角色管理'];
+    '用户设置', '背景', '扩展程序', '用户设定管理', '角色管理', '整理侠'];
 
   function getDrawerLabel(drawer, toggle, index, count) {
     const panel = drawer.querySelector(':scope > .drawer-content');
@@ -8149,7 +8050,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (/^(更改背景图片|change background image|backgrounds?)$/i.test(title || '')) return '背景';
     if (/^(user\s*身份|user persona|persona management)$/i.test(title || '')) return '用户设定管理';
     if (/^(世界书|world info|world lore)$/i.test(title || '')) return '世界/知识书';
-    return title || (count === 9 ? drawerFallbackLabels[index] : null) || `导航 ${index + 1}`;
+    return title || (count >= 9 ? drawerFallbackLabels[index] : null) || `导航 ${index + 1}`;
   }
 
   function ensureNavInfoStation() {
@@ -8247,10 +8148,28 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function syncRail() {
     const holder = HOST_DOC.getElementById('top-settings-holder');
     if (!holder) return;
-    const drawers = [...holder.querySelectorAll(':scope > .drawer')];
+
+    const station = ensureNavInfoStation();
+    const nativeDrawers = [...holder.querySelectorAll(':scope > .drawer')]
+      .filter(drawer => drawer !== state.organizerEntry);
+    const lastNativeDrawer = nativeDrawers.at(-1);
+    const organizerPosition = lastNativeDrawer ? lastNativeDrawer.nextSibling : station;
+    if (state.organizerEntry && state.organizerEntry !== organizerPosition) {
+      holder.insertBefore(state.organizerEntry, organizerPosition);
+    }
+    if (station.previousElementSibling !== state.organizerEntry) {
+      holder.insertBefore(station, state.organizerEntry?.nextSibling || null);
+    }
+    if (station.nextElementSibling !== state.navEntry) {
+      holder.insertBefore(state.navEntry, station.nextSibling);
+    }
+
+    const allDrawers = [...holder.querySelectorAll(':scope > .drawer')];
+    const drawers = allDrawers.filter(drawer => !drawer.hidden);
     // A replacement holder can arrive before its native children. Leave the
-    // native UI alone until at least one real toggle is present.
-    if (!drawers.some(drawer => drawer.querySelector(':scope > .drawer-toggle'))) return;
+    // native UI alone until at least one original Tavern drawer is present.
+    if (!allDrawers.some(drawer => drawer !== state.organizerEntry && drawer.querySelector(':scope > .drawer-toggle'))) return;
+
     HOST_DOC.body.dataset.tleNav = navigationMode;
     const count = String(drawers.length);
     if (HOST_DOC.body.style.getPropertyValue('--tle-rows') !== count) {
@@ -8258,6 +8177,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       HOST_DOC.body.style.setProperty('--tle-half-rows', String(Math.ceil(drawers.length / 2)));
     }
     HOST_DOC.body.toggleAttribute('data-tle-compact', drawers.length >= 10 || HOST_WIN.innerHeight < 415);
+
     for (const [index, drawer] of drawers.entries()) {
       const toggle = drawer.querySelector(':scope > .drawer-toggle');
       if (!toggle) continue;
@@ -8272,16 +8192,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const name = getDrawerLabel(drawer, toggle, index, drawers.length);
       if (label.textContent !== name) label.textContent = name;
     }
+
     if (state.workspaceHeader && holder.firstElementChild !== state.workspaceHeader) {
       holder.prepend(state.workspaceHeader);
     }
     updateWorkspaceHeader();
-    const station = ensureNavInfoStation();
-    if (holder.lastElementChild !== state.navEntry || state.navEntry.previousElementSibling !== state.organizerEntry || state.organizerEntry.previousElementSibling !== station) {
-      holder.append(station, state.organizerEntry, state.navEntry);
-    }
     syncFloorZeroClearance();
   }
+
 
   const CHAT_SHORTCUT_OVERLAY_SELECTOR = [
     '.drawer-content.openDrawer:not([data-tle-quick-panel])',
@@ -11451,33 +11369,44 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const input = state.globalSearchPanel?.querySelector('input');
     if (input) input.value = '';
     state.globalSearchView = 'search';
-    state.globalSearchPanel?.classList.remove('is-resource-view');
+    state.globalSearchPanel?.classList.remove('is-resource-view', 'openDrawer');
+    state.globalSearchPanel?.classList.add('closedDrawer');
+    state.globalSearchPanel?.setAttribute('aria-hidden', 'true');
     renderGlobalSearchResults('');
-    if (state.globalSearchPanel) {
-      state.globalSearchPanel.hidden = true;
-      state.globalSearchPanel.setAttribute('aria-hidden', 'true');
-    }
     HOST_DOC.body.classList.remove('tle-global-search-open');
     state.globalSearchOpen = false;
-    state.organizerEntry?.querySelector('#' + ID.searchToggle)?.setAttribute('aria-expanded', 'false');
-    if (restoreFocus) {
-      state.organizerEntry?.querySelector('#' + ID.searchToggle)?.focus({ preventScroll: true });
-    }
+    const toggle = state.organizerEntry?.querySelector(':scope > .drawer-toggle');
+    toggle?.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) toggle?.focus({ preventScroll: true });
   }
 
   function openGlobalSearch() {
     if (!globalSearchEnabled || !state.globalSearchPanel) return;
+    if (state.globalSearchOpen) {
+      closeGlobalSearch(true);
+      return;
+    }
     if (quickPanel && !quickPanel.embedded) closeQuickPanel(false);
     search.jumpAbort?.abort();
+    setPanelOpen(false);
+    closeMobileNativeDrawers();
     const panel = state.globalSearchPanel;
-    panel.hidden = false;
+    panel.classList.remove('closedDrawer');
+    panel.classList.add('openDrawer');
     panel.setAttribute('aria-hidden', 'false');
     state.globalSearchOpen = true;
-    state.organizerEntry?.querySelector('#' + ID.searchToggle)?.setAttribute('aria-expanded', 'true');
+    state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.setAttribute('aria-expanded', 'true');
     HOST_DOC.body.classList.add('tle-global-search-open');
     const input = panel.querySelector('input');
     setGlobalSearchView('search');
     if (input?.isConnected) input.focus({ preventScroll: true });
+    if (state.mobileNav.open && isMobileViewport()) {
+      HOST_WIN.requestAnimationFrame(() => {
+        if (!state.destroyed && state.mobileNav.open && state.globalSearchOpen) {
+          setMobileNavOpen(false, true);
+        }
+      });
+    }
   }
 
   function createGlobalSearch() {
@@ -11486,12 +11415,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const panel = HOST_DOC.createElement('section');
       state.globalSearchPanel = panel;
       panel.id = GLOBAL_SEARCH_ID;
-      panel.className = 'tle-global-search-overlay';
+      panel.className = 'drawer-content closedDrawer';
       panel.setAttribute('aria-label', '整理侠');
       panel.setAttribute('aria-hidden', 'true');
-      panel.hidden = true;
       panel.innerHTML = `
-        <div class="popup tle-search-surface" role="dialog" aria-modal="true" aria-label="整理侠">
+        <div class="tle-search-surface" role="region" aria-label="整理侠内容">
           <header class="tle-search-heading">
             <div class="tle-search-heading-copy">
               <strong class="tle-search-title">整理侠</strong>
@@ -11542,10 +11470,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       input.addEventListener('compositionend', () => { search.composing = false; onInput(); }, { signal: state.abort.signal });
 
       panel.addEventListener('click', event => {
-        if (event.target === panel) {
-          closeGlobalSearch(true);
-          return;
-        }
         const organizerTab = event.target.closest('[data-organizer-tab]');
         if (organizerTab) {
           if (organizerTab.dataset.organizerTab === 'resources') openQuickGroupManager(organizerTab);
@@ -11613,7 +11537,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       });
       search.observer.observe(HOST_DOC.body, { childList: true, subtree: true, characterData: true });
 
-      HOST_DOC.body.appendChild(panel);
+      state.organizerEntry?.appendChild(panel);
       applyGlobalSearchAvailability();
       renderGlobalSearchResults('');
     } catch (error) {
@@ -11686,9 +11610,29 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         <span class="tle-engine-update-dot" data-tle-engine-update hidden aria-hidden="true"></span>
       </button>`;
     state.navEntry = entry;
-    const organizerEntry = HOST_DOC.createElement('section');
+    const organizerEntry = HOST_DOC.createElement('div');
     organizerEntry.id = ID.organizerEntry;
-    organizerEntry.innerHTML = '<button id="' + ID.searchToggle + '" type="button" title="整理侠 · 搜索与资源管理" aria-label="打开整理侠" aria-haspopup="dialog" aria-controls="' + GLOBAL_SEARCH_ID + '" aria-expanded="false"><span class="tle-organizer-mark" aria-hidden="true"><i class="fa-solid fa-layer-group"></i></span><span class="tle-organizer-copy"><strong>整理侠</strong><small>RESOURCE ORGANIZER</small></span></button>';
+    organizerEntry.className = 'drawer';
+    const organizerToggle = HOST_DOC.createElement('div');
+    organizerToggle.className = 'drawer-toggle interactable';
+    organizerToggle.tabIndex = 0;
+    organizerToggle.setAttribute('role', 'button');
+    organizerToggle.setAttribute('aria-label', '整理侠');
+    organizerToggle.setAttribute('aria-controls', GLOBAL_SEARCH_ID);
+    organizerToggle.setAttribute('aria-expanded', 'false');
+    organizerToggle.title = '整理侠 · 全局搜索与资源管理';
+    const organizerIcon = HOST_DOC.createElement('div');
+    organizerIcon.id = ID.searchToggle;
+    organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable';
+    organizerIcon.setAttribute('aria-hidden', 'true');
+    organizerToggle.appendChild(organizerIcon);
+    organizerEntry.appendChild(organizerToggle);
+    organizerToggle.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      event.stopPropagation();
+      organizerIcon.click();
+    }, { signal: state.abort.signal });
     state.organizerEntry = organizerEntry;
     setMobileNavOpen(false);
   }
@@ -12177,6 +12121,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const target = event.target;
     if (!target?.closest) return;
     if (target.closest('[data-tle-quick-panel], #' + GLOBAL_SEARCH_ID)) return;
+    if (state.globalSearchOpen && !target.closest('#' + ID.organizerEntry)) {
+      closeGlobalSearch(false);
+    }
+    const organizerToggle = target.closest('#' + ID.organizerEntry + ' > .drawer-toggle');
+    if (organizerToggle && !target.closest('#' + ID.searchToggle)) {
+      event.preventDefault();
+      event.stopPropagation();
+      organizerToggle.querySelector('#' + ID.searchToggle)?.click();
+      return;
+    }
 
     const chatToolsPanel = target.closest('#' + ID.chatToolsPanel);
     if (chatToolsPanel) {
@@ -13827,5 +13781,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.221 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.222 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
