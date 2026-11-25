@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.232",
+  "latest_version": "0.3.233",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.232",
-    "source_path": "releases/v0.3.232/TLE.js",
-    "source_commit": "f896b870d849013be3fade6ccffd070e60b96166",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/f896b870d849013be3fade6ccffd070e60b96166/releases/v0.3.232/TLE.js",
-    "changelog_path": "releases/v0.3.232/CHANGELOG.md",
-    "sha256": "f031a32d09623e1e535fc8fdcf1b3c4a926effc11037000fc7362eae6024717e",
-    "size_bytes": 655398
+    "version": "0.3.233",
+    "source_path": "releases/v0.3.233/TLE.js",
+    "source_commit": "869477d457d75bcf20141e5a4ca0ec3addf19f4f",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/869477d457d75bcf20141e5a4ca0ec3addf19f4f/releases/v0.3.233/TLE.js",
+    "changelog_path": "releases/v0.3.233/CHANGELOG.md",
+    "sha256": "0c8ba02454f9e28ecdd065ea64903a5f92c5b985b0a6b3d2aeff7a53cad8267d",
+    "size_bytes": 655418
   },
-  "status": "TEST v0.3.232: All TLE search inputs now use input[type=\"search\"] and inherit the active theme's native search-field appearance. .tle-search-field retains layout sizing and fixed 40px height/min-height only; custom padding, radius and font overrides are removed. Global search, Organizer filtering, quick switch search and recent chat search share the rule. Search, filter, clear behavior and all other features remain unchanged. JavaScript syntax and static style regression checks passed; PC/mobile ST/TT visual acceptance remains pending.",
+  "status": "TEST v0.3.233: Shared TLE search inputs use input[type=\"search\"] and inherit the active theme's native visual styling. The fixed 40px height/min-height is applied by a more specific layout-only selector; custom padding, borders, radius, background, color and font overrides are removed. Global search, Organizer filtering, quick switch search and recent chat search share the rule. Search and clear behavior remain unchanged. Regression suite includes search-style and Organizer World Info catalog assertions; PC/mobile ST/TT visual acceptance remains pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
