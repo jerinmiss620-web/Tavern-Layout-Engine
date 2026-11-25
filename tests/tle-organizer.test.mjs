@@ -54,14 +54,14 @@ assert.ok(manager.includes("const categoryRow = quickNode('div', 'tle-quick-cate
 assert.ok(manager.includes("categoryRow.append(tabs, themeImportRow, backupRow);"));
 assert.ok(manager.includes("const groupControlsRow = quickNode('div', 'tle-quick-group-controls');"));
 assert.ok(manager.includes("groupControlsRow.append(groupFilters, toolbar);"));
-assert.ok(manager.includes("body.append(\\n      categoryRow, groupControlsRow, manageRow, transferConfirm, deleteConfirm,\\n      operations, list, status\\n    );"));
+assert.ok(manager.includes("body.append(\n      categoryRow, groupControlsRow, manageRow, transferConfirm, deleteConfirm,\n      operations, list, status\n    );"));
 assert.ok(!manager.includes("deleteHint, list, status"));
 assert.ok(!manager.includes("hint, backupRow, tabs, groupFilters"));
 assert.ok(source.includes(".tle-quick-category-row .tle-quick-tabs"));
 assert.ok(source.includes("grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);"));
-assert.ok(source.includes(".tle-quick-group-controls {\\n          grid-template-columns: minmax(0, 1fr);"));
+assert.ok(source.includes(".tle-quick-group-controls {\n          grid-template-columns: minmax(0, 1fr);"));
 assert.ok(source.includes("margin-inline-start: auto;"));
-assert.ok(source.includes("order: 3;\\n    flex: 0 0 100%;"));
+assert.ok(source.includes("order: 3;\n    flex: 0 0 100%;"));
 assert.ok(manager.includes("deleteSelectedButton.setAttribute('aria-description', deleteScopeHint);"));
 assert.ok(!manager.includes("const deleteHint = quickNode"));
 assert.ok(manager.includes("categoryRow.title = hint.title;"));
