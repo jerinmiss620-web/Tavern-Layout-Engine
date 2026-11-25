@@ -1,6 +1,6 @@
 # 自动更新验证记录 — 2026-11-22
 
-当前候选发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core 0.3.218。
+当前发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core 0.3.218。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
 
@@ -10,7 +10,7 @@
 - 原快速切换分组管理迁入同一面板，保留分组存储键与全部分组方案导入/导出。
 - 批量删除采用白名单和酒馆原生接口：角色卡（保留聊天记录、要求退出当前聊天）、全局世界书、预设、推理格式。API/模型、User 身份、UI 主题不开放批量删除；正则继续由正则侠管理。
 - 新增 `tests/tle-organizer.test.mjs` 检查唯一入口、单一搜索框、原搜索保留、分组数据键和删除权限。
-- GitHub Actions CI 通过前不宣称自动化测试完成；PC ST、Android ST、iPhone TT 的真实宿主验收仍待执行，不以源码模拟代替实机测试。
+- GitHub Actions CI（PR #18，run 45532897681）已通过；PC ST、Android ST、iPhone TT 的真实宿主验收仍待执行，不以源码模拟代替实机测试。
 
 `tests/tle-update-chain.test.mjs` 在 jsdom 宿主页和实际 iframe 中执行完整 Bootstrap、Loader、Core 源码；使用 fake-indexeddb 提供事务、持久槽位及故障注入。模拟网络提供清单和按 Commit 固定的源文件；script-src 和 Blob 路径均实际执行源码，检查 SRI 摘要。测试不把一个预设版本号的假 Loader/Core 对象当成运行成功。
 
