@@ -21,7 +21,7 @@
     "source_commit": "8f6534c1a2839e561998d5e4d984f871074d720b",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/8f6534c1a2839e561998d5e4d984f871074d720b/loader/TLE-Remote-Loader-Test-0.3.0.js",
     "sha256": "4252697ff4d2f89e8c42ce7d41027b80de517015899f308e0f92ecccd0590401",
-    "size_bytes": 39810,
+    "size_bytes": 39896,
     "installer_path": "loader/TLE-Remote-Loader-Test-0.3.0.json",
     "installer_commit": "08527064995cc13ce39d64f53528ffdc163a66a1",
     "installer_url": "https://github.com/jerinmiss620-web/Tavern-Layout-Engine/blob/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json"
