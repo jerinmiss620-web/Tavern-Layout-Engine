@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.269",
+  "latest_version": "0.3.270",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.269",
-    "source_path": "releases/v0.3.269/TLE.js",
-    "source_commit": "21a8eb7b26e7128a40d7d54d953381af656e2621",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/21a8eb7b26e7128a40d7d54d953381af656e2621/releases/v0.3.269/TLE.js",
-    "changelog_path": "releases/v0.3.269/CHANGELOG.md",
-    "sha256": "dcc2a60e92389031fe843b2a52e287b82666082b2f739954d69ae175cf530dce",
-    "size_bytes": 957726
+    "version": "0.3.270",
+    "source_path": "releases/v0.3.270/TLE.js",
+    "source_commit": "05d799b7c3d5669ec5af0a5d6062573809c9c9a4",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/05d799b7c3d5669ec5af0a5d6062573809c9c9a4/releases/v0.3.270/TLE.js",
+    "changelog_path": "releases/v0.3.270/CHANGELOG.md",
+    "sha256": "5a2473b8a960a4b109f293d27b7c57e2e44d140516181118a5ee9d95cb389afb",
+    "size_bytes": 957978
   },
-  "status": "TEST v0.3.269: 扩大记录预览底部渐变区域，增加七段透明度过渡；信息内容继续底部对齐。保留2:3头像、两行概要及原生操作。仅更新测试通道。",
+  "status": "TEST v0.3.270: 记录预览卡片圆角跟随酒馆头像设置；普通头像使用 --avatar-base-border-radius-round，big-avatars 使用 --avatar-base-border-radius 与 --big-avatar-border-factor 原生计算；最外层统一裁切头像和渐变。保留2:3头像、渐变、两行概要和原生操作。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
