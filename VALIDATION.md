@@ -2,7 +2,7 @@
 
 - 测试通道：`channels/test.json`，版本 `0.3.266`；源码：`releases/v0.3.266/TLE.js`。
 - 不可变源码 Commit：`37e163afa875e595c6508797d656a41c5b531751`。
-- SHA-256：待 GitHub Actions 远端校验回填；UTF-8 字节数：`958740`。
+- SHA-256：`6c9a8ccf2060d9d8239f591eb20a8fb7e6fc31fa098ecd60a2a47c43a32fce02`；UTF-8 字节数：`958740`。
 - 开发 Core 源码、不可变发布源码和禁用状态测试导入包内嵌的 Core 源码均一致；画廊模块独立源码与 Core 内嵌模块逐字节一致。
 - 点击角色名称调用原生 `selectCharacterById(index, { switchMenu: true })` 进入当前角色管理 / 编辑界面。
 - 点击角色绑定世界书名称优先调用原生 `openWorldInfoEditor(worldName)` 打开指定世界书；TT 未暴露模块接口时回退到原生世界书抽屉和选择器。
