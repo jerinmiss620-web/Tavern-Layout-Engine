@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.254",
     "source_path": "releases/v0.3.254/TLE.js",
-    "source_commit": "ead001a9706c7ddc77153c471f2972f82ecc1a90",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ead001a9706c7ddc77153c471f2972f82ecc1a90/releases/v0.3.254/TLE.js",
+    "source_commit": "14bc1300e5416557ce4e31416c5ad9ebec6a41f2",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/14bc1300e5416557ce4e31416c5ad9ebec6a41f2/releases/v0.3.254/TLE.js",
     "changelog_path": "releases/v0.3.254/CHANGELOG.md",
-    "sha256": "328707faf91acc6f15a42534065b0906eccd1965b045647bc39194a847490119",
-    "size_bytes": 828519
+    "sha256": "7e29b20995c495be05ee5497eef7f0ffeabe5a7505300913f2a5437489febc69",
+    "size_bytes": 828525
   },
-  "status": "TEST 0.3.254: 修复分组管理按钮未挂载问题。管理模式显示「重命名」「批量删除」文字按钮；重命名先点选自定义分组，批量删除勾选右侧复选框并二次确认。系统目录不可操作，删除分组不会删除资源。",
+  "status": "TEST 0.3.254: 修复分组管理按钮未挂载问题。管理模式显示「重命名」「批量删除」文字按钮；仅可操作自定义分组。重命名先点选分组，批量删除勾选右侧复选框并二次确认。系统目录不可操作，删除分组不会删除资源。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
