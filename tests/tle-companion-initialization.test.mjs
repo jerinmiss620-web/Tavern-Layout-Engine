@@ -90,6 +90,9 @@ assert.match(source, /companionUnavailableReason\(field, target, error\)/);
 assert.match(source, /companionQueueGenerationRetry\(\)/);
 assert.match(source, /companionScheduleState\(data, role\)/);
 assert.ok(source.includes('Core v' + manifest.release.version));
+assert.ok(source.includes('Host Diagnostics 2.0 · v' + manifest.release.version));
+assert.ok(source.includes('data-tle-update-summary>v' + manifest.release.version));
+assert.ok(source.includes('data-tle-runtime-version>v' + manifest.release.version));
 assert.ok(source.includes("version: '" + manifest.release.version + "'"));
 
 console.log('TLE companion initialization and schedule-recovery checks passed: v' + manifest.release.version + '.');
