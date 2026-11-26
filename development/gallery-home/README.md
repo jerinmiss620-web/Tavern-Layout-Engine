@@ -1,4 +1,4 @@
-# Freesia Gallery · 首页角色画廊 v0.2.1 TEST
+# Freesia Gallery · 首页角色画廊 v0.2.2 TEST
 
 独立测试模块。当前只改造 SillyTavern 欢迎首页，不接入 TLE Core，不修改 Bootstrap、导航栏、整理侠、信息站或正式频道。
 
@@ -11,6 +11,11 @@
 - 每页行数可选 1～15 行，默认 3 行；每页最多创建 60 张角色卡（4 列 × 15 行），通过分页浏览完整角色库，避免一次性创建全部卡片 DOM。
 - 每页设置保存在独立的账号存储键 `freesiaGallerySettings`，不覆盖酒馆原生 Recent Chats Settings。
 - 角色头像统一使用 3:4 竖版比例，图片使用 `object-fit: cover`；画廊卡片与详情页头像采用相同约束。
+- 网格间距统一为 `clamp(5px, 0.7vw, 8px)`；2/3/4 列均通过 `minmax(0, 1fr)` 均分剩余宽度，不固定卡片宽度。
+- 每行等高，卡片使用统一的内部结构：头像、单行角色名称、聊天数量与原生操作按钮、最近聊天信息。
+- 角色名称独占一行；聊天数量与置顶/重命名/删除按钮同处一行；日期独占一行，避免被操作按钮挤压；聊天预览独占全宽并固定预留两行高度。
+- 消息数与文件大小放在预览下方的独立统计行，不再与聊天概要并排挤占预览宽度。
+- 没有最近聊天的角色仍保留日期占位、两行预览区域、统计区域与工具栏占位，避免卡片高度缩短。
 - 卡片上半区（头像、角色名、聊天数量）点击进入我们自己的角色详情页。
 - 卡片下半区（最近聊天日期、聊天预览）点击直达该角色最近一次聊天。
 - 最近聊天预览最多两行；显示日期、消息数、文件大小。
@@ -38,8 +43,10 @@
 
 ## 原生设置和原生能力
 
-- 欢迎首页顶部隐藏 SillyTavern Logo 和版本号，使用「角色画廊 / 角色详情 / 聊天文件」作为一级标题；原生显示/隐藏最近聊天、Recent Chats Settings 齿轮与画廊/原生视图切换仍保留。
+- 欢迎首页顶部隐藏大蜘蛛 Logo，但保留 SillyTavern 完整版本文字；画廊标题显示为「角色画廊 · SillyTavern 版本信息」，版本文字使用较小、低对比度样式，窄屏允许自然换行。角色详情与聊天文件页沿用同一版本标识。
+- 原生显示/隐藏最近聊天、Recent Chats Settings 齿轮与画廊/原生视图切换仍保留；切回原生最近聊天时恢复酒馆原有 Logo 与版本显示。
 - 返回按钮放在次级标题行，避免与页面标题挤在一起；原生快捷入口保留。
+- 顶部摘要只显示角色总数与分页位置；列数和行数只由下方设置控件表达，不重复显示。
 - 直接读取账号存储 `recentChatsSettings`：
   - `maxDisplayed`：传给 `POST /api/chats/recent` 的 `max`，决定用于最近聊天预览与排序的聊天文件数量。
   - `collapsedDisplayed`：仅由酒馆原生最近聊天列表使用，不再控制画廊显示数量。
@@ -53,7 +60,7 @@
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@952ae6e4a6fb608b18ecbe65206581ed5725866a/development/gallery-home/Freesia-Gallery-Home-0.2.1.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@16011f61b837e1a75ce3400b6d850fba562431b9/development/gallery-home/Freesia-Gallery-Home-0.2.2.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
