@@ -990,6 +990,12 @@
             }
             if (nativeDescription.rows) description.rows = nativeDescription.rows;
             if (nativeDescription.style && nativeDescription.style.cssText) description.style.cssText = nativeDescription.style.cssText;
+            if (typeof window.getComputedStyle === 'function') {
+                const nativeHeight = window.getComputedStyle(nativeDescription).getPropertyValue('height');
+                if (nativeHeight && nativeHeight !== 'auto' && nativeHeight !== '0px') {
+                    description.style.height = nativeHeight;
+                }
+            }
         }
 
         main.append(heading, descriptionLabel, description);
