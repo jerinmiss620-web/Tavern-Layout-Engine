@@ -4633,6 +4633,11 @@ body.tle-global-search-open { overflow: hidden !important; }
   gap: 8px;
   min-width: 0;
 }
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row > .flex-container {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+}
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-controls {
   display: flex;
   flex: 0 1 auto;
