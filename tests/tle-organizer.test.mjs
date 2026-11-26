@@ -67,6 +67,11 @@ assert.match(manager, /const manageGroupsToggle = quickButton\('', \(\) => setGr
 assert.ok(manager.includes("groupActions.append(newGroupToggle, autoGroupButton, manageGroupsToggle, renameGroupButton, deleteGroupsButton)"));
 assert.match(manager, /groupSelection\.hidden = true/);
 assert.match(manager, /groupSelection\.hidden = !managingGroups/);
+assert.ok(manager.includes("manageGroupsToggle.setAttribute('aria-pressed', String(managingGroups))"));
+assert.ok(manager.includes("manageGroupsToggle.title = managingGroups ? '完成分组管理' : '管理分组'"));
+assert.ok(manager.includes("if (icon) icon.className = 'fa-solid fa-folder-open'"));
+assert.doesNotMatch(manager, /icon\.className = managingGroups \? 'fa-solid fa-check'/);
+
 assert.ok(manager.includes("selectedGroupLabel = quickNode('small', '', '当前视图：')"));
 assert.ok(manager.includes("「全部项目」和「未分组」"));
 assert.ok(manager.includes("const renameGroupButton = quickButton('', () => beginRenameGroup(), 'menu_button tle-quick-icon-action')"));
