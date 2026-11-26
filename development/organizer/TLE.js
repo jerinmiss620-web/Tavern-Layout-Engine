@@ -2184,23 +2184,20 @@ var TLEBatchLibrary = (() => {
         this.cancelButton,
         this.button("\u5907\u4EFD\u4E0E\u6062\u590D", () => this.backups())
       );
-      this.ruleDetails = n("details");
+      this.ruleDetails = n("details", "tle-content-rule-details");
       this.ruleDetails.append(n("summary", "", "\u89C4\u5219\u7EC4\u5408\u4E0E\u9AD8\u7EA7\u9009\u9879"));
-      this.ruleDetails.append(this.button("\u6DFB\u52A0\u89C4\u5219", () => {
+      this.addRuleButton = this.button("\u6DFB\u52A0\u89C4\u5219", () => {
         if (this.rules.length >= 200) throw Error("\u6700\u591A 200 \u6761\u89C4\u5219\u3002");
         this.rules.push({ find: "", replace: "" });
         this.invalidate();
         this.renderRules();
-      }));
-      this.ruleRows = n("div");
-      this.ruleDetails.append(this.ruleRows);
-      const combos = n("div", "flex-container flexWrap");
-      this.comboName = n("input", "text_pole");
+      });
+      this.ruleRows = n("div", "tle-content-rule-list");
+      this.comboCreateRow = n("div", "tle-content-rule-toolbar flex-container flexWrap alignItemsCenter");
+      this.comboName = n("input", "text_pole flex1");
       this.comboName.placeholder = "\u89C4\u5219\u7EC4\u5408\u540D\u79F0";
       this.comboName.setAttribute("aria-label", "\u89C4\u5219\u7EC4\u5408\u540D\u79F0");
-      this.comboSelect = n("select", "text_pole");
-      this.comboSelect.setAttribute("aria-label", "\u89C4\u5219\u7EC4\u5408");
-      combos.append(this.comboName, this.button("\u4FDD\u5B58\u7EC4\u5408", async () => {
+      this.saveComboButton = this.button("\u4FDD\u5B58\u7EC4\u5408", async () => {
         validateRules(this.rules, { searchOnly: true });
         const name = this.comboName.value.trim();
         if (!name || ["__proto__", "prototype", "constructor"].includes(name)) throw Error("\u8BF7\u8F93\u5165\u6709\u6548\u7684\u89C4\u5219\u7EC4\u5408\u540D\u79F0\u3002");
@@ -2208,7 +2205,12 @@ var TLEBatchLibrary = (() => {
         await this.persist();
         this.renderCombinations();
         this.message("\u89C4\u5219\u7EC4\u5408\u5DF2\u4FDD\u5B58\u3002");
-      }), this.comboSelect, this.button("\u8F7D\u5165\u7EC4\u5408", async () => {
+      });
+      this.comboCreateRow.append(this.addRuleButton, this.comboName, this.saveComboButton);
+      this.comboManageRow = n("div", "tle-content-rule-toolbar flex-container flexWrap alignItemsCenter");
+      this.comboSelect = n("select", "text_pole flex1");
+      this.comboSelect.setAttribute("aria-label", "\u89C4\u5219\u7EC4\u5408");
+      this.loadComboButton = this.button("\u8F7D\u5165\u7EC4\u5408", async () => {
         const rules = this.combinations[this.comboSelect.value];
         if (!rules) throw Error("\u8BF7\u9009\u62E9\u7EC4\u5408\u3002");
         validateRules(rules, { searchOnly: true });
@@ -2216,21 +2218,24 @@ var TLEBatchLibrary = (() => {
         this.syncInputs();
         this.invalidate();
         await this.persist();
-      }), this.button("\u5220\u9664\u7EC4\u5408", async () => {
+      });
+      this.deleteComboButton = this.button("\u5220\u9664\u7EC4\u5408", async () => {
         delete this.combinations[this.comboSelect.value];
         await this.persist();
         this.renderCombinations();
-      }));
-      this.paths = n("textarea", "text_pole");
+      });
+      this.comboManageRow.append(this.comboSelect, this.loadComboButton, this.deleteComboButton);
+      this.paths = n("textarea", "text_pole tle-content-rule-paths");
       this.paths.rows = 2;
       this.paths.placeholder = '{"user/files/\u6587\u4EF6.json":[["content"]]}';
-      this.paths.setAttribute("aria-label", "\u6307\u5B9A JSON/YAML \u6587\u4EF6\u5141\u8BB8\u4FEE\u6539\u7684\u5B57\u6BB5\u8DEF\u5F84");
+      this.paths.setAttribute("aria-label", "\u6307\u5B9A JSON/YAML 文件允许修改的字段路径");
       this.paths.addEventListener("input", () => {
         this.invalidate();
         void this.persist().catch(() => {
         });
       });
-      this.ruleDetails.append(combos, n("small", "", "JSON/YAML \u4EC5\u626B\u63CF\u660E\u786E\u6307\u5B9A\u8DEF\u5F84\uFF1B\u672A\u77E5\u5B57\u6BB5\u4E0D\u4F1A\u9012\u5F52\u4FEE\u6539\u3002\u666E\u901A\u6587\u672C\u89C4\u5219\u533A\u5206\u5927\u5C0F\u5199\uFF0C\u91CD\u53E0\u4F18\u5148\u957F\u5339\u914D\uFF0C\u540C\u957F\u5EA6\u6309\u89C4\u5219\u987A\u5E8F\u3002"), this.paths);
+      this.ruleHelp = n("small", "tle-content-rule-help", "JSON/YAML 仅扫描明确指定路径；未知字段不会递归修改。普通文本规则区分大小写，重叠优先长匹配，同长度按规则顺序。");
+      this.ruleDetails.append(this.comboCreateRow, this.ruleRows, this.comboManageRow, this.ruleHelp, this.paths);
       this.selectionTools = n("div", "flex-container flexWrap");
       this.selectionTools.append(this.button("\u5168\u9009\u5F53\u524D\u7ED3\u679C", () => this.selectAll(true)), this.button("\u53D6\u6D88\u5168\u9009", () => this.selectAll(false)));
       this.confirm = n("div", "tle-quick-transfer-confirm");
@@ -2333,8 +2338,8 @@ var TLEBatchLibrary = (() => {
     renderRules() {
       this.ruleRows.replaceChildren();
       this.rules.slice(1).forEach((rule, i) => {
-        const row = this.node("div", "tle-content-rule flex-container");
-        const find = this.node("input", "text_pole"), replace = this.node("input", "text_pole");
+        const row = this.node("div", "tle-content-rule flex-container flexWrap alignItemsCenter");
+        const find = this.node("input", "text_pole flex1"), replace = this.node("input", "text_pole flex1");
         find.type = replace.type = "text";
         find.value = rule.find;
         replace.value = rule.replace;
@@ -6041,6 +6046,56 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         gap: 4px;
         white-space: nowrap;
       }
+      .tle-quick-manager .tle-content-rule-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-content-rule-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-content-rule-toolbar > .text_pole {
+        flex: 1 1 12rem;
+        min-width: 0;
+        width: auto;
+      }
+      .tle-quick-manager .tle-content-rule-toolbar > button {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+        white-space: nowrap;
+      }
+      .tle-quick-manager .tle-content-rule-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-content-rule {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-content-rule > .text_pole {
+        flex: 1 1 12rem;
+        min-width: 0;
+        width: auto;
+      }
+      .tle-quick-manager .tle-content-rule > button {
+        flex: 0 0 auto;
+        width: auto;
+        white-space: nowrap;
+      }
+      .tle-quick-manager .tle-content-rule-help { display: block; min-width: 0; }
+      .tle-quick-manager .tle-content-rule-paths { width: 100%; min-width: 0; box-sizing: border-box; }
+
       @media screen and (min-width: 1001px) {
         .tle-quick-manager .tle-organizer-workspace {
           display: grid;
@@ -16771,7 +16826,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.246',
+    version: '0.3.247',
     ready: false,
     destroy,
     state,

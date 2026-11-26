@@ -31,12 +31,11 @@ export class OrganizerContent {
     mount() {
         const n = this.node;
         this.searchRow = n('div', 'tle-content-search-row flex-container');
-        this.target = n('div', 'flex-container'); this.target.setAttribute('role', 'group'); this.target.setAttribute('aria-label', '搜索方式');
-        for (const [value, text] of [['name', '资源名称'], ['content', '查找与替换']]) {
-            const label = n('label', 'checkbox_label'), radio = n('input'); radio.type = 'radio'; radio.name = 'tle-organizer-search-mode'; radio.value = value; radio.checked = value === this.mode;
-            radio.addEventListener('change', () => { if (radio.checked) void this.run(() => this.setMode(value)); });
-            label.append(radio, n('span', '', text)); this.target.append(label);
-        }
+        this.target = n('label', 'checkbox_label');
+        this.modeToggle = n('input', 'checkbox'); this.modeToggle.type = 'checkbox'; this.modeToggle.checked = this.active;
+        this.modeToggle.setAttribute('aria-label', '查找和替换');
+        this.modeToggle.addEventListener('change', () => { void this.run(() => this.setMode(this.modeToggle.checked ? 'content' : 'name')); });
+        this.target.append(this.modeToggle, n('span', '', '查找和替换'));
         this.replace = n('input', 'text_pole flex1'); this.replace.type = 'text'; this.replace.size = 1; this.replace.placeholder = '留空删除匹配文本'; this.replace.setAttribute('aria-label', '替换为'); this.replace.hidden = true;
         this.replace.addEventListener('input', () => { this.rules[0].replace = this.replace.value; this.invalidate(); void this.persist().catch(() => {}); });
         this.findRow = n('div', 'flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px');
@@ -58,24 +57,31 @@ export class OrganizerContent {
         this.cancelButton = this.h.button('取消扫描', () => { this.cancelled = true; if (this.jobId) void this.api('cancel', { id: this.jobId }).catch(e => this.message(e.message)); }); this.cancelButton.hidden = true;
         actions.append(this.scopeSelect, this.cancelButton,
             this.button('备份与恢复', () => this.backups()));
-        this.ruleDetails = n('details'); this.ruleDetails.append(n('summary', '', '规则组合与高级选项'));
-        this.ruleDetails.append(this.button('添加规则', () => { if (this.rules.length >= 200) throw Error('最多 200 条规则。'); this.rules.push({ find: '', replace: '' }); this.invalidate(); this.renderRules(); }));
-        this.ruleRows = n('div'); this.ruleDetails.append(this.ruleRows);
-        const combos = n('div', 'flex-container flexWrap');
-        this.comboName = n('input', 'text_pole'); this.comboName.placeholder = '规则组合名称'; this.comboName.setAttribute('aria-label', '规则组合名称');
-        this.comboSelect = n('select', 'text_pole'); this.comboSelect.setAttribute('aria-label', '规则组合');
-        combos.append(this.comboName, this.button('保存组合', async () => {
+        this.ruleDetails = n('details', 'tle-content-rule-details');
+        this.ruleDetails.append(n('summary', '', '规则组合与高级选项'));
+        this.addRuleButton = this.button('添加规则', () => { if (this.rules.length >= 200) throw Error('最多 200 条规则。'); this.rules.push({ find: '', replace: '' }); this.invalidate(); this.renderRules(); });
+        this.ruleRows = n('div', 'tle-content-rule-list');
+        this.comboCreateRow = n('div', 'tle-content-rule-toolbar flex-container flexWrap alignItemsCenter');
+        this.comboName = n('input', 'text_pole flex1'); this.comboName.placeholder = '规则组合名称'; this.comboName.setAttribute('aria-label', '规则组合名称');
+        this.saveComboButton = this.button('保存组合', async () => {
             validateRules(this.rules, { searchOnly: true }); const name = this.comboName.value.trim();
             if (!name || ['__proto__', 'prototype', 'constructor'].includes(name)) throw Error('请输入有效的规则组合名称。');
             this.combinations[name] = structuredClone(this.rules); await this.persist(); this.renderCombinations(); this.message('规则组合已保存。');
-        }), this.comboSelect, this.button('载入组合', async () => {
+        });
+        this.comboCreateRow.append(this.addRuleButton, this.comboName, this.saveComboButton);
+        this.comboManageRow = n('div', 'tle-content-rule-toolbar flex-container flexWrap alignItemsCenter');
+        this.comboSelect = n('select', 'text_pole flex1'); this.comboSelect.setAttribute('aria-label', '规则组合');
+        this.loadComboButton = this.button('载入组合', async () => {
             const rules = this.combinations[this.comboSelect.value]; if (!rules) throw Error('请选择组合。');
             validateRules(rules, { searchOnly: true }); this.rules = structuredClone(rules); this.syncInputs(); this.invalidate(); await this.persist();
-        }), this.button('删除组合', async () => { delete this.combinations[this.comboSelect.value]; await this.persist(); this.renderCombinations(); }));
-        this.paths = n('textarea', 'text_pole'); this.paths.rows = 2;
+        });
+        this.deleteComboButton = this.button('删除组合', async () => { delete this.combinations[this.comboSelect.value]; await this.persist(); this.renderCombinations(); });
+        this.comboManageRow.append(this.comboSelect, this.loadComboButton, this.deleteComboButton);
+        this.paths = n('textarea', 'text_pole tle-content-rule-paths'); this.paths.rows = 2;
         this.paths.placeholder = '{"user/files/文件.json":[["content"]]}'; this.paths.setAttribute('aria-label', '指定 JSON/YAML 文件允许修改的字段路径');
         this.paths.addEventListener('input', () => { this.invalidate(); void this.persist().catch(() => {}); });
-        this.ruleDetails.append(combos, n('small', '', 'JSON/YAML 仅扫描明确指定路径；未知字段不会递归修改。普通文本规则区分大小写，重叠优先长匹配，同长度按规则顺序。'), this.paths);
+        this.ruleHelp = n('small', 'tle-content-rule-help', 'JSON/YAML 仅扫描明确指定路径；未知字段不会递归修改。普通文本规则区分大小写，重叠优先长匹配，同长度按规则顺序。');
+        this.ruleDetails.append(this.comboCreateRow, this.ruleRows, this.comboManageRow, this.ruleHelp, this.paths);
         this.selectionTools = n('div', 'flex-container flexWrap');
         this.selectionTools.append(this.button('全选当前结果', () => this.selectAll(true)), this.button('取消全选', () => this.selectAll(false)));
         this.confirm = n('div', 'tle-quick-transfer-confirm'); this.confirm.hidden = true;
@@ -93,7 +99,7 @@ export class OrganizerContent {
         if (this.busy) return;
         if (this.active) this.rules[0].find = this.h.search.value; else this.nameQuery = this.h.search.value;
         this.mode = mode === 'content' ? 'content' : 'name';
-        for (const radio of this.target.querySelectorAll('input')) radio.checked = radio.value === this.mode;
+        this.modeToggle.checked = this.active;
         this.controls.hidden = this.replace.hidden = this.replaceRow.hidden = this.findButton.hidden = !this.active;
         this.h.setContentMode(this.active);
         this.h.search.value = this.active ? this.rules[0].find : this.nameQuery;
@@ -137,8 +143,8 @@ export class OrganizerContent {
     renderRules() {
         this.ruleRows.replaceChildren();
         this.rules.slice(1).forEach((rule, i) => {
-            const row = this.node('div', 'tle-content-rule flex-container');
-            const find = this.node('input', 'text_pole'), replace = this.node('input', 'text_pole');
+            const row = this.node('div', 'tle-content-rule flex-container flexWrap alignItemsCenter');
+            const find = this.node('input', 'text_pole flex1'), replace = this.node('input', 'text_pole flex1');
             find.type = replace.type = 'text'; find.value = rule.find; replace.value = rule.replace;
             find.setAttribute('aria-label', `规则 ${i + 2} 查找内容`); replace.setAttribute('aria-label', `规则 ${i + 2} 替换内容`);
             find.addEventListener('input', () => { rule.find = find.value; this.invalidate(); void this.persist().catch(() => {}); });

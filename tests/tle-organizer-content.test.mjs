@@ -150,12 +150,47 @@ test('upstream compatibility detects changed preview context, and original serve
     await f.c.scan();await f.c.preview();f.write('characters/A.json',{data:{description:'concurrent value'}});
     await f.c.apply();assert.match(f.read('characters/A.json'),/concurrent value/);assert.match(f.resume(),/失败/);
 });
-test('visible search mode and adjacent native controls retain one shared search field', t=>{
-    const f=fixture(t);
-    assert.match(f.c.target.textContent,/查找与替换/);assert.equal(f.c.target.tagName,'DIV');
-    assert.equal(f.c.findButton.parentElement,f.c.findRow);assert.equal(f.h.searchWrap.parentElement,f.c.findRow);
+test('native content-search checkbox and adjacent controls retain one shared search field', t => {
+    const f = fixture(t);
+    assert.match(f.c.target.textContent,/查找和替换/);
+    assert.equal(f.c.target.tagName,'LABEL');
+    assert.ok(f.c.target.classList.contains('checkbox_label'));
+    assert.equal(f.c.modeToggle.type,'checkbox');
+    assert.equal(f.c.modeToggle.parentElement,f.c.target);
+    assert.equal(f.c.findButton.parentElement,f.c.findRow);
+    assert.equal(f.h.searchWrap.parentElement,f.c.findRow);
     assert.equal(f.c.previewButton.parentElement,f.c.replaceRow);
+    assert.equal(f.d.querySelectorAll('input[type=search]').length,1);
 });
+test('rule combinations use two compact toolbars; only the JSON path editor spans the full row', t => {
+    const f = fixture(t), c = f.c;
+    assert.equal(c.addRuleButton.parentElement,c.comboCreateRow);
+    assert.equal(c.comboName.parentElement,c.comboCreateRow);
+    assert.equal(c.saveComboButton.parentElement,c.comboCreateRow);
+    assert.equal(c.comboSelect.parentElement,c.comboManageRow);
+    assert.equal(c.loadComboButton.parentElement,c.comboManageRow);
+    assert.equal(c.deleteComboButton.parentElement,c.comboManageRow);
+    assert.equal(c.comboCreateRow.parentElement,c.ruleDetails);
+    assert.equal(c.ruleRows.parentElement,c.ruleDetails);
+    assert.equal(c.comboManageRow.parentElement,c.ruleDetails);
+    assert.ok(c.comboCreateRow.classList.contains('flexWrap'));
+    assert.ok(c.comboManageRow.classList.contains('flexWrap'));
+    assert.ok(c.comboName.classList.contains('flex1'));
+    assert.ok(c.comboSelect.classList.contains('flex1'));
+    assert.equal(c.paths.tagName,'TEXTAREA');
+    assert.ok(c.paths.classList.contains('tle-content-rule-paths'));
+    c.rules = [{find:'',replace:''},{find:'extra',replace:'value'}];
+    c.renderRules();
+    const ruleRow = c.ruleRows.firstElementChild;
+    assert.ok(ruleRow.classList.contains('flexWrap'));
+    assert.ok(ruleRow.children[0].classList.contains('flex1'));
+    assert.ok(ruleRow.children[1].classList.contains('flex1'));
+    const runtime = fs.readFileSync('development/organizer/TLE.js','utf8');
+    assert.match(runtime,/\.tle-content-rule-toolbar > \.text_pole/);
+    assert.match(runtime,/\.tle-content-rule-toolbar > button/);
+    assert.match(runtime,/\.tle-content-rule-paths \{ width: 100%/);
+});
+
 test('TT capabilities exclude unsupported types and descriptor resolves stable world/persona IDs',()=>{
     const inv={supportedScopes:['persona','chats','character','greetings','world'],resources:[],owners:[],scopes:{}};
     assert.deepEqual(resolveScope(inv,'all','preset',[],new Set()).scopes,inv.supportedScopes);
