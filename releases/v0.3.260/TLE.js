@@ -8048,7 +8048,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function withQuickWorldInfoControl(action) {
     const connected = quickSelect('world_info');
     if (connected) return action(connected);
-    const panel = HOST_DOC.querySelector('#WorldInfo');
+    const target = HOST_DOC.querySelector('#WorldInfo');
+    const panel = target?.classList.contains('drawer-content')
+      ? target
+      : target?.closest('.drawer')?.querySelector(':scope > .drawer-content');
     const runtime = HOST_WIN.__TAURITAVERN_PANEL_RUNTIME__;
     const slot = panel?.dataset.ttRuntimeSlotId;
     if (!slot || typeof runtime?.setVisible !== 'function' || typeof runtime?.reconcile !== 'function') {
@@ -8383,14 +8386,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         controlAvailable = Boolean(select);
         return select ? quickWorldInfoSelectItems() : [];
       });
-      const initial = read();
-      if (controlAvailable || !mount) return initial;
-      openNativePanelForInfo('worldInfo');
-      for (let i = 0; i < 20 && !state.destroyed && !signal.aborted && !quickSelect('world_info'); i++) {
+      let latest = read();
+      if (!controlAvailable && !mount) return latest;
+      if (!controlAvailable) openNativePanelForInfo('worldInfo');
+      for (let i = 0; i < 20 && !state.destroyed && !signal.aborted; i++) {
+        if (latest.length) return latest;
         await new Promise(resolve => HOST_WIN.setTimeout(resolve, 50));
+        latest = read();
       }
       if (state.destroyed || signal.aborted) return [];
-      return read();
+      return latest;
     }
     const context = HOST_WIN.SillyTavern?.getContext?.() || {};
     if (id === 'character') {
@@ -13391,7 +13396,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (isWorldInfo) line.title = '可多选；应用方案时会按此清单同步全局世界书';
     return { line, toggle, select, choices, saved };
   }
-    async function companionOpenEditor(planId = '', duplicate = false, replaceCurrent = false) {
+  async function companionOpenEditor(planId = '', duplicate = false, replaceCurrent = false) {
     const role = companionCurrentRole();
     if (!role) { companionNotice('warning', '请先进入单角色聊天。'); return; }
     if (companionRuntime.applying) return;
@@ -13609,14 +13614,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const errorText = String(error?.message || '').trim();
     if (errorText) return errorText;
     if (field.id === 'worldInfo') {
-      const select = quickSelect('world_info');
+      const select = withQuickWorldInfoControl(control => control);
       if (!select) return '全局世界书控件尚未挂载；TT 原生世界书面板暂未就绪';
       if (!select.multiple) return '当前全局世界书控件不是多选控件，无法安全同步整套清单';
       if (select.disabled) return '全局世界书控件当前不可用';
       return '方案中的部分全局世界书当前不存在或不可用';
     }
     if (field.id === 'theme') {
-      const select = quickSelect('themes');
+      const select = withQuickThemeControl(control => control);
       if (!select) return 'UI 主题控件尚未挂载；TT 用户设置面板暂未就绪';
       if (![...select.options].some(option => option.value)) return 'UI 主题列表尚未加载或为空';
       return '方案绑定的 UI 主题当前不存在或不可用';
@@ -13702,6 +13707,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
         try {
           if (field.id === 'worldInfo') {
+            await quickCatalog('worldInfo', false, state.abort.signal);
+            if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
             const result = companionApplyWorldInfo(target);
             finished++;
             if (result.missing.length) {
