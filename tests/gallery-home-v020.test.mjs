@@ -55,6 +55,8 @@ function createContext(calls) {
             },
         ],
         groups: [],
+        POPUP_TYPE: { INPUT: 1, CONFIRM: 2 },
+        callGenericPopup: async (message, type, inputValue) => type === 1 ? calls.popupInput : calls.popupConfirm,
         accountStorage: {
             getItem: key => key === 'recentChatsSettings'
                 ? JSON.stringify({ maxDisplayed: 15, collapsedDisplayed: 1 })
@@ -73,8 +75,8 @@ function createContext(calls) {
         openCharacterChat: async name => { calls.opened.push(name); },
         getCurrentChatId: () => undefined,
         saveSettingsDebounced: () => {},
-        eventSource: { on: () => {}, off: () => {} },
-        eventTypes: {},
+        eventSource: { on: () => {}, off: () => {}, emit: async (type, data) => { calls.emitted.push({ type, data }); } },
+        eventTypes: { CHAT_RENAMED: 'CHAT_RENAMED', CHAT_DELETED: 'CHAT_DELETED' },
     };
 }
 
@@ -96,7 +98,7 @@ function allCharacterChats() {
 
 function setup() {
     const dom = new JSDOM(createHomeMarkup(), { url: 'http://localhost/', runScripts: 'outside-only' });
-    const calls = { selected: [], opened: [], nativeOpened: 0, pinned: 0 };
+    const calls = { selected: [], opened: [], nativeOpened: 0, pinned: 0, popupInput: 'A-renamed', popupConfirm: true, renamed: null, deleted: null, emitted: [] };
     const context = createContext(calls);
     dom.window.SillyTavern = { getContext: () => context };
     dom.window.fetch = async (url, options = {}) => {
@@ -109,6 +111,18 @@ function setup() {
         }
         if (url === '/api/chats/search') {
             return { ok: true, json: async () => allCharacterChats() };
+        }
+        if (url === '/api/chats/rename') {
+            calls.renamed = JSON.parse(options.body);
+            return { ok: true, json: async () => ({}) };
+        }
+        if (url === '/api/chats/delete') {
+            calls.deleted = JSON.parse(options.body);
+            return { ok: true, json: async () => ({}) };
+        }
+        if (url === '/api/characters/merge-attributes') {
+            calls.merged = JSON.parse(options.body);
+            return { ok: true, json: async () => ({}) };
         }
         throw new Error('Unexpected request: ' + url);
     };
@@ -143,6 +157,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(cards[0].querySelector('.freesia-gallery-chat-count').textContent, /2 个聊天/);
     assert.match(cards[0].querySelector('.freesia-gallery-card-latest .chatMessage').textContent, /latest preview/);
     assert.equal(cards[0].classList.contains('recentChat'), true);
+    assert.equal(cards[0].querySelector('.chatActions .pinChat'), null, 'home gallery must not expose pin actions');
     assert.match(css, /grid-template-columns: repeat\(var\(--freesia-gallery-columns, 4\), minmax\(0, 1fr\)\)/);
     assert.match(css, /grid-auto-rows: 1fr; align-items: stretch/);
     assert.match(css, /gap: clamp\(5px, 0\.7vw, 8px\)/);
@@ -189,6 +204,27 @@ test('renders a bounded portrait gallery with native card structure and independ
     dom.window.close();
 });
 
+test('limits gallery to at most three columns at viewport widths of 480px and below', async () => {
+    const { dom, api } = setup();
+    Object.defineProperty(dom.window, 'innerWidth', { value: 480, configurable: true });
+    await api.setLayoutSettings({ columns: 4, rows: 2 });
+    const panel = dom.window.document.querySelector('.welcomePanel');
+    const select = panel.querySelector('[aria-label="每行列数"]');
+    const four = select.querySelector('option[value="4"]');
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '3');
+    assert.equal(select.value, '3');
+    assert.equal(four.disabled, true);
+
+    Object.defineProperty(dom.window, 'innerWidth', { value: 481, configurable: true });
+    dom.window.dispatchEvent(new dom.window.Event('resize'));
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '4');
+    assert.equal(select.value, '4');
+    assert.equal(four.disabled, false);
+
+    api.stop();
+    dom.window.close();
+});
+
 test('detail page reuses native recent-chat rows and a readonly native text field; management jumps to the native editor', async () => {
     const { dom, api, calls } = setup();
     await api.refresh();
@@ -205,14 +241,15 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.equal(panel.querySelector('.freesia-gallery-detail-name').textContent, 'Alpha');
     assert.match(panel.querySelector('.freesia-gallery-lorebook').textContent, /Alpha Lorebook/);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-lorebook').textContent, /Char's lorebook/);
-    assert.equal(panel.querySelector('.freesia-gallery-detail-heading .freesia-gallery-manage'), null);
+    assert.ok(panel.querySelector('.freesia-gallery-detail-heading .freesia-gallery-manage'));
     const descriptionHeader = panel.querySelector('.freesia-gallery-description-header');
     assert.ok(descriptionHeader);
+    assert.equal(descriptionHeader.children.length, 1);
     assert.equal(descriptionHeader.children[0].classList.contains('freesia-gallery-description-label'), true);
-    assert.equal(descriptionHeader.children[1].classList.contains('freesia-gallery-manage'), true);
     assert.match(descriptionHeader.textContent, /角色描述/);
     const detailCss = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
-    assert.match(detailCss, /\.freesia-gallery-description-header \{ display: flex; align-items: center; justify-content: space-between/);
+    assert.match(detailCss, /\.freesia-gallery-description-header \{ display: block/);
+    assert.match(detailCss, /\.freesia-gallery-detail-heading \.freesia-gallery-manage/);
 
     assert.match(detailCss, /\.freesia-gallery-detail-hero \{ display: grid;[^}]*align-items: stretch/);
     assert.match(detailCss, /\.freesia-gallery-detail-avatar \{ display: block; align-self: stretch;[^}]*aspect-ratio: auto !important/);
@@ -225,8 +262,21 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     const sessions = panel.querySelectorAll('.freesia-gallery-session-card');
     assert.equal(sessions.length, 3);
     assert.ok(sessions[0].classList.contains('recentChat'));
+    assert.ok(sessions[0].querySelector('.chatActions .pinChat'));
+    assert.ok(sessions[0].querySelector('.chatActions .renameChat'));
+    assert.ok(sessions[0].querySelector('.chatActions .deleteChat'));
     assert.ok(panel.querySelector('.freesia-gallery-session-list').classList.contains('recentChatList'));
     assert.match(panel.querySelector('.freesia-gallery-detail-chat-count').textContent, /3 个聊天/);
+
+    const firstBeforePin = sessions[0].dataset.file;
+    const secondBeforePin = sessions[1].dataset.file;
+    sessions[1].querySelector('.pinChat').click();
+    const pinnedSessions = panel.querySelectorAll('.freesia-gallery-session-card');
+    assert.equal(pinnedSessions[0].dataset.file, secondBeforePin);
+    assert.equal(pinnedSessions[0].querySelector('.pinChat').classList.contains('active'), true);
+    assert.notEqual(pinnedSessions[0].dataset.file, firstBeforePin);
+    const pinnedStorage = JSON.parse(context.accountStorage.getItem('freesiaGalleryDetailPinnedChats'));
+    assert.ok(Object.values(pinnedStorage).some(item => item.avatar === 'a.png' && item.chatName === secondBeforePin));
 
     panel.querySelector('.freesia-gallery-manage').click();
     await new Promise(resolve => dom.window.setTimeout(resolve, 0));
@@ -234,6 +284,31 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.equal(calls.selected[0].index, 0);
     assert.equal(calls.selected[0].options.switchMenu, true);
     assert.equal(calls.opened.length, 0);
+
+    api.stop();
+    dom.window.close();
+});
+
+test('detail rename and delete actions use native chat endpoints and update the detail list', async () => {
+    const { dom, api, calls } = setup();
+    await api.refresh();
+    await api.openDetail('a.png');
+    const panel = dom.window.document.querySelector('.welcomePanel');
+
+    const first = panel.querySelector('.freesia-gallery-session-card');
+    first.querySelector('.renameChat').click();
+    await new Promise(resolve => dom.window.setTimeout(resolve, 0));
+    assert.equal(calls.renamed.avatar_url, 'a.png');
+    assert.equal(calls.renamed.original_file, 'A-new.jsonl');
+    assert.equal(calls.renamed.renamed_file, 'A-renamed.jsonl');
+    assert.equal(panel.querySelector('.freesia-gallery-session-card').dataset.file, 'A-renamed');
+
+    const second = panel.querySelector('.freesia-gallery-session-card');
+    second.querySelector('.deleteChat').click();
+    await new Promise(resolve => dom.window.setTimeout(resolve, 0));
+    assert.equal(calls.deleted.avatar_url, 'a.png');
+    assert.equal(calls.deleted.chatfile, 'A-old.jsonl');
+    assert.equal(panel.querySelectorAll('.freesia-gallery-session-card').length, 2);
 
     api.stop();
     dom.window.close();
