@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.253
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.254
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -8814,7 +8814,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const groupManagementHint = quickNode(
       'small',
       'tle-quick-group-management-hint',
-      '仅可操作自定义分组；「全部项目」和「未分组」是系统目录，不可重命名或删除。勾选自定义分组可批量删除。'
+      '重命名：点选下方一个自定义分组名称；批量删除：勾选分组右侧方框。仅限自定义分组，「全部项目」和「未分组」不可操作。'
     );
     const selectedGroupSummary = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-selection-summary');
     const selectedGroupLabel = quickNode('small', '', '当前目录：');
@@ -8824,18 +8824,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const groupManagementActions = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-management-actions');
     groupManagementActions.setAttribute('aria-label', '分组管理操作');
-    const renameGroupButton = quickButton('', () => beginRenameGroup(), 'menu_button tle-quick-icon-action');
+    const renameGroupButton = quickButton('重命名', () => beginRenameGroup(), 'menu_button');
+    renameGroupButton.classList.remove('menu_button_icon');
     renameGroupButton.title = '重命名当前自定义分组';
     renameGroupButton.setAttribute('aria-label', '重命名当前分组');
-    const renameGroupIcon = quickNode('i', 'fa-solid fa-pen-to-square');
-    renameGroupIcon.setAttribute('aria-hidden', 'true');
-    renameGroupButton.append(renameGroupIcon);
-    const deleteGroupsButton = quickButton('', () => beginDeleteGroups(), 'menu_button tle-quick-icon-action');
+    renameGroupButton.setAttribute('aria-description', '先点选下方一个自定义分组名称，再点击此按钮。');
+    const deleteGroupsButton = quickButton('批量删除', () => beginDeleteGroups(), 'menu_button');
+    deleteGroupsButton.classList.remove('menu_button_icon');
     deleteGroupsButton.title = '批量删除已勾选的自定义分组';
     deleteGroupsButton.setAttribute('aria-label', '批量删除已选分组');
-    const deleteGroupsIcon = quickNode('i', 'fa-solid fa-trash-can');
-    deleteGroupsIcon.setAttribute('aria-hidden', 'true');
-    deleteGroupsButton.append(deleteGroupsIcon);
+    deleteGroupsButton.setAttribute('aria-description', '勾选分组右侧方框后，再点击此按钮。');
+    groupManagementActions.append(renameGroupButton, deleteGroupsButton);
 
     const renameInput = quickNode('input', 'text_pole');
     renameInput.placeholder = '输入新的分组名称';
@@ -11066,14 +11065,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.253 · 分组目录直接选择，重命名与删除跟随当前分组</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.254 · 分组目录直接选择，重命名与删除跟随当前分组</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.253</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.254</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -17174,7 +17173,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.253',
+    version: '0.3.254',
     ready: false,
     destroy,
     state,
@@ -17625,5 +17624,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.253 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.254 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
