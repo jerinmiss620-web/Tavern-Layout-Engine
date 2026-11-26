@@ -6,9 +6,9 @@ const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8'
 const manifest = JSON.parse(read('channels/test.json'));
 const source = read(manifest.release.source_path);
 
-assert.equal(manifest.release.version, '0.3.274');
-assert.equal(manifest.latest_version, '0.3.274');
-assert.ok(source.includes("version: '0.3.274'"));
+assert.equal(manifest.release.version, '0.3.275');
+assert.equal(manifest.latest_version, '0.3.275');
+assert.ok(source.includes("version: '0.3.275'"));
 new vm.Script(source, { filename: 'TLE v' + manifest.release.version });
 
 function section(text, startMarker, endMarker) {
@@ -73,6 +73,21 @@ assert.equal(helpers.chatFadeSelectBackgroundMode(false, { style: solid }), 'pag
   'a native page background is selected when no wallpaper exists');
 assert.equal(helpers.chatFadeSelectBackgroundMode(false, null), 'none',
   'no background source must not create a fake mirror');
+assert.equal(helpers.chatFadeSelectBackgroundMode(false, { style: solid }, true), 'page',
+  'an explicit solid body/html background wins over a color-only #bg1');
+assert.equal(helpers.chatFadeSelectBackgroundMode(false, null, true), 'wallpaper',
+  'a color-only #bg1 remains usable when the page has no painted background');
+assert.deepEqual(
+  [
+    helpers.chatFadeSelectBackgroundMode(true, { style: gradient }, true),
+    helpers.chatFadeSelectBackgroundMode(true, { style: solid }, true),
+    helpers.chatFadeSelectBackgroundMode(false, { style: solid }, true),
+    helpers.chatFadeSelectBackgroundMode(false, null, true),
+    helpers.chatFadeSelectBackgroundMode(false, null, false),
+  ],
+  ['page', 'wallpaper', 'page', 'wallpaper', 'none'],
+  'CSS gradient → real wallpaper → CSS solid → fallback tint → none must transition deterministically'
+);
 
 const bind = section(source, '  function bindChatFadeWallpaperSync(', '  function createChatFadeMirror(');
 assert.doesNotMatch(bind, /if\s*\(!bg1\)\s*return;/,
@@ -81,6 +96,14 @@ assert.match(bind, /new Set\(\[HOST_DOC\.documentElement, HOST_DOC\.body\]/,
   'observe root page elements independently from #bg1');
 assert.match(bind, /if \(ancestor === HOST_DOC\.body\) options\.childList = true;/,
   'notice a #bg1 layer being added or replaced at the body root');
+assert.match(bind, /if \(hostSurface\) themeAncestors\.add\(hostSurface\)/,
+  'observe #sheld even without a current #bg1');
+assert.match(bind, /if \(ancestor === hostSurface\) options\.childList = true;/,
+  'notice nested wallpaper layer insertions within #sheld');
+assert.match(bind, /containsHostSurfaceNode/,
+  'observe #sheld replacement to reattach background listeners');
+assert.match(bind, /state\.chatFade\.themeSurface === hostSurface/,
+  'skip rebinding only when the host surface has not changed');
 assert.match(bind, /HOST_DOC\.head/,
   'watch stylesheet changes so a theme CSS background is re-detected');
 assert.match(bind, /if \(bg1\) \{/,
@@ -89,7 +112,9 @@ assert.match(bind, /if \(bg1\) \{/,
 const create = section(source, '  function createChatFadeMirror() {', '  function scheduleChatFadeWallpaperSync() {');
 assert.match(create, /const pageBackground = getChatFadePageBackground\(\)/);
 assert.match(create, /const bgLayerVisible = Boolean\(/);
-assert.match(create, /chatFadeSelectBackgroundMode\(hasWallpaperSource, pageBackground\)/);
+assert.match(create, /chatFadeSelectBackgroundMode\(hasWallpaperImage, pageBackground, hasWallpaperSurface\)/);
+assert.match(create, /const hasWallpaperImage = bgLayerVisible && \(hasBgImage \|\| hasSourceImg\)/);
+assert.match(create, /const hasWallpaperSurface = hasWallpaperImage \|\| \(bgLayerVisible && hasBgColor\)/);
 assert.match(create, /if \(backgroundMode === 'page'\)/);
 assert.match(create, /renderMode = 'page-background'/);
 assert.match(create, /renderMode = 'page-background-mask-only'/);
@@ -109,6 +134,52 @@ assert.doesNotMatch(schedule, /if\s*\(!currentBg\)/,
   'the sync scheduler must not stop merely because #bg1 is absent');
 
 assert.match(source, /backgroundSource: state\.chatFade\.backgroundSource/);
+
+const cleanupSource = section(source, '  function clearChatFadeVisual() {', '  function chatFadePseudoIsFree(');
+const cssClasses = [
+  'tle-chat-fade-active',
+  'tle-chat-fade-pseudo-before',
+  'tle-chat-fade-pseudo-after',
+  'tle-chat-fade-fixed',
+  'tle-chat-fade-background-fallback',
+];
+function fakeChat() {
+  const css = new Set(cssClasses);
+  return {
+    classList: {
+      remove: (...names) => names.forEach(name => css.delete(name)),
+      has: name => css.has(name),
+    },
+    css,
+    propertiesCleaned: false,
+  };
+}
+const previousChat = fakeChat();
+const nextChat = fakeChat();
+const fadeState = { chatFade: {
+  chat: previousChat, active: true, pseudo: 'before',
+  renderMode: 'sticky-pseudo', backgroundSource: 'wallpaper',
+} };
+const cleanupSandbox = {
+  state: fadeState,
+  getChatFadeChat: () => nextChat,
+  clearChatFadeWallpaperVariables: chat => { chat.propertiesCleaned = true; },
+  CHAT_FADE_CLASS: cssClasses[0],
+  CHAT_FADE_PSEUDO_BEFORE_CLASS: cssClasses[1],
+  CHAT_FADE_PSEUDO_AFTER_CLASS: cssClasses[2],
+  CHAT_FADE_FIXED_CLASS: cssClasses[3],
+  CHAT_FADE_BACKGROUND_FALLBACK_CLASS: cssClasses[4],
+};
+vm.runInNewContext(cleanupSource + '\nglobalThis.resetVisual = clearChatFadeVisual;', cleanupSandbox);
+cleanupSandbox.resetVisual();
+for (const chat of [previousChat, nextChat]) {
+  assert.equal(chat.css.size, 0, 'mode switches must clear all mirror and fade classes');
+  assert.equal(chat.propertiesCleaned, true, 'mode switches must clear all old wallpaper variables');
+}
+assert.equal(fadeState.chatFade.active, false);
+assert.equal(fadeState.chatFade.backgroundSource, null);
+assert.equal(fadeState.chatFade.renderMode, null);
+assert.equal(fadeState.chatFade.chat, null);
 assert.match(source, /主题明确设置 CSS 背景图（包括渐变）时优先透出主题背景/);
 assert.doesNotMatch(create + bind + schedule, /setInterval\(/,
   'background recognition must not add polling');
