@@ -24,7 +24,7 @@
 
 - 左侧显示角色头像。
 - 右侧显示角色名称、角色主世界书绑定名称（未绑定时不显示）。
-- 角色描述以只读 textarea 展示，沿用酒馆 `#description_textarea` 的原生类名和内联样式（不复制其 ID），优先继承 `.text_pole` 与当前主题。
+- 角色描述以只读 textarea 展示，沿用酒馆 `#description_textarea` 的原生类名、内联样式及可读取的计算高度（不复制其 ID），优先继承 `.text_pole` 与当前主题。
 - “详情/管理”按钮只负责跳转到酒馆原生角色编辑界面：调用原生 `selectCharacterById(index, { switchMenu: true })`。角色编辑、世界书绑定管理等全部归酒馆原生界面负责，本项目不重造管理功能。
 - 下方显示该角色的聊天文件总数、最新聊天及其他聊天记录。
 - 最新聊天和会话条目点击后打开对应聊天。
@@ -53,7 +53,7 @@
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@5df77f06d7f455868122b44636fb53baa66c6ff3/development/gallery-home/Freesia-Gallery-Home-0.2.1.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@952ae6e4a6fb608b18ecbe65206581ed5725866a/development/gallery-home/Freesia-Gallery-Home-0.2.1.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
