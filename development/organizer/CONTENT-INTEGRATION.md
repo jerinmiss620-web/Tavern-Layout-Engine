@@ -11,7 +11,7 @@
 
 ## 使用与安装
 
-测试通道使用 `channels/test.json`；手动备用安装包为 `releases/v0.3.242/TLE-0.3.242-TEST-import.json`（默认禁用）。只启用一条 TLE 加载链，避免独立 Core 与 Test Loader 重复执行。
+测试通道使用 `channels/test.json`；手动备用安装包为 `releases/v0.3.243/TLE-0.3.243-TEST-import.json`（默认禁用）。只启用一条 TLE 加载链，避免独立 Core 与 Test Loader 重复执行。
 
 PC SillyTavern：已安装且能运行的原版 Global Batch Replace v1.1.0 服务端可直接使用，更新 Core 即可查找、预览、替换、导出备份及整份恢复。v0.3.234 错误地要求原版没有返回的扫描指纹，导致结果被拦截；本版已修复，不必为了查找更换服务端。
 
