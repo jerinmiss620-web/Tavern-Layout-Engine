@@ -254,8 +254,6 @@
                 fourColumns.disabled = narrow;
                 fourColumns.textContent = narrow ? '4 列（桌面）' : '4 列';
             }
-            // Keep the saved desktop preference while the actual mobile grid is capped at 3 columns.
-            state.columnsSelect.value = String(state.layoutSettings.columns);
         }
         if (state.grid) state.grid.style.setProperty('--freesia-gallery-columns', String(getEffectiveGalleryColumns()));
     }
@@ -1809,6 +1807,7 @@
                 rows: settings.rows === undefined ? state.layoutSettings.rows : rows,
             };
             syncResponsiveLayoutControls();
+            if (state.columnsSelect) state.columnsSelect.value = String(state.layoutSettings.columns);
             if (state.rowsSelect) state.rowsSelect.value = String(state.layoutSettings.rows);
             state.galleryPage = 0;
             saveGallerySettings();
