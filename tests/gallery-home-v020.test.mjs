@@ -185,9 +185,7 @@ test('chat files page lists all sessions and opens an older chat through the nat
     await api.openDetail('a.png');
 
     const filesButton = dom.window.document.querySelector('.freesia-gallery-detail-chat-header button');
-    console.log('files button', filesButton?.outerHTML, 'before', api.getPage());
     filesButton.click();
-    console.log('after click', api.getPage());
     assert.equal(api.getPage(), 'files');
     assert.equal(dom.window.document.querySelectorAll('.freesia-gallery-file-row').length, 3);
     assert.equal(dom.window.document.querySelector('.recentChatsTitle').textContent, '聊天文件');
@@ -254,6 +252,28 @@ test('fallback mode groups native rows by character and still provides portrait 
     assert.equal(cards.length, 2);
     assert.equal(cards[0].querySelector('.freesia-gallery-card-name').textContent, 'Alpha');
     assert.match(cards[0].querySelector('.freesia-gallery-chat-count').textContent, /2 个聊天/);
+
+    api.stop();
+    dom.window.close();
+});
+
+
+test('gallery includes characters that have no recent chat records', async () => {
+    const { dom, api, context } = setup();
+    context.characters.push({
+        avatar: 'c.png',
+        name: 'No Recent Chat',
+        description: 'This character has not started a chat yet.',
+        data: { extensions: {} },
+    });
+    await api.refresh();
+
+    const cards = Array.from(dom.window.document.querySelectorAll('.freesia-gallery-card'));
+    assert.equal(cards.length, 3);
+    const emptyCharacter = cards.find(card => card.dataset.avatar === 'c.png');
+    assert.ok(emptyCharacter);
+    assert.equal(emptyCharacter.querySelector('.freesia-gallery-card-name').textContent, 'No Recent Chat');
+    assert.equal(emptyCharacter.querySelector('.freesia-gallery-card-preview').textContent, '暂无最近聊天记录');
 
     api.stop();
     dom.window.close();
