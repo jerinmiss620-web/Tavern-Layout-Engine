@@ -2,13 +2,14 @@
 
 日期：2026-11-26。本次基线 4b92fcf / v0.3.235，原项目 v1.1.0 / 6b4ab84。
 
-## v0.3.243 搜索模式按钮原生样式纠正
+## v0.3.244 单个原生复选框切换模块
 
-- 两个常驻模式按钮继续使用宿主按钮工厂创建，继承 SillyTavern 原生 `menu_button` / `menu_button_icon` 类；当前模式同步添加原生 `active` 类，并保留 `aria-pressed`。
-- 删除 `.tle-content-mode-button` 私有类及其整套背景、边框、圆角、颜色、字重、hover/focus 视觉规则；`.tle-content-mode-switch` 仅保留 flex 排列规则。
-- 浏览器与 ST 实机验收脚本已从 radio 查询改为普通 button 点击，并增加双按钮常驻、原生 active 状态、原生按钮计算样式对照检查。
-- 本次仅完成源码、测试脚本与交付清单同步；本轮自动化执行、GitHub Actions 和 ST/TT 实机验收尚未完成，不据此宣称通过。
-
+- 默认模式为资源管理；分类标题右侧只有一个「查找和替换」原生 checkbox。
+- 勾选后进入内容查找与替换模块；取消勾选返回资源管理。没有第二个模式控件，也不需要给资源管理模式增加选项。
+- checkbox 不添加自定义 class、inline style 或专属 CSS；直接继承 SillyTavern / TauriTavern 当前主题的原生控件外观。
+- 删除双按钮实现及其 `.tle-content-mode-switch` 布局规则；下方资源列表选择机制、搜索词暂存、规则加载、扫描与替换逻辑保持不变。
+- 浏览器与 ST 验收脚本改为验证单个 checkbox、默认未勾选、勾选/取消后的模块切换及原生计算样式。
+- 源码、发布候选、备用导入包和测试通道清单完成同步；本轮自动化执行、GitHub Actions 与 ST/TT 实机验收尚未完成，不据此宣称通过。
 
 ## v0.3.236 布局与小组选择
 
