@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.259
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.260
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3700,6 +3700,13 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 .tle-companion-field-label { font-size: .88em; }
 .tle-companion-default { display: flex; flex-direction: row !important; align-items: center; gap: 8px; }
 .tle-companion-actions > .menu_button { white-space: nowrap; }
+.tle-companion-default-action {
+  border-color: var(--SmartThemeQuoteColor, currentColor);
+  font-weight: 700;
+}
+.tle-companion-default-action[aria-pressed="true"] {
+  color: var(--SmartThemeQuoteColor, inherit);
+}
 
 #${ID.panel} .tle-optional-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding-block: 8px; }
 #${ID.panel} .tle-optional-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; min-width: 0; }
@@ -8038,6 +8045,24 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     migrateQuickWorldInfoGroupAssignments(items);
     return items;
   }
+  function withQuickWorldInfoControl(action) {
+    const connected = quickSelect('world_info');
+    if (connected) return action(connected);
+    const panel = HOST_DOC.querySelector('#WorldInfo');
+    const runtime = HOST_WIN.__TAURITAVERN_PANEL_RUNTIME__;
+    const slot = panel?.dataset.ttRuntimeSlotId;
+    if (!slot || typeof runtime?.setVisible !== 'function' || typeof runtime?.reconcile !== 'function') {
+      return action(null);
+    }
+    try {
+      runtime.setVisible(slot, true);
+      runtime.reconcile();
+      return action(quickSelect('world_info'));
+    } finally {
+      runtime.setVisible(slot, panel.classList.contains('openDrawer'));
+      runtime.reconcile();
+    }
+  }
 
   function matchesWorldInfoFilter(entry, filter, unloadedCount = 0) {
     const binding = entry?.binding || {};
@@ -8352,6 +8377,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   async function quickCatalog(id, mount = true, signal = state.abort.signal) {
     if (id === 'theme') return quickThemeCatalog(signal);
     if (id === 'reasoning') return (await withQuickReasoningControl(quickReasoningItems, signal)) || [];
+    if (id === 'worldInfo') {
+      let controlAvailable = false;
+      const read = () => withQuickWorldInfoControl(select => {
+        controlAvailable = Boolean(select);
+        return select ? quickWorldInfoSelectItems() : [];
+      });
+      const initial = read();
+      if (controlAvailable || !mount) return initial;
+      openNativePanelForInfo('worldInfo');
+      for (let i = 0; i < 20 && !state.destroyed && !signal.aborted && !quickSelect('world_info'); i++) {
+        await new Promise(resolve => HOST_WIN.setTimeout(resolve, 50));
+      }
+      if (state.destroyed || signal.aborted) return [];
+      return read();
+    }
     const context = HOST_WIN.SillyTavern?.getContext?.() || {};
     if (id === 'character') {
       return (context.characters || []).filter(c => c?.avatar).map(c => {
@@ -11202,14 +11242,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.259 · 分组工具栏顺序与重命名操作优化</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.260 · 分组工具栏顺序与重命名操作优化</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.259</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.260</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13045,6 +13085,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     { id: 'model', name: '模型', type: 'api' },
     { id: 'preset', name: '预设', type: 'preset' },
     { id: 'reasoning', name: '推理格式', type: 'reasoning' },
+    { id: 'worldInfo', name: '全局世界书', type: 'worldInfo' },
     { id: 'theme', name: 'UI 主题', type: 'theme' },
   ];
   const companionRuntime = {
@@ -13105,7 +13146,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
   async function companionCatalogs() {
     const catalogs = {};
-    for (const type of ['api', 'preset', 'reasoning', 'theme']) {
+    for (const type of ['api', 'preset', 'reasoning', 'worldInfo', 'theme']) {
       try {
         // Catalogs are read from TLE's own host-aware quick-switch resolvers.
         catalogs[type] = await quickCatalog(type, false, state.abort.signal);
@@ -13119,6 +13160,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function companionSnapshot(catalogs) {
     const fields = {};
     for (const field of COMPANION_FIELDS) {
+      if (field.id === 'worldInfo') {
+        const selected = (catalogs.worldInfo || []).filter(item => item.selected && !item.disabled);
+        const items = selected.map(item => ({ value: String(item.value), label: item.label }));
+        fields.worldInfo = {
+          selectId: 'world_info',
+          value: items.map(item => item.value),
+          items,
+          label: items.length ? `已选 ${items.length} 本：${items.map(item => item.label).join('、')}` : '未启用全局世界书',
+        };
+        continue;
+      }
       const item = (catalogs[field.type] || []).find(e => e.selected && companionEntryId(field, e));
       if (item) fields[field.id] = { selectId: item.selectId, value: item.value, label: item.label };
     }
@@ -13203,6 +13255,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       + ' · 下次 ' + nextTime + ' → ' + (next?.name || '未知方案');
   }
 
+  function companionToggleDefault(planId, role = companionCurrentRole()) {
+    if (!role) return false;
+    const data = companionRead();
+    const plan = data.plans.find(item => item.id === planId && item.roles.includes(role.key));
+    if (!plan) {
+      companionNotice('warning', '该方案已失效或不属于当前角色。');
+      return false;
+    }
+    const wasDefault = data.defaults[role.key] === planId;
+    if (wasDefault) delete data.defaults[role.key];
+    else data.defaults[role.key] = planId;
+    if (!companionSave(data)) return false;
+    companionRefreshList();
+    companionNotice('success', wasDefault
+      ? '已取消角色默认方案。'
+      : '已设为角色默认「' + plan.name + '」；其他方案的默认状态已自动取消。');
+    return true;
+  }
+
   function companionRefreshList() {
     const list = state.chatTools.panel?.querySelector('[data-companion-list]');
     const heading = state.chatTools.panel?.querySelector('[data-companion-role]');
@@ -13235,9 +13306,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       summary.append(titleRow);
       summary.append(quickNode('small', '', companionPlanDetails(plan) || '空方案'));
       const controls = quickNode('div', 'tle-companion-actions');
+      const setDefault = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
+        companionToggleDefault(plan.id, role);
+      });
+      setDefault.classList.add('tle-companion-default-action');
+      setDefault.setAttribute('aria-pressed', String(isDefault));
       const apply = companionTextButton('应用', () => { void companionApply(plan.id); });
       apply.disabled = companionRuntime.applying;
-      controls.append(apply);
+      controls.append(setDefault, apply);
       row.append(summary, controls);
       list.append(row);
     }
@@ -13250,27 +13326,58 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const name = quickNode('span', 'tle-companion-field-label', field.name);
     const select = quickNode('select', 'text_pole');
     select.setAttribute('aria-label', field.name);
+    const isWorldInfo = field.id === 'worldInfo';
     const choices = (catalogs[field.type] || []).filter(item => companionEntryId(field, item) && !item.disabled);
     const known = new Set();
-    for (const item of choices) {
-      const signature = JSON.stringify([item.selectId, item.value]);
-      if (known.has(signature)) continue;
-      known.add(signature);
-      const option = quickNode('option', '', item.label);
-      option.value = signature;
-      select.append(option);
+
+    if (isWorldInfo) {
+      select.multiple = true;
+      select.size = Math.min(6, Math.max(3, choices.length));
+      const savedValues = saved && Array.isArray(saved.value)
+        ? new Set(saved.value.map(value => String(value)))
+        : null;
+      for (const item of choices) {
+        const value = String(item.value);
+        known.add(value);
+        const option = quickNode('option', '', item.label);
+        option.value = value;
+        option.selected = savedValues ? savedValues.has(value) : Boolean(item.selected);
+        select.append(option);
+      }
+      if (savedValues) {
+        const savedItems = new Map((Array.isArray(saved.items) ? saved.items : [])
+          .map(item => [String(item.value), String(item.label || item.value)]));
+        for (const value of savedValues) {
+          if (known.has(value)) continue;
+          const option = quickNode('option', '', '原配置（当前未读取）：' + (savedItems.get(value) || value));
+          option.value = value;
+          option.disabled = true;
+          option.selected = true;
+          select.append(option);
+        }
+      }
+    } else {
+      for (const item of choices) {
+        const signature = JSON.stringify([item.selectId, item.value]);
+        if (known.has(signature)) continue;
+        known.add(signature);
+        const option = quickNode('option', '', item.label);
+        option.value = signature;
+        select.append(option);
+      }
+      const savedSignature = saved && JSON.stringify([saved.selectId, saved.value]);
+      if (savedSignature && !known.has(savedSignature)) {
+        const old = quickNode('option', '', '原配置（当前未读取）：' + (saved.label || saved.value));
+        old.value = savedSignature;
+        select.prepend(old);
+      }
+      if (savedSignature) select.value = savedSignature;
+      else {
+        const active = choices.find(item => item.selected);
+        if (active) select.value = JSON.stringify([active.selectId, active.value]);
+      }
     }
-    const savedSignature = saved && JSON.stringify([saved.selectId, saved.value]);
-    if (savedSignature && !known.has(savedSignature)) {
-      const old = quickNode('option', '', '原配置（当前未读取）：' + (saved.label || saved.value));
-      old.value = savedSignature;
-      select.prepend(old);
-    }
-    if (savedSignature) select.value = savedSignature;
-    else {
-      const active = choices.find(item => item.selected);
-      if (active) select.value = JSON.stringify([active.selectId, active.value]);
-    }
+
     if (!select.options.length) {
       const missing = quickNode('option', '', '当前无法读取该项，请先打开原生设置');
       missing.value = '';
@@ -13281,9 +13388,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     select.disabled = !toggle.checked;
     toggle.addEventListener('change', () => { select.disabled = !toggle.checked; });
     line.append(toggle, name, select);
+    if (isWorldInfo) line.title = '可多选；应用方案时会按此清单同步全局世界书';
     return { line, toggle, select, choices, saved };
   }
-  async function companionOpenEditor(planId = '', duplicate = false, replaceCurrent = false) {
+    async function companionOpenEditor(planId = '', duplicate = false, replaceCurrent = false) {
     const role = companionCurrentRole();
     if (!role) { companionNotice('warning', '请先进入单角色聊天。'); return; }
     if (companionRuntime.applying) return;
@@ -13297,7 +13405,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const catalogs = await companionCatalogs();
     if (quickPanel !== shell || state.destroyed) return;
     pending.remove();
-    const defaults = savedData.defaults;
     const fields = source && !replaceCurrent ? source.fields : companionSnapshot(catalogs);
     const form = quickNode('div', 'tle-companion-editor');
     const nameLabel = quickNode('label', '', '方案名称');
@@ -13305,18 +13412,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     nameInput.maxLength = 64;
     nameInput.value = source ? source.name + (duplicate ? ' · 副本' : '') : '新方案';
     nameLabel.append(nameInput);
-    form.append(nameLabel, quickNode('p', 'tle-muted', '未勾选的项目保持原样。壁纸自动跟随主题绑定，不单独保存。'));
+    form.append(nameLabel, quickNode('p', 'tle-muted', '未勾选的项目保持原样。全局世界书支持多选并按清单同步；壁纸自动跟随 UI 主题，不单独保存。'));
     const rows = COMPANION_FIELDS.map(field => {
       const item = companionEditorRow(field, catalogs, fields[field.id]);
       form.append(item.line);
       return { field, ...item };
     });
-    const defaultRow = quickNode('label', 'tle-companion-default');
-    const defaultToggle = quickNode('input');
-    defaultToggle.type = 'checkbox';
-    defaultToggle.checked = source && !duplicate ? defaults[role.key] === source.id : false;
-    defaultRow.append(defaultToggle, quickNode('span', '', '设为角色默认（日夜定时关闭时自动应用）'));
-    form.append(defaultRow);
     const actions = quickNode('div', 'tle-companion-actions');
     const saveButton = companionTextButton('保存方案', () => {
       const name = nameInput.value.trim();
@@ -13324,6 +13425,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const nextFields = {};
       for (const row of rows) {
         if (!row.toggle.checked) continue;
+        if (row.field.id === 'worldInfo') {
+          const items = [...row.select.selectedOptions].map(option => ({
+            value: String(option.value),
+            label: String(option.textContent || option.value).replace(/^原配置（当前未读取）：/, ''),
+          }));
+          nextFields.worldInfo = {
+            selectId: 'world_info',
+            value: items.map(item => item.value),
+            items,
+            label: items.length ? `已选 ${items.length} 本：${items.map(item => item.label).join('、')}` : '未启用全局世界书',
+          };
+          continue;
+        }
         let signature;
         try { signature = JSON.parse(row.select.value); } catch {}
         if (!signature || !signature[0] || signature[1] == null) continue;
@@ -13339,12 +13453,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const old = fresh.plans.find(p => p.id === id);
       const next = { id, name, roles: old?.roles || [role.key], fields: nextFields };
       fresh.plans = old ? fresh.plans.map(p => p.id === id ? next : p) : [...fresh.plans, next];
-      if (defaultToggle.checked) fresh.defaults[role.key] = id;
-      else if (fresh.defaults[role.key] === id) delete fresh.defaults[role.key];
       if (!companionSave(fresh)) return;
       closeQuickPanel(false);
       companionRefreshList();
-      companionNotice('success', '方案已保存：' + name + (defaultToggle.checked ? '（已设角色默认）' : ''));
+      companionNotice('success', '方案已保存：' + name);
     });
     const cancel = companionTextButton('取消', () => closeQuickPanel(false));
     actions.append(saveButton, cancel);
@@ -13458,22 +13570,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         copy.append(titleRow);
         copy.append(quickNode('small', '', companionPlanDetails(plan)));
         const actions = quickNode('div', 'tle-companion-actions');
+        const defaultButton = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
+          if (companionToggleDefault(plan.id, role)) render();
+        });
+        defaultButton.classList.add('tle-companion-default-action');
+        defaultButton.setAttribute('aria-pressed', String(isDefault));
+        actions.append(defaultButton);
         const buttons = [
           ['编辑', () => void companionOpenEditor(plan.id)],
           ['复制', () => void companionOpenEditor(plan.id, true)],
           ['覆盖当前', () => void companionOpenEditor(plan.id, false, true)],
-          [isDefault ? '取消默认' : '设为默认', () => {
-            const fresh = companionRead();
-            if (isDefault) delete fresh.defaults[role.key];
-            else fresh.defaults[role.key] = plan.id;
-            if (companionSave(fresh)) {
-              render();
-              companionRefreshList();
-              companionNotice('success', isDefault
-                ? '已取消角色默认；日夜定时规则不受影响。'
-                : '已设为角色默认「' + plan.name + '」；如启用日夜定时则按时段优先。');
-            }
-          }],
           ['删除', () => {
             if (!HOST_WIN.confirm('确认删除方案「' + plan.name + '」？不会删除角色或原生配置。')) return;
             const fresh = companionRead();
@@ -13502,6 +13608,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function companionUnavailableReason(field, target, error) {
     const errorText = String(error?.message || '').trim();
     if (errorText) return errorText;
+    if (field.id === 'worldInfo') {
+      const select = quickSelect('world_info');
+      if (!select) return '全局世界书控件尚未挂载；TT 原生世界书面板暂未就绪';
+      if (!select.multiple) return '当前全局世界书控件不是多选控件，无法安全同步整套清单';
+      if (select.disabled) return '全局世界书控件当前不可用';
+      return '方案中的部分全局世界书当前不存在或不可用';
+    }
+    if (field.id === 'theme') {
+      const select = quickSelect('themes');
+      if (!select) return 'UI 主题控件尚未挂载；TT 用户设置面板暂未就绪';
+      if (![...select.options].some(option => option.value)) return 'UI 主题列表尚未加载或为空';
+      return '方案绑定的 UI 主题当前不存在或不可用';
+    }
     if (field.id === 'profile') {
       const select = quickSelect('connection_profiles');
       if (!select) return '连接配置控件尚未加载；原生 API 设置尚未就绪';
@@ -13529,6 +13648,27 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (choice.slot && manualHold) return false;
     if (!choice.slot && !changed && !force) return false;
     return true;
+  }
+
+  function companionApplyWorldInfo(target) {
+    const requested = Array.isArray(target.value)
+      ? [...new Set(target.value.map(value => String(value)))]
+      : target.value == null ? [] : [String(target.value)];
+    const result = withQuickWorldInfoControl(select => {
+      if (!select) throw new Error('全局世界书控件尚未挂载；TT 原生世界书面板暂未就绪。');
+      if (select.disabled) throw new Error('全局世界书控件当前不可用。');
+      if (!select.multiple) throw new Error('当前全局世界书控件不是多选控件，已停止修改以避免误选。');
+      const options = [...select.options];
+      const available = options.filter(option => !option.hidden && !option.disabled && !option.parentElement?.disabled);
+      const availableValues = new Set(available.map(option => String(option.value)));
+      const requestedSet = new Set(requested);
+      const missing = requested.filter(value => !availableValues.has(value));
+      for (const option of available) option.selected = requestedSet.has(String(option.value));
+      select.dispatchEvent(new HOST_WIN.Event('change', { bubbles: true }));
+      return { missing };
+    });
+    if (!result) throw new Error('无法取得全局世界书控件。');
+    return result;
   }
 
   async function companionApply(id, automatic = false) {
@@ -13561,6 +13701,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (!target) continue;
         if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
         try {
+          if (field.id === 'worldInfo') {
+            const result = companionApplyWorldInfo(target);
+            finished++;
+            if (result.missing.length) {
+              const labels = result.missing.map(value =>
+                target.items?.find(item => String(item.value) === value)?.label || value
+              );
+              skipped.push({
+                name: field.name,
+                target: labels.join('、'),
+                reason: '这些世界书当前不存在或不可用；其余可用项目已按方案同步',
+              });
+            }
+            continue;
+          }
           // Read each field afresh: changing an API profile/source can rebuild the
           // model selector, so a cached API catalog would be stale for the next field.
           const catalog = await quickCatalog(field.type, field.type === 'api' || field.type === 'preset', state.abort.signal);
@@ -17310,7 +17465,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.259',
+    version: '0.3.260',
     ready: false,
     destroy,
     state,
@@ -17761,5 +17916,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.259 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.260 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
