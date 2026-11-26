@@ -2130,9 +2130,10 @@ var TLEBatchLibrary = (() => {
       this.modeButtons = new Map();
       for (const [value, text] of [["name", "\u8D44\u6E90\u540D\u79F0"], ["content", "\u67E5\u627E\u4E0E\u66FF\u6362"]]) {
         const button = this.button(text, () => this.setMode(value));
-        button.classList.add("tle-content-mode-button");
         button.type = "button";
-        button.setAttribute("aria-pressed", String(value === this.mode));
+        const selected = value === this.mode;
+        button.setAttribute("aria-pressed", String(selected));
+        button.classList.toggle("active", selected);
         this.modeButtons.set(value, button);
         this.target.append(button);
       }
@@ -2261,7 +2262,9 @@ var TLEBatchLibrary = (() => {
       else this.nameQuery = this.h.search.value;
       this.mode = mode === "content" ? "content" : "name";
       for (const [value, button] of this.modeButtons) {
-        button.setAttribute("aria-pressed", String(value === this.mode));
+        const selected = value === this.mode;
+        button.setAttribute("aria-pressed", String(selected));
+        button.classList.toggle("active", selected);
       }
       this.controls.hidden = this.replace.hidden = this.replaceRow.hidden = this.findButton.hidden = !this.active;
       this.h.setContentMode(this.active);
@@ -5961,38 +5964,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         align-items: center;
         gap: 4px;
         min-width: 0;
-      }
-      .tle-quick-manager .tle-content-mode-button {
-        display: inline-flex;
-        flex: 0 0 auto;
-        align-items: center;
-        justify-content: center;
-        min-height: 28px;
-        margin: 0;
-        padding: 4px 9px;
-        border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 30%));
-        border-radius: 6px;
-        background: transparent;
-        color: inherit;
-        font-size: .86em;
-        font-weight: 500;
-        line-height: 1.2;
-        white-space: nowrap;
-        cursor: pointer;
-        box-sizing: border-box;
-      }
-      .tle-quick-manager .tle-content-mode-button[aria-pressed="true"] {
-        border-color: var(--SmartThemeQuoteColor, currentColor);
-        background: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 14%, transparent);
-        color: var(--SmartThemeQuoteColor, inherit);
-        font-weight: 600;
-      }
-      .tle-quick-manager .tle-content-mode-button:not([aria-pressed="true"]):hover {
-        border-color: var(--SmartThemeQuoteColor, currentColor);
-      }
-      .tle-quick-manager .tle-content-mode-button:focus-visible {
-        outline: 2px solid var(--SmartThemeQuoteColor, currentColor);
-        outline-offset: 2px;
       }
 
       /* Organizer workspace: desktop gets three independently scrollable columns.
