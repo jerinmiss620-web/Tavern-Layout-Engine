@@ -3,14 +3,15 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
+const manifest = JSON.parse(read('channels/test.json'));
 const source = read('development/organizer/TLE.js');
 const previous = read('releases/v0.3.240/TLE.js');
-const release = read('releases/v0.3.241/TLE.js');
+const release = read(manifest.release.source_path);
+const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
 
-assert.equal(release, source, 'v0.3.241 pinned test source must match the working source');
-assert.equal(JSON.parse(read('releases/v0.3.241/TLE-0.3.241-TEST-import.json')).content, source,
-  'the disabled import package must contain the exact test source');
-new vm.Script(source, { filename: 'TLE v0.3.241' });
+assert.equal(release, source, 'the pinned test source must match the working source');
+assert.equal(installer.content, source, 'the disabled import package must contain the exact test source');
+new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
 
 function section(text, startMarker, endMarker) {
   const start = text.indexOf(startMarker);
@@ -88,7 +89,7 @@ assert.match(source, /未能应用任何项目/);
 assert.match(source, /companionUnavailableReason\(field, target, error\)/);
 assert.match(source, /companionQueueGenerationRetry\(\)/);
 assert.match(source, /companionScheduleState\(data, role\)/);
-assert.match(source, /Core v0\.3\.241/);
-assert.match(source, /version: '0\.3\.241'/);
+assert.ok(source.includes('Core v' + manifest.release.version));
+assert.ok(source.includes("version: '" + manifest.release.version + "'"));
 
-console.log('TLE companion initialization and schedule-recovery checks passed: v0.3.241.');
+console.log('TLE companion initialization and schedule-recovery checks passed: v' + manifest.release.version + '.');
