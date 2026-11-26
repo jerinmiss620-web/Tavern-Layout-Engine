@@ -23,6 +23,7 @@ fs.writeFileSync(path.join(testRoot,'chats/TLE分组/test.jsonl'),JSON.stringify
 fs.writeFileSync(path.join(testRoot,'worlds/TLE分组.json'),JSON.stringify({entries:{0:{uid:0,content:'TLE分组旧词',key:['TLE分组'],comment:'测试分组'}}}));
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe'});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[],requests=[];
+let modeToggle=null;
 page.on('pageerror',e=>errors.push(e.message));
 page.on('request',r=>{if(r.url().includes('/api/plugins/global-batch-replace/'))requests.push({endpoint:r.url().split('/').pop(),body:r.postDataJSON()});});
 const source=fs.readFileSync('development/organizer/TLE.js','utf8');
@@ -32,31 +33,21 @@ const boot=async()=>{
  console.log('Native host ready');
  await page.addScriptTag({content:source});
  await page.locator('#tle-organizer-entry > .drawer-toggle').click();
- await page.getByRole('button',{name:'查找与替换',exact:true}).click();
- const modes=page.locator('#tle-organizer-panel .tle-content-mode-switch > button');
- assert.equal(await modes.count(),2,'Both native mode buttons must remain visible');
- assert.equal(await modes.nth(0).getAttribute('aria-pressed'),'false');
- assert.equal(await modes.nth(1).getAttribute('aria-pressed'),'true');
- assert.equal(await modes.nth(0).evaluate(button=>button.classList.contains('active')),false);
- assert.equal(await modes.nth(1).evaluate(button=>button.classList.contains('active')),true);
- assert.equal(await page.locator('#tle-organizer-panel .tle-content-mode-button').count(),0);
- const nativeModeStyles=await page.evaluate(()=>{
-  const panel=document.querySelector('#tle-organizer-panel');
-  const modes=[...panel.querySelectorAll('.tle-content-mode-switch > button')];
-  const properties=['backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','paddingTop','paddingRight','color','fontSize','fontWeight','fontFamily','boxShadow'];
-  return modes.map(mode=>{
-   const probe=document.createElement('button');
-   probe.type='button';
-   probe.className='menu_button menu_button_icon'+(mode.classList.contains('active')?' active':'');
-   probe.textContent='native';
-   mode.parentElement.append(probe);
-   const actual=getComputedStyle(mode),expected=getComputedStyle(probe);
-   const matches=properties.every(property=>actual[property]===expected[property]);
-   probe.remove();
-   return matches;
-  });
+ modeToggle=page.getByRole('checkbox',{name:'查找和替换',exact:true});
+ assert.equal(await modeToggle.count(),1,'Exactly one native mode checkbox is present');
+ assert.equal(await modeToggle.isChecked(),false,'Resource management is the default mode');
+ assert.equal(await modeToggle.getAttribute('class'),null);
+ assert.equal(await modeToggle.getAttribute('style'),null);
+ const nativeModeStyle=await modeToggle.evaluate(toggle=>{
+  const probe=document.createElement('input');probe.type='checkbox';toggle.parentElement.append(probe);
+  const properties=['appearance','accentColor','backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','width','height','marginTop','marginRight','color','boxShadow'];
+  const actual=getComputedStyle(toggle),expected=getComputedStyle(probe);
+  const matches=properties.every(property=>actual[property]===expected[property]);
+  probe.remove();return matches;
  });
- assert.deepEqual(nativeModeStyles,[true,true],'Mode buttons must inherit the exact native menu_button appearance');
+ assert.equal(nativeModeStyle,true,'The mode checkbox must use the unmodified native host checkbox style');
+ await modeToggle.check();
+ assert.equal(await modeToggle.isChecked(),true);
  await page.waitForFunction(()=>!document.querySelector('#tle-organizer-panel input[type=search]').disabled);
 };
 try{
@@ -88,7 +79,7 @@ try{
    const props=['height','fontSize','paddingTop','paddingBottom','borderRadius','backgroundColor','color'];
    const equal=props.every(p=>getComputedStyle(input)[p]===getComputedStyle(peer)[p]);peer.remove();
    const panel=document.querySelector('#tle-organizer-panel');
-   return {width:innerWidth,scrollWidth:document.documentElement.scrollWidth,input:input.getBoundingClientRect().toJSON(),find:find.getBoundingClientRect().toJSON(),replace:panel.querySelector('[aria-label="替换为"]').getBoundingClientRect().toJSON(),scope:panel.querySelector('[aria-label="内容搜索范围"]').getBoundingClientRect().toJSON(),backup:[...panel.querySelectorAll('button')].find(b=>b.textContent==='备份与恢复').getBoundingClientRect().toJSON(),modeInHeading:!!panel.querySelector('.tle-content-heading [aria-label="搜索方式"]'),nativeSearchStyle:equal,customClear:!!row.querySelector('.tle-search-clear')};
+   return {width:innerWidth,scrollWidth:document.documentElement.scrollWidth,input:input.getBoundingClientRect().toJSON(),find:find.getBoundingClientRect().toJSON(),replace:panel.querySelector('[aria-label="替换为"]').getBoundingClientRect().toJSON(),scope:panel.querySelector('[aria-label="内容搜索范围"]').getBoundingClientRect().toJSON(),backup:[...panel.querySelectorAll('button')].find(b=>b.textContent==='备份与恢复').getBoundingClientRect().toJSON(),modeInHeading:!!panel.querySelector('.tle-content-heading input[type="checkbox"][aria-label="查找和替换"]'),nativeSearchStyle:equal,customClear:!!row.querySelector('.tle-search-clear')};
   });
   assert.equal(bounds.nativeSearchStyle,true);assert.equal(bounds.customClear,false);
   assert.equal(bounds.modeInHeading,true);
@@ -119,7 +110,7 @@ try{
  const sectionCheckBox=await worlds.locator(':scope > summary input').boundingBox(),sectionTextBox=await worlds.locator(':scope > summary strong').boundingBox();
  assert(Math.abs(sectionCheckBox.y-sectionTextBox.y)<6,'Group checkbox and heading share a row');
  await page.screenshot({path:path.join(output,'typed-result-groups.png'),fullPage:true});
- await page.getByRole('button',{name:'资源名称',exact:true}).click();
+ await modeToggle.uncheck();
  const groupName='TLE布局'+Date.now();await page.getByLabel('新分组名称',{exact:true}).fill(groupName);await page.getByRole('button',{name:'新建分组',exact:true}).click();
  await page.getByRole('button',{name:'管理分组',exact:true}).click();
  await page.getByLabel('重命名分组',{exact:true}).fill(groupName+'改');await page.getByRole('button',{name:'重命名',exact:true}).click();
@@ -127,7 +118,7 @@ try{
  assert(Math.abs(renameBox.y-deleteBox.y)<6);assert.equal(await page.getByRole('button',{name:'新建分组',exact:true}).isVisible(),true);
  await page.screenshot({path:path.join(output,'group-management.png'),fullPage:true});
  await page.getByRole('button',{name:'删除分组',exact:true}).click();
- await page.getByRole('button',{name:'查找与替换',exact:true}).click();await search.fill('TLE验收旧词');await page.getByLabel('替换为',{exact:true}).fill('TLE验收新词');
+ await modeToggle.check();await search.fill('TLE验收旧词');await page.getByLabel('替换为',{exact:true}).fill('TLE验收新词');
  await page.getByRole('button',{name:'查找',exact:true}).click();await page.locator('.tle-quick-list details[data-content-key]').waitFor();
  await page.getByRole('button',{name:'预览替换',exact:true}).click();await page.getByRole('button',{name:'确认替换',exact:true}).click();
  await page.waitForEvent('load');assert.equal(JSON.parse(fs.readFileSync(file,'utf8')).entries[0].content,'TLE验收新词 第一段。TLE验收新词 第二段。');
