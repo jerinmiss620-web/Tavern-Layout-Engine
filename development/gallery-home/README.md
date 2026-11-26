@@ -1,4 +1,4 @@
-# Freesia Gallery · 首页角色画廊 v0.2.10 TEST
+# Freesia Gallery · 首页角色画廊 v0.2.11 TEST
 
 独立测试模块。当前只改造 SillyTavern 欢迎首页，不接入 TLE Core，不修改 Bootstrap、导航栏、整理侠、信息站或正式频道。
 
@@ -12,7 +12,7 @@
 - 每页设置保存在独立的账号存储键 `freesiaGallerySettings`，不覆盖酒馆原生 Recent Chats Settings；设置控件追加在原生齿轮打开的 Recent Chats Settings 弹窗中，复用原生保存/取消入口，不在首页额外占位。
 - 画廊卡片和角色详情头像统一使用 3:4 竖版比例。详情页采用左右双列；桌面端资料区与头像等高，移动端资料区按内容自然收缩，描述框保留约三行高度，不强行撑满头像高度。图片使用 `object-fit: cover`。
 - 网格间距统一为 `clamp(5px, 0.7vw, 8px)`；2/3/4 列均通过 `minmax(0, 1fr)` 均分剩余宽度，不固定卡片宽度。
-- 每行等高，卡片使用统一的内部结构：头像、单行角色名称、最近聊天信息。聊天数量覆盖在头像左下角，以底部渐变遮罩增强文字对比；角色置顶按钮独立覆盖在头像右上角。
+- 每行等高，卡片使用统一的内部结构：头像、单行角色名称、最近聊天信息。聊天数量覆盖在头像左下角，不增加背景遮罩，仅对文字应用轻量 drop-shadow；角色置顶按钮独立覆盖在头像右上角。
 - 最近聊天信息区固定为日期、两行预览、底部统计三个独立区域；日期与预览强制左对齐，统计区强制右对齐，避免继承主题中的居中排版。
 - 角色名称居中显示；聊天数量完整保留，重命名/删除按钮与独立的角色置顶按钮分行展示，避免三列窄卡片中数量和操作按钮互相挤压；日期独占一行且左对齐，聊天预览固定预留两行高度，消息统计行保留完整行高。
 - 消息数与文件大小放在预览下方的独立统计行，不再与聊天概要并排挤占预览宽度。
@@ -63,12 +63,12 @@
 
 ## 独立加载测试
 
-v0.2.10 调整画廊卡片信息层级：聊天数量移至头像左下角并增加底部渐变遮罩；角色置顶按钮独立放在头像右上角；重命名、删除按钮移至最近聊天日期行右侧，明确操作对象；没有最近聊天时隐藏聊天级操作按钮。同时收紧移动端角色详情区：右侧资料按内容自然高度显示，描述框约三行，管理按钮使用紧凑高度；桌面端仍保留左右等高布局。
+v0.2.11 移除聊天数量文字背后的整块渐变遮罩，改为只对文字应用单层 drop-shadow，避免压暗头像并保持浅色、复杂壁纸上的可读性；角色置顶按钮独立放在头像右上角；重命名、删除按钮移至最近聊天日期行右侧，没有最近聊天时隐藏聊天级操作按钮。移动端角色详情区继续按内容自然收缩。
 
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@cd92303b85d27052f370b99f6e109dca0069db66/development/gallery-home/Freesia-Gallery-Home-0.2.10.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@6f06eef05d7764fe651baa4e4cd2ea74f8dd14d5/development/gallery-home/Freesia-Gallery-Home-0.2.11.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
