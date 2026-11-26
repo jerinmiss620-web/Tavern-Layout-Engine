@@ -51,7 +51,7 @@ function createContext(openCalls) {
 }
 
 test('groups every returned character chat by avatar and sorts the latest session first', () => {
-    const dom = new JSDOM(createHomeMarkup(), { url: 'http://localhost/' });
+    const dom = new JSDOM(createHomeMarkup(), { url: 'http://localhost/', runScripts: 'outside-only' });
     const context = createContext({});
     dom.window.SillyTavern = { getContext: () => context };
     dom.window.fetch = async () => ({ ok: true, json: async () => [] });
@@ -76,7 +76,7 @@ test('groups every returned character chat by avatar and sorts the latest sessio
 });
 
 test('renders grouped cards, opens the latest chat, toggles native view, and restores the native list', async () => {
-    const dom = new JSDOM(createHomeMarkup(), { url: 'http://localhost/' });
+    const dom = new JSDOM(createHomeMarkup(), { url: 'http://localhost/', runScripts: 'outside-only' });
     const openCalls = {};
     const context = createContext(openCalls);
     const records = [
@@ -122,7 +122,7 @@ test('renders grouped cards, opens the latest chat, toggles native view, and res
 });
 
 test('fallback mode includes native collapsed items marked with the hidden class', async () => {
-    const dom = new JSDOM(createHomeMarkup(), { url: 'http://localhost/' });
+    const dom = new JSDOM(createHomeMarkup(), { url: 'http://localhost/', runScripts: 'outside-only' });
     dom.window.fetch = async () => { throw new Error('API unavailable'); };
     dom.window.eval(script);
     const api = dom.window.FreesiaGalleryHome;
