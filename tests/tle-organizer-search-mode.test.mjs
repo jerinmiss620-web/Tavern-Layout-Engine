@@ -10,37 +10,29 @@ const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${m
 assert.equal(installer.content, source, 'the disabled test installer must match the pinned source');
 new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
 
-function section(text, startMarker, endMarker) {
-  const start = text.indexOf(startMarker);
-  const end = text.indexOf(endMarker, start);
-  assert.ok(start >= 0 && end > start, 'missing source section: ' + startMarker);
-  return text.slice(start, end);
-}
+assert.match(source, /const resourceTab = quickButton\('资源整理', \(\) => switchOrganizerView\('resources'\), 'menu_button tle-organizer-tab'\);/);
+assert.match(source, /const findReplaceTab = quickButton\('查找替换', \(\) => switchOrganizerView\('findreplace'\), 'menu_button tle-organizer-tab'\);/);
+assert.match(source, /viewTabs\.append\(resourceTab, findReplaceTab\);/);
+assert.match(source, /resourcePage\.append\(workspace\);/);
+assert.match(source, /findReplacePage\.append\(content\.searchRow, content\.controls, contentList, contentStatus\);/);
+assert.match(source, /body\.append\(resourcePage, findReplacePage\);/);
 
-const mount = section(
-  source,
-  '      this.searchRow = n("div", "tle-content-search-row flex-container");',
-  '      this.replace = n("input", "text_pole flex1");'
+const switchView = source.slice(
+  source.indexOf('    function switchOrganizerView(view) {'),
+  source.indexOf('    function ', source.indexOf('    function switchOrganizerView(view) {') + 20)
 );
+assert.match(switchView, /activeView = view === 'findreplace' \? 'findreplace' : 'resources';/);
+assert.match(switchView, /resourcePage\.hidden = activeView !== 'resources';/);
+assert.match(switchView, /findReplacePage\.hidden = activeView !== 'findreplace';/);
+assert.match(switchView, /resourceTab\.setAttribute\('aria-pressed', String\(activeView === 'resources'\)\);/);
+assert.match(switchView, /findReplaceTab\.setAttribute\('aria-pressed', String\(activeView === 'findreplace'\)\);/);
+assert.match(switchView, /headingTools\.hidden = activeView !== 'resources';/);
+assert.match(switchView, /if \(activeView === 'findreplace'\) \{\s*content\.renderList\(\);\s*void content\.run\(\(\) => content\.activate\(\)\);\s*\} else \{\s*render\(\);\s*\}/);
+assert.match(source, /if \(activeView === 'findreplace'\) content\?\.renderList\(\);/);
 
-assert.match(mount, /this\.target = n\("label", "checkbox_label"\)/);
-assert.match(mount, /this\.modeToggle = n\("input", "checkbox"\)/);
-assert.match(mount, /this\.modeToggle\.type = "checkbox"/);
-assert.match(mount, /this\.modeToggle\.checked = this\.active/);
-assert.match(mount, /this\.modeToggle\.addEventListener\("change"/);
-assert.match(mount, /this\.setMode\(this\.modeToggle\.checked \? "content" : "name"\)/);
-assert.match(mount, /this\.target\.append\(this\.modeToggle, n\("span"/);
-assert.doesNotMatch(mount, /role", "group"|aria-pressed|modeButtons|tle-content-mode-button|radio/i,
-  'the switch must remain one native checkbox, not a radio group or custom button set');
-
-const setMode = section(source, '    async setMode(mode) {', '    onInput() {');
-assert.match(setMode, /this\.modeToggle\.checked = this\.active;/);
-assert.doesNotMatch(setMode, /modeButtons|aria-pressed|radio/i,
-  'mode state must be synchronized through the native checkbox');
-
+assert.doesNotMatch(source, /this\.target = n\("label", "checkbox_label"\)|this\.modeToggle = n\("input", "checkbox"\)/,
+  'the retired inline checkbox mode control must not return');
 assert.doesNotMatch(source, /tle-content-mode-switch|tle-content-mode-button|tle-content-mode-radio/,
-  'no dedicated mode-switch CSS or custom mode-control classes should remain');
-assert.doesNotMatch(source, /\.tle-quick-manager \.tle-content-mode-(?:switch|button|radio)/,
-  'mode-control appearance must inherit native SillyTavern checkbox styling');
+  'the separated tabs must not introduce a second custom mode-control system');
 
-console.log('TLE organizer native checkbox mode checks passed: v' + manifest.release.version + '.');
+console.log('TLE Organizer separated resource/find-replace tabs passed: v' + manifest.release.version + '.');
