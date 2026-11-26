@@ -184,7 +184,7 @@ test('chat files page lists all sessions and opens an older chat through the nat
     await api.refresh();
     await api.openDetail('a.png');
 
-    dom.window.document.querySelector('.freesia-gallery-detail button').click();
+    dom.window.document.querySelector('.freesia-gallery-detail-chat-header button').click();
     assert.equal(api.getPage(), 'files');
     assert.equal(dom.window.document.querySelectorAll('.freesia-gallery-file-row').length, 3);
     assert.equal(dom.window.document.querySelector('.recentChatsTitle').textContent, '聊天文件');
