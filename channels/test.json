@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.264",
+  "latest_version": "0.3.265",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.264",
-    "source_path": "releases/v0.3.264/TLE.js",
-    "source_commit": "27053c6292fabe217dc90e35219a9c9035bb6619",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/27053c6292fabe217dc90e35219a9c9035bb6619/releases/v0.3.264/TLE.js",
-    "changelog_path": "releases/v0.3.264/CHANGELOG.md",
-    "sha256": "998e3c795cb74380633bf63411918c97b55fe5fec4b9074ab94053a4318812b9",
-    "size_bytes": 948195
+    "version": "0.3.265",
+    "source_path": "releases/v0.3.265/TLE.js",
+    "source_commit": "13e4ab184b80565e0fc55a2fa73951a821270d3b",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/13e4ab184b80565e0fc55a2fa73951a821270d3b/releases/v0.3.265/TLE.js",
+    "changelog_path": "releases/v0.3.265/CHANGELOG.md",
+    "sha256": "e4050a2946f84b44626c9f56be9271691290c66b5463983c10daaa826c9c2d7d",
+    "size_bytes": 954843
   },
-  "status": "TEST v0.3.264: 首页角色画廊整合进 TLE Core 生命周期；画廊 CSS 重复选择器覆盖已合并，移动端详情头像与资料区等高，保留原生最近聊天切换与角色管理跳转。仅更新测试通道，ST/TT PC/移动端实机验收待完成。",
+  "status": "TEST v0.3.265: 首页「记录预览 / 记录详情」命名与持久化开关；右上角快速切换原生首页；头像伪元素与 border-image 兼容设置；仅更新测试通道。自动化与 ST/TT 实机验收待确认。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
