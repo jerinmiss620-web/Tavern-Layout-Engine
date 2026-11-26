@@ -104,6 +104,46 @@ try{
  assert(Math.abs(confirmBox.y-cancelBox.y)<6,'Resource delete confirmation buttons share a row');
  await page.screenshot({path:path.join(output,'resource-delete-confirmation.png'),fullPage:true});
  await page.getByRole('button',{name:'取消',exact:true}).click();
+ await page.setViewportSize({width:1440,height:1000});
+ const initialGroup=page.locator('.tle-quick-filter[data-group-id="favorites"]');
+ assert.equal(await initialGroup.isEnabled(),true,'Group directory rows must be clickable when idle');
+ await page.evaluate(()=>{harness.content.lock(true);harness.content.lock(true);});
+ assert.equal(await initialGroup.isDisabled(),true,'A running content operation may temporarily lock navigation');
+ await page.evaluate(()=>harness.content.lock(false));
+ assert.equal(await initialGroup.isEnabled(),true,'Repeated lock acquisition must restore the original clickable state');
+ await initialGroup.click();
+ assert.equal(await page.locator('.tle-quick-group-selection-name').textContent(),'收藏');
+
+ await page.getByRole('button',{name:'新建分组',exact:true}).click();
+ await page.getByLabel('新分组名称',{exact:true}).fill('测试分组 A');
+ await page.getByRole('button',{name:'创建',exact:true}).click();
+ const groupA=page.locator('.tle-quick-filter[data-group-id]').filter({hasText:'测试分组 A'});
+ const groupAId=await groupA.getAttribute('data-group-id');
+ assert.ok(groupAId);
+ await page.getByRole('button',{name:'新建分组',exact:true}).click();
+ await page.getByLabel('新分组名称',{exact:true}).fill('测试分组 B');
+ await page.getByRole('button',{name:'创建',exact:true}).click();
+ const groupB=page.locator('.tle-quick-filter[data-group-id]').filter({hasText:'测试分组 B'});
+ const groupBId=await groupB.getAttribute('data-group-id');
+ assert.ok(groupBId);
+ await page.locator('.tle-quick-filter[data-group-id="'+groupAId+'"]').click();
+ assert.equal(await page.locator('.tle-quick-group-selection-name').textContent(),'测试分组 A');
+ const batchTarget=page.getByLabel('批量操作目标分组',{exact:true});
+ await batchTarget.selectOption(groupBId);
+ assert.equal(await page.locator('.tle-quick-group-selection-name').textContent(),'测试分组 A',
+   'Batch target changes must not replace the viewed/managed group');
+ await page.getByRole('button',{name:'重命名',exact:true}).click();
+ await page.getByLabel('修改后的分组名称',{exact:true}).fill('测试分组 A 改');
+ await page.getByRole('button',{name:'确认重命名',exact:true}).click();
+ assert.equal(await page.locator('.tle-quick-group-selection-name').textContent(),'测试分组 A 改');
+ await page.screenshot({path:path.join(output,'group-management.png'),fullPage:true});
+ await page.getByRole('button',{name:'删除分组',exact:true}).click();
+ assert.match(await page.locator('.tle-quick-group-delete-message').textContent(),/不会删除其中的资源/);
+ await page.getByRole('button',{name:'确认删除分组',exact:true}).click();
+ assert.equal(await page.locator('.tle-quick-group-selection-name').textContent(),'未选择');
+ assert.equal(await batchTarget.inputValue(),groupBId,'Deleting the viewed group must preserve a different batch target');
+ assert.equal(await page.locator('.tle-quick-filter[data-group-id="'+groupAId+'"]').count(),0);
+ assert.equal(await page.locator('.tle-quick-filter[data-group-id="'+groupBId+'"]').count(),1);
  assert.deepEqual(errors,[]);fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({passed:true,viewports:[1440,320,375,390,768],browser:await browser.version(),realPlatformsTested:[],errors},null,2));
  console.log('Real Chromium Organizer wiring/preview/mobile/name-delete regression passed. Host APIs are fixtures; this is not ST/TT device acceptance.');
 }finally{await browser.close();await new Promise(r=>server.close(r));if(path.basename(root).startsWith('tle-browser-'))fs.rmSync(root,{recursive:true,force:true});}

@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.250
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.251
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2399,9 +2399,9 @@ var TLEBatchLibrary = (() => {
       this.h.lock(value);
       for (const el of [...this.target.querySelectorAll("input"), ...this.searchRow.querySelectorAll("input,select,button"), ...this.controls.querySelectorAll("input,select,textarea,button")]) {
         if (value) {
-          el.dataset.contentDisabled = String(el.disabled);
+          if (el.dataset.contentDisabled === undefined) el.dataset.contentDisabled = String(el.disabled);
           el.disabled = true;
-        } else {
+        } else if (el.dataset.contentDisabled !== undefined) {
           el.disabled = el.dataset.contentDisabled === "true";
           delete el.dataset.contentDisabled;
         }
@@ -5987,17 +5987,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       .tle-quick-manager .tle-quick-group-actions {
         display: flex;
         flex: 0 0 auto;
+        flex-wrap: wrap;
         align-items: center;
+        justify-content: space-between;
         gap: 6px;
         min-width: 0;
       }
       .tle-quick-manager .tle-quick-group-actions > button { flex: 0 0 auto; }
-      .tle-quick-manager .tle-quick-group-editor {
-        gap: 6px;
-        min-width: 0;
-      }
+      .tle-quick-manager .tle-quick-group-editor { gap: 6px; min-width: 0; }
       .tle-quick-manager .tle-quick-group-create-row,
-      .tle-quick-manager .tle-quick-group-edit-row {
+      .tle-quick-manager .tle-quick-group-rename-row {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -6005,34 +6004,28 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         min-width: 0;
       }
       .tle-quick-manager .tle-quick-group-create-row > .text_pole,
-      .tle-quick-manager .tle-quick-group-edit-row > .text_pole {
+      .tle-quick-manager .tle-quick-group-rename-row > .text_pole {
         flex: 1 1 9rem;
         width: auto;
         min-width: 0;
       }
       .tle-quick-manager .tle-quick-group-create-row > button,
-      .tle-quick-manager .tle-quick-group-edit-row > button {
+      .tle-quick-manager .tle-quick-group-rename-row > button,
+      .tle-quick-manager .tle-quick-group-selection-actions > button,
+      .tle-quick-manager .tle-quick-group-delete-actions > button {
         flex: 0 0 auto;
         width: auto;
         max-width: 100%;
         white-space: nowrap;
       }
-      .tle-quick-manager .tle-quick-group-manage {
-        gap: 6px;
-        min-width: 0;
-      }
-      .tle-quick-manager .tle-quick-group-manage-target {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        gap: 4px;
-        min-width: 0;
-      }
-      .tle-quick-manager .tle-quick-group-manage-name { overflow-wrap: anywhere; }
-      .tle-quick-manager .tle-quick-group-manage-hint {
-        display: block;
-        min-width: 0;
-      }
+      .tle-quick-manager .tle-quick-group-selection { gap: 6px; min-width: 0; }
+      .tle-quick-manager .tle-quick-group-selection-summary { gap: 4px 8px; min-width: 0; }
+      .tle-quick-manager .tle-quick-group-selection-name { overflow-wrap: anywhere; }
+      .tle-quick-manager .tle-quick-group-selection-count { min-width: 0; opacity: .72; }
+      .tle-quick-manager .tle-quick-group-selection-actions,
+      .tle-quick-manager .tle-quick-group-delete-actions { gap: 6px; min-width: 0; }
+      .tle-quick-manager .tle-quick-group-delete-confirm { gap: 6px; min-width: 0; }
+      .tle-quick-manager .tle-quick-group-delete-message { display: block; min-width: 0; white-space: normal; }
       .tle-quick-manager .tle-quick-filter-bar {
         display: flex;
         flex: 1 1 auto;
@@ -6214,24 +6207,24 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           overflow-y: auto;
           padding: 0 2px 2px 0;
         }
-        .tle-quick-manager .tle-quick-filter-bar > button {
+        .tle-quick-manager .tle-quick-filter-bar > .tle-quick-filter {
           flex: 0 0 auto;
           width: 100%;
           max-width: none;
-          justify-content: flex-start;
-          padding: 7px 9px;
-          border-radius: 8px;
+          justify-content: space-between;
           text-align: left;
           white-space: normal;
         }
         .tle-quick-manager .tle-quick-group-actions {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
           gap: 6px;
         }
         .tle-quick-manager .tle-quick-group-actions > button {
+          flex: 0 0 auto;
           min-width: 0;
-          padding-inline: 6px;
           white-space: nowrap;
         }
         .tle-quick-manager .tle-quick-toolbar {
@@ -6328,6 +6321,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch;
         }
+        .tle-quick-manager .tle-quick-filter-bar > .tle-quick-filter {
+          width: auto;
+          max-width: min(72vw, 260px);
+          flex: 0 0 auto;
+        }
+        .tle-quick-manager .tle-quick-filter-label {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
         .tle-quick-manager .tle-quick-group-heading { display: none; }
         .tle-quick-manager .tle-quick-toolbar {
           grid-area: target;
@@ -6417,7 +6420,24 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         .tle-quick-manager .tle-quick-status { grid-area: status; }
       }
 
-      .tle-quick-manager .tle-quick-filter,
+      .tle-quick-manager .tle-quick-filter {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        text-align: left;
+        cursor: pointer;
+      }
+      .tle-quick-manager .tle-quick-filter[aria-pressed="true"] {
+        color: var(--SmartThemeQuoteColor, inherit);
+        font-weight: 600;
+      }
+      .tle-quick-manager .tle-quick-filter-label { min-width: 0; overflow-wrap: anywhere; }
+      .tle-quick-manager .tle-quick-filter-count { flex: 0 0 auto; opacity: .72; }
       .tle-quick-manager .tle-quick-group-tag {
         appearance: none;
         -webkit-appearance: none;
@@ -6432,11 +6452,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         font-size: .8em;
         line-height: 1.3;
         cursor: pointer;
-      }
-      .tle-quick-manager .tle-quick-filter[aria-pressed="true"] {
-        border-color: var(--SmartThemeQuoteColor, currentColor);
-        color: var(--SmartThemeQuoteColor, inherit);
-        background: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 9%, transparent);
       }
       .tle-quick-manager .tle-quick-list {
         flex: 1 1 auto;
@@ -8677,6 +8692,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let module = 'preset';
     let targetGroup = '';
     let viewGroup = '*';
+    let editingGroupId = '';
+    let deletingGroupId = '';
     let entries = [];
     let loading = 0;
     let statusMessage = '';
@@ -8744,41 +8761,54 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     current.abort.signal.addEventListener('abort', () => horizontalIndicatorResizeObserver?.disconnect(), { once: true });
 
     const newGroupName = quickNode('input', 'text_pole');
-    newGroupName.placeholder = '新分组名称';
+    newGroupName.placeholder = '输入新分组名称';
     newGroupName.size = 1;
     newGroupName.setAttribute('aria-label', '新分组名称');
-    const createButton = quickButton('新建分组', () => createGroup());
+    const createButton = quickButton('创建', () => createGroup());
+    const cancelCreateButton = quickButton('取消', () => {
+      createRow.hidden = true;
+      newGroupName.value = '';
+      newGroupToggle.setAttribute('aria-expanded', 'false');
+    });
     const createRow = quickNode('div', 'tle-quick-group-create-row flex-container flexWrap alignItemsCenter');
-    createRow.append(newGroupName, createButton);
+    createRow.hidden = true;
+    createRow.append(newGroupName, createButton, cancelCreateButton);
 
-    const manageTarget = quickNode('div', 'tle-quick-group-manage-target');
-    manageTarget.setAttribute('aria-label', '当前选中分组');
-    const manageTargetLabel = quickNode('small', '', '当前选中分组：');
-    const manageTargetName = quickNode('strong', 'tle-quick-group-manage-name', '未选择，请点选下方分组');
-    manageTargetName.setAttribute('aria-live', 'polite');
-    manageTarget.append(manageTargetLabel, manageTargetName);
+    const selectedGroupSummary = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-selection-summary');
+    const selectedGroupLabel = quickNode('small', '', '当前选中分组：');
+    const selectedGroupName = quickNode('strong', 'tle-quick-group-selection-name', '未选择');
+    const selectedGroupCount = quickNode('small', 'tle-quick-group-selection-count', '点选下方分组后，可在这里重命名或删除。');
+    selectedGroupSummary.append(selectedGroupLabel, selectedGroupName, selectedGroupCount);
 
-    const groupName = quickNode('input', 'text_pole');
-    groupName.placeholder = '输入修改后的名称';
-    groupName.size = 1;
-    groupName.disabled = true;
-    groupName.setAttribute('aria-label', '修改后的分组名称');
-    const renameButton = quickButton('确认重命名', () => renameGroup());
-    const deleteButton = quickButton('删除该分组', () => deleteGroup());
-    const manageEditLabel = quickNode('small', '', '修改为');
-    const manageEditRow = quickNode('div', 'tle-quick-group-edit-row flex-container flexWrap alignItemsCenter');
-    manageEditRow.append(manageEditLabel, groupName, renameButton, deleteButton);
+    const selectedGroupActions = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-selection-actions');
+    selectedGroupActions.hidden = true;
+    const renameGroupButton = quickButton('重命名', () => beginRenameGroup());
+    const deleteGroupButton = quickButton('删除分组', () => beginDeleteGroup());
+    selectedGroupActions.append(renameGroupButton, deleteGroupButton);
 
-    const manageHint = quickNode(
-      'small',
-      'tle-quick-group-manage-hint',
-      '删除只移除分组，不会删除资源；组内项目会移回「未分组」。'
-    );
-    const manageRow = quickNode('div', 'tle-quick-group-manage flex-container flexFlowColumn');
-    manageRow.hidden = true;
-    manageRow.append(manageTarget, manageEditRow, manageHint);
+    const renameInput = quickNode('input', 'text_pole');
+    renameInput.placeholder = '输入新的分组名称';
+    renameInput.size = 1;
+    renameInput.setAttribute('aria-label', '修改后的分组名称');
+    const renameConfirmButton = quickButton('确认重命名', () => renameGroup());
+    const renameCancelButton = quickButton('取消', () => cancelRenameGroup());
+    const renameEditor = quickNode('div', 'tle-quick-group-rename-row flex-container flexWrap alignItemsCenter');
+    renameEditor.hidden = true;
+    renameEditor.append(renameInput, renameConfirmButton, renameCancelButton);
+
+    const groupDeleteMessage = quickNode('small', 'tle-quick-group-delete-message');
+    const groupDeleteConfirmButton = quickButton('确认删除分组', () => deleteGroup());
+    const groupDeleteCancelButton = quickButton('取消', () => cancelDeleteGroup());
+    const groupDeleteActions = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-delete-actions');
+    groupDeleteActions.append(groupDeleteConfirmButton, groupDeleteCancelButton);
+    const groupDeleteConfirm = quickNode('div', 'flex-container flexFlowColumn tle-quick-group-delete-confirm');
+    groupDeleteConfirm.hidden = true;
+    groupDeleteConfirm.append(groupDeleteMessage, groupDeleteActions);
+
+    const groupSelection = quickNode('div', 'flex-container flexFlowColumn tle-quick-group-selection');
+    groupSelection.append(selectedGroupSummary, selectedGroupActions, renameEditor, groupDeleteConfirm);
     const groupEditor = quickNode('div', 'tle-quick-group-editor flex-container flexFlowColumn');
-    groupEditor.append(createRow, manageRow);
+    groupEditor.append(createRow, groupSelection);
 
     const search = state.organizerPanel.querySelector('.tle-search-field');
     if (!search) return;
@@ -8789,13 +8819,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const targetSelect = quickNode('select', 'text_pole');
     targetSelect.setAttribute('aria-label', '批量操作目标分组');
 
-    const manageButton = quickButton('管理分组', () => {
-      manageRow.hidden = !manageRow.hidden;
-      manageButton.textContent = manageRow.hidden ? '管理分组' : '收起管理';
-      manageButton.setAttribute('aria-expanded', String(!manageRow.hidden));
-      if (!manageRow.hidden && targetGroup) groupName.focus({ preventScroll: true });
+    const newGroupToggle = quickButton('新建分组', () => {
+      const opening = createRow.hidden;
+      createRow.hidden = !opening;
+      newGroupToggle.setAttribute('aria-expanded', String(opening));
+      if (opening) {
+        editingGroupId = '';
+        deletingGroupId = '';
+        renameEditor.hidden = true;
+        groupDeleteConfirm.hidden = true;
+        newGroupName.focus({ preventScroll: true });
+      } else newGroupName.value = '';
     });
-    manageButton.setAttribute('aria-expanded', 'false');
+    newGroupToggle.setAttribute('aria-expanded', 'false');
 
     const autoGroupButton = quickButton('自动分组', () => autoGroupByPrefix());
     autoGroupButton.title = '识别当前分类中名称具有相同开头的项目；只整理未分组项目，不覆盖已有分组归属。';
@@ -8804,7 +8840,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     toolbar.append(targetSelect);
 
     const groupActions = quickNode('div', 'tle-quick-group-actions');
-    groupActions.append(manageButton, autoGroupButton);
+    groupActions.append(newGroupToggle, autoGroupButton);
 
     const operations = quickNode('div', 'flex-container flexWrap tle-quick-operations');
     const selectVisibleButton = quickButton('全选当前结果', () => {
@@ -8916,13 +8952,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         targetGroup = '';
         viewGroup = '*';
         selected.clear();
-        groupName.value = '';
+        editingGroupId = '';
+        deletingGroupId = '';
+        newGroupName.value = '';
+        renameInput.value = '';
+        createRow.hidden = true;
+        renameEditor.hidden = true;
+        groupDeleteConfirm.hidden = true;
+        newGroupToggle.setAttribute('aria-expanded', 'false');
         if (!content?.active) search.value = '';
         content?.contextChanged();
         deleteConfirm.hidden = true;
-        manageRow.hidden = true;
-        manageButton.textContent = '管理分组';
-        manageButton.setAttribute('aria-expanded', 'false');
         statusMessage = '';
         void load();
       });
@@ -8948,11 +8988,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!groups.some(group => group.id === targetGroup)) targetGroup = '';
       targetSelect.value = targetGroup;
       targetSelect.disabled = groups.length === 0;
-      const managedGroup = groups.find(group => group.id === targetGroup);
-      manageTargetName.textContent = managedGroup?.name || '未选择，请点选下方分组';
-      groupName.disabled = !managedGroup;
-      renameButton.disabled = !managedGroup;
-      deleteButton.disabled = !managedGroup;
       assignButton.disabled = !targetGroup || selected.size === 0;
       ungroupButton.disabled = selected.size === 0;
       clearSelectionButton.disabled = selected.size === 0;
@@ -8962,6 +8997,33 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       deleteSelectedButton.title = blockedReason || (selectedEntries.length
         ? '删除所选资源。' + deleteScopeHint
         : '请先勾选需要删除的资源。' + deleteScopeHint);
+    }
+
+    function refreshGroupManagement(data = readQuickGroups()) {
+      const groups = currentGroups(data);
+      const managedGroup = groups.find(group => group.id === viewGroup);
+      const managedCount = managedGroup
+        ? entries.filter(entry => quickAssignment(data, module, entry.key) === managedGroup.id).length
+        : 0;
+      selectedGroupName.textContent = managedGroup?.name || '未选择';
+      selectedGroupCount.textContent = managedGroup ? `${managedCount} 项资源` : '点选下方分组后，可在这里重命名或删除。';
+      selectedGroupActions.hidden = !managedGroup;
+      if (!managedGroup) {
+        editingGroupId = '';
+        deletingGroupId = '';
+      }
+      renameEditor.hidden = !managedGroup || editingGroupId !== managedGroup.id;
+      groupDeleteConfirm.hidden = !managedGroup || deletingGroupId !== managedGroup.id;
+      if (managedGroup && !renameEditor.hidden && HOST_DOC.activeElement !== renameInput) renameInput.value = managedGroup.name;
+      if (managedGroup && !groupDeleteConfirm.hidden) {
+        groupDeleteMessage.textContent = `确认删除「${managedGroup.name}」？不会删除其中的资源；${managedCount} 项会移回「未分组」。`;
+      }
+      const busy = Boolean(content?.busy || deleteBusy || scanBusy);
+      renameInput.disabled = !managedGroup || busy;
+      renameGroupButton.disabled = !managedGroup || busy;
+      deleteGroupButton.disabled = !managedGroup || busy;
+      renameConfirmButton.disabled = !managedGroup || busy;
+      groupDeleteConfirmButton.disabled = !managedGroup || busy;
     }
 
     function getVisibleEntries(data = readQuickGroups()) {
@@ -8980,9 +9042,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     function setViewGroup(id) {
       viewGroup = id;
-      const group = currentGroups().find(item => item.id === id);
-      targetGroup = group?.id || '';
-      groupName.value = group?.name || '';
+      editingGroupId = '';
+      deletingGroupId = '';
+      renameEditor.hidden = true;
+      groupDeleteConfirm.hidden = true;
+      createRow.hidden = true;
+      newGroupToggle.setAttribute('aria-expanded', 'false');
       if (!content?.active) search.value = '';
       selected.clear();
       content?.contextChanged();
@@ -8999,21 +9064,23 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (id) assignedCount.set(id, (assignedCount.get(id) || 0) + 1);
         else ungroupedCount++;
       }
-
       groupFilters.replaceChildren();
       const filters = [
-        { id: '*', label: `全部项目 · ${entries.length}` },
-        { id: '', label: `未分组 · ${ungroupedCount}` },
-        ...groups.map(group => ({ id: group.id, label: `${quickGroupLabel(group)} · ${assignedCount.get(group.id) || 0}` })),
+        { id: '*', label: '全部项目', count: entries.length },
+        { id: '', label: '未分组', count: ungroupedCount },
+        ...groups.map(group => ({ id: group.id, label: quickGroupLabel(group), count: assignedCount.get(group.id) || 0 })),
       ];
       for (const filter of filters) {
-        const button = quickButton(filter.label, () => setViewGroup(filter.id), 'tle-quick-filter');
+        const button = quickButton('', () => setViewGroup(filter.id), 'menu_button tle-quick-filter');
+        button.dataset.groupId = filter.id;
+        button.append(
+          quickNode('span', 'tle-quick-filter-label', filter.label),
+          quickNode('small', 'tle-quick-filter-count', String(filter.count))
+        );
         const group = groups.find(item => item.id === filter.id);
-        button.title = group
-          ? '查看并选中此分组；可在「管理分组」中重命名或删除，包括空分组。'
-          : filter.id === ''
-            ? '查看尚未归组的项目。'
-            : '查看当前分类的全部项目。';
+        button.title = group ? '查看此分组；重命名和删除操作会作用于当前选中的分组。'
+          : filter.id === '' ? '查看尚未归组的项目。' : '查看当前分类的全部项目。';
+        button.setAttribute('aria-label', `${filter.label}，${filter.count} 项`);
         button.setAttribute('aria-pressed', String(viewGroup === filter.id));
         groupFilters.append(button);
       }
@@ -9140,9 +9207,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       renderGroupFilters(data);
       refreshTargetSelect(data);
 
-      const target = groups.find(group => group.id === targetGroup);
-      if (target && HOST_DOC.activeElement !== groupName) groupName.value = target.name;
-      if (!target && HOST_DOC.activeElement !== groupName) groupName.value = '';
+      refreshGroupManagement(data);
       content?.syncScope();
       renderList(data);
     }
@@ -9216,7 +9281,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         ...tabs.querySelectorAll('button'),
         ...operations.querySelectorAll('button'),
         ...groupEditor.querySelectorAll('button,input'),
-        targetSelect, manageButton, autoGroupButton,
+        targetSelect, newGroupToggle, autoGroupButton,
       ];
       const busyDisabled = busyControls.map(control => control.disabled);
       busyControls.forEach(control => { control.disabled = true; });
@@ -9383,46 +9448,82 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       const id = HOST_WIN.crypto?.randomUUID?.() || `g_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
       groups.push({ id, name, keyword: '' });
+      viewGroup = id;
       targetGroup = id;
-      viewGroup = '*';
-      manageRow.hidden = true;
-      manageButton.textContent = '管理分组';
-      manageButton.setAttribute('aria-expanded', 'false');
-      saveAndRender(data, `已创建「${name}」分组。`);
-      groupName.value = name;
+      editingGroupId = '';
+      deletingGroupId = '';
+      createRow.hidden = true;
       newGroupName.value = '';
+      newGroupToggle.setAttribute('aria-expanded', 'false');
+      saveAndRender(data, `已创建「${name}」分组。`);
+    }
+
+    function beginRenameGroup() {
+      const group = currentGroups().find(item => item.id === viewGroup);
+      if (!group) { statusMessage = '请先在分组目录中选择一个分组。'; render(); return; }
+      editingGroupId = group.id;
+      deletingGroupId = '';
+      renameInput.value = group.name;
+      render();
+      renameInput.focus({ preventScroll: true });
+      renameInput.select();
+    }
+
+    function cancelRenameGroup() {
+      editingGroupId = '';
+      renameEditor.hidden = true;
+      render();
     }
 
     function renameGroup() {
       const data = readQuickGroups();
       const groups = currentGroups(data);
-      const group = groups.find(item => item.id === targetGroup);
-      const name = groupName.value.trim();
-      if (!group) { statusMessage = '请先选择需要重命名的分组。'; render(); return; }
+      const group = groups.find(item => item.id === viewGroup && item.id === editingGroupId);
+      const name = renameInput.value.trim();
+      if (!group) { statusMessage = '请先在分组目录中选择需要重命名的分组。'; render(); return; }
       if (!name) { statusMessage = '分组名称不能为空。'; render(); return; }
-      if (groups.some(item => item.id !== targetGroup && item.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+      if (groups.some(item => item.id !== group.id && item.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
         statusMessage = '当前分类中已有同名分组。';
         render();
         return;
       }
       group.name = name;
+      editingGroupId = '';
       saveAndRender(data, '分组名称已更新。');
+    }
+
+    function beginDeleteGroup() {
+      const group = currentGroups().find(item => item.id === viewGroup);
+      if (!group) { statusMessage = '请先在分组目录中选择一个分组。'; render(); return; }
+      deletingGroupId = group.id;
+      editingGroupId = '';
+      render();
+    }
+
+    function cancelDeleteGroup() {
+      deletingGroupId = '';
+      groupDeleteConfirm.hidden = true;
+      render();
     }
 
     function deleteGroup() {
       const data = readQuickGroups();
       const groups = currentGroups(data);
-      const group = groups.find(item => item.id === targetGroup);
-      if (!group) { statusMessage = '请先选择需要删除的分组。'; render(); return; }
+      const group = groups.find(item => item.id === viewGroup && item.id === deletingGroupId);
+      if (!group) { statusMessage = '请先在分组目录中选择需要删除的分组。'; render(); return; }
       const removedId = group.id;
+      const movedCount = entries.filter(entry => quickAssignment(data, module, entry.key) === removedId).length;
       groups.splice(groups.indexOf(group), 1);
       const map = data.assignments[module] || Object.create(null);
       for (const key of Object.keys(map)) if (map[key] === removedId) delete map[key];
       data.assignments[module] = map;
+      if (targetGroup === removedId) targetGroup = '';
       if (viewGroup === removedId) viewGroup = '*';
-      targetGroup = '';
-      groupName.value = '';
-      saveAndRender(data, `已删除「${group.name}」；其中项目已恢复为未分组，其他分类不受影响。`);
+      editingGroupId = '';
+      deletingGroupId = '';
+      renameEditor.hidden = true;
+      groupDeleteConfirm.hidden = true;
+      saveAndRender(data, `已删除「${group.name}」分组；资源没有删除，${movedCount} 项已移回「未分组」。`);
     }
 
     function assignSelected() {
@@ -9629,7 +9730,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         ...tabs.querySelectorAll('button'),
         ...operations.querySelectorAll('button'),
         ...groupEditor.querySelectorAll('button,input'),
-        targetSelect, manageButton, autoGroupButton,
+        targetSelect, newGroupToggle, autoGroupButton,
       ].filter(Boolean);
       const disabledBefore = controls.map(control => control.disabled);
       controls.forEach(control => { control.disabled = true; });
@@ -9832,19 +9933,28 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     targetSelect.addEventListener('change', () => {
       targetGroup = targetSelect.value;
-      const group = currentGroups().find(item => item.id === targetGroup);
-      groupName.value = group?.name || '';
-      if (group) viewGroup = group.id;
-      content?.contextChanged();
       render();
     });
-    groupName.addEventListener('keydown', event => {
+    renameInput.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
         renameGroup();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        cancelRenameGroup();
       }
     });
-    newGroupName.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); createGroup(); } });
+    newGroupName.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        createGroup();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        createRow.hidden = true;
+        newGroupName.value = '';
+        newGroupToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
     current.onSearchInput = () => {
       if (quickPanel !== current) return;
       content?.onInput();
@@ -9866,8 +9976,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       lock(locked) {
         for (const el of body.querySelectorAll('button,input,select,textarea')) {
           if (content.controls.contains(el) || content.searchRow.contains(el) || content.target.contains(el)) continue;
-          if (locked) { el.dataset.contentLockDisabled = String(el.disabled); el.disabled = true; }
-          else { el.disabled = el.dataset.contentLockDisabled === 'true'; delete el.dataset.contentLockDisabled; }
+          if (locked) {
+            if (el.dataset.contentLockDisabled === undefined) el.dataset.contentLockDisabled = String(el.disabled);
+            el.disabled = true;
+          } else if (el.dataset.contentLockDisabled !== undefined) {
+            el.disabled = el.dataset.contentLockDisabled === 'true';
+            delete el.dataset.contentLockDisabled;
+          }
         }
         list.inert = locked;
       },
@@ -10789,14 +10904,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.250 · 整理侠使用单个原生复选框切换查找与替换</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.251 · 分组目录直接选择，重命名与删除跟随当前分组</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.250</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.251</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -16897,7 +17012,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.250',
+    version: '0.3.251',
     ready: false,
     destroy,
     state,
@@ -17348,5 +17463,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.250 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.251 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
