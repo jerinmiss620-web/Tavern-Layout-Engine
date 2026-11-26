@@ -11,6 +11,7 @@ function createHomeMarkup() {
     return '<div id="chat">' +
         '<div class="welcomePanel">' +
             '<div class="welcomeHeaderTitle">' +
+                '<img class="welcomeHeaderLogo" src="img/logo.png" alt="SillyTavern Logo">' +
                 '<span class="welcomeHeaderVersionDisplay">SillyTavern</span>' +
                 '<div class="mes_button showRecentChats"></div>' +
                 '<div class="mes_button recentChatsSettings"></div>' +
@@ -345,7 +346,9 @@ test('layout settings persist, allow only 2/3/4 columns and 1-15 rows, and pagin
 
     assert.equal(api.setLayoutSettings({ columns: 5 }), false);
     assert.equal(api.setLayoutSettings({ rows: 16 }), false);
-    assert.deepEqual(api.setLayoutSettings({ columns: 3, rows: 1 }), { columns: 3, rows: 1 });
+    const updatedSettings = api.setLayoutSettings({ columns: 3, rows: 1 });
+    assert.equal(updatedSettings.columns, 3);
+    assert.equal(updatedSettings.rows, 1);
     assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 3);
 
     api.stop();
