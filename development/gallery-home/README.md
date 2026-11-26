@@ -68,7 +68,7 @@ v0.2.5 增加 480px 以下三列上限、详情页聊天操作和独立置顶；
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@61304eb22ce95d320090ba76527616ff611a2fc5/development/gallery-home/Freesia-Gallery-Home-0.2.5.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@720392902754bc1ad0102fe93113b5810574ac04/development/gallery-home/Freesia-Gallery-Home-0.2.5.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
