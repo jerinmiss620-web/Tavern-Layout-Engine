@@ -56,6 +56,7 @@ try{
  const search=page.locator('#tle-organizer-panel input[type=search]');assert.equal(await search.count(),1);
  const modeToggle=page.getByRole('checkbox',{name:'查找和替换',exact:true});
  assert.equal(await modeToggle.count(),1,'One native checkbox controls the content-search module');
+ assert.equal(await modeToggle.evaluate(toggle=>toggle.parentElement.matches('label.checkbox_label')),true,'The checkbox uses SillyTavern native checkbox_label markup');
  assert.equal(await modeToggle.isChecked(),false,'Resource management is the default mode');
  assert.equal(await modeToggle.getAttribute('class'),null,'The native checkbox has no custom class');
  assert.equal(await modeToggle.getAttribute('style'),null,'The native checkbox has no inline styling');
