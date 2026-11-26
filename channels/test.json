@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.270",
+  "latest_version": "0.3.271",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.270",
-    "source_path": "releases/v0.3.270/TLE.js",
-    "source_commit": "05d799b7c3d5669ec5af0a5d6062573809c9c9a4",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/05d799b7c3d5669ec5af0a5d6062573809c9c9a4/releases/v0.3.270/TLE.js",
-    "changelog_path": "releases/v0.3.270/CHANGELOG.md",
-    "sha256": "5a2473b8a960a4b109f293d27b7c57e2e44d140516181118a5ee9d95cb389afb",
-    "size_bytes": 957978
+    "version": "0.3.271",
+    "source_path": "releases/v0.3.271/TLE.js",
+    "source_commit": "6ba12bb8b06ce76bdc3d5596fc3218834db2a08a",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6ba12bb8b06ce76bdc3d5596fc3218834db2a08a/releases/v0.3.271/TLE.js",
+    "changelog_path": "releases/v0.3.271/CHANGELOG.md",
+    "sha256": "7c2c64afe6f810b5d355fa66e95e7f5712f0bcadf6ccf0837b087796dc5fa9fb",
+    "size_bytes": 958907
   },
-  "status": "TEST v0.3.270: 记录预览卡片圆角跟随酒馆头像设置；普通头像使用 --avatar-base-border-radius-round，big-avatars 使用 --avatar-base-border-radius 与 --big-avatar-border-factor 原生计算；最外层统一裁切头像和渐变。保留2:3头像、渐变、两行概要和原生操作。仅更新测试通道。",
+  "status": "TEST v0.3.271: 记录预览卡片日期、置顶/编辑/删除图标及底部统计统一使用高对比度白色；置顶状态不再依赖酒馆主题强调色。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
