@@ -9,7 +9,7 @@
 - 兼容性修复新增两项默认开启、可分别关闭的记录预览头像设置：禁用头像 `::before / ::after` 伪元素装饰、禁用 `border-image` 边框贴图。仅作用于 TLE 创建的头像。
 - 「详情/管理」按钮恢复酒馆原生 `menu_button` 尺寸；角色名与世界书名、最近会话名与聊天文件名统一左对齐。
 - 回归测试已更新以覆盖模块内嵌一致性、首页开关接线与默认值、视图命名、头像兼容规则、原生按钮和 CSS 无重复选择器。
-- GitHub Actions 自动化结果待核对；ST/TT PC 与移动端实机验收仍待用户完成。本版不修改 Stable Core、Stable Loader 或 Bootstrap。
+- GitHub Actions run [#45873512033](https://github.com/jerinmiss620-web/Tavern-Layout-Engine/actions/runs/45873512033) 已通过：完整 `npm test` 回归、TLE 测试通道远端清单/不可变源码/禁用状态 TEST 导入包核验均成功；Stable 发布验证保持 v0.3.239。ST/TT PC 与移动端实机验收仍待用户完成。本版不修改 Stable Core、Stable Loader 或 Bootstrap。
 
 ## 2026-11-27 · Core v0.3.264 首页角色画廊整合（测试候选）
 
