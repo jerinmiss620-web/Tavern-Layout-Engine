@@ -18643,6 +18643,7 @@ function createTLEGalleryHome(window, document) {
             });
         });
         state.settingsPopupObserver.observe(document.body, { childList: true, subtree: true });
+        document.querySelectorAll('dialog.popup').forEach(attachGallerySettingsToNativePopup);
     }
 
     function findCharacter(avatar) {
@@ -19355,7 +19356,7 @@ function createTLEGalleryHome(window, document) {
     }
 
     function start() {
-        if (state.started || typeof document === 'undefined') return window[GLOBAL_NAME];
+        if (state.started || !state.enabled || typeof document === 'undefined') return window[GLOBAL_NAME];
         state.started = true;
         if (!document.getElementById(STYLE_ID)) {
             const style = createElement('style');
@@ -19400,8 +19401,8 @@ function createTLEGalleryHome(window, document) {
             const next = Boolean(enabled);
             if (state.enabled === next) return next;
             state.enabled = next;
-            if (!next) unmountPanel();
-            else if (state.started) syncPanel();
+            if (!next) stop();
+            else start();
             return next;
         },
         setAvatarCompatibility: function (settings) {
