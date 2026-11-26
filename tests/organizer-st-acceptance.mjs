@@ -37,16 +37,19 @@ const boot=async()=>{
  assert.equal(await modeToggle.count(),1,'Exactly one native mode checkbox is present');
  assert.equal(await modeToggle.evaluate(toggle=>toggle.parentElement.matches('label.checkbox_label')),true,'The checkbox uses the host native checkbox_label markup');
  assert.equal(await modeToggle.isChecked(),false,'Resource management is the default mode');
- assert.equal(await modeToggle.getAttribute('class'),null);
+ assert.equal(await modeToggle.getAttribute('class'),'checkbox');
  assert.equal(await modeToggle.getAttribute('style'),null);
  const nativeModeStyle=await modeToggle.evaluate(toggle=>{
-  const probe=document.createElement('input');probe.type='checkbox';toggle.parentElement.append(probe);
+  const probe=document.createElement('input');probe.type='checkbox';probe.className='checkbox';toggle.parentElement.append(probe);
   const properties=['appearance','accentColor','backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','width','height','marginTop','marginRight','color','boxShadow'];
   const actual=getComputedStyle(toggle),expected=getComputedStyle(probe);
   const matches=properties.every(property=>actual[property]===expected[property]);
   probe.remove();return matches;
  });
  assert.equal(nativeModeStyle,true,'The mode checkbox must use the unmodified native host checkbox style');
+ assert.equal(await page.locator('.tle-organizer-pane-title.standoutHeader').count(),2,'Both navigation pane titles use standoutHeader');
+ assert.equal(await page.locator('.tle-content-heading.standoutHeader').count(),1,'The resource heading uses standoutHeader');
+ assert.equal(await page.locator('.tle-organizer-divider').count(),0,'No Organizer divider elements remain');
  await modeToggle.check();
  assert.equal(await modeToggle.isChecked(),true);
  await page.waitForFunction(()=>!document.querySelector('#tle-organizer-panel input[type=search]').disabled);
