@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.256
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.257
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -6029,7 +6029,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         font-size: .82em;
         line-height: 1.4;
       }
-      .tle-quick-manager .tle-quick-group-delete-actions { gap: 6px; min-width: 0; }
+      .tle-quick-manager .tle-quick-group-delete-actions { gap: 6px; min-width: 0; flex-wrap: nowrap; }
       .tle-quick-manager .tle-quick-group-delete-confirm { gap: 6px; min-width: 0; }
       .tle-quick-manager .tle-quick-group-delete-message { display: block; min-width: 0; white-space: normal; }
       .tle-quick-manager .tle-quick-filter-bar {
@@ -8860,9 +8860,22 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     renameEditor.append(renameInput, renameConfirmButton, renameCancelButton);
 
     const groupDeleteMessage = quickNode('small', 'tle-quick-group-delete-message');
-    const groupDeleteConfirmButton = quickButton('确认删除所选分组', () => deleteGroups());
-    const groupDeleteCancelButton = quickButton('取消', () => cancelDeleteGroups());
-    const groupDeleteActions = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-delete-actions');
+    const groupDeleteConfirmButton = quickButton('', () => deleteGroups(), 'menu_button tle-quick-icon-action');
+    groupDeleteConfirmButton.title = '确认删除所选分组';
+    groupDeleteConfirmButton.setAttribute('aria-label', '确认删除所选分组');
+    groupDeleteConfirmButton.setAttribute('aria-description', '确认后删除已选自定义分组；其中的资源不会删除，会移回「未分组」。');
+    const groupDeleteConfirmIcon = quickNode('i', 'fa-solid fa-check');
+    groupDeleteConfirmIcon.setAttribute('aria-hidden', 'true');
+    groupDeleteConfirmButton.append(groupDeleteConfirmIcon);
+
+    const groupDeleteCancelButton = quickButton('', () => cancelDeleteGroups(), 'menu_button tle-quick-icon-action');
+    groupDeleteCancelButton.title = '取消删除';
+    groupDeleteCancelButton.setAttribute('aria-label', '取消删除');
+    const groupDeleteCancelIcon = quickNode('i', 'fa-solid fa-xmark');
+    groupDeleteCancelIcon.setAttribute('aria-hidden', 'true');
+    groupDeleteCancelButton.append(groupDeleteCancelIcon);
+
+    const groupDeleteActions = quickNode('div', 'flex-container alignItemsCenter tle-quick-group-delete-actions');
     groupDeleteActions.append(groupDeleteConfirmButton, groupDeleteCancelButton);
     const groupDeleteConfirm = quickNode('div', 'flex-container flexFlowColumn tle-quick-group-delete-confirm');
     groupDeleteConfirm.hidden = true;
@@ -11096,14 +11109,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.256 · 分组工具栏顺序与重命名操作优化</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.257 · 分组工具栏顺序与重命名操作优化</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.256</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.257</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -17204,7 +17217,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.256',
+    version: '0.3.257',
     ready: false,
     destroy,
     state,
@@ -17655,5 +17668,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.256 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.257 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
