@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.240
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.241
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -10698,14 +10698,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.240 · 搜索框统一继承主题原生样式</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.241 · 配套侠初始化不再覆盖当前配置</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.240</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.241</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -12567,10 +12567,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           defaults: raw.defaults && typeof raw.defaults === 'object' ? raw.defaults : {},
           schedules: raw.schedules && typeof raw.schedules === 'object' ? raw.schedules : {},
           manualHolds: raw.manualHolds && typeof raw.manualHolds === 'object' ? raw.manualHolds : {},
+          scheduleTokens: raw.scheduleTokens && typeof raw.scheduleTokens === 'object' ? raw.scheduleTokens : {},
         };
       }
     } catch (error) { console.warn('[配套侠] 读取方案失败', error); }
-    return { schema: 1, plans: [], defaults: {}, schedules: {}, manualHolds: {} };
+    return { schema: 1, plans: [], defaults: {}, schedules: {}, manualHolds: {}, scheduleTokens: {} };
   }
   function companionSave(data) {
     try {
@@ -12908,6 +12909,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const fresh = companionRead();
       fresh.schedules[role.key] = next;
       delete fresh.manualHolds[role.key];
+      delete fresh.scheduleTokens[role.key];
       if (!companionSave(fresh)) return;
       companionRuntime.lastScheduleToken = '';
       companionNotice('success', next.enabled
@@ -13018,6 +13020,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return '当前列表中不存在该项，或对应原生控件暂不可用';
   }
 
+  function companionShouldAutoApply({ choice, force = false, changed = false, boundaryChanged = false, manualHold = false }) {
+    if (!choice || (!force && !changed && !boundaryChanged)) return false;
+    if (choice.slot && manualHold) return false;
+    if (!choice.slot && !changed && !force) return false;
+    return true;
+  }
+
   async function companionApply(id, automatic = false) {
     if (state.destroyed) return;
     const role = companionCurrentRole();
@@ -13126,11 +13135,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       companionArmSchedule(choice?.slot);
       if (!key) { companionRuntime.lastScheduleToken = ''; return; }
       const token = choice?.slot?.token || '';
-      const boundaryChanged = Boolean(token && companionRuntime.lastScheduleToken !== token);
+      const storedToken = data.scheduleTokens?.[key] || '';
+      const runtimeToken = companionRuntime.lastScheduleToken.startsWith(key + '|')
+        ? companionRuntime.lastScheduleToken
+        : '';
+      const previousToken = storedToken || runtimeToken;
+      const boundaryChanged = Boolean(token && previousToken !== token);
       companionRuntime.lastScheduleToken = token;
-      if (!choice || (!force && !changed && !boundaryChanged)) return;
-      if (choice.slot && companionManualHold(data, role, choice.slot)) return;
-      if (!choice.slot && !changed && !force) return;
+      if (token && boundaryChanged) {
+        data.scheduleTokens[key] = token;
+        companionSave(data);
+      }
+      const manualHold = Boolean(choice?.slot && companionManualHold(data, role, choice.slot));
+      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold })) return;
       console.info('[配套侠] 自动应用角色「' + role.name + '」方案：' + choice.plan.name);
       void companionApply(choice.id, true);
     }, 350);
@@ -13162,9 +13179,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.addEventListener('visibilitychange', resume, { signal: state.abort.signal });
     HOST_WIN.addEventListener('focus', resume, { signal: state.abort.signal });
     HOST_WIN.addEventListener('pageshow', resume, { signal: state.abort.signal });
-    // On script reload, apply the selected role's explicit default once.
-    // This also covers environments that mounted before the eventSource was ready.
-    companionRuntime.lastRole = '';
+    // Establish the already-open role as the initialization baseline.
+    // Loading or updating TLE is not a character switch and must not replay its default plan.
+    // The saved schedule token still allows a missed day/night boundary to recover once.
+    const initialRole = companionCurrentRole();
+    const initialData = companionRead();
+    companionRuntime.lastRole = initialRole?.key || '';
+    companionRuntime.lastScheduleToken = initialRole
+      ? (initialData.scheduleTokens?.[initialRole.key] || '')
+      : '';
     companionOnChatChanged();
   }
   function companionCleanup() {
@@ -16774,7 +16797,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.240',
+    version: '0.3.241',
     ready: false,
     destroy,
     state,
@@ -17225,5 +17248,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.240 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.241 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
