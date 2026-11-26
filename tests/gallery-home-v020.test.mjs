@@ -57,7 +57,11 @@ function createContext(calls) {
         accountStorage: {
             getItem: key => key === 'recentChatsSettings'
                 ? JSON.stringify({ maxDisplayed: 15, collapsedDisplayed: 1 })
-                : key === 'pinnedChats' ? null : null,
+                : key === 'pinnedChats' ? null : (calls.storage && calls.storage[key]) || null,
+            setItem: (key, value) => {
+                calls.storage = calls.storage || {};
+                calls.storage[key] = value;
+            },
         },
         getRequestHeaders: () => ({ 'Content-Type': 'application/json' }),
         getThumbnailUrl: (type, avatar) => '/thumbnail/' + avatar,
@@ -123,7 +127,7 @@ function setup() {
     return { dom, api, calls, context };
 }
 
-test('renders a portrait-first four-column gallery with independent identity and latest-chat zones', async () => {
+test('renders a bounded portrait gallery with native card structure and independent layout controls', async () => {
     const { dom, api, calls } = setup();
     await api.refresh();
 
@@ -132,40 +136,56 @@ test('renders a portrait-first four-column gallery with independent identity and
     const css = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
 
     assert.equal(calls.recentBody.max, 15);
-    assert.equal(api.getSettings().collapsedDisplayed, 1);
     assert.equal(cards.length, 2);
     assert.equal(cards[0].querySelector('.freesia-gallery-card-identity .avatar').isConnected, true);
-    assert.equal(cards[0].querySelector('.freesia-gallery-card-name').textContent, 'Alpha');
+    assert.equal(cards[0].querySelector('.freesia-gallery-card-heading .characterName').textContent, 'Alpha');
     assert.match(cards[0].querySelector('.freesia-gallery-chat-count').textContent, /2 个聊天/);
-    assert.match(cards[0].querySelector('.freesia-gallery-card-preview').textContent, /latest preview/);
-    assert.ok(cards[1].classList.contains('freesia-gallery-collapsed'));
-    assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+    assert.match(cards[0].querySelector('.freesia-gallery-card-latest .chatMessage').textContent, /latest preview/);
+    assert.equal(cards[0].classList.contains('recentChat'), true);
+    assert.match(css, /grid-template-columns: repeat\(var\(--freesia-gallery-columns, 4\), minmax\(0, 1fr\)\)/);
     assert.match(css, /aspect-ratio: 3 \/ 4/);
-    assert.doesNotMatch(css, /grid-template-columns: 136px/);
+    assert.doesNotMatch(css, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
+    assert.doesNotMatch(css, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
     assert.ok(panel.querySelector('.recentChatsSettings'));
     assert.ok(panel.querySelector('.recentChatList:not(.freesia-gallery-grid)').isConnected);
+    assert.equal(panel.querySelector('.freesia-gallery-title').textContent, '角色画廊');
+    assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
+    assert.equal(api.getLayoutSettings().columns, 4);
+    assert.equal(api.getLayoutSettings().rows, 3);
+    assert.equal(panel.querySelector('[aria-label="每行列数"]').options.length, 3);
+    assert.equal(panel.querySelector('[aria-label="每页显示行数"]').options.length, 15);
 
     cards[0].querySelector('.freesia-gallery-card-identity').click();
     await new Promise(resolve => dom.window.setTimeout(resolve, 0));
     assert.equal(api.getPage(), 'detail');
-    assert.equal(calls.nativeOpened, 0);
 
     api.stop();
     dom.window.close();
 });
 
-test('detail page shows description and lorebook, while management jumps to the native character editor', async () => {
+test('detail page reuses native recent-chat rows and a readonly native text field; management jumps to the native editor', async () => {
     const { dom, api, calls } = setup();
     await api.refresh();
     await api.openDetail('a.png');
 
     const panel = dom.window.document.querySelector('.welcomePanel');
     assert.equal(api.getPage(), 'detail');
-    assert.equal(panel.querySelector('.recentChatsTitle').textContent, '角色详情');
+    assert.equal(panel.querySelector('.freesia-gallery-title').textContent, '角色详情');
+    assert.equal(panel.querySelector('.recentChatsTitle').textContent, 'Recent Chats');
+    assert.equal(panel.querySelector('.freesia-gallery-back').hidden, false);
     assert.equal(panel.querySelector('.freesia-gallery-detail-name').textContent, 'Alpha');
     assert.match(panel.querySelector('.freesia-gallery-lorebook').textContent, /Alpha Lorebook/);
-    assert.match(panel.querySelector('.freesia-gallery-description').textContent, /read-only character information/);
-    assert.equal(panel.querySelectorAll('.freesia-gallery-session-card').length, 3);
+
+    const description = panel.querySelector('.freesia-gallery-description');
+    assert.match(description.value, /read-only character information/);
+    assert.equal(description.tagName, 'TEXTAREA');
+    assert.equal(description.readOnly, true);
+    assert.ok(description.classList.contains('text_pole'));
+
+    const sessions = panel.querySelectorAll('.freesia-gallery-session-card');
+    assert.equal(sessions.length, 3);
+    assert.ok(sessions[0].classList.contains('recentChat'));
+    assert.ok(panel.querySelector('.freesia-gallery-session-list').classList.contains('recentChatList'));
     assert.match(panel.querySelector('.freesia-gallery-detail-chat-count').textContent, /3 个聊天/);
 
     panel.querySelector('.freesia-gallery-manage').click();
@@ -179,7 +199,7 @@ test('detail page shows description and lorebook, while management jumps to the 
     dom.window.close();
 });
 
-test('chat files page lists all sessions and opens an older chat through the native context', async () => {
+test('chat files page uses native recent-chat rows and opens an older chat through the native context', async () => {
     const { dom, api, calls } = setup();
     await api.refresh();
     await api.openDetail('a.png');
@@ -187,10 +207,11 @@ test('chat files page lists all sessions and opens an older chat through the nat
     const filesButton = dom.window.document.querySelector('.freesia-gallery-detail-chat-header button');
     filesButton.click();
     assert.equal(api.getPage(), 'files');
-    assert.equal(dom.window.document.querySelectorAll('.freesia-gallery-file-row').length, 3);
-    assert.equal(dom.window.document.querySelector('.recentChatsTitle').textContent, '聊天文件');
+    assert.equal(dom.window.document.querySelectorAll('.freesia-gallery-file-list .recentChat').length, 3);
+    assert.equal(dom.window.document.querySelector('.freesia-gallery-title').textContent, '聊天文件');
+    assert.ok(dom.window.document.querySelector('.freesia-gallery-file-list').classList.contains('recentChatList'));
 
-    const oldFile = Array.from(dom.window.document.querySelectorAll('.freesia-gallery-file-row'))
+    const oldFile = Array.from(dom.window.document.querySelectorAll('.freesia-gallery-file-list .recentChat'))
         .find(row => row.textContent.includes('A-archive'));
     oldFile.click();
     await new Promise(resolve => dom.window.setTimeout(resolve, 0));
@@ -217,7 +238,7 @@ test('latest-chat area opens the recent chat and cloned native actions forward t
     dom.window.close();
 });
 
-test('native recent-chat view and original settings remain available; stop restores the original page', async () => {
+test('native recent-chat view remains available and gallery header restores correctly', async () => {
     const { dom, api } = setup();
     await api.refresh();
 
@@ -228,14 +249,16 @@ test('native recent-chat view and original settings remain available; stop resto
     api.toggleView();
     assert.equal(panel.classList.contains('freesia-gallery-native'), true);
     assert.equal(panel.querySelector('.recentChatsTitle').textContent, 'Recent Chats');
+    assert.equal(panel.querySelector('.freesia-gallery-layout-controls').hidden, true);
 
     api.toggleView();
     assert.equal(panel.classList.contains('freesia-gallery-native'), false);
-    assert.equal(panel.querySelector('.recentChatsTitle').textContent, '角色画廊');
+    assert.equal(panel.querySelector('.freesia-gallery-title').textContent, '角色画廊');
 
     api.stop();
     assert.equal(panel.classList.contains('freesia-gallery-active'), false);
     assert.equal(panel.querySelector('.freesia-gallery-grid'), null);
+    assert.equal(panel.querySelector('.freesia-gallery-title'), null);
     assert.equal(panel.querySelector('.freesia-gallery-detail'), null);
     assert.equal(nativeList.isConnected, true);
     assert.equal(panel.querySelector('.recentChatsTitle').textContent, 'Recent Chats');
@@ -250,13 +273,12 @@ test('fallback mode groups native rows by character and still provides portrait 
 
     const cards = dom.window.document.querySelectorAll('.freesia-gallery-card');
     assert.equal(cards.length, 2);
-    assert.equal(cards[0].querySelector('.freesia-gallery-card-name').textContent, 'Alpha');
+    assert.equal(cards[0].querySelector('.freesia-gallery-card-heading .characterName').textContent, 'Alpha');
     assert.match(cards[0].querySelector('.freesia-gallery-chat-count').textContent, /2 个聊天/);
 
     api.stop();
     dom.window.close();
 });
-
 
 test('gallery includes characters that have no recent chat records', async () => {
     const { dom, api, context } = setup();
@@ -272,8 +294,59 @@ test('gallery includes characters that have no recent chat records', async () =>
     assert.equal(cards.length, 3);
     const emptyCharacter = cards.find(card => card.dataset.avatar === 'c.png');
     assert.ok(emptyCharacter);
-    assert.equal(emptyCharacter.querySelector('.freesia-gallery-card-name').textContent, 'No Recent Chat');
-    assert.equal(emptyCharacter.querySelector('.freesia-gallery-card-preview').textContent, '暂无最近聊天记录');
+    assert.equal(emptyCharacter.querySelector('.freesia-gallery-card-heading .characterName').textContent, 'No Recent Chat');
+    assert.equal(emptyCharacter.querySelector('.freesia-gallery-card-latest .chatMessage').textContent, '暂无最近聊天记录');
+
+    api.stop();
+    dom.window.close();
+});
+
+test('layout settings persist, allow only 2/3/4 columns and 1-15 rows, and paginate without rendering every character', async () => {
+    const { dom, api, context, calls } = setup();
+    for (let index = 0; index < 65; index += 1) {
+        context.characters.push({
+            avatar: 'extra-' + index + '.png',
+            name: 'Extra ' + index,
+            description: '',
+            data: { extensions: {} },
+        });
+    }
+    await api.refresh();
+
+    const panel = dom.window.document.querySelector('.welcomePanel');
+    assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 12);
+    assert.equal(panel.querySelectorAll('.freesia-gallery-pagination button').length, 2);
+    assert.equal(api.getLayoutSettings().columns, 4);
+    assert.equal(api.getLayoutSettings().rows, 3);
+
+    const columns = panel.querySelector('[aria-label="每行列数"]');
+    columns.value = '2';
+    columns.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    assert.equal(api.getLayoutSettings().columns, 2);
+    assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 6);
+    assert.equal(JSON.parse(calls.storage.freesiaGallerySettings).columns, 2);
+
+    const rows = panel.querySelector('[aria-label="每页显示行数"]');
+    rows.value = '15';
+    rows.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    assert.equal(api.getLayoutSettings().rows, 15);
+    assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 30);
+    assert.equal(JSON.parse(calls.storage.freesiaGallerySettings).rows, 15);
+
+    columns.value = '4';
+    columns.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 60);
+    assert.equal(panel.querySelectorAll('.freesia-gallery-pagination button').length, 2);
+    assert.equal(panel.querySelector('.freesia-gallery-summary').textContent.includes('第 1 / 2 页'), true);
+
+    panel.querySelectorAll('.freesia-gallery-pagination button')[1].click();
+    assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 7);
+    assert.equal(panel.querySelector('.freesia-gallery-summary').textContent.includes('第 2 / 2 页'), true);
+
+    assert.equal(api.setLayoutSettings({ columns: 5 }), false);
+    assert.equal(api.setLayoutSettings({ rows: 16 }), false);
+    assert.deepEqual(api.setLayoutSettings({ columns: 3, rows: 1 }), { columns: 3, rows: 1 });
+    assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 3);
 
     api.stop();
     dom.window.close();
