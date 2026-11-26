@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.242",
+  "latest_version": "0.3.243",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.242",
-    "source_path": "releases/v0.3.242/TLE.js",
-    "source_commit": "635912d742ce4e3ecbbe751890307a5d857fe730",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/635912d742ce4e3ecbbe751890307a5d857fe730/releases/v0.3.242/TLE.js",
-    "changelog_path": "releases/v0.3.242/CHANGELOG.md",
-    "sha256": "6e22b37cef30924f835f10b8b16cec4ef12a573a569e832d507781ec45b84fa9",
-    "size_bytes": 813880
+    "version": "0.3.243",
+    "source_path": "releases/v0.3.243/TLE.js",
+    "source_commit": "e498f6ea3a5ecc1209740bdd40d4defa5a12a6fe",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e498f6ea3a5ecc1209740bdd40d4defa5a12a6fe/releases/v0.3.243/TLE.js",
+    "changelog_path": "releases/v0.3.243/CHANGELOG.md",
+    "sha256": "2053346cf5e0b5d59877aa6e03ea2676a82ec245f11e5f05918030f0e6ebc80d",
+    "size_bytes": 812782
   },
-  "status": "TEST 0.3.242: Source syntax compilation and remote pinned-source/installer/manifest consistency checks passed. Organizer search mode now uses checkbox-like square visuals while retaining native radio semantics, radiogroup labeling, keyboard operation, and the existing search-mode change handler. v0.3.241 companion initialization protection, schedule-token recovery, manual holds, per-item partial application, and unavailable-item reasons remain included. GitHub Actions Node regression workflow and ST/TT visual/keyboard acceptance pending.",
+  "status": "TEST 0.3.243: Organizer search mode now uses two persistent ordinary buttons instead of radio/checkbox controls. Both modes remain visible; aria-pressed and theme-colored active styling identify the current mode. Existing search term preservation, content-rule loading, scan/replace logic, v0.3.241 companion initialization protection, schedule-token recovery, manual holds, partial application, and unavailable-item reasons remain included. Static source checks pending final remote consistency verification; GitHub Actions and ST/TT runtime acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
