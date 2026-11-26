@@ -1,3 +1,14 @@
+## 2026-11-27 · Core v0.3.264 首页角色画廊整合（测试候选）
+
+- 测试通道：`channels/test.json`，版本 `0.3.264`；源码：`releases/v0.3.264/TLE.js`。
+- 画廊独立模块维护于 `development/gallery-home/gallery-home.js`，并逐字节嵌入 Core；由 TLE Core 显式启动和销毁。
+- 清理原画廊 CSS 中重复选择器覆盖；每个组件选择器仅保留一份，移动端与桌面端差异通过 CSS 自定义属性及媒体断点表达。
+- 保留首页画廊/原生最近聊天切换、原生 Recent Chats Settings 齿轮、角色置顶、聊天操作、详情页、聊天文件页及原生角色管理跳转。
+- 移动端详情区保持左右布局；头像固定 3:4，右侧资料区 stretch 等高，描述框填充剩余高度并内部滚动。
+- 新增 `tests/tle-gallery-home.test.mjs`：校验模块与 Core 源码一致、生命周期接线、CSS 无重复选择器、移动端等高规则及源码语法。
+- 本版仅更新测试通道；Stable Core、Loader Runtime 与 Bootstrap 不变。
+- ST/TT PC/移动端实机验收待用户完成；自动化通过不代表实机验收完成。
+
 ## 2026-11-26 · Core v0.3.263 配套方案预览与更新按钮原生化（测试候选）
 
 - 测试通道：`channels/test.json`，版本 `0.3.263`；源码：`releases/v0.3.263/TLE.js`。
