@@ -32,7 +32,31 @@ const boot=async()=>{
  console.log('Native host ready');
  await page.addScriptTag({content:source});
  await page.locator('#tle-organizer-entry > .drawer-toggle').click();
- await page.getByRole('radio',{name:'查找与替换',exact:true}).check();
+ await page.getByRole('button',{name:'查找与替换',exact:true}).click();
+ const modes=page.locator('#tle-organizer-panel .tle-content-mode-switch > button');
+ assert.equal(await modes.count(),2,'Both native mode buttons must remain visible');
+ assert.equal(await modes.nth(0).getAttribute('aria-pressed'),'false');
+ assert.equal(await modes.nth(1).getAttribute('aria-pressed'),'true');
+ assert.equal(await modes.nth(0).evaluate(button=>button.classList.contains('active')),false);
+ assert.equal(await modes.nth(1).evaluate(button=>button.classList.contains('active')),true);
+ assert.equal(await page.locator('#tle-organizer-panel .tle-content-mode-button').count(),0);
+ const nativeModeStyles=await page.evaluate(()=>{
+  const panel=document.querySelector('#tle-organizer-panel');
+  const modes=[...panel.querySelectorAll('.tle-content-mode-switch > button')];
+  const nativeFind=[...panel.querySelectorAll('button.menu_button.menu_button_icon')].find(button=>button.textContent.trim()==='查找');
+  if(!nativeFind)return null;
+  const properties=['backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','paddingTop','paddingRight','color','fontSize','fontWeight','fontFamily','boxShadow'];
+  return modes.map(mode=>{
+   const probe=nativeFind.cloneNode(false);
+   probe.classList.toggle('active',mode.classList.contains('active'));
+   mode.parentElement.append(probe);
+   const actual=getComputedStyle(mode),expected=getComputedStyle(probe);
+   const matches=properties.every(property=>actual[property]===expected[property]);
+   probe.remove();
+   return matches;
+  });
+ });
+ assert.deepEqual(nativeModeStyles,[true,true],'Mode buttons must inherit the exact native menu_button appearance');
  await page.waitForFunction(()=>!document.querySelector('#tle-organizer-panel input[type=search]').disabled);
 };
 try{
@@ -95,7 +119,7 @@ try{
  const sectionCheckBox=await worlds.locator(':scope > summary input').boundingBox(),sectionTextBox=await worlds.locator(':scope > summary strong').boundingBox();
  assert(Math.abs(sectionCheckBox.y-sectionTextBox.y)<6,'Group checkbox and heading share a row');
  await page.screenshot({path:path.join(output,'typed-result-groups.png'),fullPage:true});
- await page.getByRole('radio',{name:'资源名称',exact:true}).check();
+ await page.getByRole('button',{name:'资源名称',exact:true}).click();
  const groupName='TLE布局'+Date.now();await page.getByLabel('新分组名称',{exact:true}).fill(groupName);await page.getByRole('button',{name:'新建分组',exact:true}).click();
  await page.getByRole('button',{name:'管理分组',exact:true}).click();
  await page.getByLabel('重命名分组',{exact:true}).fill(groupName+'改');await page.getByRole('button',{name:'重命名',exact:true}).click();
@@ -103,7 +127,7 @@ try{
  assert(Math.abs(renameBox.y-deleteBox.y)<6);assert.equal(await page.getByRole('button',{name:'新建分组',exact:true}).isVisible(),true);
  await page.screenshot({path:path.join(output,'group-management.png'),fullPage:true});
  await page.getByRole('button',{name:'删除分组',exact:true}).click();
- await page.getByRole('radio',{name:'查找与替换',exact:true}).check();await search.fill('TLE验收旧词');await page.getByLabel('替换为',{exact:true}).fill('TLE验收新词');
+ await page.getByRole('button',{name:'查找与替换',exact:true}).click();await search.fill('TLE验收旧词');await page.getByLabel('替换为',{exact:true}).fill('TLE验收新词');
  await page.getByRole('button',{name:'查找',exact:true}).click();await page.locator('.tle-quick-list details[data-content-key]').waitFor();
  await page.getByRole('button',{name:'预览替换',exact:true}).click();await page.getByRole('button',{name:'确认替换',exact:true}).click();
  await page.waitForEvent('load');assert.equal(JSON.parse(fs.readFileSync(file,'utf8')).entries[0].content,'TLE验收新词 第一段。TLE验收新词 第二段。');
