@@ -9,7 +9,7 @@
 - 点击「X 个聊天」打开当前角色的聊天文件列表；移除「聊天文件」独立按钮。
 - 移除「详情/管理」按钮及「角色描述」标题行；描述正文直接位于角色名 / 世界书行下方。
 - 文字导航使用主题继承的链接样式、悬停提示和键盘焦点提示，不增加按钮底色、边框或圆角。
-- GitHub Actions 与 ST/TT PC / 移动端实机验收待核对。本版不修改 Stable Core、Stable Loader 或 Bootstrap。
+- GitHub Actions run [#45882131444](https://github.com/jerinmiss620-web/Tavern-Layout-Engine/actions/runs/45882131444) 已通过：完整 `npm test`、记录详情导航专项结构测试、测试频道远端清单 / 不可变源码 / 禁用状态备用导入包核验均成功。ST/TT PC / 移动端实机验收仍待用户完成。本版不修改 Stable Core、Stable Loader 或 Bootstrap。
 
 
 ## 2026-11-27 · Core v0.3.265 记录预览命名、首页开关与头像兼容（测试候选）
