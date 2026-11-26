@@ -157,7 +157,7 @@
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { grid-template-columns: minmax(112px, 34%) minmax(0, 1fr); gap: 14px; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-name { font-size: 1.2em; }',
         '}',
-        '@media screen and (max-width: 420px) {',
+        '@media screen and (max-width: 480px) {',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { grid-template-columns: 104px minmax(0, 1fr); gap: 8px; align-items: start; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar { align-self: start !important; width: 100% !important; height: auto !important; min-height: 0 !important; aspect-ratio: 3 / 4 !important; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-main { gap: 8px; }',
@@ -1331,6 +1331,10 @@
         if (!state.panel) return false;
         state.selectedAvatar = avatar;
         state.fileSearch = '';
+        if (state.detailManageButton) {
+            state.detailManageButton.remove();
+            state.detailManageButton = null;
+        }
         state.detailCharacter = null;
         state.detailChats = [];
         setPage('detail');
