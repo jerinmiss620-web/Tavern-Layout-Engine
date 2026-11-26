@@ -10237,9 +10237,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     });
     current.onSearchInput = () => {
       if (quickPanel !== current) return;
-      content?.contextChanged();
       list.scrollTop = 0;
-      render();
+      if (content?.scope === 'filtered') content.contextChanged();
+      else render();
     };
 
     content = new TLEBatchLibrary.OrganizerContent({
