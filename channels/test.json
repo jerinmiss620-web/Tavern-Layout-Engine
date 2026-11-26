@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.257",
+  "latest_version": "0.3.258",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.257",
-    "source_path": "releases/v0.3.257/TLE.js",
-    "source_commit": "edc1d669b7aab79be1ec51c5d81497e4c116e020",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/edc1d669b7aab79be1ec51c5d81497e4c116e020/releases/v0.3.257/TLE.js",
-    "changelog_path": "releases/v0.3.257/CHANGELOG.md",
-    "sha256": "ce01f6d98e5707f9c04d6a96a0ea88623502ef258dadcc1ae3a875955a78c6df",
-    "size_bytes": 830796
+    "version": "0.3.258",
+    "source_path": "releases/v0.3.258/TLE.js",
+    "source_commit": "cdf25b0f76653760b9eebfa1997e1c968128d1fd",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/cdf25b0f76653760b9eebfa1997e1c968128d1fd/releases/v0.3.258/TLE.js",
+    "changelog_path": "releases/v0.3.258/CHANGELOG.md",
+    "sha256": "c4ac3594a60123445ff32ccc2c4dee4a503bd6dbf1a3c2ee5f447a9bd328ddd7",
+    "size_bytes": 830757
   },
-  "status": "TEST 0.3.257: 整理侠分组删除确认区改为酒馆原生图标按钮：✓确认删除、×取消；按钮提供悬停名称，操作行保持单行。上方垃圾桶只进入确认状态，下方✓才执行删除；分组内资源不会删除，而是移回「未分组」。",
+  "status": "TEST 0.3.258: 管理分组按钮在开启和关闭管理模式时均保持文件夹图标，不再切换为 ✓；通过原生 aria-pressed 状态和悬停提示显示当前模式。✓ 仅表示确认操作，× 仅表示取消操作。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
