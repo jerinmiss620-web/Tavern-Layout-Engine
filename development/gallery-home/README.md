@@ -17,13 +17,13 @@
 
 当前原型只聚合单角色聊天。群聊和没有角色头像的根目录聊天暂不放进角色卡片。若当前环境无法访问接口，则退回读取原生首页 DOM；这种模式只会拿到原生最近聊天列表中的条目，结果可能不完整。
 
-## 独立测试
+## 独立测试\n\n注意：不要把 raw.githubusercontent.com 用作 script src。GitHub Raw 会以 text/plain 和 nosniff 返回原始文件，Chrome 会按 MIME 类型拒绝执行。这里使用 jsDelivr，并固定到通过回归测试的 commit SHA。
 
 在 SillyTavern／TT 首页打开开发者工具 Console，执行以下代码加载测试脚本：
 
     const s = document.createElement('script');
-    s.src = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/feature/gallery-home-standalone-20261126/development/gallery-home/Freesia-Gallery-Home-0.1.0.js';
-    s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome);
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@e13bb7861dc1ed0270be4b92ab68bcb3186583c7/development/gallery-home/Freesia-Gallery-Home-0.1.0.js';
+    s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome);\n    s.onerror = (error) => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
 
 脚本加载后会自动识别原生首页并启动画廊。
