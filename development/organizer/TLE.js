@@ -13273,9 +13273,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     else data.defaults[role.key] = planId;
     if (!companionSave(data)) return false;
     companionRefreshList();
+    const scheduleActive = data.schedules?.[role.key]?.enabled === true;
     companionNotice('success', wasDefault
       ? '已取消角色默认方案。'
-      : '已设为角色默认「' + plan.name + '」；其他方案的默认状态已自动取消。');
+      : '已设为角色默认「' + plan.name + '」；其他方案的默认状态已自动取消。'
+        + (scheduleActive ? ' 当前启用了日夜定时，实际应用仍以时段方案为准。' : ''));
     return true;
   }
 
@@ -13667,10 +13669,22 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const available = options.filter(option => !option.hidden && !option.disabled && !option.parentElement?.disabled);
       const availableValues = new Set(available.map(option => String(option.value)));
       const requestedSet = new Set(requested);
-      const missing = requested.filter(value => !availableValues.has(value));
+      const issues = requested
+        .filter(value => !availableValues.has(value))
+        .map(value => ({
+          value,
+          label: target.items?.find(item => String(item.value) === value)?.label || value,
+        }));
+      for (const option of options) {
+        if (availableValues.has(String(option.value))) {
+          option.selected = requestedSet.has(String(option.value));
+        } else if (option.selected && !requestedSet.has(String(option.value))) {
+          issues.push({ value: String(option.value), label: String(option.textContent || option.value) });
+        }
+      }
       for (const option of available) option.selected = requestedSet.has(String(option.value));
       select.dispatchEvent(new HOST_WIN.Event('change', { bubbles: true }));
-      return { missing };
+      return { issues };
     });
     if (!result) throw new Error('无法取得全局世界书控件。');
     return result;
@@ -13711,14 +13725,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
             if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
             const result = companionApplyWorldInfo(target);
             finished++;
-            if (result.missing.length) {
-              const labels = result.missing.map(value =>
-                target.items?.find(item => String(item.value) === value)?.label || value
-              );
+            if (result.issues.length) {
               skipped.push({
                 name: field.name,
-                target: labels.join('、'),
-                reason: '这些世界书当前不存在或不可用；其余可用项目已按方案同步',
+                target: result.issues.map(item => item.label).join('、'),
+                reason: '这些世界书当前不存在或不可用，或宿主控件禁止修改；其余可用项目已按方案同步',
               });
             }
             continue;
