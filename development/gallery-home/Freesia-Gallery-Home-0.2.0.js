@@ -77,9 +77,9 @@
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-files { display: none !important; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .welcomeRecent > .recentChatList:not(.' + GRID_CLASS + ') { display: flex !important; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-gallery .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-gallery .freesia-gallery-files { display: none; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-detail .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-files .' + GRID_CLASS + ' { display: none; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-detail .freesia-gallery-files, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-files .freesia-gallery-detail { display: none; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-detail .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-page-files .freesia-gallery-files { display: block; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .' + GRID_CLASS + ' { display: none; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-files, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-detail { display: none; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-files { display: block; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-subpage-header { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 16px; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-back { flex: 0 0 auto; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { display: grid; grid-template-columns: minmax(180px, 262px) minmax(0, 1fr); gap: 28px; align-items: stretch; }',
@@ -96,7 +96,7 @@
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-chat-count { font-size: 1.05em; font-weight: 500; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-list { display: flex; flex-direction: column; gap: 12px; min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 16px 18px; border: 1px solid var(--SmartThemeBorderColor); background: var(--SmartThemeBlurTintColor); cursor: pointer; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-card.is-latest { background: var(--SmartThemeQuoteColor); color: var(--SmartThemeBodyColor, inherit); }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-card.is-latest { border-inline-start: 4px solid var(--SmartThemeQuoteColor); }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-title { min-width: 0; font-weight: 500; overflow-wrap: anywhere; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-date { flex: 0 0 auto; font-size: 0.82em; opacity: 0.75; }',
@@ -686,10 +686,6 @@
         button.type = 'button';
         button.hidden = true;
         button.append(createElement('i', 'fa-solid fa-arrow-left fa-fw'));
-        button.addEventListener('click', function () {
-            if (state.page === 'files') setPage('detail');
-            else setPage('gallery');
-        });
         header.insertBefore(button, state.title || header.firstChild);
         state.backButton = button;
     }
@@ -772,6 +768,7 @@
     async function openDetail(avatar) {
         if (!state.panel) return false;
         state.selectedAvatar = avatar;
+        state.fileSearch = '';
         state.detailCharacter = null;
         state.detailChats = [];
         setPage('detail');
@@ -799,7 +796,7 @@
         const fragment = document.createDocumentFragment();
 
         const hero = createElement('section', 'freesia-gallery-detail-hero');
-        const nativeRow = state.nativeList && state.nativeList.querySelector('.recentChat[data-avatar="' + CSS.escape(character.avatar) + '"]');
+        const nativeRow = state.nativeList && Array.from(state.nativeList.querySelectorAll('.recentChat[data-avatar]')).find(row => row.getAttribute('data-avatar') === character.avatar);
         const avatar = createAvatar(
             character.avatar,
             context && typeof context.getThumbnailUrl === 'function' ? context.getThumbnailUrl('avatar', character.avatar) : '',
