@@ -13166,7 +13166,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const fields = {};
     for (const field of COMPANION_FIELDS) {
       if (field.id === 'worldInfo') {
-        const selected = (catalogs.worldInfo || []).filter(item => item.selected && !item.disabled);
+        const selected = (catalogs.worldInfo || []).filter(item => item.selected && !item.disabled && item.value != null && String(item.value) !== '');
         const items = selected.map(item => ({ value: String(item.value), label: item.label }));
         fields.worldInfo = {
           selectId: 'world_info',
@@ -13334,7 +13334,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const select = quickNode('select', 'text_pole');
     select.setAttribute('aria-label', field.name);
     const isWorldInfo = field.id === 'worldInfo';
-    const choices = (catalogs[field.type] || []).filter(item => companionEntryId(field, item) && !item.disabled);
+    const choices = (catalogs[field.type] || []).filter(item => companionEntryId(field, item) && !item.disabled
+      && (field.id !== 'worldInfo' || (item.value != null && String(item.value) !== '')));
     const known = new Set();
 
     if (isWorldInfo) {
@@ -13658,9 +13659,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   function companionApplyWorldInfo(target) {
-    const requested = Array.isArray(target.value)
-      ? [...new Set(target.value.map(value => String(value)))]
-      : target.value == null ? [] : [String(target.value)];
+    const requested = (Array.isArray(target.value)
+      ? target.value.map(value => String(value))
+      : target.value == null ? [] : [String(target.value)])
+      .filter(value => value !== '');
+    const uniqueRequested = [...new Set(requested)];
     const result = withQuickWorldInfoControl(select => {
       if (!select) throw new Error('全局世界书控件尚未挂载；TT 原生世界书面板暂未就绪。');
       if (select.disabled) throw new Error('全局世界书控件当前不可用。');
@@ -13668,8 +13671,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const options = [...select.options];
       const available = options.filter(option => !option.hidden && !option.disabled && !option.parentElement?.disabled);
       const availableValues = new Set(available.map(option => String(option.value)));
-      const requestedSet = new Set(requested);
-      const issues = requested
+      const requestedSet = new Set(uniqueRequested);
+      const issues = uniqueRequested
         .filter(value => !availableValues.has(value))
         .map(value => ({
           value,
