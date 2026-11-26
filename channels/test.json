@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.266",
     "source_path": "releases/v0.3.266/TLE.js",
-    "source_commit": "904ddc9cdb2acdc73e8aeec749100b9e5d230efe",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/904ddc9cdb2acdc73e8aeec749100b9e5d230efe/releases/v0.3.266/TLE.js",
+    "source_commit": "37e163afa875e595c6508797d656a41c5b531751",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/37e163afa875e595c6508797d656a41c5b531751/releases/v0.3.266/TLE.js",
     "changelog_path": "releases/v0.3.266/CHANGELOG.md",
-    "sha256": "8097c14bdd52f3b17efb40f8f7fd8d5e1af07fc3e31424a0cf8cc947eb97c989",
-    "size_bytes": 958787
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "size_bytes": 958740
   },
   "status": "TEST v0.3.266: 记录详情改为角色名→角色编辑、绑定世界书名→指定世界书编辑、聊天数量→当前角色聊天文件的文字导航；移除详情/管理和聊天文件按钮及角色描述标题行。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
