@@ -56,6 +56,7 @@
         page: 'gallery',
         galleryPage: 0,
         galleryGroups: [],
+        galleryBaseOrder: new Map(),
         layoutSettings: { columns: DEFAULT_GALLERY_COLUMNS, rows: DEFAULT_GALLERY_ROWS },
         selectedAvatar: '',
         detailCharacter: null,
@@ -311,7 +312,9 @@
         return (Array.isArray(groups) ? groups : [])
             .map((group, index) => ({
                 group: group,
-                index: index,
+                index: state.galleryBaseOrder.has(String(group.avatar || ''))
+                    ? state.galleryBaseOrder.get(String(group.avatar || ''))
+                    : index,
                 pinnedAt: Number(pinned[String(group.avatar || '')] || 0),
             }))
             .sort((a, b) => {
@@ -820,6 +823,7 @@
             const records = await fetchRecentChats(context, state.settings, state.requestController ? state.requestController.signal : undefined);
             if (generation !== state.generation || !state.panel) return false;
             const groups = groupCharacterChats(records, context, getPinnedChats(context));
+            state.galleryBaseOrder = new Map(groups.map((group, index) => [String(group.avatar || ''), index]));
             renderGallery(groups, 'api');
             return true;
         } catch (error) {
@@ -827,6 +831,7 @@
             console.warn('[Freesia Gallery] Recent chat API failed; using native DOM fallback.', error);
             if (generation !== state.generation || !state.panel) return false;
             const groups = groupFallbackChats();
+            state.galleryBaseOrder = new Map(groups.map((group, index) => [String(group.avatar || ''), index]));
             renderGallery(groups, 'fallback', error);
             return groups.length > 0;
         }
@@ -1621,6 +1626,7 @@
         state.page = 'gallery';
         state.galleryPage = 0;
         state.galleryGroups = [];
+        state.galleryBaseOrder = new Map();
         state.selectedAvatar = '';
         state.detailCharacter = null;
         state.detailChats = [];
