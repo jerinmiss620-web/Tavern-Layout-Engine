@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.245
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.246
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2125,7 +2125,7 @@ var TLEBatchLibrary = (() => {
       const n = this.node;
       this.searchRow = n("div", "tle-content-search-row flex-container");
       this.target = n("label", "checkbox_label");
-      this.modeToggle = n("input");
+      this.modeToggle = n("input", "checkbox");
       this.modeToggle.type = "checkbox";
       this.modeToggle.checked = this.active;
       this.modeToggle.setAttribute("aria-label", "\u67E5\u627E\u548C\u66FF\u6362");
@@ -5957,7 +5957,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         display: contents;
       }
       .tle-quick-manager .tle-organizer-pane-title { display: none; }
-      .tle-quick-manager .tle-organizer-divider { display: none; }
       /* Only result wrapping belongs to TLE; input/button visuals and sizing
          come from the host's search controls, menu_button and flex utilities. */
       .tle-quick-manager .tle-content-text { white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -6045,8 +6044,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       @media screen and (min-width: 1001px) {
         .tle-quick-manager .tle-organizer-workspace {
           display: grid;
-          grid-template-columns: minmax(138px, .78fr) 1px minmax(168px, .92fr) 1px minmax(360px, 2.3fr);
-          column-gap: 6px;
+          grid-template-columns: minmax(138px, .78fr) minmax(168px, .92fr) minmax(360px, 2.3fr);
+          column-gap: 0;
           row-gap: 0;
           flex: 1 1 auto;
           min-width: 0;
@@ -6054,22 +6053,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         }
         /* Real HR elements use vertical writing mode so their logical block-start
            border becomes a full-height vertical rule without transform geometry. */
-        .tle-quick-manager .tle-organizer-divider {
-          display: block;
-          align-self: stretch;
-          justify-self: center;
-          box-sizing: border-box;
-          width: 1px;
-          min-width: 1px;
-          height: auto;
-          min-height: 0;
-          margin: 0;
-          padding: 0;
-          border: 0;
-          border-block-start: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 22%));
-          writing-mode: vertical-rl;
-          opacity: .58;
-        }
         .tle-quick-manager .tle-organizer-pane {
           display: flex;
           flex-direction: column;
@@ -6082,15 +6065,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           border-radius: 0;
           background: transparent;
         }
-        .tle-quick-manager .tle-organizer-pane-title {
-          display: block;
-          flex: 0 0 auto;
-          padding-bottom: 0;
-          border-bottom: 0;
-          font-size: .88em;
-          font-weight: 650;
-          opacity: .76;
-        }
+        .tle-quick-manager .tle-organizer-pane-title { display: block; flex: 0 0 auto; }
         .tle-quick-manager .tle-quick-category-row {
           flex: 1 1 auto;
           flex-direction: column;
@@ -8797,21 +8772,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const workspace = quickNode('div', 'tle-organizer-workspace');
     const categoryPane = quickNode('section', 'tle-organizer-pane tle-organizer-category-pane');
     categoryPane.setAttribute('aria-label', '资源类型');
-    const categoryHeading = quickNode('strong', 'tle-organizer-pane-title', '资源类型');
+    const categoryHeading = quickNode('strong', 'tle-organizer-pane-title standoutHeader', '资源类型');
     const groupPane = quickNode('section', 'tle-organizer-pane tle-organizer-group-pane');
     groupPane.setAttribute('aria-label', '分组目录');
-    const groupHeading = quickNode('strong', 'tle-organizer-pane-title', '分组目录');
+    const groupHeading = quickNode('strong', 'tle-organizer-pane-title standoutHeader', '分组目录');
     const groupHeader = quickNode('div', 'tle-quick-group-heading');
     groupHeader.setAttribute('aria-label', '分组目录');
     groupHeader.append(groupHeading);
     const resourcePane = quickNode('section', 'tle-organizer-pane tle-organizer-resource-pane');
     resourcePane.setAttribute('aria-label', '资源列表');
-    const categoryDivider = quickNode('hr', 'tle-organizer-divider');
-    categoryDivider.setAttribute('aria-hidden', 'true');
-    const groupDivider = quickNode('hr', 'tle-organizer-divider');
-    groupDivider.setAttribute('aria-hidden', 'true');
     const resourceHeading = quickNode('strong', '', '资源列表');
-    const resourceHeader = quickNode('div', 'tle-content-heading flex-container alignItemsCenter justifySpaceBetween');
+    const resourceHeader = quickNode('div', 'tle-content-heading standoutHeader flex-container alignItemsCenter justifySpaceBetween');
     resourceHeader.append(resourceHeading);
 
     for (const item of QUICK_RESOURCE_MODULES) {
@@ -9813,7 +9784,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       resourceHeader, content.searchRow, content.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,
       operations, list, status
     );
-    workspace.append(categoryPane, categoryDivider, groupPane, groupDivider, resourcePane);
+    workspace.append(categoryPane, groupPane, resourcePane);
     body.append(workspace);
     refreshQuickHorizontalIndicators();
     void load().then(() => { if (resume?.message) { statusMessage = resume.message; render(); } });
@@ -10692,14 +10663,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.245 · 整理侠使用单个原生复选框切换查找与替换</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.246 · 整理侠使用单个原生复选框切换查找与替换</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.245</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.246</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -16800,7 +16771,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.245',
+    version: '0.3.246',
     ready: false,
     destroy,
     state,
@@ -17251,5 +17222,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.245 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.246 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
