@@ -206,8 +206,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.ok(cards[0].querySelector('.freesia-gallery-card-latest .chatMessageContainer'));
     assert.equal(api.getLayoutSettings().columns, 4);
     assert.equal(api.getLayoutSettings().rows, 3);
-    assert.equal(panel.querySelector('[aria-label="每行列数"]').options.length, 3);
-    assert.equal(panel.querySelector('[aria-label="每页显示行数"]').options.length, 15);
+    assert.equal(panel.querySelector('.freesia-gallery-layout-controls'), null);
 
     cards[0].querySelector('.freesia-gallery-card-identity').click();
     await new Promise(resolve => dom.window.setTimeout(resolve, 0));
@@ -567,6 +566,30 @@ test('native recent-chat settings gear opens the original popup with gallery lay
 
     api.stop();
     assert.equal(dialog.querySelector('.freesia-gallery-popup-layout-title'), null);
+    dom.window.close();
+});
+
+test('canceling the native recent-chat settings popup does not save gallery layout changes', async () => {
+    const { dom, api, calls } = setup();
+    await api.refresh();
+
+    const dialog = dom.window.document.createElement('dialog');
+    dialog.className = 'popup';
+    dialog.innerHTML = '<div class="popup-body"><div class="popup-content">Recent Chats Settings</div>'
+        + '<div class="popup-inputs"><input id="maxRecentChats"><input id="collapsedRecentChats"></div>'
+        + '<div class="popup-controls"><div class="popup-button-ok">保存</div><div class="popup-button-cancel">取消</div></div></div>';
+    dom.window.document.body.append(dialog);
+    await new Promise(resolve => dom.window.setTimeout(resolve, 0));
+
+    dialog.querySelector('#freesiaGalleryColumns').value = '2';
+    dialog.querySelector('#freesiaGalleryRows').value = '9';
+    dialog.querySelector('.popup-button-cancel').click();
+
+    assert.equal(api.getLayoutSettings().columns, 4);
+    assert.equal(api.getLayoutSettings().rows, 3);
+    assert.equal(calls.storage?.freesiaGallerySettings, undefined);
+
+    api.stop();
     dom.window.close();
 });
 
