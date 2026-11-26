@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.9.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.10.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -301,9 +301,11 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.match(detailCss, /\.freesia-gallery-description \{ display: block; flex: 1 1 0; width: 100%; min-width: 0; min-height: 0 !important; height: 0 !important/);
     assert.doesNotMatch(detailCss, /\.freesia-gallery-detail-main \{ display: contents/);
     assert.doesNotMatch(detailCss, /\.freesia-gallery-description \{ grid-column: 1 \/ -1/);
-    assert.match(detailCss, /\.freesia-gallery-detail-hero \{ grid-template-columns: 104px minmax\(0, 1fr\); gap: 8px; align-items: stretch/);
+    assert.match(detailCss, /\.freesia-gallery-detail-hero \{ grid-template-columns: 104px minmax\(0, 1fr\); gap: 8px; align-items: start/);
     assert.match(detailCss, /\.freesia-gallery-detail-heading \{ display: flex; flex: 0 0 auto; flex-wrap: nowrap/);
-    assert.match(detailCss, /\.freesia-gallery-description \{ flex: 1 1 0; width: 100% !important; min-width: 0; min-height: 0 !important; height: 0 !important/);
+    assert.match(detailCss, /\.freesia-gallery-detail-main \{ display: flex; flex-direction: column; align-self: start; width: 100%; height: auto/);
+    assert.match(detailCss, /\.freesia-gallery-description-header \.freesia-gallery-manage \{ height: 26px !important; min-height: 26px !important/);
+    assert.match(detailCss, /\.freesia-gallery-description \{ flex: 0 0 auto; width: 100% !important; min-width: 0; min-height: 4\.2em !important; height: 4\.2em !important/);
     assert.match(detailCss, /\.freesia-gallery-detail-avatar \{ display: block; align-self: start;[^}]*aspect-ratio: 3 \/ 4 !important/);
     const hero = panel.querySelector('.freesia-gallery-detail-hero');
     const detailMain = hero.querySelector('.freesia-gallery-detail-main');
