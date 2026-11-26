@@ -63,6 +63,8 @@
 
 ## 独立加载测试
 
+v0.2.4 已将布局与页面显隐修复加入自动化回归测试。
+
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
