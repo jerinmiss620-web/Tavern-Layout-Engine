@@ -43,12 +43,12 @@ const boot=async()=>{
  const nativeModeStyles=await page.evaluate(()=>{
   const panel=document.querySelector('#tle-organizer-panel');
   const modes=[...panel.querySelectorAll('.tle-content-mode-switch > button')];
-  const nativeFind=[...panel.querySelectorAll('button.menu_button.menu_button_icon')].find(button=>button.textContent.trim()==='查找');
-  if(!nativeFind)return null;
   const properties=['backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','paddingTop','paddingRight','color','fontSize','fontWeight','fontFamily','boxShadow'];
   return modes.map(mode=>{
-   const probe=nativeFind.cloneNode(false);
-   probe.classList.toggle('active',mode.classList.contains('active'));
+   const probe=document.createElement('button');
+   probe.type='button';
+   probe.className='menu_button menu_button_icon'+(mode.classList.contains('active')?' active':'');
+   probe.textContent='native';
    mode.parentElement.append(probe);
    const actual=getComputedStyle(mode),expected=getComputedStyle(probe);
    const matches=properties.every(property=>actual[property]===expected[property]);
