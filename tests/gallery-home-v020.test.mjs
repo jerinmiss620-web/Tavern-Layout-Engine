@@ -351,7 +351,7 @@ test('empty-chat cards reserve the same two-line preview region and keep all met
     assert.equal(card.children.length, 4);
 
     const css = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
-    assert.match(css, /grid-template-rows: auto minmax\(2\.6em, 2\.6em\) auto/);
+    assert.match(css, /grid-template-rows: auto minmax\(2\.6em, 2\.6em\) minmax\(1\.35em, auto\)/);
     assert.match(css, /grid-auto-rows: 1fr/);
 
     api.stop();
