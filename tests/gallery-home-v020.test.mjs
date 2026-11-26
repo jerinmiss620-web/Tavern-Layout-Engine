@@ -12,7 +12,7 @@ function createHomeMarkup() {
         '<div class="welcomePanel">' +
             '<div class="welcomeHeaderTitle">' +
                 '<img class="welcomeHeaderLogo" src="img/logo.png" alt="SillyTavern Logo">' +
-                '<span class="welcomeHeaderVersionDisplay">SillyTavern 1.19.0 'release' (06bde939f)</span>' +
+                "<span class=\"welcomeHeaderVersionDisplay\">SillyTavern 1.19.0 'release' (06bde939f)</span>" +
                 '<div class="mes_button showRecentChats"></div>' +
                 '<div class="mes_button recentChatsSettings"></div>' +
                 '<div class="mes_button hideRecentChats"></div>' +
