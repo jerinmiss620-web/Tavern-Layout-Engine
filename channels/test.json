@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.267",
+  "latest_version": "0.3.268",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.267",
-    "source_path": "releases/v0.3.267/TLE.js",
-    "source_commit": "d9b94d578ba84d066fb32cd8fdf27105c733f232",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d9b94d578ba84d066fb32cd8fdf27105c733f232/releases/v0.3.267/TLE.js",
-    "changelog_path": "releases/v0.3.267/CHANGELOG.md",
-    "sha256": "d12a28808619bfa35f42ae42e4043b7a266dda8b7cb40ebb7b2939fdffc29ba6",
-    "size_bytes": 957577
+    "version": "0.3.268",
+    "source_path": "releases/v0.3.268/TLE.js",
+    "source_commit": "8f95aaea003b844ec0b0197da7382af41bf17a44",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/8f95aaea003b844ec0b0197da7382af41bf17a44/releases/v0.3.268/TLE.js",
+    "changelog_path": "releases/v0.3.268/CHANGELOG.md",
+    "sha256": "6ebf50a3c5cae9d072fcbe48f4cd31d5a09c6ca31414ff28c22e243b67fe7ae5",
+    "size_bytes": 957596
   },
-  "status": "TEST v0.3.267: 首页记录预览改为2:3竖版头像信息卡；角色名/聊天数、日期/透明图标操作、多行概要和右下统计叠加于头像内部；自建卡片不再继承原生 recentChat 外层样式。仅更新测试通道。",
+  "status": "TEST v0.3.268: 修正记录预览信息遮罩从整卡覆盖为仅底部锚定；头像上半部保留干净；最近聊天概要严格最多两行；保留2:3头像与原生操作。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
