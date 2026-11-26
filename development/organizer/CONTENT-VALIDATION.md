@@ -1,5 +1,13 @@
 # v0.3.236 验证记录与历史验收纠正
 
+## v0.3.270 记录预览头像圆角同步（测试分支）
+
+- 普通头像的卡片圆角使用 `--avatar-base-border-radius-round`，与原生 `.avatar img` 规则一致。
+- `body.big-avatars` 状态下使用 `calc(var(--avatar-base-border-radius) * var(--big-avatar-border-factor))`，与原生大头像规则一致。
+- 圆角作用于最外层卡片，由已有 `overflow: hidden` 裁切头像与渐变；渐变层不另设固定圆角。
+- 仅增加 CSS 规则，无 JS 监听、轮询或尺寸计算；新增静态断言覆盖普通头像与 big-avatars 两种情况。
+- **尚未完成：** 在酒馆用户设置中分别切换圆形、方形、圆角及 big-avatars 形状，进行实机验收。
+
 ## v0.3.269 记录预览渐变过渡优化（测试分支）
 
 - 根据 v0.3.268 实机截图，原底部信息区渐变范围不足，透明度变化集中，出现明显横向色带。

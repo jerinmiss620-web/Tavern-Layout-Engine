@@ -9,16 +9,16 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.269');
+assert.equal(version, '0.3.270');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.269'/);
+assert.match(moduleSource, /const VERSION = '0.3.270'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.269'/);
+assert.match(core, /version: '0\.3\.270'/);
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
@@ -30,6 +30,8 @@ for (const line of moduleSource.slice(cssStart, cssEnd).split('\n')) {
 }
 assert.equal(new Set(selectors).size, selectors.length, 'No duplicate CSS selector override layers');
 assert.match(moduleSource, /--freesia-gallery-detail-main-gap: 0px/);
+assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*border-radius: var\(--avatar-base-border-radius-round, 0px\);[^}]*overflow: hidden;/, "The card clips the gradient to the normal avatar corner-radius setting");
+assert.ok(moduleSource.includes('body.big-avatars #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { border-radius: calc(var(--avatar-base-border-radius, 0px) * var(--big-avatar-border-factor, 1)); }'), "Big-avatar cards use the same radius calculation as the native big avatar image");
 assert.match(moduleSource, /--freesia-gallery-detail-columns: 104px minmax\(0, 1fr\)/);
 assert.match(moduleSource, /align-self: stretch/);
 assert.match(moduleSource, /freesia-gallery-description \{[^}]*flex: 1 1 0/);

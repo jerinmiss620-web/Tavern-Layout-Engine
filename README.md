@@ -2,19 +2,19 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.269 · 记录预览渐变过渡优化
+## 开发分支测试版 v0.3.270 · 记录预览头像圆角同步
 
-根据实机截图，扩大头像底部信息区的渐变范围，并增加多段透明度过渡，消除渐变顶部突兀的横向色带。
+修正头像图片与底部渐变边缘不一致的问题：记录预览卡片现在使用酒馆头像设置对应的圆角，并由最外层统一裁切头像和渐变。
 
-- **渐变范围：** 底部信息区最小高度扩大到卡片的 48%，最大高度限制为 60%。
-- **渐变曲线：** 增加多个透明度停靠点，从透明、微暗、半透明逐渐过渡到深色，避免短距离内突然变暗。
-- **内容位置：** 信息行仍由底部向上排列，使用底部对齐；扩大渐变区域不会把角色名、日期、概要和统计信息整体抬高。
-- **保持不变：** 2:3 头像、底部锚点、两行概要上限、原生操作按钮和点击行为。
-- **代码：** 直接替换原有渐变规则，不追加补丁；Core 与独立画廊源码保持一致。
+- **普通头像：** 跟随 `--avatar-base-border-radius-round`。
+- **big-avatars：** 跟随 `--avatar-base-border-radius` 与 `--big-avatar-border-factor` 的原生计算。
+- **动态适配：** 直接使用现有 CSS 变量和 `body.big-avatars` 状态类，不增加 JS 监听或轮询。
+- **保持不变：** 2:3 头像、渐变曲线、底部信息排列、两行概要和原生操作按钮。
+- **代码：** 圆角整合进原卡片 CSS 规则，不追加补丁；Core 与独立画廊源码保持一致。
 
 仅更新开发分支测试通道；正式 Stable Core、Loader Runtime 和 Bootstrap 不变。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.269/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.270/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 ## 一次安装，后续自动更新
 
 正式发布：**Core v0.3.259 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
