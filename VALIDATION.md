@@ -1,3 +1,14 @@
+## 2026-11-26 · Core v0.3.242 整理侠搜索方式方框单选样式（测试候选）
+
+- 测试通道：`channels/test.json`，版本 `0.3.242`；源码：`releases/v0.3.242/TLE.js`。
+- 本版只修改 OrganizerContent 的搜索模式控件结构、语义及其原有样式定义；底层仍是同一组 `type="radio"`，没有用 checkbox 和 JS 模拟互斥。
+- 容器使用 `role="radiogroup"`；每个选项继续由 label 包裹原生 radio，保留 change 事件、键盘操作与互斥行为。
+- 方框标记使用主题变量 `--SmartThemeBorderColor` / `--SmartThemeQuoteColor`；焦点状态可见；样式直接整合进 Core 原有 createStyle 样式块，没有追加补丁。
+- 新增 `tests/tle-organizer-search-mode.test.mjs`，校验原生 radio 语义、radiogroup、label 结构、勾选标记和键盘焦点样式。
+- 更新配套侠初始化回归测试，使其从测试通道清单读取当前版本源码与导入包，不再硬编码 v0.3.241。
+- 保留 v0.3.241 的配套方案字段目录、日夜时间计算、手动覆盖规则、逐项应用引擎及初始化基线保护。
+- 自动源码语法检查与结构断言待本版固定源码、导入包及测试清单完成同步后执行；ST/TT 实机外观与键盘操作验收仍待进行。
+
 ## 2026-11-26 · Core v0.3.241 配套侠初始化与日夜定时恢复（测试候选）
 
 - 测试通道：`channels/test.json`，版本 `0.3.241`；源码：`releases/v0.3.241/TLE.js`。
