@@ -2,18 +2,20 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.256 · 分组工具栏顺序与重命名操作优化
+## 开发分支测试版 v0.3.257 · 删除确认操作图标统一
 
-本次测试更新：调整整理侠「分组目录」顶部操作顺序，并压缩重命名编辑行。
+本次测试更新：将整理侠分组删除确认区的文字按钮改为与重命名编辑行一致的原生图标按钮。
 
-- **工具栏顺序：** 创建分组 → 自动分组 → 管理分组；管理分组移至这三个主要操作的最后。已有的铅笔（重命名）和垃圾桶（批量删除）继续排列在其后。
-- **重命名编辑行：** 输入框后改为确认（✓）和取消（×）两个原生图标按钮；悬停可查看操作名称。
-- **不换行：** 重命名输入框、确认和取消按钮固定在同一行；仅输入框承担弹性收缩，不再让按钮折到下一行。
-- 保留 v0.3.255 的选择逻辑：重命名读取已勾选的唯一自定义分组，不依赖当前资源视图；批量删除仍读取多个已勾选分组。
-- 不新增 CSS 补丁；直接整理原有分组编辑行规则，按钮沿用酒馆原生 `.menu_button tle-quick-icon-action` 样式。
+- **确认删除：** 使用 ✓ 图标，悬停显示「确认删除所选分组」。
+- **取消删除：** 使用 × 图标，悬停显示「取消删除」。
+- 两个按钮沿用酒馆原生 `.menu_button tle-quick-icon-action` 样式，并提供 aria-label / aria-description。
+- 删除确认操作行固定单行，不再因窄屏宽度折行；上方删除说明仍可自然换行。
+- 上方垃圾桶仍只负责进入删除确认状态；只有点击下方 ✓ 才执行删除。
+- 保留删除保护：仅处理已勾选的自定义分组，分组内资源不会删除，而是移回「未分组」。
+- 直接修改原有删除确认按钮和布局规则，不追加 CSS 补丁。
 - 仅更新开发分支测试通道；正式 Stable Core、Loader 和 Bootstrap 不变。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.256/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md)。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.257/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md)。
 
 ## 一次安装，后续自动更新
 
