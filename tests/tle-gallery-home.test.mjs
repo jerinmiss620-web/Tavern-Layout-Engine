@@ -37,7 +37,7 @@ assert.match(moduleSource, /Math\.min\(2, state\.layoutSettings\.columns\)/);
 assert.match(moduleSource, /setEnabled: function \(enabled\)/);
 assert.match(moduleSource, /if \(state\.started \|\| !state\.enabled \|\| typeof document === 'undefined'\)/);
 assert.match(moduleSource, /if \(!next\) stop\(\);\s*else start\(\);/);
-assert.match(moduleSource, /document\.querySelectorAll\('dialog\\.popup'\)\.forEach\(attachGallerySettingsToNativePopup\)/);
+assert.ok(moduleSource.includes("document.querySelectorAll('dialog.popup').forEach(attachGallerySettingsToNativePopup)"));
 assert.match(moduleSource, /setAvatarCompatibility: function \(settings\)/);
 assert.match(moduleSource, /setHeader\('记录预览'/);
 assert.match(moduleSource, /setHeader\('记录详情'/);
