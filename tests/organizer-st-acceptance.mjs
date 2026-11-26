@@ -150,6 +150,12 @@ try{
  assert(Math.abs(sectionCheckBox.y-sectionTextBox.y)<6,'Group checkbox and heading share a row');
  await page.screenshot({path:path.join(output,'typed-result-groups.png'),fullPage:true});
  await modeToggle.uncheck();
+ const initialRenameAction=page.getByRole('button',{name:'重命名',exact:true});
+ const initialDeleteAction=page.getByRole('button',{name:'删除分组',exact:true});
+ assert.equal(await initialRenameAction.isVisible(),true,'Group rename action remains visible before a group is selected');
+ assert.equal(await initialDeleteAction.isVisible(),true,'Group delete action remains visible before a group is selected');
+ assert.equal(await initialRenameAction.isDisabled(),true,'Group rename action is disabled until a custom group is selected');
+ assert.equal(await initialDeleteAction.isDisabled(),true,'Group delete action is disabled until a custom group is selected');
  const groupName='TLE布局'+Date.now();
   await page.getByRole('button',{name:'新建分组',exact:true}).click();
   await page.getByLabel('新分组名称',{exact:true}).fill(groupName);
@@ -157,6 +163,10 @@ try{
   const groupA=page.locator('.tle-quick-filter[data-group-id]').filter({hasText:groupName});
   const groupAId=await groupA.getAttribute('data-group-id');
   assert.ok(groupAId,'The created group must appear as a selectable directory row');
+  assert.equal(await initialRenameAction.isVisible(),true);
+  assert.equal(await initialDeleteAction.isVisible(),true);
+  assert.equal(await initialRenameAction.isEnabled(),true,'Creating a group selects it and enables rename');
+  assert.equal(await initialDeleteAction.isEnabled(),true,'Creating a group selects it and enables delete');
   await page.getByRole('button',{name:'新建分组',exact:true}).click();
   await page.getByLabel('新分组名称',{exact:true}).fill(groupName+'B');
   await page.getByRole('button',{name:'创建',exact:true}).click();

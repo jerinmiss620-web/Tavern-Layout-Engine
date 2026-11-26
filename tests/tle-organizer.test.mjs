@@ -65,6 +65,9 @@ assert.match(source, /API 连接、接口来源与模型仅允许搜索，不参
 assert.match(source, /正则继续由正则侠管理/);
 assert.match(manager, /quickButton\('重命名'/);
 assert.match(manager, /quickButton\('删除分组'/);
+assert.match(manager, /selectedGroupActions\.append\(selectedGroupActionsLabel, renameGroupButton, deleteGroupButton\)/);
+assert.match(manager, /selectedGroupActions\.hidden = false/);
+assert.doesNotMatch(manager, /selectedGroupActions\.hidden = !managedGroup/);
 assert.match(manager, /function refreshGroupManagement/);
 assert.match(manager, /const managedGroup = groups\.find\(group => group\.id === viewGroup\)/);
 assert.match(manager, /renameInput\.setAttribute\('aria-label', '修改后的分组名称'\)/);

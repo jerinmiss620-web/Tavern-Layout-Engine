@@ -106,6 +106,12 @@ try{
  await page.getByRole('button',{name:'取消',exact:true}).click();
  await page.setViewportSize({width:1440,height:1000});
  const initialGroup=page.locator('.tle-quick-filter[data-group-id="favorites"]');
+ const renameAction=page.getByRole('button',{name:'重命名',exact:true});
+ const deleteAction=page.getByRole('button',{name:'删除分组',exact:true});
+ assert.equal(await renameAction.isVisible(),true,'Rename action must remain visible without a selection');
+ assert.equal(await deleteAction.isVisible(),true,'Delete action must remain visible without a selection');
+ assert.equal(await renameAction.isDisabled(),true,'Rename action is disabled without a selected custom group');
+ assert.equal(await deleteAction.isDisabled(),true,'Delete action is disabled without a selected custom group');
  assert.equal(await initialGroup.isEnabled(),true,'Group directory rows must be clickable when idle');
  await page.evaluate(()=>{harness.content.lock(true);harness.content.lock(true);});
  assert.equal(await initialGroup.isDisabled(),true,'A running content operation may temporarily lock navigation');
@@ -113,6 +119,10 @@ try{
  assert.equal(await initialGroup.isEnabled(),true,'Repeated lock acquisition must restore the original clickable state');
  await initialGroup.click();
  assert.equal(await page.locator('.tle-quick-group-selection-name').textContent(),'收藏');
+ assert.equal(await renameAction.isVisible(),true);
+ assert.equal(await deleteAction.isVisible(),true);
+ assert.equal(await renameAction.isEnabled(),true,'Selecting a custom group enables rename');
+ assert.equal(await deleteAction.isEnabled(),true,'Selecting a custom group enables delete');
 
  await page.getByRole('button',{name:'新建分组',exact:true}).click();
  await page.getByLabel('新分组名称',{exact:true}).fill('测试分组 A');
