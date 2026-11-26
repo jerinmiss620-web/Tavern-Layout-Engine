@@ -10,7 +10,7 @@
     "source_commit": "61e2e35bfe332a636130f0c16e5f10f82106da69",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/61e2e35bfe332a636130f0c16e5f10f82106da69/releases/v0.3.262/TLE.js",
     "changelog_path": "releases/v0.3.262/CHANGELOG.md",
-    "sha256": "b708bb20b093c3d7989b8ad224520a448916b4ec5c934822c6e0727ff5e594c1",
+    "sha256": "cdafbc6a5f94e168c87a2a500ff927691c844a5405edf1ca1f1fec8847f76c06",
     "size_bytes": 848161
   },
   "status": "TEST 0.3.262: 配套方案标题行右侧显示默认/应用操作；整理侠移动端标题顺序优化；查找替换取消操作区内滚动，范围与备份控件响应式换行；保留 v0.3.261 宿主启动恢复默认方案逻辑。",
