@@ -8787,9 +8787,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const hint = quickNode(
       'small',
       'tle-quick-hint',
-      '仅管理酒馆原生支持删除的资源；不可删除配置仍可在搜索页查找。'
+      '仅管理酒馆原生支持删除的资源；不可删除配置仍可通过全局搜索查找。'
     );
-    hint.title = '资源管理只显示酒馆原生支持删除的资源；模型、API 与其他不可删除配置仅保留在搜索页。现有隐藏分类分组数据仍保留在全部分组备份中。右上角图标可导入/导出全部分组方案。';
+    hint.title = '资源管理只显示酒馆原生支持删除的资源；模型、API 与其他不可删除配置仍可通过全局搜索查找。现有隐藏分类分组数据仍保留在全部分组备份中。右上角图标可导入/导出全部分组方案。';
     const tabs = quickNode('div', 'flex-container flexWrap tle-quick-tabs');
     tabs.setAttribute('aria-label', '资源类型');
     const worldFilterBar = quickNode('div', 'tle-worldbook-filter-bar');
@@ -9096,7 +9096,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const resourceHeader = quickNode('div', 'tle-content-heading standoutHeader flex-container alignItemsCenter justifySpaceBetween');
     resourceHeader.append(resourceHeading);
     const resourcePage = quickNode('section', 'tle-organizer-resource-page');
+    resourcePage.id = 'tle-organizer-resource-page';
+    resourcePage.setAttribute('aria-label', '资源整理');
     const findReplacePage = quickNode('section', 'tle-organizer-findreplace-page');
+    findReplacePage.id = 'tle-organizer-findreplace-page';
+    findReplacePage.setAttribute('aria-label', '查找替换');
+    resourceTab.setAttribute('aria-controls', resourcePage.id);
+    findReplaceTab.setAttribute('aria-controls', findReplacePage.id);
     findReplacePage.hidden = true;
     const contentSearchWrap = quickNode('div', 'tle-search-input-wrap flex-container flexnowrap flex1');
     const contentSearchIcon = quickNode('i', 'fa-solid fa-magnifying-glass');
@@ -10318,7 +10324,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     refreshQuickHorizontalIndicators();
     if (activeView === 'findreplace') switchOrganizerView('findreplace');
     void load().then(() => { if (resume?.message) { statusMessage = resume.message; render(); } });
-    // The Organizer reuses the single search field above the view; it never creates a second one.
+    // Resource-name filtering and content search use separate inputs on separate tabs.
   }
   const FOLD_STORAGE_KEY = 'tle.optionalFolds.v2';
   const FOLD_LABELS = {
