@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.12.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.13.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -173,7 +173,11 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .deleteChat'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .freesia-gallery-chat-actions'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar'));
-    assert.match(css, /\.freesia-gallery-chat-count \{ position: absolute;[^}]*background: none; filter: drop-shadow\(0 1px 2px rgba\(0, 0, 0, 0\.95\)\)/);
+    assert.match(css, /\.freesia-gallery-chat-count \{ position: absolute;[^}]*background: none; filter: drop-shadow\(0 1px 1px rgba\(0, 0, 0, 0\.78\)\)/);
+    assert.match(css, /\.freesia-gallery-chat-count \{[^}]*font-size: clamp\(12px, 0\.86em, 14px\); font-weight: 500; line-height: 1\.35/);
+    assert.match(css, /\.freesia-gallery-chat-count \{[^}]*pointer-events: auto; -webkit-user-select: text; user-select: text; cursor: pointer/);
+    assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*font-weight: 600/);
+    assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*pointer-events: none/);
     assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*linear-gradient/);
     assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*background: linear-gradient/);
     assert.doesNotMatch(css, /\.freesia-gallery-card > \.freesia-gallery-character-pin \{ position: absolute/);
