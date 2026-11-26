@@ -9,16 +9,16 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.270');
+assert.equal(version, '0.3.271');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.270'/);
+assert.match(moduleSource, /const VERSION = '0.3.271'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.270'/);
+assert.match(core, /version: '0\.3\.271'/);
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
@@ -67,6 +67,11 @@ assert.doesNotMatch(moduleSource, /\.freesia-gallery-card-overlay \{[^}]*inset: 
 assert.match(moduleSource, /\.freesia-gallery-card-overlay > \.chatStats \{[^}]*flex-direction: row;[^}]*justify-content: flex-end !important;[^}]*font-size: 0\.85em; gap: 6px;/, "Message count and file size stay right-aligned in the bottom row");
 assert.match(moduleSource, /\.freesia-gallery-chat-actions button \{[^}]*background: transparent !important;[^}]*background-image: none !important;[^}]*border: 0 !important;[^}]*box-shadow: none !important;/, "Action icons have no button base, background, border or shadow");
 assert.doesNotMatch(moduleSource, /\.freesia-gallery-chat-actions button \{[^}]*\b(?:width|height|padding):/, "Action button dimensions and padding are not overridden");
+assert.match(moduleSource, /--freesia-gallery-overlay-color: #fff;[^\n]*color: var\(--freesia-gallery-overlay-color, #fff\)/, "The card overlay owns a fixed high-contrast text color");
+assert.match(moduleSource, /freesia-gallery-card-date-row \.chatDate \{[^}]*color: var\(--freesia-gallery-overlay-color, #fff\) !important;/, "The date ignores inherited theme text colors");
+assert.match(moduleSource, /freesia-gallery-chat-actions button \{[^}]*color: var\(--freesia-gallery-overlay-color, #fff\) !important;/, "All card action buttons use the fixed overlay color");
+assert.match(moduleSource, /freesia-gallery-character-pin\.active \{[^}]*color: var\(--freesia-gallery-overlay-color, #fff\) !important;/, "The active pin does not inherit a potentially low-contrast theme accent");
+assert.match(moduleSource, /freesia-gallery-card-overlay > \.chatStats \{[^}]*color: var\(--freesia-gallery-overlay-color, #fff\) !important;/, "Bottom statistics use the same fixed overlay color");
 assert.match(moduleSource, /\.freesia-gallery-card-overlay > \.chatMessageContainer \{[^}]*flex: 0 0 auto;[^}]*max-height: 2\.7em;/, "The preview container is limited to two lines and does not consume the card's remaining height");
 assert.ok(moduleSource.includes("justify-content: space-between; text-align: left !important; flex-wrap: var(--freesia-gallery-detail-heading-wrap"), "Keep character and lorebook at opposite ends of one heading row");
 assert.ok(moduleSource.includes("text-align: right !important; }"), "Right-align the bound lorebook");
