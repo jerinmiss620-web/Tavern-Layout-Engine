@@ -10,7 +10,7 @@
     "source_commit": "60c282431f02a1bdc6d962f4cff725c0627be5dc",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/60c282431f02a1bdc6d962f4cff725c0627be5dc/releases/v0.3.263/TLE.js",
     "changelog_path": "releases/v0.3.263/CHANGELOG.md",
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "sha256": "1ef3d0bd13e1363bf8f9926e743350ab6920c9a2f62e78a50fc42a9816ae484c",
     "size_bytes": 849024
   },
   "status": "TEST 0.3.263: 配套方案预览改为统一字段化双列布局；引擎面板五个更新相关操作恢复酒馆原生 menu_button 外观；仅改展示与样式，不改方案和更新业务逻辑。",
