@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.14.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.15.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -181,6 +181,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .freesia-gallery-chat-actions'));
     assert.equal(cards[0].querySelector('.freesia-gallery-card-toolbar'), null);
     assert.match(css, /\.freesia-gallery-chat-count \{ position: absolute;[^}]*background: none; filter: drop-shadow\(0 1px 1px rgba\(0, 0, 0, 0\.78\)\)/);
+    assert.match(css, /\.freesia-gallery-chat-count \{[^}]*padding: 0 8px 3px;[^}]*filter: drop-shadow\(0 1px 1px rgba\(0, 0, 0, 0\.78\)\)/);
     assert.match(css, /\.freesia-gallery-chat-count \{[^}]*font-size: clamp\(12px, 0\.86em, 14px\); font-weight: 500; line-height: 1\.35/);
     assert.match(css, /\.freesia-gallery-chat-count \{[^}]*pointer-events: auto; -webkit-user-select: text; user-select: text; cursor: pointer/);
     assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*font-weight: 600/);
@@ -268,12 +269,12 @@ test('gallery character pin is independent from native chat pins and sorts the c
     dom.window.close();
 });
 
-test('limits gallery to at most three columns at viewport widths of 480px and below', async () => {
+test('limits gallery to at most two columns at viewport widths of 480px and below', async () => {
     const { dom, api } = setup();
     Object.defineProperty(dom.window, 'innerWidth', { value: 480, configurable: true });
     await api.setLayoutSettings({ columns: 4, rows: 2 });
     const panel = dom.window.document.querySelector('.welcomePanel');
-    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '3');
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '2');
     assert.equal(api.getLayoutSettings().columns, 4);
 
     Object.defineProperty(dom.window, 'innerWidth', { value: 481, configurable: true });
@@ -635,7 +636,7 @@ test('canceling the native recent-chat settings popup does not save gallery layo
     dom.window.close();
 });
 
-test('mobile gallery popup preserves the desktop four-column preference while capping the actual grid at three', async () => {
+test('mobile gallery popup preserves desktop preferences while capping the grid at two columns', async () => {
     const { dom, api, calls } = setup();
     dom.window.innerWidth = 390;
     dom.window.dispatchEvent(new dom.window.Event('resize'));
@@ -652,14 +653,22 @@ test('mobile gallery popup preserves the desktop four-column preference while ca
 
     const columns = dialog.querySelector('#freesiaGalleryColumns');
     assert.equal(columns.value, '4');
+    assert.equal(columns.querySelector('option[value="3"]').disabled, true);
+    assert.equal(columns.querySelector('option[value="3"]').textContent, '3 列（桌面）');
     assert.equal(columns.querySelector('option[value="4"]').disabled, true);
-    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '3');
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '2');
 
     dialog.querySelector('#freesiaGalleryRows').value = '4';
     dialog.querySelector('.popup-button-ok').click();
     assert.deepEqual(JSON.parse(JSON.stringify(api.getLayoutSettings())), { columns: 4, rows: 4 });
     assert.deepEqual(JSON.parse(calls.storage.freesiaGallerySettings), { columns: 4, rows: 4 });
-    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '3');
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '2');
+
+    dom.window.innerWidth = 481;
+    dom.window.dispatchEvent(new dom.window.Event('resize'));
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '4');
+    assert.equal(columns.querySelector('option[value="3"]').disabled, false);
+    assert.equal(columns.querySelector('option[value="4"]').disabled, false);
 
     api.stop();
     dom.window.close();
