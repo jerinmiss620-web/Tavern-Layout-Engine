@@ -6,6 +6,7 @@ import express from 'express';
 import { chromium } from 'playwright-core';
 import { installBatchRoutes } from '../plugins/global-batch-replace/batch-server.js';
 const source=fs.readFileSync('development/organizer/TLE.js','utf8');
+assert.doesNotMatch(source,/tle-content-mode-button/,'Mode buttons must not define a private visual class');
 const nativePublic=process.env.TLE_ST_PUBLIC||'E:/SillyTavern/SillyTavern/public';
 assert.ok(fs.existsSync(path.join(nativePublic,'style.css')),'Set TLE_ST_PUBLIC to a local SillyTavern public folder for native CSS checks');
 const slice=(start,end)=>{const a=source.indexOf(start),b=source.indexOf(end,a);assert.ok(a>=0&&b>a);return source.slice(a,b);};
@@ -52,8 +53,38 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.waitForFunction(()=>window.harness?.content);
  await page.setViewportSize({width:1440,height:1000});
  const search=page.locator('#tle-organizer-panel input[type=search]');assert.equal(await search.count(),1);
+ const modeButtons=page.locator('#tle-organizer-panel .tle-content-mode-switch > button');
+ assert.equal(await modeButtons.count(),2,'Both ordinary mode buttons must always exist');
+ const initialModeState=await modeButtons.evaluateAll(buttons=>buttons.map(button=>({
+  native:button.classList.contains('menu_button')&&button.classList.contains('menu_button_icon'),
+  active:button.classList.contains('active'),
+  pressed:button.getAttribute('aria-pressed'),
+  visible:!!(button.offsetWidth||button.offsetHeight||button.getClientRects().length)
+ })));
+ assert.deepEqual(initialModeState,[
+  {native:true,active:true,pressed:'true',visible:true},
+  {native:true,active:false,pressed:'false',visible:true}
+ ]);
+ const nativeStyleMatches=await modeButtons.evaluateAll(buttons=>{
+  const properties=['backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','paddingTop','paddingRight','color','fontSize','fontWeight','fontFamily','boxShadow'];
+  return buttons.map(button=>{
+   const probe=document.createElement('button');
+   probe.className='menu_button menu_button_icon'+(button.classList.contains('active')?' active':'');
+   probe.textContent='native';
+   button.parentElement.append(probe);
+   const actual=getComputedStyle(button),expected=getComputedStyle(probe);
+   const matches=properties.every(property=>actual[property]===expected[property]);
+   probe.remove();
+   return matches;
+  });
+ });
+ assert.deepEqual(nativeStyleMatches,[true,true],'Mode buttons must use unmodified SillyTavern menu_button styles');
  await search.fill('预设');assert.equal(await page.locator('.tle-quick-list>.tle-quick-item').count(),1);
- await page.getByRole('radio',{name:'查找与替换',exact:true}).check();await page.waitForFunction(()=>!harness.content.busy);
+ await page.getByRole('button',{name:'查找与替换',exact:true}).click();await page.waitForFunction(()=>!harness.content.busy);
+ assert.equal(await modeButtons.nth(0).getAttribute('aria-pressed'),'false');
+ assert.equal(await modeButtons.nth(0).evaluate(button=>button.classList.contains('active')),false);
+ assert.equal(await modeButtons.nth(1).getAttribute('aria-pressed'),'true');
+ assert.equal(await modeButtons.nth(1).evaluate(button=>button.classList.contains('active')),true);
  await search.fill('旧签名');await page.getByLabel('替换为',{exact:true}).fill('');
  await page.getByRole('button',{name:'查找',exact:true}).click();await page.waitForFunction(()=>!harness.content.busy&&harness.content.snapshot?.status==='ready');
  assert.equal(await page.locator('#tle-organizer-panel .tle-quick-list').count(),1);
@@ -68,13 +99,16 @@ try{
  await page.getByRole('button',{name:'返回选择',exact:true}).click();
  for(const width of [320,375,390,768]){
   await page.setViewportSize({width,height:844});
+  assert.equal(await modeButtons.nth(0).isVisible(),true);assert.equal(await modeButtons.nth(1).isVisible(),true);
   const bounds=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:innerWidth,search:document.querySelector('#tle-organizer-panel input[type=search]').getBoundingClientRect().toJSON(),list:document.querySelector('.tle-quick-list').getBoundingClientRect().toJSON()}));
   assert.ok(bounds.document<=bounds.viewport+1,`horizontal page overflow at ${width}: ${JSON.stringify(bounds)}`);
   assert.ok(bounds.search.width>70&&bounds.search.height>15,`search size at ${width}: ${JSON.stringify(bounds)}`);
   assert.ok(bounds.list.height>50,`list remains usable at ${width}: ${JSON.stringify(bounds)}`);
   await page.screenshot({path:path.join(output,`mobile-${width}.png`),fullPage:true});
  }
- await page.getByRole('radio',{name:'资源名称',exact:true}).check();assert.equal(await search.inputValue(),'预设');
+ await page.getByRole('button',{name:'资源名称',exact:true}).click();await page.waitForFunction(()=>!harness.content.busy);
+ assert.equal(await modeButtons.nth(0).getAttribute('aria-pressed'),'true');assert.equal(await modeButtons.nth(0).evaluate(button=>button.classList.contains('active')),true);
+ assert.equal(await modeButtons.nth(1).getAttribute('aria-pressed'),'false');assert.equal(await search.inputValue(),'预设');
  assert.equal(await page.getByRole('button',{name:'批量删除资源',exact:true}).isVisible(),true);
  await page.locator('.tle-quick-list .tle-quick-item-check').check();assert.equal(await page.getByRole('button',{name:'批量删除资源',exact:true}).isEnabled(),true);
  await page.getByRole('button',{name:'批量删除资源',exact:true}).click();assert.equal(await page.getByRole('button',{name:'确认删除 1 项',exact:true}).isVisible(),true);
