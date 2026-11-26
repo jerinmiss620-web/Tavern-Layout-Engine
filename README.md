@@ -2,20 +2,17 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.257 · 删除确认操作图标统一
+## 开发分支测试版 v0.3.258 · 管理分组状态图标去歧义
 
-本次测试更新：将整理侠分组删除确认区的文字按钮改为与重命名编辑行一致的原生图标按钮。
+本次测试更新：管理分组按钮在开启管理模式时不再切换成 ✓，避免与重命名确认、删除确认的 ✓ 图标混淆。
 
-- **确认删除：** 使用 ✓ 图标，悬停显示「确认删除所选分组」。
-- **取消删除：** 使用 × 图标，悬停显示「取消删除」。
-- 两个按钮沿用酒馆原生 `.menu_button tle-quick-icon-action` 样式，并提供 aria-label / aria-description。
-- 删除确认操作行固定单行，不再因窄屏宽度折行；上方删除说明仍可自然换行。
-- 上方垃圾桶仍只负责进入删除确认状态；只有点击下方 ✓ 才执行删除。
-- 保留删除保护：仅处理已勾选的自定义分组，分组内资源不会删除，而是移回「未分组」。
-- 直接修改原有删除确认按钮和布局规则，不追加 CSS 补丁。
+- **管理分组图标：** 开启和关闭管理模式时始终使用文件夹图标（`fa-folder-open`）。
+- **状态反馈：** 继续通过原生按钮的 `aria-pressed` 状态和悬停提示区分模式；关闭时提示「管理分组」，开启时提示「完成分组管理」。
+- **确认语义：** ✓ 仅用于确认重命名或确认删除；× 仅用于取消操作。
+- 不新增 CSS、不改变按钮顺序、不改变分组管理及删除逻辑。
 - 仅更新开发分支测试通道；正式 Stable Core、Loader 和 Bootstrap 不变。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.257/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md)。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.258/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md)。
 
 ## 一次安装，后续自动更新
 
