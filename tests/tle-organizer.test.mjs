@@ -163,7 +163,7 @@ assert.match(source, /\.tle-quick-manager \.tle-organizer-pane-title\s*\{\s*disp
 assert.doesNotMatch(source, /\.tle-organizer-group-pane\s+\.tle-organizer-pane-title/,
   'Do not give the group heading a separate fixed-width or one-off selector');
 assert.doesNotMatch(source, /tle-organizer-divider|writing-mode:\s*vertical-rl/);
-const scrollbarWidthValues = [...source.matchAll(/scrollbar-width\\s*:\\s*([^;]+);/g)].map(match => match[1].trim()).sort();
+const scrollbarWidthValues = [...source.matchAll(/scrollbar-width\s*:\s*([^;]+);/g)].map(match => match[1].trim()).sort();
 assert.deepEqual(scrollbarWidthValues, ['none', 'none', 'none', 'thin']);
 assert.equal((source.match(/scrollbar-gutter: stable;/g) || []).length, 2);
 assert.match(readme, /第三方布局插件兼容性/);
