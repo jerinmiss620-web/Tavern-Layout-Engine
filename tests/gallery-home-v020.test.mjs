@@ -147,7 +147,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /grid-auto-rows: 1fr; align-items: stretch/);
     assert.match(css, /gap: clamp\(5px, 0\.7vw, 8px\)/);
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
-    assert.match(css, /\.freesia-gallery-card-latest \.chatMessageContainer \{ display: block/);
+    assert.match(css, /\.freesia-gallery-card-latest > \.chatMessageContainer \{ display: flex !important/);
     assert.match(css, /text-align: left !important/);
     assert.match(css, /justify-content: flex-start !important/);
     assert.match(css, /justify-content: flex-end !important/);
@@ -170,7 +170,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /\.welcomeHeader \.welcomeShortcuts \{[^}]*justify-content: flex-end;[^}]*margin-inline-start: auto/);
     assert.match(css, /@media screen and \(min-width: 821px\)/);
     assert.match(css, /\.welcomeHeader > \.freesia-gallery-layout-controls \{ flex: 0 0 auto; flex-wrap: nowrap/);
-    assert.match(css, /\.welcomeHeader \[hidden\]/);
+    assert.match(css, /\[hidden\] \{ display: none !important; \}/);
     assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-summary').textContent, /每页.*列.*行/);
     assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .chatActions'));
