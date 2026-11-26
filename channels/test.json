@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.241",
     "source_path": "releases/v0.3.241/TLE.js",
-    "source_commit": "50e03bc6ae0d52930ff7f54ae5d9aa6cf6d0cf01",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/50e03bc6ae0d52930ff7f54ae5d9aa6cf6d0cf01/releases/v0.3.241/TLE.js",
+    "source_commit": "b15f568d2a10756938645af935f2daa5ddddd89f",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b15f568d2a10756938645af935f2daa5ddddd89f/releases/v0.3.241/TLE.js",
     "changelog_path": "releases/v0.3.241/CHANGELOG.md",
-    "sha256": "8e4193cd560a7e4622c0424089bf8739d8492c2683538b49fa026603b9ba7109",
-    "size_bytes": 810872
+    "sha256": "f5598d50c6f00783f6c6283294138ff64c70742a9dd7bb8938e0ab5d1d711946",
+    "size_bytes": 811378
   },
-  "status": "TEST v0.3.241: Companion initialization establishes the current role as a baseline and does not replay its default plan on Core load/update/reload. Persisted schedule tokens prevent same-period reapplication while recovering a missed day/night boundary once. Existing manual holds, per-item partial application, unavailable-item reasons, and role-switch behavior are preserved; automated and ST/TT runtime acceptance pending.",
+  "status": "TEST v0.3.241: Companion initialization records the current role as a baseline and does not replay a default or existing scheduled plan during Core load/update/reload. For legacy schedules without a saved token, the current period is seeded without applying it; later missed day/night boundaries are recovered once. Same-period refreshes do not reapply. Existing manual holds, per-item partial application, unavailable-item reasons, and real role-switch behavior are preserved; automated and ST/TT runtime acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
