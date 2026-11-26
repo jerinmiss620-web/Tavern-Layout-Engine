@@ -80,7 +80,7 @@ assert.match(manager, /function refreshGroupManagement/);
 assert.match(manager, /const managedGroup = groups\.find\(group => group\.id === viewGroup\)/);
 assert.match(manager, /renameInput\.setAttribute\('aria-label', '修改后的分组名称'\)/);
 assert.match(manager, /不会删除其中的资源/);
-assert.match(manager, /项会移回「未分组」/);
+assert.match(manager, /项资源将移回「未分组」/);
 assert.match(manager, /button\.dataset\.groupId = filter\.id/);
 assert.match(manager, /menu_button tle-quick-filter/);
 assert.doesNotMatch(manager, /manageTargetName|manageRow|manageButton|groupName/);
