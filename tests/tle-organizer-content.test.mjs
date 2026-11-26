@@ -240,8 +240,11 @@ test('development build preserves a single Organizer, protected resource deletio
     const s=fs.readFileSync('development/organizer/TLE.js','utf8');
     assert.doesNotMatch(s,/global-batch-replace-dialog|gbr-batch-owner-list|class BatchPanel|class GlobalBatchApp/);
     assert.equal((s.match(/panel.id = ID.organizerPanel/g)||[]).length,1);
-    assert.match(s,/if \(content\?\.active\) \{ content.renderList\(\); return; \}/);
-    assert.match(s,/content\?\.active \|\| content\?\.busy/);
+    // The Organizer now owns a dedicated resource/find-replace tab state;
+    // content rendering is gated by the active view rather than the old active/busy flags.
+    assert.match(s,/headingTools\.hidden = activeView !== 'resources';/);
+    assert.match(s,/if \(activeView === 'findreplace'\) \{\s*content\.renderList\(\);\s*void content\.run\(\(\) => content\.activate\(\)\);\s*\}/);
+    assert.match(s,/if \(activeView === 'findreplace'\) content\?\.renderList\(\);/);
     assert.match(s,/persona: true/); assert.match(s,/theme: true/);
     assert.doesNotMatch(s,/input\.tle-search-field\[type="search"\]\s*\{/);
     const panel=s.slice(s.indexOf('  function createOrganizerPanel()'),s.indexOf('  function createRailControls()'));
