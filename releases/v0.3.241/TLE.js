@@ -13185,10 +13185,18 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     // The saved schedule token still allows a missed day/night boundary to recover once.
     const initialRole = companionCurrentRole();
     const initialData = companionRead();
-    companionRuntime.lastRole = initialRole?.key || '';
-    companionRuntime.lastScheduleToken = initialRole
+    const initialChoice = companionAutoTarget(initialData, initialRole);
+    const savedScheduleToken = initialRole
       ? (initialData.scheduleTokens?.[initialRole.key] || '')
       : '';
+    // A pre-v0.3.241 schedule has no token yet. Seed its current period as a baseline
+    // instead of replaying a scheduled plan during the upgrade itself.
+    if (initialRole && initialChoice?.slot && !savedScheduleToken) {
+      initialData.scheduleTokens[initialRole.key] = initialChoice.slot.token;
+      companionSave(initialData);
+    }
+    companionRuntime.lastRole = initialRole?.key || '';
+    companionRuntime.lastScheduleToken = savedScheduleToken || initialChoice?.slot?.token || '';
     companionOnChatChanged();
   }
   function companionCleanup() {
