@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const source = readFileSync('development/organizer/TLE.js', 'utf8');
-const release = readFileSync('releases/v0.3.240/TLE.js', 'utf8');
+const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
+const manifest = JSON.parse(read('channels/test.json'));
+const source = read(manifest.release.source_path);
+const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
 
-assert.equal(release, source, 'v0.3.240 immutable test source must match the working source');
+assert.equal(installer.content, source, 'the test installer must match the current pinned test source');
 assert.ok(source.includes("const NAV_MODE_STORAGE_KEY = 'tle.navigationMode';"));
 assert.doesNotMatch(source, /INFO_ENABLED_KEY|getInfoEnabled|infoEnabled|saveInfoEnabled|info-enabled/,
   'the standalone information-station master switch must be removed');
