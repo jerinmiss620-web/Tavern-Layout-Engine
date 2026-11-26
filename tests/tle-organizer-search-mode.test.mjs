@@ -23,35 +23,24 @@ const mount = section(
   '      this.replace = n("input", "text_pole flex1");'
 );
 
-assert.match(mount, /tle-content-mode-switch/);
-assert.match(mount, /setAttribute\("role", "group"\)/);
-assert.match(mount, /this\.button\(text, \(\) => this\.setMode\(value\)\)/);
-assert.match(mount, /tle-content-mode-button/);
-assert.match(mount, /button\.type = "button"/);
-assert.match(mount, /button\.setAttribute\("aria-pressed", String\(value === this\.mode\)\)/);
-assert.match(mount, /this\.modeButtons\.set\(value, button\)/);
-assert.doesNotMatch(mount, /radio|checkbox|<input|\.hidden/i,
-  'mode controls must be visible buttons, not radio/checkbox inputs');
+assert.match(mount, /this\.target = n\("label", "checkbox_label"\)/);
+assert.match(mount, /this\.modeToggle = n\("input", "checkbox"\)/);
+assert.match(mount, /this\.modeToggle\.type = "checkbox"/);
+assert.match(mount, /this\.modeToggle\.checked = this\.active/);
+assert.match(mount, /this\.modeToggle\.addEventListener\("change"/);
+assert.match(mount, /this\.setMode\(this\.modeToggle\.checked \? "content" : "name"\)/);
+assert.match(mount, /this\.target\.append\(this\.modeToggle, n\("span"/);
+assert.doesNotMatch(mount, /role", "group"|aria-pressed|modeButtons|tle-content-mode-button|radio/i,
+  'the switch must remain one native checkbox, not a radio group or custom button set');
 
 const setMode = section(source, '    async setMode(mode) {', '    onInput() {');
-assert.match(setMode, /for \(const \[value, button\] of this\.modeButtons\)/);
-assert.match(setMode, /button\.setAttribute\("aria-pressed", String\(value === this\.mode\)\)/);
-assert.doesNotMatch(setMode, /this\.target\.hidden|this\.target\.style\.display/,
-  'both mode buttons must remain visible after switching');
+assert.match(setMode, /this\.modeToggle\.checked = this\.active;/);
+assert.doesNotMatch(setMode, /modeButtons|aria-pressed|radio/i,
+  'mode state must be synchronized through the native checkbox');
 
-const css = section(
-  source,
-  '      .tle-quick-manager .tle-content-mode-switch {',
-  '      /* Organizer workspace: desktop gets three independently scrollable columns.'
-);
-assert.match(css, /flex-wrap:\s*nowrap/);
-assert.match(css, /min-height:\s*28px/);
-assert.match(css, /border-radius:\s*6px/);
-assert.match(css, /background:\s*color-mix\(/);
-assert.match(css, /\[aria-pressed="true"\]/);
-assert.match(css, /:focus-visible/);
-assert.match(css, /--SmartThemeQuoteColor/);
-assert.match(css, /--SmartThemeBorderColor/);
-assert.doesNotMatch(css, /tle-content-mode-radio|tle-content-mode-label|clip-path/);
+assert.doesNotMatch(source, /tle-content-mode-switch|tle-content-mode-button|tle-content-mode-radio/,
+  'no dedicated mode-switch CSS or custom mode-control classes should remain');
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-content-mode-(?:switch|button|radio)/,
+  'mode-control appearance must inherit native SillyTavern checkbox styling');
 
-console.log('TLE organizer search mode button-switch checks passed: v' + manifest.release.version + '.');
+console.log('TLE organizer native checkbox mode checks passed: v' + manifest.release.version + '.');
