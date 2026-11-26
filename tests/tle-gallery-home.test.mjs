@@ -9,10 +9,10 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.271');
+assert.equal(version, '0.3.272');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.271'/);
+assert.match(moduleSource, /const VERSION = '0.3.272'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
@@ -66,7 +66,10 @@ assert.match(moduleSource, /rgba\(0, 0, 0, 0\) 0%, rgba\(0, 0, 0, 0\.035\) 14%, 
 assert.doesNotMatch(moduleSource, /\.freesia-gallery-card-overlay \{[^}]*inset: 0;/, "The overlay must not cover the full card");
 assert.match(moduleSource, /\.freesia-gallery-card-overlay > \.chatStats \{[^}]*flex-direction: row;[^}]*justify-content: flex-end !important;[^}]*font-size: 0\.85em; gap: 6px;/, "Message count and file size stay right-aligned in the bottom row");
 assert.match(moduleSource, /\.freesia-gallery-chat-actions button \{[^}]*background: transparent !important;[^}]*background-image: none !important;[^}]*border: 0 !important;[^}]*box-shadow: none !important;/, "Action icons have no button base, background, border or shadow");
-assert.doesNotMatch(moduleSource, /\.freesia-gallery-chat-actions button \{[^}]*\b(?:width|height|padding):/, "Action button dimensions and padding are not overridden");
+assert.match(moduleSource, /freesia-gallery-card-date-row \{[^}]*justify-content: flex-start;[^}]*gap: 6px;/, "The date row uses a compact fixed gap instead of distributing free space");
+assert.match(moduleSource, /freesia-gallery-card-date-row \.chatDate \{[^}]*flex: 1 1 auto;/, "The date expands into the available row width");
+assert.match(moduleSource, /freesia-gallery-chat-actions \{[^}]*gap: 2px; margin-inline-start: 0;/, "The action group stays compact and does not push the date away");
+assert.match(moduleSource, /freesia-gallery-chat-actions button \{[^}]*flex: 0 0 24px;[^}]*width: 24px !important;[^}]*height: 24px !important;[^}]*padding: 0 !important;/, "Native actions retain their behavior but use compact 24px icon buttons");
 assert.match(moduleSource, /--freesia-gallery-overlay-color: #fff;[^\n]*color: var\(--freesia-gallery-overlay-color, #fff\)/, "The card overlay owns a fixed high-contrast text color");
 assert.match(moduleSource, /freesia-gallery-card-date-row \.chatDate \{[^}]*color: var\(--freesia-gallery-overlay-color, #fff\) !important;/, "The date ignores inherited theme text colors");
 assert.match(moduleSource, /freesia-gallery-chat-actions button \{[^}]*color: var\(--freesia-gallery-overlay-color, #fff\) !important;/, "All card action buttons use the fixed overlay color");
