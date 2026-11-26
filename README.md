@@ -13,7 +13,7 @@
 
 仅更新开发分支测试通道；正式 Stable Core、Loader 和 Bootstrap 不变。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.263/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.264/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 ## 一次安装，后续自动更新
 
 正式发布：**Core v0.3.259 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
