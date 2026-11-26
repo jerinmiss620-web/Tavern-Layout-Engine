@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.243
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.244
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2124,19 +2124,15 @@ var TLEBatchLibrary = (() => {
     mount() {
       const n = this.node;
       this.searchRow = n("div", "tle-content-search-row flex-container");
-      this.target = n("div", "flex-container tle-content-mode-switch");
-      this.target.setAttribute("role", "group");
-      this.target.setAttribute("aria-label", "\u641C\u7D22\u65B9\u5F0F");
-      this.modeButtons = new Map();
-      for (const [value, text] of [["name", "\u8D44\u6E90\u540D\u79F0"], ["content", "\u67E5\u627E\u4E0E\u66FF\u6362"]]) {
-        const button = this.button(text, () => this.setMode(value));
-        button.type = "button";
-        const selected = value === this.mode;
-        button.setAttribute("aria-pressed", String(selected));
-        button.classList.toggle("active", selected);
-        this.modeButtons.set(value, button);
-        this.target.append(button);
-      }
+      this.target = n("label");
+      this.modeToggle = n("input");
+      this.modeToggle.type = "checkbox";
+      this.modeToggle.checked = this.active;
+      this.modeToggle.setAttribute("aria-label", "\u67E5\u627E\u548C\u66FF\u6362");
+      this.modeToggle.addEventListener("change", () => {
+        void this.run(() => this.setMode(this.modeToggle.checked ? "content" : "name"));
+      });
+      this.target.append(this.modeToggle, n("span", "", "\u67E5\u627E\u548C\u66FF\u6362"));
       this.replace = n("input", "text_pole flex1");
       this.replace.type = "text";
       this.replace.size = 1;
@@ -2261,11 +2257,7 @@ var TLEBatchLibrary = (() => {
       if (this.active) this.rules[0].find = this.h.search.value;
       else this.nameQuery = this.h.search.value;
       this.mode = mode === "content" ? "content" : "name";
-      for (const [value, button] of this.modeButtons) {
-        const selected = value === this.mode;
-        button.setAttribute("aria-pressed", String(selected));
-        button.classList.toggle("active", selected);
-      }
+      this.modeToggle.checked = this.active;
       this.controls.hidden = this.replace.hidden = this.replaceRow.hidden = this.findButton.hidden = !this.active;
       this.h.setContentMode(this.active);
       this.h.search.value = this.active ? this.rules[0].find : this.nameQuery;
@@ -5956,14 +5948,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       .tle-quick-manager .tle-quick-list .checkbox_label > span {
         min-width: 0;
         overflow-wrap: anywhere;
-      }
-      .tle-quick-manager .tle-content-mode-switch {
-        display: flex;
-        flex: 0 0 auto;
-        flex-wrap: nowrap;
-        align-items: center;
-        gap: 4px;
-        min-width: 0;
       }
 
       /* Organizer workspace: desktop gets three independently scrollable columns.
@@ -10708,14 +10692,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.243 · 整理侠搜索方式采用方框样式单选控件</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.244 · 整理侠使用单个原生复选框切换查找与替换</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.243</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.244</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -16816,7 +16800,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.243',
+    version: '0.3.244',
     ready: false,
     destroy,
     state,
@@ -17267,5 +17251,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.243 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.244 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
