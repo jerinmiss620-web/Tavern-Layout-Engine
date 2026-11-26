@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.13.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.14.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -166,13 +166,20 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(cards[0].querySelector('.freesia-gallery-card-latest .chatMessage').textContent, /latest preview/);
     assert.equal(cards[0].classList.contains('recentChat'), true);
     assert.equal(cards[0].querySelector('.chatActions .pinChat'), null, 'home pin is a character-level action, not a native chat pin');
-    assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .freesia-gallery-character-pin'));
+    const actionGroup = cards[0].querySelector('.freesia-gallery-card-date-row .chatActions');
+    assert.ok(actionGroup.querySelector('.freesia-gallery-character-pin'));
+    assert.ok(actionGroup.querySelector('.renameChat'));
+    assert.ok(actionGroup.querySelector('.deleteChat'));
+    assert.equal(actionGroup.firstElementChild.classList.contains('freesia-gallery-character-pin'), true,
+        'character pin must be the first button in the same native action group');
+    assert.equal(cards[0].querySelector('.freesia-gallery-card-toolbar'), null,
+        'gallery must not create a separate toolbar row');
     assert.equal(cards[0].querySelector(':scope > .freesia-gallery-character-pin'), null, 'character pin must not overlay the avatar');
     assert.ok(cards[0].querySelector('.freesia-gallery-card-identity > .freesia-gallery-chat-count'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .renameChat'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .deleteChat'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .freesia-gallery-chat-actions'));
-    assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar'));
+    assert.equal(cards[0].querySelector('.freesia-gallery-card-toolbar'), null);
     assert.match(css, /\.freesia-gallery-chat-count \{ position: absolute;[^}]*background: none; filter: drop-shadow\(0 1px 1px rgba\(0, 0, 0, 0\.78\)\)/);
     assert.match(css, /\.freesia-gallery-chat-count \{[^}]*font-size: clamp\(12px, 0\.86em, 14px\); font-weight: 500; line-height: 1\.35/);
     assert.match(css, /\.freesia-gallery-chat-count \{[^}]*pointer-events: auto; -webkit-user-select: text; user-select: text; cursor: pointer/);
@@ -181,17 +188,17 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*linear-gradient/);
     assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*background: linear-gradient/);
     assert.doesNotMatch(css, /\.freesia-gallery-card > \.freesia-gallery-character-pin \{ position: absolute/);
-    assert.match(css, /\.freesia-gallery-card-toolbar \{ display: flex; align-items: center; justify-content: flex-end/);
-    assert.match(css, /\.freesia-gallery-card-toolbar \.freesia-gallery-character-pin \{ display: inline-flex/);
+    assert.match(css, /\.freesia-gallery-chat-actions \.freesia-gallery-character-pin\.active \{ color:/);
+    assert.doesNotMatch(css, /freesia-gallery-card-toolbar/);
     assert.match(css, /\.freesia-gallery-chat-actions \{ display: flex; flex: 0 0 auto/);
-    assert.match(css, /\.freesia-gallery-card \{ position: relative; display: grid; grid-template-rows: auto auto auto minmax\(0, 1fr\)/);
+    assert.match(css, /\.freesia-gallery-card \{ position: relative; display: grid; grid-template-rows: auto auto minmax\(0, 1fr\)/);
     assert.match(css, /\.freesia-gallery-card-date-row \{ display: flex !important;[^}]*justify-content: space-between !important/);
-    assert.match(css, /\.freesia-gallery-card-actions \{ display: flex; flex: 0 0 auto/);
+    assert.match(css, /\.freesia-gallery-chat-actions \{ display: flex; flex: 0 0 auto/);
     assert.match(css, /grid-template-columns: repeat\(var\(--freesia-gallery-columns, 4\), minmax\(0, 1fr\)\)/);
     assert.match(css, /grid-auto-rows: 1fr; align-items: stretch/);
     assert.match(css, /gap: clamp\(5px, 0\.7vw, 8px\)/);
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
-    assert.match(css, /\.freesia-gallery-card \{ position: relative; display: grid; grid-template-rows: auto auto auto minmax\(0, 1fr\)/);
+    assert.match(css, /\.freesia-gallery-card \{ position: relative; display: grid; grid-template-rows: auto auto minmax\(0, 1fr\)/);
     assert.match(css, /\.freesia-gallery-title-separator \{ display: none !important/);
     assert.match(css, /\.freesia-gallery-detail-avatar \{ grid-column: 1; grid-row: 1/);
     assert.match(css, /\.freesia-gallery-card-latest > \.chatMessageContainer \{ display: flex !important/);
@@ -202,7 +209,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /\.chatStats \{[^}]*max-height: none;[^}]*overflow: visible/);
     assert.match(css, /justify-self: stretch !important/);
     assert.match(css, /min-height: 2\.6em; max-height: 2\.6em/);
-    assert.match(css, /\.freesia-gallery-card-actions button/);
+    assert.match(css, /\.freesia-gallery-chat-actions button/);
     assert.doesNotMatch(css, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
     assert.doesNotMatch(css, /\.freesia-gallery-session-card \{[^}]*background/);
     assert.equal(cards[0].querySelector('.avatar img').loading, 'lazy');
@@ -219,7 +226,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /\[hidden\] \{ display: none !important; \}/);
     assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-summary').textContent, /每页.*列.*行/);
-    assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .freesia-gallery-character-pin'));
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .freesia-gallery-character-pin'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatDate'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-latest .chatMessageContainer'));
@@ -514,14 +521,16 @@ test('empty-chat cards reserve the same two-line preview region and keep all met
     assert.ok(card);
     assert.equal(card.querySelector('.freesia-gallery-card-heading .characterName').textContent, 'No Recent Chat');
     assert.equal(card.querySelector('.freesia-gallery-chat-count').textContent, '0 个聊天');
-    assert.ok(card.querySelector('.freesia-gallery-card-toolbar .freesia-gallery-character-pin'));
-    assert.equal(card.querySelector(':scope > .freesia-gallery-character-pin'), null);
-    assert.equal(card.querySelector('.freesia-gallery-card-date-row .chatActions'), null,
-        'no latest chat means there is no chat-level rename/delete target');
+    const emptyActionGroup = card.querySelector('.freesia-gallery-card-date-row .chatActions');
+    assert.ok(emptyActionGroup.querySelector('.freesia-gallery-character-pin'),
+        'role-level pin remains available even without a recent chat');
+    assert.equal(emptyActionGroup.querySelector('.renameChat, .deleteChat'), null,
+        'no latest chat means there are no chat-level rename/delete actions');
+    assert.equal(card.querySelector('.freesia-gallery-card-toolbar'), null);
     assert.equal(card.querySelector('.freesia-gallery-card-date-row .chatDate').textContent, '—');
     assert.equal(card.querySelector('.freesia-gallery-card-latest .chatMessage').textContent, '暂无最近聊天记录');
     assert.ok(card.querySelector('.freesia-gallery-card-latest .chatStats'));
-    assert.equal(card.children.length, 4);
+    assert.equal(card.children.length, 3);
 
     const css = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
     assert.match(css, /grid-template-rows: auto minmax\(2\.6em, 2\.6em\) minmax\(1\.35em, auto\)/);
