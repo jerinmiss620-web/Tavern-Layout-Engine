@@ -144,8 +144,11 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(cards[0].querySelector('.freesia-gallery-card-latest .chatMessage').textContent, /latest preview/);
     assert.equal(cards[0].classList.contains('recentChat'), true);
     assert.match(css, /grid-template-columns: repeat\(var\(--freesia-gallery-columns, 4\), minmax\(0, 1fr\)\)/);
-    assert.match(css, /aspect-ratio: 3 \/ 4/);
+    assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
     assert.doesNotMatch(css, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
+    assert.doesNotMatch(css, /\.freesia-gallery-session-card \{[^}]*background/);
+    assert.doesNotMatch(css, /\.freesia-gallery-description \{/);
+    assert.equal(cards[0].querySelector('.avatar img').loading, 'lazy');
     assert.doesNotMatch(css, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
     assert.ok(panel.querySelector('.recentChatsSettings'));
     assert.ok(panel.querySelector('.recentChatList:not(.freesia-gallery-grid)').isConnected);
