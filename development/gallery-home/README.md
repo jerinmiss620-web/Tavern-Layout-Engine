@@ -60,7 +60,7 @@
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@44800dd58e643b0893413697efd45a45881c5556/development/gallery-home/Freesia-Gallery-Home-0.2.2.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@f477011c074fee6cc001da51c38085066e03e154/development/gallery-home/Freesia-Gallery-Home-0.2.2.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
