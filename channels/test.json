@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.243",
+  "latest_version": "0.3.244",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.243",
-    "source_path": "releases/v0.3.243/TLE.js",
-    "source_commit": "5767370aacdc6b2f1fb8c2df5f927d2aa896c630",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5767370aacdc6b2f1fb8c2df5f927d2aa896c630/releases/v0.3.243/TLE.js",
-    "changelog_path": "releases/v0.3.243/CHANGELOG.md",
-    "sha256": "c7f2725e4e2e53091b0dc6a0279c82741948b9914b2581791ff2658ae7712ffb",
-    "size_bytes": 811669
+    "version": "0.3.244",
+    "source_path": "releases/v0.3.244/TLE.js",
+    "source_commit": "01e0a0e7bbfa8622b9f247e5dfc723eb4c0ec56b",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/01e0a0e7bbfa8622b9f247e5dfc723eb4c0ec56b/releases/v0.3.244/TLE.js",
+    "changelog_path": "releases/v0.3.244/CHANGELOG.md",
+    "sha256": "ccf9331481fdfc7f57a0a47fd0ce88cdd66977a66640143c8dd823934d85905f",
+    "size_bytes": 811071
   },
-  "status": "TEST 0.3.243: Organizer mode selector uses two always-visible native menu_button/menu_button_icon buttons. The selected mode uses SillyTavern's built-in .menu_button.active styling with aria-pressed; all private mode-button visual CSS has been removed, leaving only flex layout for the wrapper. Development source, pinned release source, and disabled fallback installer are synchronized; manifest SHA-256 and UTF-8 byte count match. Browser and ST acceptance scripts now target ordinary buttons and check native computed styles; Node regression guards native classes and absence of private mode CSS. Automated test execution, GitHub Actions, and ST/TT real-device acceptance are still pending.",
+  "status": "TEST 0.3.244: Organizer defaults to the existing resource-management module. A single native checkbox labeled 查找和替换 switches to content search/replace when checked and returns to resource management when unchecked. The checkbox has no custom class, inline style, or dedicated CSS; all appearance is inherited from the active SillyTavern/TauriTavern theme. The previous dual-button selector and its layout CSS are removed. Search-term memory, rule loading, scan/preview/replace, backup/restore, and the lower resource-list selection mechanism are retained. Development source, pinned release source, fallback import package, docs, and tests are synchronized. Automated tests, GitHub Actions, and ST/TT real-device acceptance remain pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
