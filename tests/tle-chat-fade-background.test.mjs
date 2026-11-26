@@ -95,7 +95,7 @@ assert.match(create, /renderMode = 'page-background'/);
 assert.match(create, /renderMode = 'page-background-mask-only'/);
 assert.match(create, /backgroundSource = 'page'/);
 assert.match(create, /backgroundSource = 'wallpaper'/);
-const pageMode = section(create, "    if (backgroundMode === 'page') {", "    if (backgroundMode === 'none') {");
+const pageMode = section(create, "    if (backgroundMode === 'page') {", "    if (!bg1 || !bgCss || !bgRect) {");
 assert.doesNotMatch(pageMode, /setChatFadeWallpaperVariables|CHAT_FADE_PSEUDO_BEFORE_CLASS|CHAT_FADE_PSEUDO_AFTER_CLASS/,
   'native page background mode must not create or copy a wallpaper mirror');
 assert.match(pageMode, /chat\.classList\.add\(CHAT_FADE_CLASS\)/,
