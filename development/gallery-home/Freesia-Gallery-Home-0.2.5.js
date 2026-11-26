@@ -1037,8 +1037,12 @@
             headers: context.getRequestHeaders(),
             body: JSON.stringify({ avatar: character.avatar, chat: chatName }),
         });
-        if (!response.ok) throw new Error('更新角色当前聊天指针失败（HTTP ' + response.status + '）。');
+        if (!response.ok) {
+            console.warn('[Freesia Gallery] Could not update the character current-chat pointer.', response.status);
+            return false;
+        }
         character.chat = chatName;
+        return true;
     }
 
     async function renameDetailChat(chat) {
