@@ -50,6 +50,33 @@ const boot=async()=>{
  assert.equal(await page.locator('.tle-organizer-pane-title.standoutHeader').count(),2,'Both navigation pane titles use standoutHeader');
  assert.equal(await page.locator('.tle-content-heading.standoutHeader').count(),1,'The resource heading uses standoutHeader');
  assert.equal(await page.locator('.tle-organizer-divider').count(),0,'No Organizer divider elements remain');
+ const headingWidths=await page.evaluate(()=>{
+  const contentWidth=element=>{
+   const style=getComputedStyle(element);
+   return element.getBoundingClientRect().width-
+    parseFloat(style.paddingLeft)-parseFloat(style.paddingRight)-
+    parseFloat(style.borderLeftWidth)-parseFloat(style.borderRightWidth);
+  };
+  const categoryPane=document.querySelector('.tle-organizer-category-pane');
+  const groupPane=document.querySelector('.tle-organizer-group-pane');
+  const groupHeader=groupPane.querySelector('.tle-quick-group-heading');
+  const categoryHeading=categoryPane.querySelector('.tle-organizer-pane-title');
+  const groupHeading=groupHeader.querySelector('.tle-organizer-pane-title');
+  return {
+   categoryTitle:categoryHeading.getBoundingClientRect().width,
+   categoryAvailable:contentWidth(categoryPane),
+   groupTitle:groupHeading.getBoundingClientRect().width,
+   groupAvailable:contentWidth(groupPane),
+   groupHeader:groupHeader.getBoundingClientRect().width,
+   groupHeaderAvailable:contentWidth(groupPane)
+  };
+ });
+ assert(Math.abs(headingWidths.categoryTitle-headingWidths.categoryAvailable)<1.5,
+  'Resource type heading must fill its pane width: '+JSON.stringify(headingWidths));
+ assert(Math.abs(headingWidths.groupHeader-headingWidths.groupHeaderAvailable)<1.5,
+  'Group heading wrapper must fill its pane width: '+JSON.stringify(headingWidths));
+ assert(Math.abs(headingWidths.groupTitle-headingWidths.groupAvailable)<1.5,
+  'Group directory heading must fill the same pane width as the category heading: '+JSON.stringify(headingWidths));
  await modeToggle.check();
  assert.equal(await modeToggle.isChecked(),true);
  await page.waitForFunction(()=>!document.querySelector('#tle-organizer-panel input[type=search]').disabled);

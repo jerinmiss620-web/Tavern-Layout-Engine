@@ -91,6 +91,10 @@ assert.match(manager, /resourcePane\.append\(\s*resourceHeader, content\.searchR
 assert.match(manager, /workspace\.append\(categoryPane, groupPane, resourcePane\)/);
 assert.match(manager, /body\.append\(workspace\)/);
 assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) minmax\(168px, \.92fr\) minmax\(360px, 2\.3fr\)/);
+assert.match(source, /\.tle-quick-manager \.tle-organizer-pane-title\s*\{\s*display:\s*block;\s*flex:\s*0 0 auto;\s*width:\s*100%;\s*min-width:\s*0;\s*box-sizing:\s*border-box;\s*\}/,
+  'Both Organizer pane titles must fill the width of their own pane');
+assert.doesNotMatch(source, /\.tle-organizer-group-pane\s+\.tle-organizer-pane-title/,
+  'Do not give the group heading a separate fixed-width or one-off selector');
 assert.doesNotMatch(source, /tle-organizer-divider|writing-mode:\s*vertical-rl/);
 assert.match(readme, /第三方布局插件兼容性/);
 assert.match(readme, /不保证与第三方布局管理插件同时启用时的兼容性/);
