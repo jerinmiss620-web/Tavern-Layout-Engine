@@ -215,7 +215,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /\[hidden\] \{ display: none !important; \}/);
     assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-summary').textContent, /每页.*列.*行/);
-    assert.equal(cards[0].querySelector('.freesia-gallery-card-toolbar'), null);
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .freesia-gallery-character-pin'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatDate'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-latest .chatMessageContainer'));
