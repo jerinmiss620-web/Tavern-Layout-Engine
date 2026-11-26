@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.274",
+  "latest_version": "0.3.275",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.274",
-    "source_path": "releases/v0.3.274/TLE.js",
-    "source_commit": "e3af3cb0a7801fcba2c426f433a0c24ecac6b162",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e3af3cb0a7801fcba2c426f433a0c24ecac6b162/releases/v0.3.274/TLE.js",
-    "changelog_path": "releases/v0.3.274/CHANGELOG.md",
-    "sha256": "18bfb27c1b6f526c563879308b7933870c5f818a32a8a2149e4639f73aa388cf",
-    "size_bytes": 963371
+    "version": "0.3.275",
+    "source_path": "releases/v0.3.275/TLE.js",
+    "source_commit": "19895260db02fc5f81c5f8ce91a95d2e7e2d675b",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/19895260db02fc5f81c5f8ce91a95d2e7e2d675b/releases/v0.3.275/TLE.js",
+    "changelog_path": "releases/v0.3.275/CHANGELOG.md",
+    "sha256": "fb945ac2be5f48fe5ebd5c671d53625d007c7d59ee9dbfb56bf3d0da6108c983",
+    "size_bytes": 964265
   },
-  "status": "TEST v0.3.274：修复渐隐侠背景来源识别。主题明确设置 body/html CSS 背景图（含渐变）时优先使用原生页面背景；普通纯色底色下仍优先镜像可见 #bg1 壁纸。监听不再依赖 #bg1，主题切换自动重新识别。仅更新测试通道。",
+  "status": "TEST v0.3.275：渐隐侠原生 CSS 背景与真实壁纸镜像双向切换；纯色主题不再被 #bg1 色层误判为图片壁纸；在 #sheld 下动态加入或替换 #bg1 时按需重新检测，清除旧伪元素与变量。只更新测试通道，正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
