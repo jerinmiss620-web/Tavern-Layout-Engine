@@ -9,16 +9,16 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.265');
+assert.equal(version, '0.3.266');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.265'/);
+assert.match(moduleSource, /const VERSION = '0.3.266'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.265'/);
+assert.match(core, /version: '0\.3\.266'/);
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
@@ -55,9 +55,21 @@ assert.ok(moduleSource.includes("align-items: center !important; justify-content
 assert.ok(moduleSource.includes("-webkit-box-pack: center;"), "Vertically center short message preview text");
 assert.ok(moduleSource.includes("justify-content: space-between; text-align: left !important; flex-wrap: var(--freesia-gallery-detail-heading-wrap"), "Keep character and lorebook at opposite ends of one heading row");
 assert.ok(moduleSource.includes("text-align: right !important; }"), "Right-align the bound lorebook");
+assert.match(moduleSource, /async function openCharacterManagement\(avatar\)/);
+assert.match(moduleSource, /selectCharacterById\(found\.index, \{ switchMenu: true \}\)/);
+assert.match(moduleSource, /async function openBoundLorebook\(worldName\)/);
+assert.match(moduleSource, /await import\('\/scripts\/world-info\.js'\)/);
+assert.match(moduleSource, /openWorldInfoEditor\(name\)/);
+assert.match(moduleSource, /world_editor_select/);
+assert.match(moduleSource, /createNavigationLink\(/);
+assert.match(moduleSource, /freesia-gallery-character-link/);
+assert.match(moduleSource, /freesia-gallery-lorebook/);
+assert.match(moduleSource, /freesia-gallery-detail-chat-count/);
+assert.ok(moduleSource.includes("main.append(heading, description);"), "Description begins directly below the name/lorebook row");
+assert.match(moduleSource, /setPage\('files'\);\s*renderFiles\(\)/);
+assert.doesNotMatch(moduleSource, /detailManageButton|freesia-gallery-manage|freesia-gallery-description-header|freesia-gallery-description-label|const filesButton/, "Remove redundant action buttons and description title row");
 
-assert.match(moduleSource, /menu_button freesia-gallery-manage/);
-assert.doesNotMatch(moduleSource, /menu_button menu_button_icon freesia-gallery-manage/);
+
 assert.doesNotMatch(moduleSource, /freesia-gallery-version/);
 assert.doesNotMatch(moduleSource, /setHeader\('角色画廊'/);
 assert.match(core, /getStoredBool\(RECORD_PREVIEW_ENABLED_KEY, true\)/);
@@ -68,4 +80,4 @@ assert.match(core, /home-avatar-pseudo-disabled/);
 assert.match(core, /home-avatar-border-image-disabled/);
 new vm.Script(moduleSource, { filename: 'development/gallery-home/gallery-home.js' });
 new vm.Script(core, { filename: corePath });
-console.log('TLE gallery integration, lifecycle, responsive layout and CSS consolidation checks passed.');
+console.log('TLE gallery integration, native character/worldbook navigation, chat-file routing, lifecycle, responsive layout and CSS consolidation checks passed.');

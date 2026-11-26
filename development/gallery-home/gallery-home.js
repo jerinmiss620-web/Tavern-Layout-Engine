@@ -2,7 +2,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.265';
+    const VERSION = '0.3.266';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -42,7 +42,6 @@ function createTLEGalleryHome(window, document) {
         filesRoot: null,
         title: null,
         titleGroup: null,
-        detailManageButton: null,
         nativeTitle: null,
         originalTitle: null,
         backButton: null,
@@ -133,6 +132,8 @@ function createTLEGalleryHome(window, document) {
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-main { display: flex; flex-direction: column; align-self: stretch; width: 100%; height: auto; min-width: 0; min-height: 0; gap: var(--freesia-gallery-detail-main-gap, 8px); box-sizing: border-box; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-description { display: block; flex: 1 1 0; width: 100%; min-width: 0; min-height: 0 !important; height: 0 !important; max-height: none !important; margin: var(--freesia-gallery-description-margin, initial); padding: var(--freesia-gallery-description-padding, initial); box-sizing: border-box; font-size: var(--freesia-gallery-description-size, inherit); line-height: var(--freesia-gallery-description-line, normal); overflow: auto; resize: none; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; text-align: left !important; flex-wrap: var(--freesia-gallery-detail-heading-wrap, wrap); gap: var(--freesia-gallery-detail-heading-gap, 8px 12px); width: 100%; min-width: 0; min-height: 0; overflow: var(--freesia-gallery-detail-heading-overflow, visible); }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-character-link { display: block; width: 100%; min-width: 0; overflow: hidden; color: inherit; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-character-link:hover, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-lorebook:hover, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-count:hover { color: var(--SmartThemeQuoteColor, currentColor); text-decoration: underline; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card .chatNameContainer { display: flex; align-items: center; gap: 8px; min-width: 0; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card .chatName { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-session-card .chatName { text-align: left !important; }",
@@ -140,16 +141,13 @@ function createTLEGalleryHome(window, document) {
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card .chatDate { flex: 0 0 auto; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; margin-inline-start: auto; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-name { flex: var(--freesia-gallery-detail-name-flex, 0 1 auto); min-width: 0; max-width: var(--freesia-gallery-detail-name-max, 100%); margin: 0; font-size: var(--freesia-gallery-detail-name-size, 1.5em); font-weight: 500; line-height: var(--freesia-gallery-detail-name-line, normal); white-space: var(--freesia-gallery-detail-name-white-space, normal); overflow: var(--freesia-gallery-detail-name-overflow, visible); text-overflow: var(--freesia-gallery-detail-name-text-overflow, clip); overflow-wrap: var(--freesia-gallery-detail-name-wrap, anywhere); text-align: left !important; margin-inline-end: auto; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-lorebook { flex: var(--freesia-gallery-lorebook-flex, 0 1 auto); min-width: 0; margin-inline-start: auto; font-size: 0.9em; opacity: 0.76; white-space: var(--freesia-gallery-lorebook-white-space, normal); overflow: var(--freesia-gallery-lorebook-overflow, visible); text-overflow: var(--freesia-gallery-lorebook-text-overflow, clip); overflow-wrap: anywhere; text-align: right !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-description-header { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: var(--freesia-gallery-description-header-gap, 8px); width: 100%; min-width: 0; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-description-header .freesia-gallery-manage { flex: 0 0 auto; margin-inline-start: auto; white-space: nowrap; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-description-label { display: block; flex: 1 1 auto; min-width: 0; margin: 0; font-size: 0.82em; opacity: 0.68; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-lorebook { flex: var(--freesia-gallery-lorebook-flex, 0 1 auto); min-width: 0; margin-inline-start: auto; color: inherit; font-size: 0.9em; opacity: 0.76; text-decoration: none; cursor: pointer; white-space: var(--freesia-gallery-lorebook-white-space, normal); overflow: var(--freesia-gallery-lorebook-overflow, visible); text-overflow: var(--freesia-gallery-lorebook-text-overflow, clip); overflow-wrap: anywhere; text-align: right !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: var(--freesia-gallery-detail-chat-margin, 12px 0 10px); }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-count { font-size: 1.05em; font-weight: 500; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-count { display: inline-flex; align-items: center; color: inherit; font-size: 1.05em; font-weight: 500; text-decoration: none; cursor: pointer; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-files-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 8px; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-search { flex: 1 1 12em; min-width: 0; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-empty { padding: 24px 12px; text-align: center; opacity: 0.7; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-count:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-latest:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-row:focus-visible { outline: 2px solid var(--SmartThemeQuoteColor, currentColor); outline-offset: 3px; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-count:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-latest:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-row:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-character-link:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-lorebook:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-count:focus-visible { outline: 2px solid var(--SmartThemeQuoteColor, currentColor); outline-offset: 3px; }",
         "@media screen and (min-width: 821px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-header-wrap: nowrap; --freesia-gallery-header-gap: 8px; --freesia-gallery-summary-gap: 2px; } }",
         "@media screen and (max-width: 820px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-detail-columns: 104px minmax(0, 1fr); --freesia-gallery-detail-gap: 8px; --freesia-gallery-detail-main-gap: 0px; --freesia-gallery-detail-heading-wrap: nowrap; --freesia-gallery-detail-heading-gap: 4px; --freesia-gallery-detail-heading-overflow: hidden; --freesia-gallery-detail-name-flex: 0 1 auto; --freesia-gallery-detail-name-max: 100%; --freesia-gallery-detail-name-size: 1.05em; --freesia-gallery-detail-name-line: 1.2; --freesia-gallery-detail-name-white-space: nowrap; --freesia-gallery-detail-name-overflow: hidden; --freesia-gallery-detail-name-text-overflow: ellipsis; --freesia-gallery-detail-name-wrap: normal; --freesia-gallery-lorebook-white-space: nowrap; --freesia-gallery-lorebook-overflow: hidden; --freesia-gallery-lorebook-text-overflow: ellipsis; --freesia-gallery-description-header-gap: 4px; --freesia-gallery-description-margin: 0; --freesia-gallery-description-padding: 6px 8px; --freesia-gallery-description-size: 0.86em; --freesia-gallery-description-line: 1.3; --freesia-gallery-detail-chat-margin: 10px 0 10px; --freesia-gallery-date-height: 22px; --freesia-gallery-date-gap: 4px; --freesia-gallery-action-size: 22px; --freesia-gallery-action-padding: 0; --freesia-gallery-character-align: center; } }",
     ].join('\n');
@@ -591,6 +589,27 @@ function createTLEGalleryHome(window, document) {
         });
     }
 
+    function createNavigationLink(className, text, ariaLabel, callback) {
+        const link = createElement('a', className, text);
+        link.href = '#';
+        link.title = ariaLabel || String(text || '');
+        if (ariaLabel) link.setAttribute('aria-label', ariaLabel);
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (typeof callback !== 'function') return;
+            try {
+                const result = callback(event);
+                if (result && typeof result.catch === 'function') {
+                    result.catch(error => reportError('页面跳转失败。', error));
+                }
+            } catch (error) {
+                reportError('页面跳转失败。', error);
+            }
+        });
+        return link;
+    }
+
     function createGalleryCard(group) {
         const latest = group.latestChat;
         const nativeRow = latest && findNativeEntry(latest);
@@ -833,7 +852,6 @@ function createTLEGalleryHome(window, document) {
             state.backButton.onclick = backAction || null;
         }
         if (state.viewToggle) state.viewToggle.hidden = state.page !== 'gallery';
-        if (state.detailManageButton) state.detailManageButton.hidden = state.page !== 'detail';
         if (state.panel) {
             PAGE_CLASSES.forEach(name => state.panel.classList.remove(name));
             state.panel.classList.add('freesia-gallery-page-' + state.page);
@@ -1395,10 +1413,6 @@ function createTLEGalleryHome(window, document) {
         if (!state.panel) return false;
         state.selectedAvatar = avatar;
         state.fileSearch = '';
-        if (state.detailManageButton) {
-            state.detailManageButton.remove();
-            state.detailManageButton = null;
-        }
         state.detailCharacter = null;
         state.detailChats = [];
         setPage('detail');
@@ -1420,6 +1434,69 @@ function createTLEGalleryHome(window, document) {
         }
     }
 
+    async function openCharacterManagement(avatar) {
+        const found = findCharacter(avatar);
+        if (found.index < 0 || !found.context || typeof found.context.selectCharacterById !== 'function') {
+            reportError('当前环境无法打开角色编辑界面。');
+            return false;
+        }
+        try {
+            await found.context.selectCharacterById(found.index, { switchMenu: true });
+            return true;
+        } catch (error) {
+            reportError('打开角色编辑界面失败。', error);
+            return false;
+        }
+    }
+
+    async function openBoundLorebook(worldName) {
+        const name = String(worldName || '').trim();
+        if (!name) return false;
+        const context = getContext();
+        const names = context && typeof context.getWorldInfoNames === 'function'
+            ? context.getWorldInfoNames()
+            : [];
+        if (Array.isArray(names) && names.length && !names.includes(name)) {
+            reportError('当前角色绑定的世界书「' + name + '」未在酒馆世界书列表中找到。');
+            return false;
+        }
+
+        let importError = null;
+        try {
+            const worldInfoModule = await import('/scripts/world-info.js');
+            if (worldInfoModule && typeof worldInfoModule.openWorldInfoEditor === 'function') {
+                worldInfoModule.openWorldInfoEditor(name);
+                return true;
+            }
+            importError = new Error('当前酒馆未提供 openWorldInfoEditor 接口。');
+        } catch (error) {
+            importError = error;
+        }
+
+        // Compatibility fallback for TT builds that expose the native editor DOM
+        // but do not expose the world-info module through the same import path.
+        const drawer = document.getElementById('WIDrawerIcon');
+        const worldInfo = document.getElementById('WorldInfo');
+        const worldInfoVisible = !!worldInfo && worldInfo.getClientRects().length > 0
+            && window.getComputedStyle(worldInfo).display !== 'none';
+        if (drawer && !worldInfoVisible) drawer.click();
+
+        const select = document.getElementById('world_editor_select');
+        if (select) {
+            const index = Array.isArray(names) ? names.indexOf(name) : -1;
+            const option = Array.from(select.options || []).find(item => String(item.textContent || '').trim() === name);
+            const value = index >= 0 ? String(index) : (option ? option.value : undefined);
+            if (value !== undefined && Array.from(select.options || []).some(item => item.value === value)) {
+                select.value = value;
+                select.dispatchEvent(new window.Event('change', { bubbles: true }));
+                return true;
+            }
+        }
+
+        reportError('无法打开角色绑定的世界书「' + name + '」。', importError);
+        return false;
+    }
+
     function renderDetail() {
         if (!state.detailRoot || !state.detailCharacter) return;
         const character = state.detailCharacter;
@@ -1438,34 +1515,24 @@ function createTLEGalleryHome(window, document) {
 
         const main = createElement('div', 'freesia-gallery-detail-main');
         const heading = createElement('div', 'freesia-gallery-detail-heading');
-        heading.append(createElement('h2', 'freesia-gallery-detail-name', character.name || '未命名角色'));
+        const nameHeading = createElement('h2', 'freesia-gallery-detail-name');
+        nameHeading.append(createNavigationLink(
+            'freesia-gallery-character-link',
+            character.name || '未命名角色',
+            '打开角色编辑界面：' + (character.name || '未命名角色'),
+            () => openCharacterManagement(character.avatar)
+        ));
+        heading.append(nameHeading);
 
         const lorebook = showLorebook(character, context);
-        if (lorebook) heading.append(createElement('div', 'freesia-gallery-lorebook', lorebook));
-
-        if (state.detailManageButton) state.detailManageButton.remove();
-        const manage = createElement('button', 'menu_button freesia-gallery-manage');
-        manage.type = 'button';
-        manage.textContent = '详情/管理';
-        manage.setAttribute('aria-label', '打开酒馆原生角色详情与管理');
-        manage.addEventListener('click', async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const found = findCharacter(character.avatar);
-            if (found.index < 0 || !found.context || typeof found.context.selectCharacterById !== 'function') {
-                reportError('当前环境无法打开酒馆原生角色管理界面。');
-                return;
-            }
-            try {
-                await found.context.selectCharacterById(found.index, { switchMenu: true });
-            } catch (error) {
-                reportError('打开酒馆原生角色管理界面失败。', error);
-            }
-        });
-        const descriptionHeader = createElement('div', 'freesia-gallery-description-header');
-        const descriptionLabel = createElement('div', 'freesia-gallery-description-label', '角色描述');
-        descriptionHeader.append(descriptionLabel, manage);
-        state.detailManageButton = manage;
+        if (lorebook) {
+            heading.append(createNavigationLink(
+                'freesia-gallery-lorebook',
+                lorebook,
+                '打开绑定世界书：' + lorebook,
+                () => openBoundLorebook(lorebook)
+            ));
+        }
         const description = createElement('textarea', 'text_pole freesia-gallery-description');
         description.readOnly = true;
         description.rows = 3;
@@ -1479,17 +1546,20 @@ function createTLEGalleryHome(window, document) {
             description.className = nativeDescription.className + ' freesia-gallery-description';
         }
 
-        main.append(heading, descriptionHeader, description);
+        main.append(heading, description);
         hero.append(avatar, main);
         fragment.append(hero);
 
         const chatHeader = createElement('div', 'freesia-gallery-detail-chat-header');
-        chatHeader.append(createElement('strong', 'freesia-gallery-detail-chat-count', state.detailChats.length + ' 个聊天'));
-        const filesButton = createElement('button', 'menu_button menu_button_icon');
-        filesButton.type = 'button';
-        filesButton.textContent = '聊天文件';
-        filesButton.addEventListener('click', function () { setPage('files'); renderFiles(); });
-        chatHeader.append(filesButton);
+        chatHeader.append(createNavigationLink(
+            'freesia-gallery-detail-chat-count',
+            state.detailChats.length + ' 个聊天',
+            '打开当前角色的全部聊天文件',
+            function () {
+                setPage('files');
+                renderFiles();
+            }
+        ));
         fragment.append(chatHeader);
 
         const sessions = createElement('div', 'recentChatList freesia-gallery-session-list');
@@ -1661,7 +1731,6 @@ function createTLEGalleryHome(window, document) {
         state.filesRoot = null;
         state.title = null;
         state.titleGroup = null;
-        state.detailManageButton = null;
         state.nativeTitle = null;
         state.originalTitle = null;
         state.backButton = null;
