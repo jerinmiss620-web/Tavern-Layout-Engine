@@ -13330,10 +13330,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const toggle = quickNode('input');
     toggle.type = 'checkbox';
     toggle.checked = Boolean(saved);
-    const name = quickNode('span', 'tle-companion-field-label', field.name);
+    const isWorldInfo = field.id === 'worldInfo';
+    const name = quickNode('span', 'tle-companion-field-label',
+      isWorldInfo && !saved ? '全局世界书（未保存）' : field.name);
     const select = quickNode('select', 'text_pole');
     select.setAttribute('aria-label', field.name);
-    const isWorldInfo = field.id === 'worldInfo';
     const choices = (catalogs[field.type] || []).filter(item => companionEntryId(field, item) && !item.disabled
       && (field.id !== 'worldInfo' || (item.value != null && String(item.value) !== '')));
     const known = new Set();
@@ -13396,7 +13397,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     select.disabled = !toggle.checked;
     toggle.addEventListener('change', () => { select.disabled = !toggle.checked; });
     line.append(toggle, name, select);
-    if (isWorldInfo) line.title = '可多选；应用方案时会按此清单同步全局世界书';
+    if (isWorldInfo) line.title = saved
+      ? '可多选；应用方案时会按此清单同步全局世界书'
+      : '该旧方案尚未记录全局世界书；勾选左侧并保存，即可记录当前已选书目';
     return { line, toggle, select, choices, saved };
   }
   async function companionOpenEditor(planId = '', duplicate = false, replaceCurrent = false) {
