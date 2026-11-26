@@ -1,4 +1,4 @@
-# Freesia Gallery · 首页角色画廊 v0.2.6 TEST
+# Freesia Gallery · 首页角色画廊 v0.2.7 TEST
 
 独立测试模块。当前只改造 SillyTavern 欢迎首页，不接入 TLE Core，不修改 Bootstrap、导航栏、整理侠、信息站或正式频道。
 
@@ -32,7 +32,7 @@
 - 右侧显示角色名称、角色主世界书绑定名称（未绑定时不显示）。
 - 角色描述以只读 textarea 展示，沿用酒馆 `#description_textarea` 的原生类名、内联样式及可读取的计算高度（不复制其 ID），优先继承 `.text_pole` 与当前主题。
 - 标题区只显示角色名称与实际绑定的主世界书名称，不添加 `Char's lorebook` 等示例性英文前缀。
-- 「详情/管理」按钮与页面标题「角色详情」放在同一行；角色名称和实际绑定的世界书名称保留在资料区，不与管理按钮争抢位置。按钮不带 `>` 箭头。
+- 「详情/管理」按钮放在「角色描述」标题行最右侧，不与页面标题或角色名称挤在一起。按钮不带 `>` 箭头。
 - “详情/管理”按钮只负责跳转到酒馆原生角色编辑界面：调用原生 `selectCharacterById(index, { switchMenu: true })`。角色编辑、世界书绑定管理等全部归酒馆原生界面负责，本项目不重造管理功能。
 - 下方显示该角色的聊天文件总数、最新聊天及其他聊天记录。每条聊天记录提供置顶、重命名、删除三个操作；置顶仅作用于当前角色详情页的聊天列表，使用独立账号存储，不改变酒馆首页全局最近聊天置顶状态。聊天名称居中显示。
 - 最新聊天和会话条目点击后打开对应聊天。
@@ -63,12 +63,12 @@
 
 ## 独立加载测试
 
-v0.2.6 恢复独立的角色置顶、修正页面标题按钮位置、去除跳转按钮箭头，并重排移动端三列工具栏与详情页头像比例。
+v0.2.7 恢复独立的角色置顶、修正页面标题按钮位置、去除跳转按钮箭头，并重排移动端三列工具栏与详情页头像比例。
 
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@54545009a649afc3830fa22c241baae55b31991d/development/gallery-home/Freesia-Gallery-Home-0.2.6.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@2d94a43ff5f42aba1b95f54b075c9d1f456af2ac/development/gallery-home/Freesia-Gallery-Home-0.2.7.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
