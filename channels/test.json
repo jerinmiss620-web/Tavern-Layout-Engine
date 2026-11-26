@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.258",
+  "latest_version": "0.3.259",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.258",
-    "source_path": "releases/v0.3.258/TLE.js",
-    "source_commit": "cdf25b0f76653760b9eebfa1997e1c968128d1fd",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/cdf25b0f76653760b9eebfa1997e1c968128d1fd/releases/v0.3.258/TLE.js",
-    "changelog_path": "releases/v0.3.258/CHANGELOG.md",
-    "sha256": "c4ac3594a60123445ff32ccc2c4dee4a503bd6dbf1a3c2ee5f447a9bd328ddd7",
-    "size_bytes": 830757
+    "version": "0.3.259",
+    "source_path": "releases/v0.3.259/TLE.js",
+    "source_commit": "329ca9ded2274c03ea8918f1feaf76ce9ab96600",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/329ca9ded2274c03ea8918f1feaf76ce9ab96600/releases/v0.3.259/TLE.js",
+    "changelog_path": "releases/v0.3.259/CHANGELOG.md",
+    "sha256": "e46521043b68142cb310074d1dd17e4c85d76dea5c450bd3c6a79fec2e97f7e9",
+    "size_bytes": 834589
   },
-  "status": "TEST 0.3.258: 管理分组按钮在开启和关闭管理模式时均保持文件夹图标，不再切换为 ✓；通过原生 aria-pressed 状态和悬停提示显示当前模式。✓ 仅表示确认操作，× 仅表示取消操作。",
+  "status": "TEST 0.3.259: 整理侠标题行新增「资源整理 / 查找替换」两个独立标签，默认进入资源整理；查找替换拥有独立输入、控制区、结果列表和状态，不再挤占资源整理第三分栏。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
