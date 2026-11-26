@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.271",
+  "latest_version": "0.3.272",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.271",
-    "source_path": "releases/v0.3.271/TLE.js",
-    "source_commit": "d2b4b45a437b25fedc7353b3c8a325e1b414c87d",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d2b4b45a437b25fedc7353b3c8a325e1b414c87d/releases/v0.3.271/TLE.js",
-    "changelog_path": "releases/v0.3.271/CHANGELOG.md",
-    "sha256": "7c2c64afe6f810b5d355fa66e95e7f5712f0bcadf6ccf0837b087796dc5fa9fb",
-    "size_bytes": 958907
+    "version": "0.3.272",
+    "source_path": "releases/v0.3.272/TLE.js",
+    "source_commit": "29324230048f8a075cf458c2568246956ddc1f46",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/29324230048f8a075cf458c2568246956ddc1f46/releases/v0.3.272/TLE.js",
+    "changelog_path": "releases/v0.3.272/CHANGELOG.md",
+    "sha256": "e5abe6969af5a709da60657bfd9d32d3f4d259b820be292631da1b42fcbec62e",
+    "size_bytes": 959249
   },
-  "status": "TEST v0.3.271: 记录预览卡片日期、置顶/编辑/删除图标及底部统计统一使用高对比度白色；置顶状态不再依赖酒馆主题强调色。仅更新测试通道。",
+  "status": "TEST v0.3.272: 记录预览底部置顶/重命名/删除按钮压缩为24×24px，日期弹性填充剩余空间；保留v0.3.271统一白色配色与原生按钮行为。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
