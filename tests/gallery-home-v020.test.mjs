@@ -148,6 +148,9 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /gap: clamp\(5px, 0\.7vw, 8px\)/);
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
     assert.match(css, /\.freesia-gallery-card-latest \.chatMessageContainer \{ display: block/);
+    assert.match(css, /text-align: left !important/);
+    assert.match(css, /grid-template-rows: auto minmax\(2\.6em, 2\.6em\) minmax\(1\.35em, auto\)/);
+    assert.match(css, /\.chatStats \{[^}]*max-height: none;[^}]*overflow: visible/);
     assert.match(css, /min-height: 2\.6em; max-height: 2\.6em/);
     assert.match(css, /\.freesia-gallery-card-toolbar \.chatActions/);
     assert.doesNotMatch(css, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
@@ -159,6 +162,9 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.ok(panel.querySelector('.recentChatList:not(.freesia-gallery-grid)').isConnected);
     assert.equal(panel.querySelector('.freesia-gallery-title').textContent, '角色画廊');
     assert.match(panel.querySelector('.freesia-gallery-version').textContent, /SillyTavern 1\.19\.0/);
+    assert.match(css, /\.welcomeHeaderTitle \{[^}]*justify-content: space-between;[^}]*width: 100%/);
+    assert.match(css, /\.freesia-gallery-title-group \{[^}]*flex: 1 1 auto/);
+    assert.match(css, /\.welcomeHeader \.welcomeShortcuts \{[^}]*justify-content: flex-end;[^}]*margin-inline-start: auto/);
     assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-summary').textContent, /每页.*列.*行/);
     assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .chatActions'));
@@ -189,6 +195,15 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.equal(panel.querySelector('.freesia-gallery-back').hidden, false);
     assert.equal(panel.querySelector('.freesia-gallery-detail-name').textContent, 'Alpha');
     assert.match(panel.querySelector('.freesia-gallery-lorebook').textContent, /Alpha Lorebook/);
+    assert.doesNotMatch(panel.querySelector('.freesia-gallery-lorebook').textContent, /Char's lorebook/);
+    assert.equal(panel.querySelector('.freesia-gallery-detail-heading .freesia-gallery-manage'), null);
+    const descriptionHeader = panel.querySelector('.freesia-gallery-description-header');
+    assert.ok(descriptionHeader);
+    assert.equal(descriptionHeader.children[0].classList.contains('freesia-gallery-description-label'), true);
+    assert.equal(descriptionHeader.children[1].classList.contains('freesia-gallery-manage'), true);
+    assert.match(descriptionHeader.textContent, /角色描述/);
+    const detailCss = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
+    assert.match(detailCss, /\.freesia-gallery-description-header \{ display: flex; align-items: center; justify-content: space-between/);
 
     const description = panel.querySelector('.freesia-gallery-description');
     assert.match(description.value, /read-only character information/);
