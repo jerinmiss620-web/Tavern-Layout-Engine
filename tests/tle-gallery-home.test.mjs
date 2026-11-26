@@ -23,7 +23,7 @@ const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
 assert.ok(cssStart >= 0 && cssEnd > cssStart);
 const selectors = [];
-for (const line of moduleSource.slice(cssStart, cssEnd).split('\\n')) {
+for (const line of moduleSource.slice(cssStart, cssEnd).split('\n')) {
   const match = line.match(/^\s*"(.*)"[,]?$/);
   if (match && match[1].includes('{')) selectors.push(match[1].slice(0, match[1].indexOf('{')).trim());
 }
