@@ -150,7 +150,10 @@ assert.match(manager, /groupActions\.append\(newGroupToggle, autoGroupButton, ma
 assert.doesNotMatch(manager, /categoryDivider|groupDivider|tle-organizer-divider/);
 assert.match(manager, /categoryPane\.append\(categoryHeading, categoryRow\)/);
 assert.match(manager, /groupPane\.append\(groupHeader, groupActions, groupEditor, groupFilters\)/);
-assert.match(manager, /resourcePane\.append\(\s*resourceHeader, content\.searchRow, content\.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,\s*operations, list, status/);
+assert.match(manager, /resourcePane\.append\(\s*resourceHeader, resourceSearchRow, worldFilterBar, toolbar, transferConfirm, deleteConfirm,\s*operations, list, status/);
+assert.match(manager, /resourceSearchRow\.append\(current\.searchWrap\)/);
+assert.match(source, /findReplacePage\.append\(content\.searchRow, content\.controls, contentList, contentStatus\)/,
+  'Find/replace controls must live in the separate Organizer tab, not the three-pane resource workspace');
 assert.match(manager, /workspace\.append\(categoryPane, groupPane, resourcePane\)/);
 assert.match(manager, /body\.append\(workspace\)/);
 assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) minmax\(168px, \.92fr\) minmax\(360px, 2\.3fr\)/);
