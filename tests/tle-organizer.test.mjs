@@ -125,7 +125,7 @@ assert.match(source, /GUI 预设是酒馆原生保留项，不能删除/);
 assert.match(manager, /headingTools\.replaceChildren\(themeImportRow, backupRow\)/);
 assert.doesNotMatch(manager, /headingTools\.append\(themeImportRow, backupRow\)/);
 assert.match(manager, /toolbar\.append\(targetSelect\)/);
-assert.match(manager, /groupActions\.append\(newGroupToggle, manageGroupsToggle, autoGroupButton\)/);
+assert.match(manager, /groupActions\.append\(newGroupToggle, manageGroupsToggle, autoGroupButton, renameGroupButton, deleteGroupsButton\)/);
 assert.doesNotMatch(manager, /categoryDivider|groupDivider|tle-organizer-divider/);
 assert.match(manager, /categoryPane\.append\(categoryHeading, categoryRow\)/);
 assert.match(manager, /groupPane\.append\(groupHeader, groupActions, groupEditor, groupFilters\)/);
