@@ -23,27 +23,35 @@ const mount = section(
   '      this.replace = n("input", "text_pole flex1");'
 );
 
-assert.match(mount, /tle-content-mode-options/);
-assert.match(mount, /setAttribute\("role", "radiogroup"\)/);
-assert.match(mount, /tle-content-mode-option/);
-assert.match(mount, /tle-content-mode-radio/);
-assert.match(mount, /radio\.type = "radio"/,
-  'the control must retain native radio semantics and mutual exclusion');
-assert.match(mount, /radio\.name = "tle-organizer-search-mode"/);
-assert.match(mount, /tle-content-mode-label/);
-assert.match(mount, /label\.append\(radio, caption\)/);
-assert.match(mount, /radio\.addEventListener\("change"/);
+assert.match(mount, /tle-content-mode-switch/);
+assert.match(mount, /setAttribute\("role", "group"\)/);
+assert.match(mount, /this\.button\(text, \(\) => this\.setMode\(value\)\)/);
+assert.match(mount, /tle-content-mode-button/);
+assert.match(mount, /button\.type = "button"/);
+assert.match(mount, /button\.setAttribute\("aria-pressed", String\(value === this\.mode\)\)/);
+assert.match(mount, /this\.modeButtons\.set\(value, button\)/);
+assert.doesNotMatch(mount, /radio|checkbox|<input|\.hidden/i,
+  'mode controls must be visible buttons, not radio/checkbox inputs');
+
+const setMode = section(source, '    async setMode(mode) {', '    onInput() {');
+assert.match(setMode, /for \(const \[value, button\] of this\.modeButtons\)/);
+assert.match(setMode, /button\.setAttribute\("aria-pressed", String\(value === this\.mode\)\)/);
+assert.doesNotMatch(setMode, /this\.target\.hidden|this\.target\.style\.display/,
+  'both mode buttons must remain visible after switching');
 
 const css = section(
   source,
-  '      .tle-quick-manager .tle-content-mode-options {',
+  '      .tle-quick-manager .tle-content-mode-switch {',
   '      /* Organizer workspace: desktop gets three independently scrollable columns.'
 );
-assert.match(css, /gap:\s*12px/);
-assert.match(css, /border-radius:\s*3px/);
-assert.match(css, /\.tle-content-mode-radio:checked \+ \.tle-content-mode-label::after/);
-assert.match(css, /border-right:\s*2px solid var\(--SmartThemeQuoteColor/);
-assert.match(css, /:focus-visible \+ \.tle-content-mode-label::before/);
-assert.match(css, /clip-path:\s*inset\(50%\)/);
+assert.match(css, /flex-wrap:\s*nowrap/);
+assert.match(css, /min-height:\s*28px/);
+assert.match(css, /border-radius:\s*6px/);
+assert.match(css, /background:\s*color-mix\(/);
+assert.match(css, /\[aria-pressed="true"\]/);
+assert.match(css, /:focus-visible/);
+assert.match(css, /--SmartThemeQuoteColor/);
+assert.match(css, /--SmartThemeBorderColor/);
+assert.doesNotMatch(css, /tle-content-mode-radio|tle-content-mode-label|clip-path/);
 
-console.log('TLE organizer search mode checkbox-look radio checks passed: v' + manifest.release.version + '.');
+console.log('TLE organizer search mode button-switch checks passed: v' + manifest.release.version + '.');
