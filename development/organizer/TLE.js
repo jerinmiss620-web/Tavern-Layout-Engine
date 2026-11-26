@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.249
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.250
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -5992,6 +5992,47 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         min-width: 0;
       }
       .tle-quick-manager .tle-quick-group-actions > button { flex: 0 0 auto; }
+      .tle-quick-manager .tle-quick-group-editor {
+        gap: 6px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-quick-group-create-row,
+      .tle-quick-manager .tle-quick-group-edit-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-quick-group-create-row > .text_pole,
+      .tle-quick-manager .tle-quick-group-edit-row > .text_pole {
+        flex: 1 1 9rem;
+        width: auto;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-quick-group-create-row > button,
+      .tle-quick-manager .tle-quick-group-edit-row > button {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100%;
+        white-space: nowrap;
+      }
+      .tle-quick-manager .tle-quick-group-manage {
+        gap: 6px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-quick-group-manage-target {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-quick-group-manage-name { overflow-wrap: anywhere; }
+      .tle-quick-manager .tle-quick-group-manage-hint {
+        display: block;
+        min-width: 0;
+      }
       .tle-quick-manager .tle-quick-filter-bar {
         display: flex;
         flex: 1 1 auto;
@@ -6141,7 +6182,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           flex: 1 1 auto;
           flex-direction: column;
           flex-wrap: nowrap;
-          align-items: stretch;
+          align-items: flex-start;
           gap: 5px;
           min-width: 0;
           min-height: 0;
@@ -6151,11 +6192,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         }
         .tle-quick-manager .tle-quick-category-row .tle-quick-tabs > button {
           flex: 0 0 auto;
-          width: 100%;
+          align-self: flex-start;
+          width: auto;
+          max-width: 100%;
           min-width: 0;
           justify-content: flex-start;
           text-align: left;
-          white-space: normal;
+          white-space: nowrap;
         }
         .tle-quick-manager .tle-quick-filter-bar {
           display: flex;
@@ -8700,22 +8743,40 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     horizontalScrollTargets.forEach(element => horizontalIndicatorResizeObserver?.observe(element));
     current.abort.signal.addEventListener('abort', () => horizontalIndicatorResizeObserver?.disconnect(), { once: true });
 
-    const groupName = quickNode('input', 'text_pole');
-    groupName.placeholder = '重命名分组';
-    groupName.setAttribute('aria-label', '重命名分组');
-    const newGroupName = quickNode('input', 'text_pole flex1');
-    newGroupName.placeholder = '新分组名称'; newGroupName.size = 1;
+    const newGroupName = quickNode('input', 'text_pole');
+    newGroupName.placeholder = '新分组名称';
+    newGroupName.size = 1;
     newGroupName.setAttribute('aria-label', '新分组名称');
     const createButton = quickButton('新建分组', () => createGroup());
-    const createRow = quickNode('div', 'flex-container flexnowrap alignItemsCenter');
+    const createRow = quickNode('div', 'tle-quick-group-create-row flex-container flexWrap alignItemsCenter');
     createRow.append(newGroupName, createButton);
-    const renameButton = quickButton('重命名', () => renameGroup());
-    const deleteButton = quickButton('删除分组', () => deleteGroup());
-    const manageRow = quickNode('div', 'flex-container flexFlowColumn');
+
+    const manageTarget = quickNode('div', 'tle-quick-group-manage-target');
+    manageTarget.setAttribute('aria-label', '当前选中分组');
+    const manageTargetLabel = quickNode('small', '', '当前选中分组：');
+    const manageTargetName = quickNode('strong', 'tle-quick-group-manage-name', '未选择，请点选下方分组');
+    manageTargetName.setAttribute('aria-live', 'polite');
+    manageTarget.append(manageTargetLabel, manageTargetName);
+
+    const groupName = quickNode('input', 'text_pole');
+    groupName.placeholder = '输入修改后的名称';
+    groupName.size = 1;
+    groupName.disabled = true;
+    groupName.setAttribute('aria-label', '修改后的分组名称');
+    const renameButton = quickButton('确认重命名', () => renameGroup());
+    const deleteButton = quickButton('删除该分组', () => deleteGroup());
+    const manageEditLabel = quickNode('small', '', '修改为');
+    const manageEditRow = quickNode('div', 'tle-quick-group-edit-row flex-container flexWrap alignItemsCenter');
+    manageEditRow.append(manageEditLabel, groupName, renameButton, deleteButton);
+
+    const manageHint = quickNode(
+      'small',
+      'tle-quick-group-manage-hint',
+      '删除只移除分组，不会删除资源；组内项目会移回「未分组」。'
+    );
+    const manageRow = quickNode('div', 'tle-quick-group-manage flex-container flexFlowColumn');
     manageRow.hidden = true;
-    const manageActions = quickNode('div', 'flex-container');
-    manageActions.append(renameButton, deleteButton);
-    manageRow.append(groupName, manageActions);
+    manageRow.append(manageTarget, manageEditRow, manageHint);
     const groupEditor = quickNode('div', 'tle-quick-group-editor flex-container flexFlowColumn');
     groupEditor.append(createRow, manageRow);
 
@@ -8732,7 +8793,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       manageRow.hidden = !manageRow.hidden;
       manageButton.textContent = manageRow.hidden ? '管理分组' : '收起管理';
       manageButton.setAttribute('aria-expanded', String(!manageRow.hidden));
-      if (!manageRow.hidden) groupName.focus({ preventScroll: true });
+      if (!manageRow.hidden && targetGroup) groupName.focus({ preventScroll: true });
     });
     manageButton.setAttribute('aria-expanded', 'false');
 
@@ -8887,8 +8948,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!groups.some(group => group.id === targetGroup)) targetGroup = '';
       targetSelect.value = targetGroup;
       targetSelect.disabled = groups.length === 0;
-      renameButton.disabled = !targetGroup;
-      deleteButton.disabled = !targetGroup;
+      const managedGroup = groups.find(group => group.id === targetGroup);
+      manageTargetName.textContent = managedGroup?.name || '未选择，请点选下方分组';
+      groupName.disabled = !managedGroup;
+      renameButton.disabled = !managedGroup;
+      deleteButton.disabled = !managedGroup;
       assignButton.disabled = !targetGroup || selected.size === 0;
       ungroupButton.disabled = selected.size === 0;
       clearSelectionButton.disabled = selected.size === 0;
@@ -10725,14 +10789,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.249 · 整理侠使用单个原生复选框切换查找与替换</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.250 · 整理侠使用单个原生复选框切换查找与替换</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.249</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.250</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -16833,7 +16897,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.249',
+    version: '0.3.250',
     ready: false,
     destroy,
     state,
@@ -17284,5 +17348,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.249 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.250 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

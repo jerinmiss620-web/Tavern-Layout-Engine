@@ -63,8 +63,17 @@ assert.match(manager, /for \(const item of QUICK_RESOURCE_MODULES\)/);
 assert.doesNotMatch(manager, /for \(const item of QUICK_MODULES\) \{\s*const button = quickButton\(item\.title/);
 assert.match(source, /API 连接、接口来源与模型仅允许搜索，不参与分组或删除。/);
 assert.match(source, /正则继续由正则侠管理/);
-assert.match(manager, /quickButton\('删除分组'/);
+assert.match(manager, /quickButton\('确认重命名'/);
+assert.match(manager, /quickButton\('删除该分组'/);
+assert.match(manager, /manageTargetName\.textContent = managedGroup\?\.name \|\| '未选择，请点选下方分组'/);
+assert.match(manager, /groupName\.setAttribute\('aria-label', '修改后的分组名称'\)/);
+assert.match(manager, /删除只移除分组，不会删除资源/);
+assert.match(manager, /groupName\.disabled = !managedGroup/);
 assert.match(manager, /其中项目已恢复为未分组/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-category-row \.tle-quick-tabs\s*\{[^}]*align-items:\s*flex-start;/s);
+assert.match(source, /\.tle-quick-manager \.tle-quick-category-row \.tle-quick-tabs > button\s*\{[^}]*align-self:\s*flex-start;[^}]*width:\s*auto;/s);
+assert.doesNotMatch(source, /\.tle-quick-category-row \.tle-quick-tabs > button\s*\{[^}]*width:\s*100%/s,
+  'Desktop category buttons must not be forced to fill the entire category column');
 assert.match(manager, /quickButton\('批量删除资源'/);
 
 // Resource deletion is delegated to the host's native operations with safeguards.

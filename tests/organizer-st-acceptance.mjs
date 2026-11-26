@@ -77,6 +77,14 @@ const boot=async()=>{
   'Group heading wrapper must fill its pane width: '+JSON.stringify(headingWidths));
  assert(Math.abs(headingWidths.groupTitle-headingWidths.groupAvailable)<1.5,
   'Group directory heading must fill the same pane width as the category heading: '+JSON.stringify(headingWidths));
+ const categoryButtonWidths=await page.evaluate(()=>{
+  const tabs=document.querySelector('.tle-organizer-category-pane .tle-quick-tabs');
+  return {available:tabs.getBoundingClientRect().width,
+   buttons:[...tabs.querySelectorAll(':scope > button')].map(button=>button.getBoundingClientRect().width)};
+ });
+ assert(categoryButtonWidths.buttons.length>0,'Resource category buttons must be present');
+ assert(categoryButtonWidths.buttons.every(width=>width<categoryButtonWidths.available-12),
+  'Resource category buttons must use natural label widths instead of stretching to the pane: '+JSON.stringify(categoryButtonWidths));
  await modeToggle.check();
  assert.equal(await modeToggle.isChecked(),true);
  await page.waitForFunction(()=>!document.querySelector('#tle-organizer-panel input[type=search]').disabled);
@@ -142,13 +150,24 @@ try{
  assert(Math.abs(sectionCheckBox.y-sectionTextBox.y)<6,'Group checkbox and heading share a row');
  await page.screenshot({path:path.join(output,'typed-result-groups.png'),fullPage:true});
  await modeToggle.uncheck();
- const groupName='TLE布局'+Date.now();await page.getByLabel('新分组名称',{exact:true}).fill(groupName);await page.getByRole('button',{name:'新建分组',exact:true}).click();
+ const groupName='TLE布局'+Date.now();
  await page.getByRole('button',{name:'管理分组',exact:true}).click();
- await page.getByLabel('重命名分组',{exact:true}).fill(groupName+'改');await page.getByRole('button',{name:'重命名',exact:true}).click();
- const renameBox=await page.getByRole('button',{name:'重命名',exact:true}).boundingBox(),deleteBox=await page.getByRole('button',{name:'删除分组',exact:true}).boundingBox();
- assert(Math.abs(renameBox.y-deleteBox.y)<6);assert.equal(await page.getByRole('button',{name:'新建分组',exact:true}).isVisible(),true);
+ assert.equal(await page.locator('.tle-quick-group-manage-name').textContent(),'未选择，请点选下方分组');
+ assert.equal(await page.getByRole('button',{name:'确认重命名',exact:true}).isDisabled(),true);
+ assert.equal(await page.getByRole('button',{name:'删除该分组',exact:true}).isDisabled(),true);
+ await page.getByLabel('新分组名称',{exact:true}).fill(groupName);
+ await page.getByRole('button',{name:'新建分组',exact:true}).click();
+ await page.getByRole('button',{name:'管理分组',exact:true}).click();
+ assert.equal(await page.locator('.tle-quick-group-manage-name').textContent(),groupName);
+ await page.getByLabel('修改后的分组名称',{exact:true}).fill(groupName+'改');
+ await page.getByRole('button',{name:'确认重命名',exact:true}).click();
+ assert.equal(await page.locator('.tle-quick-group-manage-name').textContent(),groupName+'改');
+ const renameBox=await page.getByRole('button',{name:'确认重命名',exact:true}).boundingBox(),deleteBox=await page.getByRole('button',{name:'删除该分组',exact:true}).boundingBox();
+ assert(Math.abs(renameBox.y-deleteBox.y)<6,'Rename and delete actions must stay together');
+ assert.equal(await page.getByRole('button',{name:'新建分组',exact:true}).isVisible(),true);
  await page.screenshot({path:path.join(output,'group-management.png'),fullPage:true});
- await page.getByRole('button',{name:'删除分组',exact:true}).click();
+ await page.getByRole('button',{name:'删除该分组',exact:true}).click();
+ assert.equal(await page.locator('.tle-quick-group-manage-name').textContent(),'未选择，请点选下方分组');
  await modeToggle.check();await search.fill('TLE验收旧词');await page.getByLabel('替换为',{exact:true}).fill('TLE验收新词');
  await page.getByRole('button',{name:'查找',exact:true}).click();await page.locator('.tle-quick-list details[data-content-key]').waitFor();
  await page.getByRole('button',{name:'预览替换',exact:true}).click();await page.getByRole('button',{name:'确认替换',exact:true}).click();
