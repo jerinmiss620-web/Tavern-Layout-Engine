@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.272",
+  "latest_version": "0.3.273",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.272",
-    "source_path": "releases/v0.3.272/TLE.js",
-    "source_commit": "29324230048f8a075cf458c2568246956ddc1f46",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/29324230048f8a075cf458c2568246956ddc1f46/releases/v0.3.272/TLE.js",
-    "changelog_path": "releases/v0.3.272/CHANGELOG.md",
-    "sha256": "e5abe6969af5a709da60657bfd9d32d3f4d259b820be292631da1b42fcbec62e",
-    "size_bytes": 959249
+    "version": "0.3.273",
+    "source_path": "releases/v0.3.273/TLE.js",
+    "source_commit": "6020c7d5fb12c7ebe5e2f7585b5d9e0d66d539a8",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6020c7d5fb12c7ebe5e2f7585b5d9e0d66d539a8/releases/v0.3.273/TLE.js",
+    "changelog_path": "releases/v0.3.273/CHANGELOG.md",
+    "sha256": "a85dabd754a615e56999066c72407ab3310d545ca70330250ba0e34eee856a08",
+    "size_bytes": 959242
   },
-  "status": "TEST v0.3.272: 记录预览底部置顶/重命名/删除按钮压缩为24×24px，日期弹性填充剩余空间；保留v0.3.271统一白色配色与原生按钮行为。仅更新测试通道。",
+  "status": "TEST v0.3.273: 按实机反馈微调记录预览底部布局：日期行 gap 归零；覆盖层 gap 2px、padding 30px 5px 5px；统计行底部对齐并移除强制行高；聊天数量字号 clamp(10px,0.72em,12px)。保留24×24px操作按钮与统一白色配色。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
