@@ -336,7 +336,7 @@ test('empty-chat cards reserve the same two-line preview region and keep all met
     assert.equal(card.children.length, 4);
 
     const css = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
-    assert.match(css, /grid-template-rows: auto minmax\\(2\\.6em, 2\\.6em\\) auto/);
+    assert.match(css, /grid-template-rows: auto minmax\(2\.6em, 2\.6em\) auto/);
     assert.match(css, /grid-auto-rows: 1fr/);
 
     api.stop();
@@ -349,8 +349,8 @@ test('gallery title keeps SillyTavern version text without the spider logo and r
 
     const panel = dom.window.document.querySelector('.welcomePanel');
     const titleGroup = panel.querySelector('.freesia-gallery-title-group');
-    assert.match(titleGroup.textContent, /角色画廊/);
-    assert.match(titleGroup.textContent, /SillyTavern 1\\.19\\.0 'release' \\(06bde939f\\)/);
+    assert.match(titleGroup.textContent, /角色画廊 · SillyTavern/);
+    assert.match(titleGroup.textContent, /SillyTavern 1\.19\.0 'release' \(06bde939f\)/);
     assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
 
     api.toggleView();
