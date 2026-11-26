@@ -2,7 +2,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.266';
+    const VERSION = '0.3.267';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -76,29 +76,27 @@ function createTLEGalleryHome(window, document) {
     const CSS = [
         "#chat .welcomePanel." + ACTIVE_CLASS + " .welcomeRecent > .recentChatList:not(." + GRID_CLASS + ") { display: none !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: grid; grid-template-rows: auto auto minmax(0, 1fr); align-content: start; align-items: stretch; gap: 4px; width: 100%; height: 100%; min-width: 0; min-height: 0; box-sizing: border-box; padding: 5px; cursor: default; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: relative; display: block; width: 100%; min-width: 0; cursor: pointer; outline-offset: 3px; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4 !important; min-width: 0; min-height: 0; overflow: hidden; position: relative; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; cursor: default; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; cursor: pointer; outline-offset: 3px; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0; min-height: 0; margin: 0; overflow: hidden; box-sizing: border-box; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::before, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::after { content: none !important; display: none !important; background: none !important; border: 0 !important; box-shadow: none !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar img { border-image: none !important; border-image-source: none !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading { display: block; width: 100%; min-width: 0; cursor: pointer; outline-offset: 3px; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .chatName { display: block; width: 100%; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .characterName { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: var(--freesia-gallery-character-align, left); }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-count { position: absolute; inset-inline: 0; bottom: 0; z-index: 2; display: block; box-sizing: border-box; width: 100%; padding: 0 8px 3px; overflow: hidden; color: #fff; background: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.78)); white-space: nowrap; text-overflow: ellipsis; font-size: clamp(12px, 0.86em, 14px); font-weight: 500; line-height: 1.35; pointer-events: auto; -webkit-user-select: text; user-select: text; cursor: pointer; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-actions { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 3px; margin-inline-start: auto; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-actions button { flex: 0 0 auto; width: var(--freesia-gallery-action-size, auto); min-width: var(--freesia-gallery-action-size, auto); height: var(--freesia-gallery-action-size, auto); min-height: var(--freesia-gallery-action-size, 0); padding: var(--freesia-gallery-action-padding, initial); }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-date-row { display: flex !important; align-items: center; justify-content: space-between !important; gap: var(--freesia-gallery-date-gap, 6px); min-height: var(--freesia-gallery-date-height, 0); }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-actions .freesia-gallery-character-pin.active { color: var(--SmartThemeQuoteColor, var(--SmartThemeBodyColor)); }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-actions-placeholder { visibility: hidden; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest { display: grid !important; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(2.6em, 2.6em) minmax(1.35em, auto); align-content: center; align-items: stretch !important; justify-items: stretch !important; align-self: stretch !important; width: 100% !important; min-width: 0; min-height: 0; gap: 3px; overflow: visible; text-align: left !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest > .freesia-gallery-card-date-row { display: flex !important; align-items: center; justify-content: flex-start !important; justify-self: stretch !important; align-self: stretch !important; width: 100% !important; min-width: 0; margin: 0 !important; overflow: visible; text-align: left !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest > .freesia-gallery-card-date-row .chatDate { display: block !important; flex: 0 0 auto; width: auto !important; min-width: 0; margin: 0 !important; overflow: visible; white-space: normal; overflow-wrap: anywhere; text-overflow: clip; text-align: left !important; font-size: 0.78em; line-height: 1.25; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest > .chatMessageContainer { display: flex !important; align-items: center !important; justify-content: flex-start !important; justify-self: stretch !important; align-self: stretch !important; width: 100% !important; min-width: 0; min-height: 2.6em; max-height: 2.6em; margin: 0 !important; overflow: hidden; text-align: left !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest > .chatMessageContainer > .chatMessage { display: -webkit-box !important; flex: 1 1 auto; width: 100% !important; min-width: 0; min-height: 2.6em; max-height: 2.6em; margin: 0 !important; padding: 0; overflow: hidden; white-space: normal; overflow-wrap: anywhere; text-align: left !important; -webkit-box-orient: vertical; -webkit-box-pack: center; -webkit-line-clamp: 2; line-clamp: 2; line-height: 1.3em; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest > .chatStats { display: flex !important; flex-direction: row; align-items: center !important; justify-content: flex-end !important; justify-self: stretch !important; align-self: stretch !important; width: 100% !important; min-width: 0; min-height: 1.35em; max-height: none; margin: 0 !important; padding: 1px 0 2px; box-sizing: border-box; overflow: visible; white-space: nowrap; line-height: 1.35; text-align: right !important; font-size: 0.72em; gap: 6px; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest > .chatStats .counterBlock { display: flex !important; flex: 0 0 auto; align-items: center !important; justify-content: flex-end !important; margin: 0 !important; text-align: right !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " .freesia-gallery-card .freesia-gallery-card-latest > .chatStats .fileSize { display: inline-block; flex: 0 0 auto; margin: 0 !important; text-align: right !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; min-width: 0; min-height: 0; padding: 8px; box-sizing: border-box; overflow: hidden; color: #fff; background: linear-gradient(180deg, rgba(0, 0, 0, 0.56) 0%, rgba(0, 0, 0, 0.18) 30%, rgba(0, 0, 0, 0.20) 64%, rgba(0, 0, 0, 0.70) 100%); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); pointer-events: none; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; cursor: pointer; outline-offset: 3px; pointer-events: auto; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .chatName { display: block; flex: 1 1 auto; width: auto; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .characterName { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left !important; font-size: 0.94em; font-weight: 600; line-height: 1.25; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-count { display: block; flex: 0 0 auto; max-width: 42%; margin: 0; padding: 0; overflow: hidden; color: inherit; background: none; white-space: nowrap; text-overflow: ellipsis; font-size: 0.72em; font-weight: 500; line-height: 1.3; pointer-events: auto; -webkit-user-select: text; user-select: text; cursor: pointer; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-date-row { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; pointer-events: auto; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-date-row .chatDate { display: block; flex: 0 1 auto; width: auto; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left !important; font-size: 0.78em; line-height: 1.25; cursor: pointer; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-actions { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 2px; margin-inline-start: auto; pointer-events: auto; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-actions button { flex: 0 0 auto; background: transparent !important; background-image: none !important; border: 0 !important; border-image: none !important; box-shadow: none !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-actions .freesia-gallery-character-pin.active { color: var(--SmartThemeQuoteColor, #fff); }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatMessageContainer { display: flex; flex: 1 1 auto; align-items: flex-start; justify-content: flex-start; width: 100%; min-width: 0; min-height: 0; max-height: none; margin: 0; overflow: hidden; pointer-events: auto; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatMessageContainer > .chatMessage { display: -webkit-box !important; flex: 1 1 auto; width: 100%; min-width: 0; min-height: 0; max-height: 100%; margin: 0 !important; padding: 0; overflow: hidden; white-space: normal; overflow-wrap: anywhere; text-align: left !important; -webkit-box-orient: vertical; -webkit-box-pack: start; -webkit-line-clamp: 12; line-clamp: 12; line-height: 1.35em; font-size: 0.78em; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatStats { display: flex !important; flex: 0 0 auto; flex-direction: row; align-items: center !important; justify-content: flex-end !important; align-self: stretch !important; width: 100% !important; min-width: 0; min-height: 0.85em; margin: 0 !important; padding: 0 2px; box-sizing: border-box; overflow: visible; white-space: nowrap; line-height: 0.85; text-align: right !important; font-size: 0.85em; gap: 6px; pointer-events: auto; cursor: pointer; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatStats .counterBlock { display: flex !important; flex: 0 0 auto; align-items: center !important; justify-content: flex-end !important; gap: 3px; margin: 0 !important; text-align: right !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatStats .fileSize { display: inline-block; flex: 0 0 auto; margin: 0 !important; text-align: right !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-summary { display: inline-block; margin-inline-end: var(--freesia-gallery-summary-gap, 8px); font-size: 0.78em; opacity: 0.7; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .welcomeHeader > .freesia-gallery-back { order: 1; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .welcomeHeader > .freesia-gallery-summary { order: 2; flex: 0 0 auto; white-space: nowrap; }",
@@ -147,9 +145,9 @@ function createTLEGalleryHome(window, document) {
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-files-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 8px; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-search { flex: 1 1 12em; min-width: 0; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-empty { padding: 24px 12px; text-align: center; opacity: 0.7; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-chat-count:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-latest:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-row:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-character-link:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-lorebook:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-count:focus-visible { outline: 2px solid var(--SmartThemeQuoteColor, currentColor); outline-offset: 3px; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-date-row .chatDate:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatMessageContainer:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatStats:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-row:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-character-link:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-lorebook:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-count:focus-visible { outline: 2px solid var(--SmartThemeQuoteColor, currentColor); outline-offset: 3px; }",
         "@media screen and (min-width: 821px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-header-wrap: nowrap; --freesia-gallery-header-gap: 8px; --freesia-gallery-summary-gap: 2px; } }",
-        "@media screen and (max-width: 820px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-detail-columns: 104px minmax(0, 1fr); --freesia-gallery-detail-gap: 8px; --freesia-gallery-detail-main-gap: 0px; --freesia-gallery-detail-heading-wrap: nowrap; --freesia-gallery-detail-heading-gap: 4px; --freesia-gallery-detail-heading-overflow: hidden; --freesia-gallery-detail-name-flex: 0 1 auto; --freesia-gallery-detail-name-max: 100%; --freesia-gallery-detail-name-size: 1.05em; --freesia-gallery-detail-name-line: 1.2; --freesia-gallery-detail-name-white-space: nowrap; --freesia-gallery-detail-name-overflow: hidden; --freesia-gallery-detail-name-text-overflow: ellipsis; --freesia-gallery-detail-name-wrap: normal; --freesia-gallery-lorebook-white-space: nowrap; --freesia-gallery-lorebook-overflow: hidden; --freesia-gallery-lorebook-text-overflow: ellipsis; --freesia-gallery-description-margin: 0; --freesia-gallery-description-padding: 6px 8px; --freesia-gallery-description-size: 0.86em; --freesia-gallery-description-line: 1.3; --freesia-gallery-detail-chat-margin: 10px 0 10px; --freesia-gallery-date-height: 22px; --freesia-gallery-date-gap: 4px; --freesia-gallery-action-size: 22px; --freesia-gallery-action-padding: 0; --freesia-gallery-character-align: center; } }",
+        "@media screen and (max-width: 820px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-detail-columns: 104px minmax(0, 1fr); --freesia-gallery-detail-gap: 8px; --freesia-gallery-detail-main-gap: 0px; --freesia-gallery-detail-heading-wrap: nowrap; --freesia-gallery-detail-heading-gap: 4px; --freesia-gallery-detail-heading-overflow: hidden; --freesia-gallery-detail-name-flex: 0 1 auto; --freesia-gallery-detail-name-max: 100%; --freesia-gallery-detail-name-size: 1.05em; --freesia-gallery-detail-name-line: 1.2; --freesia-gallery-detail-name-white-space: nowrap; --freesia-gallery-detail-name-overflow: hidden; --freesia-gallery-detail-name-text-overflow: ellipsis; --freesia-gallery-detail-name-wrap: normal; --freesia-gallery-lorebook-white-space: nowrap; --freesia-gallery-lorebook-overflow: hidden; --freesia-gallery-lorebook-text-overflow: ellipsis; --freesia-gallery-description-margin: 0; --freesia-gallery-description-padding: 6px 8px; --freesia-gallery-description-size: 0.86em; --freesia-gallery-description-line: 1.3; --freesia-gallery-detail-chat-margin: 10px 0 10px;  } }",
     ].join('\n');
 
     function createElement(tagName, className, text) {
@@ -613,30 +611,29 @@ function createTLEGalleryHome(window, document) {
     function createGalleryCard(group) {
         const latest = group.latestChat;
         const nativeRow = latest && findNativeEntry(latest);
-        const card = createElement('article', 'recentChat freesia-gallery-card');
+        const card = createElement('article', 'freesia-gallery-card');
         card.dataset.avatar = group.avatar;
         card.dataset.galleryAvatar = group.avatar;
 
         const identity = createElement('div', 'freesia-gallery-card-identity');
         identity.append(createAvatar(group.avatar, group.thumbnail, group.name, nativeRow));
-        const count = createElement('span', 'freesia-gallery-chat-count', (group.totalCount ?? group.chats.length) + ' 个聊天');
-        identity.append(count);
         activateSurface(identity, function () { void openDetail(group.avatar); });
 
-        const characterPin = createCharacterPinButton(group);
+        const overlay = createElement('div', 'freesia-gallery-card-overlay');
 
         const heading = createElement('div', 'chatNameContainer freesia-gallery-card-heading');
         const name = createElement('div', 'chatName');
         name.append(createElement('strong', 'characterName', group.name));
-        heading.append(name);
+        const count = createElement('span', 'freesia-gallery-chat-count', (group.totalCount ?? group.chats.length) + ' 个聊天');
+        heading.append(name, count);
         activateSurface(heading, function () { void openDetail(group.avatar); });
 
-        const latestArea = createElement('div', 'recentChatInfo freesia-gallery-card-latest');
         const dateRow = createElement('div', 'chatNameContainer freesia-gallery-card-date-row');
         const date = createElement('small', 'chatDate', latest ? latest.dateShort : '—');
         date.title = latest ? latest.dateLong : '';
         dateRow.append(date);
 
+        const characterPin = createCharacterPinButton(group);
         const actions = latest ? createNativeActions(latest) : createElement('div', 'chatActions');
         actions.classList.add('freesia-gallery-chat-actions');
         actions.prepend(characterPin);
@@ -664,8 +661,8 @@ function createTLEGalleryHome(window, document) {
         if (latest && latest.fileSize) stats.append(createElement('small', 'fileSize', latest.fileSize));
         if (latest && (latest.messageCount || latest.fileSize)) activateSurface(stats, openLatestChat);
 
-        latestArea.append(dateRow, messageContainer, stats);
-        card.append(identity, heading, latestArea);
+        overlay.append(heading, dateRow, messageContainer, stats);
+        card.append(identity, overlay);
         return card;
     }
 
