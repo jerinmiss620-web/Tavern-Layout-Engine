@@ -101,7 +101,7 @@
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-files { display: block; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { display: grid; grid-template-columns: minmax(180px, 262px) minmax(0, 1fr); gap: 28px; align-items: start; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4 !important; min-width: 0; min-height: 0; overflow: hidden; position: relative; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-main { display: flex; flex-direction: column; min-width: 0; gap: 12px; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-name { min-width: 0; margin: 0; font-size: 1.5em; font-weight: 500; overflow-wrap: anywhere; }',
