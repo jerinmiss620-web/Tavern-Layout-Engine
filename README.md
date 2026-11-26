@@ -25,7 +25,7 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
 - [Core 变更日志](releases/v0.3.264/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：Core v0.3.264 的 Node 24 全量回归、正式清单/不可变源码远程核验及下载字节更新链重放均通过；用户截图已确认整理侠分组管理交互布局，更新操作按钮通过源码断言确认继承酒馆 `.menu_button`。不同主题和宿主的完整实机视觉矩阵仍未全部覆盖。
+- [实际验证范围](VALIDATION.md)：Core v0.3.264 的 Node 24 全量回归、正式清单/不可变源码远程核验及下载字节更新链重放均通过；配套侠全局世界书完整清单、宿主启动默认方案恢复、无横线紧凑预览和五个原生更新按钮均有独立回归覆盖。不同主题和宿主的完整实机视觉矩阵仍未全部覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
