@@ -8780,7 +8780,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         module = QUICK_RESOURCE_MODULES.some(item => item.id === resume.module) ? resume.module : module;
         viewGroup = resume.viewGroup; targetGroup = resume.targetGroup; worldInfoFilter = resume.worldInfoFilter;
         statusMessage = resume.message || '';
-        activeView = resume.activeView === 'findreplace' ? 'findreplace' : 'resources';
       } else resume = null;
     } catch { resume = null; }
 
@@ -10275,7 +10274,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         row.append(copy); return row;
       },
       saveResume(message) {
-        try { HOST_WIN.sessionStorage.setItem(resumeKey, JSON.stringify({ at: Date.now(), module, viewGroup, targetGroup, worldInfoFilter, nameQuery: search.value, activeView: 'findreplace', message })); } catch {}
+        try { HOST_WIN.sessionStorage.setItem(resumeKey, JSON.stringify({ at: Date.now(), module, viewGroup, targetGroup, worldInfoFilter, nameQuery: search.value, message })); } catch {}
       },
       reloading: () => contentReloading,
       reload() { contentReloading = true; HOST_WIN.setTimeout(() => HOST_WIN.location.reload(), 1800); },
@@ -10322,7 +10321,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     findReplacePage.append(content.searchRow, content.controls, contentList, contentStatus);
     body.append(resourcePage, findReplacePage);
     refreshQuickHorizontalIndicators();
-    if (activeView === 'findreplace') switchOrganizerView('findreplace');
     void load().then(() => { if (resume?.message) { statusMessage = resume.message; render(); } });
     // Resource-name filtering and content search use separate inputs on separate tabs.
   }
