@@ -2,15 +2,15 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.244 · 整理侠单复选框切换功能模块
+## 开发分支测试版 v0.3.245 · 修正整理侠原生复选框结构
 
-本次测试更新：整理侠只保留一个原生 checkbox「查找和替换」。默认不勾选，显示原有资源管理功能；勾选后自动切换到内容查找与替换模块，取消勾选即返回资源管理。控件不添加自定义 class、背景、边框、圆角或其他视觉规则，完全继承酒馆主题。原有搜索词记忆、规则加载、扫描与替换逻辑及 v0.3.241 配套侠修复均保留。详见 [v0.3.244 更新记录](releases/v0.3.244/CHANGELOG.md)。
+本次测试更新：修正 v0.3.244 的复选框 DOM。唯一开关现在采用 SillyTavern 原生 `label.checkbox_label` 结构，复选框与「查找和替换」文字按酒馆原生方式排列；不增加任何自定义 CSS。默认不勾选为资源管理，勾选进入内容查找与替换，取消勾选返回资源管理。保留原有搜索词记忆、规则加载、扫描与替换逻辑及 v0.3.241 配套侠修复。详见 [v0.3.245 更新记录](releases/v0.3.245/CHANGELOG.md)。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.244/TLE-0.3.244-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.245/TLE-0.3.245-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
 
 整理侠“资源名称 / 查找与替换”共用一个搜索框和原资源列表。已安装原版 Global Batch Replace v1.1.0 PC 服务端即可查找、预览、替换及整份恢复；[配套服务端插件](plugins/global-batch-replace/README-TLE.md) 增加 ZIP 导入和按文件恢复。TT 使用 Core 内置原生适配。
 
-[安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md) · [本版日志](releases/v0.3.244/CHANGELOG.md)。正式发布通道仍为下文版本。
+[安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md) · [本版日志](releases/v0.3.245/CHANGELOG.md)。正式发布通道仍为下文版本。
 
 ## 一次安装，后续自动更新
 
@@ -56,7 +56,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 **独立测试入口已准备：** [v0.3.231 候选更新日志](releases/v0.3.231/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
-v0.3.239 已正式发布为 Stable Core；本分支继续在同一开发线路上推进 v0.3.244。当前测试清单 `channels/test.json` 指向 v0.3.244；正式 `latest.json` 与 `release-plan.json` 保持 v0.3.239，Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。v0.3.240 的信息站总开关与默认选项调整、v0.3.241 的配套侠初始化修复、v0.3.242 的整理侠搜索方式方框样式、v0.3.244 的单复选框模块切换均只作用于测试分支，不改动已发布的 v0.3.239 源码。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.231 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。标题栏的同步、导入、导出按钮恢复继承酒馆 `menu_button` 主题样式，不再覆盖主题底色、边框、圆角、内边距和字体；按钮仅保留必要的排列与对齐规则。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.239。
+v0.3.239 已正式发布为 Stable Core；本分支继续在同一开发线路上推进 v0.3.244。当前测试清单 `channels/test.json` 指向 v0.3.244；正式 `latest.json` 与 `release-plan.json` 保持 v0.3.239，Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。v0.3.240 的信息站总开关与默认选项调整、v0.3.241 的配套侠初始化修复、v0.3.242 的整理侠搜索方式方框样式、v0.3.244 的单复选框模块切换；v0.3.245 补齐酒馆原生 `checkbox_label` 结构均只作用于测试分支，不改动已发布的 v0.3.239 源码。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.231 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。标题栏的同步、导入、导出按钮恢复继承酒馆 `menu_button` 主题样式，不再覆盖主题底色、边框、圆角、内边距和字体；按钮仅保留必要的排列与对齐规则。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.239。
 
 ## 发布与验证
 
