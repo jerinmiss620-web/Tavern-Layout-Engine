@@ -11,7 +11,7 @@
 - 记录详情标题行角色名左对齐、绑定世界书名称右对齐，使用 `space-between` 分居同一行；「详情/管理」按钮不挤入该行。
 - 首页卡片最近聊天信息区使用 `align-content:center` 垂直居中；消息预览容器与一至两行文本在固定预览高度内垂直居中，日期、统计信息继续居中对齐。
 - 「详情/管理」按钮恢复酒馆原生 `menu_button` 尺寸。
-- GitHub Actions run [#45874982332](https://github.com/jerinmiss620-web/Tavern-Layout-Engine/actions/runs/45874982332) 已通过：完整 `npm test` 回归、TLE 测试通道远端清单/不可变源码/禁用状态 TEST 导入包核验均成功。ST/TT PC 与移动端实机验收仍待用户完成。本版不修改 Stable Core、Stable Loader 或 Bootstrap。
+- GitHub Actions run [#45878736756](https://github.com/jerinmiss620-web/Tavern-Layout-Engine/actions/runs/45878736756) 已通过：完整 `npm test` 回归、记录预览版本信息/详情页左右对齐/卡片垂直居中测试，以及 TLE 测试通道远端清单、不可变源码和禁用状态 TEST 导入包核验均成功。ST/TT PC 与移动端实机验收仍待用户完成。本版不修改 Stable Core、Stable Loader 或 Bootstrap。
 
 ## 2026-11-27 · Core v0.3.264 首页角色画廊整合（测试候选）
 
