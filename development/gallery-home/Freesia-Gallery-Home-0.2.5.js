@@ -505,6 +505,9 @@
         element.setAttribute('tabindex', '0');
         element.addEventListener('click', callback);
         element.addEventListener('keydown', function (event) {
+            if (event.target !== element && event.target.closest && event.target.closest('button, a, input, select, textarea, [contenteditable="true"]')) {
+                return;
+            }
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 callback(event);
