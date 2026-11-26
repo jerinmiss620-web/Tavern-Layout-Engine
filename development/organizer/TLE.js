@@ -13181,6 +13181,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_WIN.addEventListener('pageshow', resume, { signal: state.abort.signal });
     // Establish the already-open role as the initialization baseline.
     // Loading or updating TLE is not a character switch and must not replay its default plan.
+    // Only a later host-reported role change may trigger the ordinary role default.
     // The saved schedule token still allows a missed day/night boundary to recover once.
     const initialRole = companionCurrentRole();
     const initialData = companionRead();
