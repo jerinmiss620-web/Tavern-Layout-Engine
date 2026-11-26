@@ -92,7 +92,7 @@
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-layout-control { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-layout-select { width: auto; min-width: 5em; margin: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-block: 10px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-title-group { display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 7px; min-width: 0; max-width: 100%; vertical-align: baseline; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-title-group { display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 0; min-width: 0; max-width: 100%; vertical-align: baseline; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-title { display: inline; font-size: calc(var(--mainFontSize) * 1.3); font-weight: 600; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-version { display: inline; min-width: 0; font-size: 0.76em; font-weight: 400; line-height: 1.35; opacity: 0.68; overflow-wrap: anywhere; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .welcomeHeaderLogo, #chat .welcomePanel.' + ACTIVE_CLASS + ' .welcomeHeaderVersionDisplay { display: none !important; }',
@@ -1124,7 +1124,7 @@
             const version = createElement('span', 'freesia-gallery-version', nativeVersion ? nativeVersion.textContent.trim() : '');
             titleGroup.append(galleryTitle);
             if (version.textContent) {
-                titleGroup.append(createElement('span', 'freesia-gallery-title-separator', '·'));
+                titleGroup.append(createElement('span', 'freesia-gallery-title-separator', ' · '));
                 titleGroup.append(version);
             }
             headerTitle.insertBefore(titleGroup, headerTitle.firstChild);
