@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.240",
+  "latest_version": "0.3.241",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.240",
-    "source_path": "releases/v0.3.240/TLE.js",
-    "source_commit": "2761b9ccaf26371b5efd71ff9c78aad0f4a75818",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/2761b9ccaf26371b5efd71ff9c78aad0f4a75818/releases/v0.3.240/TLE.js",
-    "changelog_path": "releases/v0.3.240/CHANGELOG.md",
-    "sha256": "68d13fb4da69fd6ba8f6ce0abe59a5ed7e0c0e535726488f212efe2beba7448b",
-    "size_bytes": 809590
+    "version": "0.3.241",
+    "source_path": "releases/v0.3.241/TLE.js",
+    "source_commit": "50e03bc6ae0d52930ff7f54ae5d9aa6cf6d0cf01",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/50e03bc6ae0d52930ff7f54ae5d9aa6cf6d0cf01/releases/v0.3.241/TLE.js",
+    "changelog_path": "releases/v0.3.241/CHANGELOG.md",
+    "sha256": "8e4193cd560a7e4622c0424089bf8739d8492c2683538b49fa026603b9ba7109",
+    "size_bytes": 810872
   },
-  "status": "TEST v0.3.240: Information Station is enabled exclusively by the navigation display mode '图标 + 文字 + 信息站'. The standalone enable checkbox and its storage gate are removed. New users default all supported display/quick/jump options to checked; saved per-item choices are preserved. Current character worldbook remains jump-only. Adds a focused regression test for the mode gate and settings migration. ST/TT runtime acceptance pending.",
+  "status": "TEST v0.3.241: Companion initialization establishes the current role as a baseline and does not replay its default plan on Core load/update/reload. Persisted schedule tokens prevent same-period reapplication while recovering a missed day/night boundary once. Existing manual holds, per-item partial application, unavailable-item reasons, and role-switch behavior are preserved; automated and ST/TT runtime acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
