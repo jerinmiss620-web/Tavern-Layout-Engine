@@ -1,4 +1,4 @@
-# Freesia Gallery · 首页角色画廊 v0.2.8 TEST
+# Freesia Gallery · 首页角色画廊 v0.2.9 TEST
 
 独立测试模块。当前只改造 SillyTavern 欢迎首页，不接入 TLE Core，不修改 Bootstrap、导航栏、整理侠、信息站或正式频道。
 
@@ -12,7 +12,7 @@
 - 每页设置保存在独立的账号存储键 `freesiaGallerySettings`，不覆盖酒馆原生 Recent Chats Settings；设置控件追加在原生齿轮打开的 Recent Chats Settings 弹窗中，复用原生保存/取消入口，不在首页额外占位。
 - 画廊卡片和角色详情头像统一使用 3:4 竖版比例。详情页头像、角色名称、角色描述标题和描述框始终组成同一个两列等高区域；移动端不把描述拆到头像下方，右侧描述框只填充头像高度内剩余空间。图片使用 `object-fit: cover`。
 - 网格间距统一为 `clamp(5px, 0.7vw, 8px)`；2/3/4 列均通过 `minmax(0, 1fr)` 均分剩余宽度，不固定卡片宽度。
-- 每行等高，卡片使用统一的内部结构：头像、单行角色名称、聊天数量与原生操作按钮、最近聊天信息。
+- 每行等高，卡片使用统一的内部结构：头像、单行角色名称、最近聊天信息。聊天数量覆盖在头像左下角，以底部渐变遮罩增强文字对比；角色置顶按钮独立覆盖在头像右上角。
 - 最近聊天信息区固定为日期、两行预览、底部统计三个独立区域；日期与预览强制左对齐，统计区强制右对齐，避免继承主题中的居中排版。
 - 角色名称居中显示；聊天数量完整保留，重命名/删除按钮与独立的角色置顶按钮分行展示，避免三列窄卡片中数量和操作按钮互相挤压；日期独占一行且左对齐，聊天预览固定预留两行高度，消息统计行保留完整行高。
 - 消息数与文件大小放在预览下方的独立统计行，不再与聊天概要并排挤占预览宽度。
@@ -20,7 +20,7 @@
 - 卡片上半区（头像、角色名、聊天数量）点击进入我们自己的角色详情页。
 - 卡片下半区（最近聊天日期、聊天预览）点击直达该角色最近一次聊天。
 - 最近聊天预览最多两行；显示日期、消息数、文件大小。
-- 画廊首页卡片提供独立的「置顶角色」按钮，以及转发给酒馆原生最近聊天 DOM 的重命名、删除按钮。角色置顶保存在独立账号存储键 `freesiaGalleryPinnedCharacters`，只改变画廊角色卡排序，不改写酒馆原生 `pinnedChats`；切换回原生最近聊天模式时，酒馆原生界面保持不变。
+- 画廊首页卡片提供独立的「置顶角色」按钮，以及转发给酒馆原生最近聊天 DOM 的重命名、删除按钮。角色置顶按钮位于头像右上角；重命名、删除按钮与最近聊天日期处于同一行，明确表示它们操作的是该角色的最近聊天，而不是角色本身。没有最近聊天的角色不显示聊天级操作按钮。角色置顶保存在独立账号存储键 `freesiaGalleryPinnedCharacters`，只改变画廊角色卡排序，不改写酒馆原生 `pinnedChats`；切换回原生最近聊天模式时，酒馆原生界面保持不变。
 - 聊天数量通过 `POST /api/characters/chats` 的 `simple: true` 延迟读取；只为当前可见卡片读取，避免首页一次性请求所有角色。
 - 没有最近聊天的角色仍显示卡片，日期显示占位符、预览显示“暂无最近聊天记录”，不会伪造最近聊天入口。
 
@@ -63,12 +63,12 @@
 
 ## 独立加载测试
 
-v0.2.8 修正详情页移动端布局：头像与右侧名称、描述标题、描述框保持两列等高；描述框填满头像高度内的剩余空间，不再换行到头像下方；不再继承原生描述框固定高度。
+v0.2.9 调整画廊卡片信息层级：聊天数量移至头像左下角并增加底部渐变遮罩；角色置顶按钮独立放在头像右上角；重命名、删除按钮移至最近聊天日期行右侧，明确操作对象；没有最近聊天时隐藏聊天级操作按钮。保留 v0.2.8 的详情页移动端双列等高布局。
 
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@8d49b09de49443b75a132c88710f3daa1aeb0245/development/gallery-home/Freesia-Gallery-Home-0.2.8.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@af3a86e016cdecfb0695e90d22c177389f08d314/development/gallery-home/Freesia-Gallery-Home-0.2.9.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
