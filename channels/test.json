@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.254",
+  "latest_version": "0.3.255",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.254",
-    "source_path": "releases/v0.3.254/TLE.js",
-    "source_commit": "14bc1300e5416557ce4e31416c5ad9ebec6a41f2",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/14bc1300e5416557ce4e31416c5ad9ebec6a41f2/releases/v0.3.254/TLE.js",
-    "changelog_path": "releases/v0.3.254/CHANGELOG.md",
-    "sha256": "7e29b20995c495be05ee5497eef7f0ffeabe5a7505300913f2a5437489febc69",
-    "size_bytes": 828525
+    "version": "0.3.255",
+    "source_path": "releases/v0.3.255/TLE.js",
+    "source_commit": "a98c1de2bfd20ce85bd6d7ef6fbaa7a0d12d7a2d",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a98c1de2bfd20ce85bd6d7ef6fbaa7a0d12d7a2d/releases/v0.3.255/TLE.js",
+    "changelog_path": "releases/v0.3.255/CHANGELOG.md",
+    "sha256": "3f5b03fb65bf0fbf6da5118f5ee497c39bbf7973d71d1d12b1193e75a9480788",
+    "size_bytes": 829176
   },
-  "status": "TEST 0.3.254: 修复分组管理按钮未挂载问题。管理模式显示「重命名」「批量删除」文字按钮；仅可操作自定义分组。重命名先点选分组，批量删除勾选右侧复选框并二次确认。系统目录不可操作，删除分组不会删除资源。",
+  "status": "TEST 0.3.255: 修复分组重命名错误读取当前视图的问题。重命名改为读取已勾选分组，恰好勾选一个自定义分组时可用；铅笔与垃圾桶图标移入分组目录顶部工具栏，仅管理模式显示。批量删除多个分组，资源不会被删除。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
