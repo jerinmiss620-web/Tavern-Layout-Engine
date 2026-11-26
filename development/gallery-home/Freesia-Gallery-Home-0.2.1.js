@@ -70,10 +70,11 @@
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); align-items: start; gap: 24px; width: 100%; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card { display: flex; flex-direction: column; align-items: stretch; min-width: 0; cursor: default; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity { display: flex; flex-direction: column; gap: 10px; min-width: 0; cursor: pointer; outline-offset: 3px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4; min-width: 0; min-height: 0; flex: 0 0 auto; overflow: hidden; position: relative; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4 !important; min-width: 0; min-height: 0; flex: 0 0 auto; overflow: hidden; position: relative; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-chat-count { flex: 0 0 auto; white-space: nowrap; font-size: 0.9em; opacity: 0.88; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card > .recentChatInfo { width: 100%; align-self: stretch; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest { min-width: 0; cursor: pointer; outline-offset: 3px; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest .chatNameContainer, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest .chatMessageContainer { min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-summary { display: inline-block; margin-inline-end: 8px; font-size: 0.78em; opacity: 0.7; }',
@@ -99,7 +100,7 @@
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-files, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-detail { display: none; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-files { display: block; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { display: grid; grid-template-columns: minmax(180px, 262px) minmax(0, 1fr); gap: 28px; align-items: start; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4; min-width: 0; min-height: 0; overflow: hidden; position: relative; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4 !important; min-width: 0; min-height: 0; overflow: hidden; position: relative; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-main { display: flex; flex-direction: column; min-width: 0; gap: 12px; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; min-width: 0; }',
@@ -979,7 +980,7 @@
         const nativeDescription = document.getElementById('description_textarea');
         if (nativeDescription) {
             if (nativeDescription.className) {
-                description.className = nativeDescription.className + ' freesia-gallery-description';
+                description.className = (nativeDescription.className || 'text_pole') + ' freesia-gallery-description';
             }
             if (nativeDescription.rows) description.rows = nativeDescription.rows;
             if (nativeDescription.style && nativeDescription.style.cssText) description.style.cssText = nativeDescription.style.cssText;
