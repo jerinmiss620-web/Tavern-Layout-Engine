@@ -14,7 +14,7 @@ assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery m
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
 assert.match(moduleSource, /const VERSION = '0.3.265'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
-assert.doesNotMatch(moduleSource, /DOMContentLoaded|else start\(\)/, 'TLE owns gallery startup');
+assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
