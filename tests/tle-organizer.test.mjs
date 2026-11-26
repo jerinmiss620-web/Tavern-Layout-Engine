@@ -78,14 +78,13 @@ assert.match(manager, /deleteSelectedButton\.setAttribute\('aria-description', d
 assert.doesNotMatch(source, /quickHasActiveConversation|请先退出当前角色或群聊|至少保留一个预设或推理格式/);
 assert.match(source, /GUI 预设是酒馆原生保留项，不能删除/);
 
-// Organizer title actions mount idempotently; the workspace uses three panes
-// separated by real vertical HR elements on desktop.
+// Organizer title actions mount idempotently; the desktop workspace uses three
+// adjacent panes without decorative divider elements or reserved 1px tracks.
 assert.match(manager, /headingTools\.replaceChildren\(themeImportRow, backupRow\)/);
 assert.doesNotMatch(manager, /headingTools\.append\(themeImportRow, backupRow\)/);
 assert.match(manager, /toolbar\.append\(targetSelect\)/);
 assert.match(manager, /groupActions\.append\(manageButton, autoGroupButton\)/);
-assert.match(manager, /const categoryDivider = quickNode\('hr', 'tle-organizer-divider'\)/);
-assert.match(manager, /const groupDivider = quickNode\('hr', 'tle-organizer-divider'\)/);
+assert.doesNotMatch(manager, /categoryDivider|groupDivider|tle-organizer-divider/);
 assert.match(manager, /categoryPane\.append\(categoryHeading, categoryRow\)/);
 assert.match(manager, /groupPane\.append\(groupHeader, groupActions, groupEditor, groupFilters\)/);
 assert.match(manager, /resourcePane\.append\(\s*resourceHeader, content\.searchRow, content\.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,\s*operations, list, status/);
@@ -97,4 +96,4 @@ assert.match(source, /writing-mode: vertical-rl/);
 assert.match(readme, /第三方布局插件兼容性/);
 assert.match(readme, /不保证与第三方布局管理插件同时启用时的兼容性/);
 
-console.log(`TLE Organizer ${actualVersion}: separate global search, native Organizer drawer, three-pane HR layout, grouping and deletion-safety tests passed.`);
+console.log(`TLE Organizer ${actualVersion}: separate global search, native Organizer drawer, divider-free three-pane layout, grouping and deletion-safety tests passed.`);
