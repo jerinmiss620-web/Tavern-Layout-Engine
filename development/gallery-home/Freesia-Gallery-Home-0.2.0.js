@@ -246,43 +246,58 @@
     }
 
     function groupCharacterChats(records, context, pinnedChats) {
-        const grouped = new Map();
+        const recentByAvatar = new Map();
         (Array.isArray(records) ? records : []).forEach(function (raw) {
             if (!raw || !raw.avatar || raw.group) return;
             const chat = normaliseRecentChat(raw, context, pinnedChats);
             if (!chat.chatName) return;
-            const character = context && Array.isArray(context.characters)
-                ? context.characters.find(item => item && item.avatar === chat.avatar)
-                : null;
-            const key = chat.avatar;
-            let group = grouped.get(key);
-            if (!group) {
-                group = {
-                    avatar: chat.avatar,
-                    name: character && character.name ? character.name : chat.characterName,
-                    thumbnail: chat.thumbnail,
-                    chats: [],
-                    latestChat: null,
-                    lastActive: 0,
-                    pinned: false,
-                    totalCount: null,
-                };
-                grouped.set(key, group);
-            }
-            group.chats.push(chat);
-            group.lastActive = Math.max(group.lastActive, chat.timestamp);
-            group.pinned = group.pinned || chat.pinned;
-            if (!group.thumbnail && chat.thumbnail) group.thumbnail = chat.thumbnail;
+            if (!recentByAvatar.has(chat.avatar)) recentByAvatar.set(chat.avatar, []);
+            recentByAvatar.get(chat.avatar).push(chat);
         });
 
-        const result = Array.from(grouped.values());
-        result.forEach(function (group) {
-            group.chats.sort((a, b) => b.timestamp - a.timestamp);
-            group.latestChat = group.chats[0] || null;
+        const characters = context && Array.isArray(context.characters) ? context.characters : [];
+        const result = [];
+        const included = new Set();
+
+        characters.forEach(function (character) {
+            if (!character || !character.avatar || character.avatar === 'none') return;
+            const avatar = String(character.avatar);
+            const chats = recentByAvatar.get(avatar) || [];
+            chats.sort((a, b) => b.timestamp - a.timestamp);
+            result.push({
+                avatar: avatar,
+                name: String(character.name || chats[0]?.characterName || avatar.replace(/\.png$/i, '')),
+                thumbnail: chats.find(chat => chat.thumbnail)?.thumbnail || '',
+                chats: chats,
+                latestChat: chats[0] || null,
+                lastActive: chats.reduce((latest, chat) => Math.max(latest, chat.timestamp), 0),
+                pinned: chats.some(chat => chat.pinned),
+                totalCount: null,
+            });
+            included.add(avatar);
         });
+
+        // If context.characters is unavailable or incomplete, retain characters
+        // represented by the native recent-chat API rather than dropping them.
+        recentByAvatar.forEach(function (chats, avatar) {
+            if (included.has(avatar)) return;
+            chats.sort((a, b) => b.timestamp - a.timestamp);
+            result.push({
+                avatar: avatar,
+                name: chats[0]?.characterName || avatar.replace(/\.png$/i, ''),
+                thumbnail: chats.find(chat => chat.thumbnail)?.thumbnail || '',
+                chats: chats,
+                latestChat: chats[0] || null,
+                lastActive: chats.reduce((latest, chat) => Math.max(latest, chat.timestamp), 0),
+                pinned: chats.some(chat => chat.pinned),
+                totalCount: null,
+            });
+        });
+
         result.sort(function (a, b) {
             if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-            return b.lastActive - a.lastActive;
+            if (a.lastActive !== b.lastActive) return b.lastActive - a.lastActive;
+            return a.name.localeCompare(b.name);
         });
         result.forEach((group, index) => {
             group.hidden = index >= state.settings.collapsedDisplayed;
@@ -292,7 +307,7 @@
 
     function groupFallbackChats() {
         if (!state.nativeList) return [];
-        const grouped = new Map();
+        const records = [];
         state.nativeList.querySelectorAll('.recentChat[data-avatar]').forEach(function (row) {
             const avatar = row.getAttribute('data-avatar') || '';
             if (!avatar || row.getAttribute('data-group')) return;
@@ -300,8 +315,7 @@
             if (!file) return;
             const date = row.querySelector('.chatDate');
             const message = row.querySelector('.chatMessage');
-            const stats = row.querySelector('.chatStats');
-            const raw = {
+            records.push({
                 avatar: avatar,
                 file_name: file + '.jsonl',
                 char_name: (row.querySelector('.characterName') || {}).textContent || avatar,
@@ -310,40 +324,9 @@
                 chat_items: (row.querySelector('.counterBlock small') || {}).textContent || '',
                 file_size: (row.querySelector('.fileSize') || {}).textContent || '',
                 pinned: !!row.querySelector('.pinChat.active, .recentChatPinned'),
-            };
-            const chat = normaliseRecentChat(raw, null, []);
-            const key = avatar;
-            let group = grouped.get(key);
-            if (!group) {
-                const image = row.querySelector('.avatar img');
-                group = {
-                    avatar: avatar,
-                    name: chat.characterName,
-                    thumbnail: image ? image.src : '',
-                    chats: [],
-                    latestChat: null,
-                    lastActive: 0,
-                    pinned: false,
-                    totalCount: null,
-                };
-                grouped.set(key, group);
-            }
-            group.chats.push(chat);
-            group.lastActive = Math.max(group.lastActive, chat.timestamp);
-            group.pinned = group.pinned || chat.pinned;
+            });
         });
-
-        const result = Array.from(grouped.values());
-        result.forEach(group => {
-            group.chats.sort((a, b) => b.timestamp - a.timestamp);
-            group.latestChat = group.chats[0] || null;
-        });
-        result.sort((a, b) => {
-            if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-            return b.lastActive - a.lastActive;
-        });
-        result.forEach((group, index) => { group.hidden = index >= state.settings.collapsedDisplayed; });
-        return result;
+        return groupCharacterChats(records, getContext(), []);
     }
 
     function createAvatar(avatarKey, thumbnail, name, nativeRow) {
@@ -360,9 +343,9 @@
         avatar.title = name;
         const image = createElement('img');
         const context = getContext();
-        image.src = thumbnail || (context && typeof context.getThumbnailUrl === 'function'
+        image.src = thumbnail || (avatarKey === 'none' ? 'img/ai4.png' : (context && typeof context.getThumbnailUrl === 'function'
             ? context.getThumbnailUrl('avatar', avatarKey)
-            : '');
+            : ''));
         image.alt = name;
         image.loading = 'lazy';
         avatar.append(image);
@@ -461,7 +444,7 @@
         const date = createElement('small', 'freesia-gallery-card-date chatDate', latest ? latest.dateShort : '—');
         date.title = latest ? latest.dateLong : '';
         top.append(date, latest ? createNativeActions(latest) : createElement('span'));
-        const preview = createElement('div', 'freesia-gallery-card-preview chatMessage', latest ? latest.preview : '暂无聊天记录');
+        const preview = createElement('div', 'freesia-gallery-card-preview chatMessage', latest ? latest.preview : '暂无最近聊天记录');
         preview.title = latest ? latest.preview : '';
         const stats = createElement('div', 'freesia-gallery-card-stats chatStats');
         if (latest && latest.messageCount) stats.append(createElement('span', 'counterBlock', latest.messageCount + ' 条消息'));
@@ -602,6 +585,7 @@
 
         const context = getContext();
         state.settings = readSettings(context);
+        state.countCache.clear();
         try {
             const records = await fetchRecentChats(context, state.settings, state.requestController ? state.requestController.signal : undefined);
             if (generation !== state.generation || !state.panel) return false;
