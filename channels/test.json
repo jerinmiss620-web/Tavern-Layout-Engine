@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.261",
+  "latest_version": "0.3.262",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.261",
-    "source_path": "releases/v0.3.261/TLE.js",
-    "source_commit": "3773f988a46bf4c6f15a9ed111e76b5e228c65cd",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/3773f988a46bf4c6f15a9ed111e76b5e228c65cd/releases/v0.3.261/TLE.js",
-    "changelog_path": "releases/v0.3.261/CHANGELOG.md",
-    "sha256": "d5b2e703ea3feff7810763c7273e8716d9bc86b645c25367742cd23ca271612a",
-    "size_bytes": 845561
+    "version": "0.3.262",
+    "source_path": "releases/v0.3.262/TLE.js",
+    "source_commit": "61e2e35bfe332a636130f0c16e5f10f82106da69",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/61e2e35bfe332a636130f0c16e5f10f82106da69/releases/v0.3.262/TLE.js",
+    "changelog_path": "releases/v0.3.262/CHANGELOG.md",
+    "sha256": "b708bb20b093c3d7989b8ad224520a448916b4ec5c934822c6e0727ff5e594c1",
+    "size_bytes": 848161
   },
-  "status": "TEST 0.3.261: 完整宿主页面启动时自动恢复当前角色默认配套方案；同页面 Core 热更新/重新启用不重复应用；角色上下文延迟时有限重试；日夜方案与手动覆盖优先级保留。",
+  "status": "TEST 0.3.262: 配套方案标题行右侧显示默认/应用操作；整理侠移动端标题顺序优化；查找替换取消操作区内滚动，范围与备份控件响应式换行；保留 v0.3.261 宿主启动恢复默认方案逻辑。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
