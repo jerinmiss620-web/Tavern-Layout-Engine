@@ -95,7 +95,7 @@ test('renders rich gallery, forwards native actions, expands sessions and applie
     let nativePinCount = 0;
     dom.window.document.querySelectorAll('.welcomeRecent .recentChat').forEach(row => {
         row.addEventListener('click', () => { nativeOpenCount += 1; });
-        row.querySelector('.pinChat').addEventListener('click', () => { nativePinCount += 1; });
+        row.querySelector('.pinChat').addEventListener('click', event => { event.stopPropagation(); nativePinCount += 1; });
     });
 
     dom.window.eval(script);
