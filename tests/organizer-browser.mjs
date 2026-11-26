@@ -58,16 +58,19 @@ try{
  assert.equal(await modeToggle.count(),1,'One native checkbox controls the content-search module');
  assert.equal(await modeToggle.evaluate(toggle=>toggle.parentElement.matches('label.checkbox_label')),true,'The checkbox uses SillyTavern native checkbox_label markup');
  assert.equal(await modeToggle.isChecked(),false,'Resource management is the default mode');
- assert.equal(await modeToggle.getAttribute('class'),null,'The native checkbox has no custom class');
+ assert.equal(await modeToggle.getAttribute('class'),'checkbox','The checkbox uses the host native checkbox class');
  assert.equal(await modeToggle.getAttribute('style'),null,'The native checkbox has no inline styling');
  const nativeCheckboxStyle=await modeToggle.evaluate(toggle=>{
-  const probe=document.createElement('input');probe.type='checkbox';toggle.parentElement.append(probe);
+  const probe=document.createElement('input');probe.type='checkbox';probe.className='checkbox';toggle.parentElement.append(probe);
   const properties=['appearance','accentColor','backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','width','height','marginTop','marginRight','color','boxShadow'];
   const actual=getComputedStyle(toggle),expected=getComputedStyle(probe);
   const matches=properties.every(property=>actual[property]===expected[property]);
   probe.remove();return matches;
  });
  assert.equal(nativeCheckboxStyle,true,'The mode toggle inherits the host checkbox appearance');
+ assert.equal(await page.locator('.tle-organizer-pane-title.standoutHeader').count(),2,'Resource type and group headings inherit standoutHeader');
+ assert.equal(await page.locator('.tle-content-heading.standoutHeader').count(),1,'The resource heading and mode switch share standoutHeader');
+ assert.equal(await page.locator('.tle-organizer-divider').count(),0,'Organizer columns have no divider elements');
  await search.fill('预设');assert.equal(await page.locator('.tle-quick-list>.tle-quick-item').count(),1);
  await modeToggle.check();await page.waitForFunction(()=>!harness.content.busy);
  assert.equal(await modeToggle.isChecked(),true);
