@@ -134,6 +134,14 @@ function setup() {
             event.stopPropagation();
             calls.pinned += 1;
         });
+        row.querySelector('.renameChat').addEventListener('click', event => {
+            event.stopPropagation();
+            calls.renamedNative = (calls.renamedNative || 0) + 1;
+        });
+        row.querySelector('.deleteChat').addEventListener('click', event => {
+            event.stopPropagation();
+            calls.deletedNative = (calls.deletedNative || 0) + 1;
+        });
     });
 
     dom.window.eval(script);
@@ -226,7 +234,7 @@ test('limits gallery to at most three columns at viewport widths of 480px and be
 });
 
 test('detail page reuses native recent-chat rows and a readonly native text field; management jumps to the native editor', async () => {
-    const { dom, api, calls } = setup();
+    const { dom, api, calls, context } = setup();
     await api.refresh();
     await api.openDetail('a.png');
 
@@ -307,7 +315,7 @@ test('detail rename and delete actions use native chat endpoints and update the 
     second.querySelector('.deleteChat').click();
     await new Promise(resolve => dom.window.setTimeout(resolve, 0));
     assert.equal(calls.deleted.avatar_url, 'a.png');
-    assert.equal(calls.deleted.chatfile, 'A-old.jsonl');
+    assert.equal(calls.deleted.chatfile, 'A-renamed.jsonl');
     assert.equal(panel.querySelectorAll('.freesia-gallery-session-card').length, 2);
 
     api.stop();
@@ -338,7 +346,7 @@ test('chat files page uses native recent-chat rows and opens an older chat throu
     dom.window.close();
 });
 
-test('latest-chat area opens the recent chat and cloned native actions forward to original buttons', async () => {
+test('latest-chat area opens the recent chat; home card actions forward rename and delete without pinning', async () => {
     const { dom, api, calls } = setup();
     await api.refresh();
 
@@ -346,8 +354,12 @@ test('latest-chat area opens the recent chat and cloned native actions forward t
     card.querySelector('.freesia-gallery-card-latest').click();
     assert.equal(calls.nativeOpened, 1);
 
-    card.querySelector('.pinChat').click();
-    assert.equal(calls.pinned, 1);
+    assert.equal(card.querySelector('.pinChat'), null, 'pinning is only available in character detail');
+    card.querySelector('.renameChat').click();
+    card.querySelector('.deleteChat').click();
+    assert.equal(calls.renamedNative, 1);
+    assert.equal(calls.deletedNative, 1);
+    assert.equal(calls.pinned, 0);
 
     api.stop();
     dom.window.close();
