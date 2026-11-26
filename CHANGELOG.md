@@ -1,8 +1,12 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.239 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
+目前正式版：**Core v0.3.259 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
+
+## 2026-11-26 · Core v0.3.259 · 整理侠分组管理与更新面板原生按钮（正式发布）
+
+详见 [本版完整日志](releases/v0.3.259/CHANGELOG.md)。整理侠分组管理交互重整、世界书状态筛选与内容查找替换继续整合；管理确认图标语义统一，更新面板操作按钮继承酒馆原生 `.menu_button`。Loader Runtime v0.3.6 与 Bootstrap v1.0.6 不变。
 
 ## 2026-11-26 · Core v0.3.239 · 整理侠三栏分隔线与稳定性修复（正式发布）
 
@@ -10,6 +14,7 @@
 
 ## Core 更新记录
 
+- [v0.3.259](releases/v0.3.259/CHANGELOG.md)
 - [v0.3.239](releases/v0.3.239/CHANGELOG.md)
 - [v0.3.220](releases/v0.3.220/CHANGELOG.md)
 - [v0.3.219](releases/v0.3.219/CHANGELOG.md)
