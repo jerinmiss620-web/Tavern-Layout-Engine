@@ -7,7 +7,7 @@ import PNGtext from 'png-chunk-text';
 import encode from '../plugins/global-batch-replace/png-encode.js';
 const root=path.resolve(process.env.TLE_ST_FIXTURE||'../st-acceptance');
 assert.equal(path.basename(root),'st-acceptance','Use only an isolated acceptance install');
-const output=path.resolve(process.env.TLE_QA_OUTPUT||'../../outputs/v0.3.236/pc-acceptance');fs.mkdirSync(output,{recursive:true});
+const output=path.resolve(process.env.TLE_QA_OUTPUT||'../../outputs/v0.3.244/pc-acceptance');fs.mkdirSync(output,{recursive:true});
 const settingsFile=path.join(root,'data/default-user/settings.json'),settings=JSON.parse(fs.readFileSync(settingsFile,'utf8'));
 settings.firstRun=false;settings.username='TLE isolated acceptance';fs.writeFileSync(settingsFile,JSON.stringify(settings));
 const file=path.join(root,'data/default-user/worlds/TLE验收.json');
