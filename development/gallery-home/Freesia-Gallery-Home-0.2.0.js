@@ -2,7 +2,7 @@
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.2.0-TEST';
+    const VERSION = '0.2.1-TEST';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -13,6 +13,10 @@
     const API_CHAT_SEARCH = '/api/chats/search';
     const DEFAULT_MAX_DISPLAYED = 15;
     const DEFAULT_COLLAPSED_DISPLAYED = 3;
+    const GALLERY_SETTINGS_KEY = 'freesiaGallerySettings';
+    const DEFAULT_GALLERY_COLUMNS = 4;
+    const DEFAULT_GALLERY_ROWS = 3;
+    const MAX_GALLERY_ROWS = 15;
 
     const previous = window[GLOBAL_NAME];
     if (previous && typeof previous.stop === 'function') {
@@ -25,9 +29,14 @@
         welcomeRecent: null,
         nativeList: null,
         grid: null,
+        paginationRoot: null,
+        layoutControls: null,
+        columnsSelect: null,
+        rowsSelect: null,
         detailRoot: null,
         filesRoot: null,
         title: null,
+        nativeTitle: null,
         originalTitle: null,
         backButton: null,
         viewToggle: null,
@@ -42,6 +51,9 @@
         eventCleanups: [],
         expandedAll: false,
         page: 'gallery',
+        galleryPage: 0,
+        galleryGroups: [],
+        layoutSettings: { columns: DEFAULT_GALLERY_COLUMNS, rows: DEFAULT_GALLERY_ROWS },
         selectedAvatar: '',
         detailCharacter: null,
         detailChats: [],
@@ -55,79 +67,65 @@
 
     const CSS = [
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .welcomeRecent > .recentChatList:not(.' + GRID_CLASS + ') { display: none !important; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 24px; width: 100%; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card { display: flex; flex-direction: column; align-items: stretch; min-width: 0; width: 100%; padding: 0; margin: 0; border: 0; background: transparent; box-shadow: none; cursor: default; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); align-items: start; gap: 24px; width: 100%; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card { display: flex; flex-direction: column; align-items: stretch; min-width: 0; cursor: default; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity { display: flex; flex-direction: column; gap: 10px; min-width: 0; cursor: pointer; outline-offset: 3px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4; min-width: 0; min-height: 0; flex: none; overflow: hidden; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar img { display: block; width: 100% !important; height: 100% !important; object-fit: cover; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; padding-inline: 2px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-name { min-width: 0; overflow-wrap: anywhere; font-size: 1.12em; font-weight: 500; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4; min-width: 0; min-height: 0; flex: 0 0 auto; overflow: hidden; position: relative; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-chat-count { flex: 0 0 auto; white-space: nowrap; font-size: 0.9em; opacity: 0.88; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest { display: flex; flex-direction: column; gap: 5px; min-width: 0; margin-top: 4px; padding: 0 2px; cursor: pointer; outline-offset: 3px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest-head { display: flex; align-items: center; justify-content: space-between; gap: 7px; min-width: 0; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-date { flex: 0 1 auto; min-width: 0; font-size: 0.82em; opacity: 0.78; white-space: nowrap; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card .chatActions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; margin-inline-start: auto; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card .chatActions > button { flex: 0 0 auto; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-preview { display: -webkit-box; min-width: 0; overflow: hidden; white-space: normal; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; font-size: 0.9em; line-height: 1.55; opacity: 0.9; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-stats { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-size: 0.76em; opacity: 0.68; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card.freesia-gallery-collapsed { display: none !important; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-show-more { grid-column: 1 / -1; justify-self: center; margin: 8px auto; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-summary { display: inline-block; margin-inline-start: 8px; font-size: 0.78em; opacity: 0.7; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest { min-width: 0; cursor: pointer; outline-offset: 3px; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest .chatNameContainer, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest .chatMessageContainer { min-width: 0; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-summary { display: inline-block; margin-inline-end: 8px; font-size: 0.78em; opacity: 0.7; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-layout-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-block: 4px 8px; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-layout-control { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-layout-select { width: auto; min-width: 5em; margin: 0; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-block: 10px; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-title { display: block; flex: 1 1 auto; min-width: 0; font-size: calc(var(--mainFontSize) * 1.3); font-weight: 600; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .welcomeHeaderLogo, #chat .welcomePanel.' + ACTIVE_CLASS + ' .welcomeHeaderVersionDisplay { display: none !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .recentChatsTitle { display: none !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .welcomeHeader { display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 8px 12px; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-back { flex: 0 0 auto; margin-inline-end: 6px; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-view-toggle { cursor: pointer; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-files { display: none !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-files, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-layout-controls, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-pagination { display: none !important; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .welcomeRecent > .recentChatList:not(.' + GRID_CLASS + ') { display: flex !important; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-summary { display: none !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-summary, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-back, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-title { display: none !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .welcomeHeaderLogo { display: block !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .welcomeHeaderVersionDisplay { display: block !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .recentChatsTitle { display: block !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .welcomeHeader { justify-content: flex-end; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-gallery .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-gallery .freesia-gallery-files { display: none; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .' + GRID_CLASS + ' { display: none; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-files, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-detail { display: none; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-files { display: block; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-subpage-header { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 16px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-back { flex: 0 0 auto; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { display: grid; grid-template-columns: minmax(180px, 262px) minmax(0, 1fr); gap: 28px; align-items: stretch; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4; min-width: 0; overflow: hidden; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar img { display: block; width: 100% !important; height: 100% !important; object-fit: cover; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { display: grid; grid-template-columns: minmax(180px, 262px) minmax(0, 1fr); gap: 28px; align-items: start; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar { display: block; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4; min-width: 0; min-height: 0; overflow: hidden; position: relative; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-main { display: flex; flex-direction: column; min-width: 0; gap: 12px; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-name { min-width: 0; margin: 0; font-size: 1.5em; font-weight: 500; overflow-wrap: anywhere; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-lorebook { min-width: 0; font-size: 0.9em; opacity: 0.76; overflow-wrap: anywhere; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-manage { flex: 0 0 auto; margin-inline-start: auto; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-description { flex: 1 1 auto; min-height: 180px; max-height: 360px; overflow: hidden; padding: 18px; border: 1px solid var(--SmartThemeBorderColor); background: var(--SmartThemeBlurTintColor); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-description-label { display: block; margin-bottom: 8px; font-size: 0.82em; opacity: 0.68; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-description-label { display: block; margin: 2px 0 4px; font-size: 0.82em; opacity: 0.68; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 10px; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-chat-count { font-size: 1.05em; font-weight: 500; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-list { display: flex; flex-direction: column; gap: 12px; min-width: 0; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 16px 18px; border: 1px solid var(--SmartThemeBorderColor); background: var(--SmartThemeBlurTintColor); cursor: pointer; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-card.is-latest { border-inline-start: 4px solid var(--SmartThemeQuoteColor); }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-title { min-width: 0; font-weight: 500; overflow-wrap: anywhere; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-date { flex: 0 0 auto; font-size: 0.82em; opacity: 0.75; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-preview { display: -webkit-box; overflow: hidden; white-space: normal; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; line-height: 1.55; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-stats { display: flex; justify-content: flex-end; gap: 10px; font-size: 0.78em; opacity: 0.72; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-files-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-file-search { flex: 1 1 auto; min-width: 0; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-file-list { display: flex; flex-direction: column; gap: 8px; }',
-        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-file-row { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 12px 14px; border: 1px solid var(--SmartThemeBorderColor); background: var(--SmartThemeBlurTintColor); cursor: pointer; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-files-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 8px; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-file-search { flex: 1 1 12em; min-width: 0; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-empty { padding: 24px 12px; text-align: center; opacity: 0.7; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-identity:focus-visible, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest:focus-visible, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-card:focus-visible, #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-file-row:focus-visible { outline: 2px solid var(--SmartThemeQuoteColor, currentColor); outline-offset: 3px; }',
         '@media screen and (max-width: 1100px) {',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }',
+        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { gap: 20px; }',
         '}',
         '@media screen and (max-width: 820px) {',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }',
+        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { gap: 16px 12px; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { grid-template-columns: minmax(112px, 34%) minmax(0, 1fr); gap: 14px; }',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-description { min-height: 150px; max-height: 260px; padding: 12px; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-name { font-size: 1.2em; }',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-session-card { padding: 12px; }',
+        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-manage { margin-inline-start: 0; }',
         '}',
         '@media screen and (max-width: 420px) {',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .' + GRID_CLASS + ' { gap: 14px 9px; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-heading { align-items: flex-start; flex-direction: column; gap: 2px; }',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-name { font-size: 1em; }',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card-latest-head { align-items: flex-start; flex-direction: column; gap: 4px; }',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-card .chatActions { margin-inline-start: 0; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-hero { grid-template-columns: 104px minmax(0, 1fr); gap: 10px; }',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-manage { margin-inline-start: 0; }',
-        '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-description { grid-column: 1 / -1; min-height: 120px; max-height: 220px; }',
         '  #chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-detail-chat-header { margin-top: 14px; }',
         '}',
     ].join('\n');
@@ -163,6 +161,41 @@
             console.warn('[Freesia Gallery] Could not read native recent chat settings.', error);
             return defaults;
         }
+    }
+
+    function readGallerySettings(context) {
+        const defaults = { columns: DEFAULT_GALLERY_COLUMNS, rows: DEFAULT_GALLERY_ROWS };
+        try {
+            const raw = context && context.accountStorage && context.accountStorage.getItem(GALLERY_SETTINGS_KEY);
+            if (!raw) return defaults;
+            const parsed = JSON.parse(raw);
+            const columnsValue = parseInt(parsed.columns, 10);
+            const rowsValue = parseInt(parsed.rows, 10);
+            return {
+                columns: [2, 3, 4].includes(columnsValue) ? columnsValue : defaults.columns,
+                rows: Math.min(MAX_GALLERY_ROWS, Math.max(1, Number.isFinite(rowsValue) ? rowsValue : defaults.rows)),
+            };
+        } catch (error) {
+            console.warn('[Freesia Gallery] Could not read gallery layout settings.', error);
+            return defaults;
+        }
+    }
+
+    function saveGallerySettings() {
+        const context = getContext();
+        const storage = context && context.accountStorage;
+        if (!storage || typeof storage.setItem !== 'function') return false;
+        try {
+            storage.setItem(GALLERY_SETTINGS_KEY, JSON.stringify(state.layoutSettings));
+            return true;
+        } catch (error) {
+            console.warn('[Freesia Gallery] Could not save gallery layout settings.', error);
+            return false;
+        }
+    }
+
+    function getGalleryPageSize() {
+        return state.layoutSettings.columns * state.layoutSettings.rows;
     }
 
     function getPinnedChats(context) {
@@ -433,24 +466,36 @@
         const identity = createElement('div', 'freesia-gallery-card-identity');
         identity.append(createAvatar(group.avatar, group.thumbnail, group.name, nativeRow));
 
-        const heading = createElement('div', 'freesia-gallery-card-heading');
-        heading.append(createElement('strong', 'freesia-gallery-card-name characterName', group.name));
+        const heading = createElement('div', 'chatNameContainer freesia-gallery-card-heading');
+        const name = createElement('div', 'chatName');
+        name.append(createElement('strong', 'characterName', group.name));
         const count = createElement('span', 'freesia-gallery-chat-count', (group.totalCount ?? group.chats.length) + ' 个聊天 ›');
-        heading.append(count);
+        heading.append(name, count);
         identity.append(heading);
         activateSurface(identity, function () { void openDetail(group.avatar); });
 
-        const latestArea = createElement('div', 'freesia-gallery-card-latest');
-        const top = createElement('div', 'freesia-gallery-card-latest-head');
-        const date = createElement('small', 'freesia-gallery-card-date chatDate', latest ? latest.dateShort : '—');
+        const latestArea = createElement('div', 'recentChatInfo freesia-gallery-card-latest');
+        const top = createElement('div', 'chatNameContainer');
+        const dateName = createElement('div', 'chatName');
+        const date = createElement('small', 'chatDate', latest ? latest.dateShort : '—');
         date.title = latest ? latest.dateLong : '';
-        top.append(date, latest ? createNativeActions(latest) : createElement('span'));
-        const preview = createElement('div', 'freesia-gallery-card-preview chatMessage', latest ? latest.preview : '暂无最近聊天记录');
+        dateName.append(date);
+        top.append(dateName, latest ? createNativeActions(latest) : createElement('span'));
+
+        const messageContainer = createElement('div', 'chatMessageContainer');
+        const preview = createElement('div', 'chatMessage', latest ? latest.preview : '暂无最近聊天记录');
         preview.title = latest ? latest.preview : '';
-        const stats = createElement('div', 'freesia-gallery-card-stats chatStats');
-        if (latest && latest.messageCount) stats.append(createElement('span', 'counterBlock', latest.messageCount + ' 条消息'));
-        if (latest && latest.fileSize) stats.append(createElement('span', 'fileSize', latest.fileSize));
-        latestArea.append(top, preview, stats);
+        const stats = createElement('div', 'chatStats');
+        if (latest && latest.messageCount) {
+            const counter = createElement('div', 'counterBlock');
+            counter.append(createElement('i', 'fa-solid fa-comment fa-xs'));
+            counter.append(createElement('small', '', latest.messageCount));
+            stats.append(counter);
+        }
+        if (latest && latest.fileSize) stats.append(createElement('small', 'fileSize', latest.fileSize));
+        messageContainer.append(preview, stats);
+        latestArea.append(top, messageContainer);
+
         if (latest) activateSurface(latestArea, function (event) {
             if (event && event.target && event.target.closest && event.target.closest('button')) return;
             openCharacterChat(group.avatar, latest.chatName).catch(error => reportError('打开最近聊天失败。', error));
@@ -516,42 +561,72 @@
         }
     }
 
+    function renderPagination(total) {
+        if (!state.paginationRoot) return;
+        const pageSize = getGalleryPageSize();
+        const pageCount = Math.max(1, Math.ceil(total / pageSize));
+        state.galleryPage = Math.min(Math.max(0, state.galleryPage), pageCount - 1);
+        state.paginationRoot.replaceChildren();
+        state.paginationRoot.hidden = state.page !== 'gallery' || pageCount <= 1;
+
+        if (pageCount <= 1) return;
+        const previous = createElement('button', 'menu_button menu_button_icon');
+        previous.type = 'button';
+        previous.textContent = '‹ 上一页';
+        previous.disabled = state.galleryPage <= 0;
+        previous.addEventListener('click', function () {
+            if (state.galleryPage <= 0) return;
+            state.galleryPage -= 1;
+            renderGallery(state.galleryGroups, state.source, state.lastError);
+        });
+
+        const pageLabel = createElement('small', '', '第 ' + (state.galleryPage + 1) + ' / ' + pageCount + ' 页');
+        const next = createElement('button', 'menu_button menu_button_icon');
+        next.type = 'button';
+        next.textContent = '下一页 ›';
+        next.disabled = state.galleryPage >= pageCount - 1;
+        next.addEventListener('click', function () {
+            if (state.galleryPage >= pageCount - 1) return;
+            state.galleryPage += 1;
+            renderGallery(state.galleryGroups, state.source, state.lastError);
+        });
+        state.paginationRoot.append(previous, pageLabel, next);
+    }
+
     function renderGallery(groups, source, error) {
         if (!state.grid || !state.panel) return;
         state.source = source;
         state.lastError = error || null;
+        state.galleryGroups = Array.isArray(groups) ? groups : [];
 
+        const pageSize = getGalleryPageSize();
+        const pageCount = Math.max(1, Math.ceil(state.galleryGroups.length / pageSize));
+        state.galleryPage = Math.min(Math.max(0, state.galleryPage), pageCount - 1);
+        state.grid.style.setProperty('--freesia-gallery-columns', String(state.layoutSettings.columns));
+
+        const start = state.galleryPage * pageSize;
+        const visibleGroups = state.galleryGroups.slice(start, start + pageSize);
         const fragment = document.createDocumentFragment();
-        groups.forEach(function (group, index) {
+        visibleGroups.forEach(function (group, index) {
             const card = createGalleryCard(group);
-            if (group.hidden && !state.expandedAll) card.classList.add('freesia-gallery-collapsed');
-            card.dataset.galleryIndex = String(index);
+            card.dataset.galleryIndex = String(start + index);
             fragment.append(card);
         });
 
-        if (!groups.length) {
+        if (!state.galleryGroups.length) {
             fragment.append(createElement('div', 'freesia-gallery-empty', source === 'api'
-                ? '还没有可展示的角色聊天记录。'
-                : '无法从原生最近聊天列表中读取角色。'));
-        }
-
-        if (groups.length > state.settings.collapsedDisplayed) {
-            const button = createElement('button', 'menu_button menu_button_icon freesia-gallery-show-more');
-            button.type = 'button';
-            button.textContent = state.expandedAll
-                ? '收起角色'
-                : '显示全部角色（' + groups.length + '）';
-            button.addEventListener('click', function () {
-                state.expandedAll = !state.expandedAll;
-                renderGallery(groups, source, error);
-            });
-            fragment.append(button);
+                ? '还没有可展示的角色。'
+                : '无法从原生角色列表中读取角色。'));
         }
 
         state.grid.replaceChildren(fragment);
+        renderPagination(state.galleryGroups.length);
+
         if (state.summary) {
-            state.summary.textContent = groups.length + ' 位角色 · 最多读取 ' + state.settings.maxDisplayed + ' 条最近聊天';
-            state.summary.title = '沿用酒馆原生 Recent Chats Settings';
+            state.summary.textContent = state.galleryGroups.length + ' 位角色'
+                + (pageCount > 1 ? ' · 第 ' + (state.galleryPage + 1) + ' / ' + pageCount + ' 页' : '')
+                + ' · 每页 ' + state.layoutSettings.columns + ' 列 × ' + state.layoutSettings.rows + ' 行';
+            state.summary.title = '每页最多渲染 ' + pageSize + ' 张角色卡，最多 15 行';
         }
         observeCardCounts();
     }
@@ -612,10 +687,12 @@
             state.backButton.onclick = backAction || null;
         }
         if (state.viewToggle) state.viewToggle.hidden = state.page !== 'gallery';
+        if (state.layoutControls) state.layoutControls.hidden = state.page !== 'gallery';
         if (state.panel) {
             PAGE_CLASSES.forEach(name => state.panel.classList.remove(name));
             state.panel.classList.add('freesia-gallery-page-' + state.page);
         }
+        if (state.paginationRoot) state.paginationRoot.hidden = state.page !== 'gallery';
     }
 
     function setPage(page) {
@@ -623,6 +700,7 @@
         if (page === 'gallery') {
             setHeader('角色画廊', '返回角色画廊', null);
             if (state.summary) state.summary.hidden = false;
+            renderPagination(state.galleryGroups.length);
         } else if (page === 'detail') {
             setHeader('角色详情', '返回角色画廊', () => setPage('gallery'));
             if (state.summary) state.summary.hidden = true;
@@ -636,13 +714,16 @@
         if (!state.panel || state.page !== 'gallery') return false;
         state.panel.classList.toggle(NATIVE_CLASS);
         const nativeMode = state.panel.classList.contains(NATIVE_CLASS);
-        if (state.title) state.title.textContent = nativeMode ? state.originalTitle : '角色画廊';
+        if (state.title) state.title.textContent = '角色画廊';
         if (state.viewToggle) {
             const label = nativeMode ? '切换到角色画廊' : '切换到原生最近聊天';
             state.viewToggle.title = label;
             state.viewToggle.setAttribute('aria-label', label);
         }
         if (state.viewToggleIcon) state.viewToggleIcon.className = 'fa-solid ' + (nativeMode ? 'fa-images' : 'fa-list') + ' fa-fw fa-lg';
+        if (state.layoutControls) state.layoutControls.hidden = nativeMode;
+        if (state.paginationRoot) state.paginationRoot.hidden = nativeMode || state.galleryGroups.length <= getGalleryPageSize();
+        if (state.summary) state.summary.hidden = nativeMode;
         return !nativeMode;
     }
 
@@ -671,10 +752,61 @@
         button.type = 'button';
         button.hidden = true;
         button.append(createElement('i', 'fa-solid fa-arrow-left fa-fw'));
-        header.insertBefore(button, state.title || header.firstChild);
+        const nativeTitle = header.querySelector('.recentChatsTitle');
+        header.insertBefore(button, nativeTitle || header.firstChild);
         state.backButton = button;
     }
 
+    function createLayoutControls(header) {
+        const root = createElement('div', 'freesia-gallery-layout-controls');
+
+        const columnsLabel = createElement('label', 'freesia-gallery-layout-control');
+        columnsLabel.append(createElement('span', '', '每行'));
+        const columns = createElement('select', 'text_pole freesia-gallery-layout-select');
+        columns.setAttribute('aria-label', '每行列数');
+        [2, 3, 4].forEach(value => {
+            const option = createElement('option', '', value + ' 列');
+            option.value = String(value);
+            columns.append(option);
+        });
+        columns.value = String(state.layoutSettings.columns);
+        columns.addEventListener('change', function () {
+            const value = parseInt(columns.value, 10);
+            if (![2, 3, 4].includes(value)) return;
+            state.layoutSettings.columns = value;
+            state.galleryPage = 0;
+            saveGallerySettings();
+            renderGallery(state.galleryGroups, state.source, state.lastError);
+        });
+        columnsLabel.append(columns);
+        root.append(columnsLabel);
+
+        const rowsLabel = createElement('label', 'freesia-gallery-layout-control');
+        rowsLabel.append(createElement('span', '', '每页'));
+        const rows = createElement('select', 'text_pole freesia-gallery-layout-select');
+        rows.setAttribute('aria-label', '每页显示行数');
+        for (let value = 1; value <= MAX_GALLERY_ROWS; value += 1) {
+            const option = createElement('option', '', value + ' 行');
+            option.value = String(value);
+            rows.append(option);
+        }
+        rows.value = String(state.layoutSettings.rows);
+        rows.addEventListener('change', function () {
+            const value = parseInt(rows.value, 10);
+            if (!Number.isInteger(value) || value < 1 || value > MAX_GALLERY_ROWS) return;
+            state.layoutSettings.rows = value;
+            state.galleryPage = 0;
+            saveGallerySettings();
+            renderGallery(state.galleryGroups, state.source, state.lastError);
+        });
+        rowsLabel.append(rows);
+        root.append(rowsLabel);
+
+        header.insertAdjacentElement('afterend', root);
+        state.layoutControls = root;
+        state.columnsSelect = columns;
+        state.rowsSelect = rows;
+    }
     function findCharacter(avatar) {
         const context = getContext();
         if (!context || !Array.isArray(context.characters)) return { context, character: null, index: -1 };
@@ -730,24 +862,44 @@
         return name;
     }
 
-    function createDetailSession(chat, index) {
-        const card = createElement('article', 'freesia-gallery-session-card' + (index === 0 ? ' is-latest' : ''));
+    function createNativeSessionCard(chat, label, index) {
+        const card = createElement('article', 'recentChat freesia-gallery-session-card');
+        card.dataset.file = chat.chatName;
+        card.dataset.avatar = state.selectedAvatar;
         card.setAttribute('role', 'button');
         card.setAttribute('tabindex', '0');
-        const top = createElement('div', 'freesia-gallery-session-top');
-        top.append(
-            createElement('strong', 'freesia-gallery-session-title', index === 0 ? '最新聊天 · ' + chat.chatName : chat.chatName),
-            createElement('small', 'freesia-gallery-session-date', chat.dateShort)
-        );
-        const preview = createElement('div', 'freesia-gallery-session-preview', chat.preview || '暂无消息预览');
-        const stats = createElement('div', 'freesia-gallery-session-stats');
-        if (chat.messageCount) stats.append(createElement('span', '', chat.messageCount + ' 条消息'));
-        if (chat.fileSize) stats.append(createElement('span', '', chat.fileSize));
-        card.append(top, preview, stats);
+
+        const info = createElement('div', 'recentChatInfo');
+        const top = createElement('div', 'chatNameContainer');
+        const name = createElement('div', 'chatName');
+        name.append(createElement('strong', 'characterName', label || chat.chatName));
+        const date = createElement('small', 'chatDate', chat.dateShort);
+        date.title = chat.dateLong || '';
+        top.append(name, date);
+
+        const messageContainer = createElement('div', 'chatMessageContainer');
+        const preview = createElement('div', 'chatMessage', chat.preview || '暂无消息预览');
+        const stats = createElement('div', 'chatStats');
+        if (chat.messageCount) {
+            const counter = createElement('div', 'counterBlock');
+            counter.append(createElement('i', 'fa-solid fa-comment fa-xs'));
+            counter.append(createElement('small', '', chat.messageCount));
+            stats.append(counter);
+        }
+        if (chat.fileSize) stats.append(createElement('small', 'fileSize', chat.fileSize));
+        messageContainer.append(preview, stats);
+        info.append(top, messageContainer);
+        card.append(info);
+
         activateSurface(card, function () {
             openCharacterChat(state.selectedAvatar, chat.chatName).catch(error => reportError('打开聊天失败。', error));
         });
         return card;
+    }
+
+    function createDetailSession(chat, index) {
+        const label = index === 0 ? '最新聊天 · ' + chat.chatName : chat.chatName;
+        return createNativeSessionCard(chat, label, index);
     }
 
     async function openDetail(avatar) {
@@ -816,11 +968,24 @@
         });
         heading.append(manage);
 
-        const description = createElement('div', 'freesia-gallery-description');
-        description.append(createElement('span', 'freesia-gallery-description-label', '角色描述 · 只读'));
-        description.append(document.createTextNode(String(character.description || character.data?.description || '暂无角色描述')));
+        const descriptionLabel = createElement('div', 'freesia-gallery-description-label', '角色描述');
+        const description = createElement('textarea', 'text_pole freesia-gallery-description');
+        description.readOnly = true;
+        description.rows = 8;
+        description.setAttribute('aria-label', '角色描述');
+        description.spellcheck = false;
+        description.value = String(character.description || character.data?.description || '暂无角色描述');
 
-        main.append(heading, description);
+        const nativeDescription = document.getElementById('description_textarea');
+        if (nativeDescription) {
+            if (nativeDescription.className) {
+                description.className = nativeDescription.className + ' freesia-gallery-description';
+            }
+            if (nativeDescription.rows) description.rows = nativeDescription.rows;
+            if (nativeDescription.style && nativeDescription.style.cssText) description.style.cssText = nativeDescription.style.cssText;
+        }
+
+        main.append(heading, descriptionLabel, description);
         hero.append(avatar, main);
         fragment.append(hero);
 
@@ -833,7 +998,7 @@
         chatHeader.append(filesButton);
         fragment.append(chatHeader);
 
-        const sessions = createElement('div', 'freesia-gallery-session-list');
+        const sessions = createElement('div', 'recentChatList freesia-gallery-session-list');
         if (!state.detailChats.length) {
             sessions.append(createElement('div', 'freesia-gallery-empty', '这个角色还没有聊天文件。'));
         } else {
@@ -855,7 +1020,7 @@
         toolbar.append(search, count);
         fragment.append(toolbar);
 
-        const list = createElement('div', 'freesia-gallery-file-list');
+        const list = createElement('div', 'recentChatList freesia-gallery-file-list');
         const query = state.fileSearch.trim().toLocaleLowerCase();
         const filtered = state.detailChats.filter(chat => !query
             || chat.chatName.toLocaleLowerCase().includes(query)
@@ -865,23 +1030,7 @@
             list.append(createElement('div', 'freesia-gallery-empty', query ? '没有匹配的聊天文件。' : '没有聊天文件。'));
         } else {
             filtered.forEach(function (chat) {
-                const row = createElement('article', 'freesia-gallery-file-row');
-                row.setAttribute('role', 'button');
-                row.setAttribute('tabindex', '0');
-                const top = createElement('div', 'freesia-gallery-session-top');
-                top.append(
-                    createElement('strong', 'freesia-gallery-session-title', chat.chatName),
-                    createElement('small', 'freesia-gallery-session-date', chat.dateShort)
-                );
-                const preview = createElement('div', 'freesia-gallery-session-preview', chat.preview || '暂无消息预览');
-                const stats = createElement('div', 'freesia-gallery-session-stats');
-                if (chat.messageCount) stats.append(createElement('span', '', chat.messageCount + ' 条消息'));
-                if (chat.fileSize) stats.append(createElement('span', '', chat.fileSize));
-                row.append(top, preview, stats);
-                activateSurface(row, function () {
-                    openCharacterChat(state.selectedAvatar, chat.chatName).catch(error => reportError('打开聊天失败。', error));
-                });
-                list.append(row);
+                list.append(createNativeSessionCard(chat, chat.chatName, -1));
             });
         }
 
@@ -922,13 +1071,19 @@
         state.panel = panel;
         state.welcomeRecent = welcomeRecent;
         state.nativeList = nativeList;
-        state.title = panel.querySelector('.recentChatsTitle');
-        state.originalTitle = state.title ? state.title.textContent : 'Recent Chats';
+        state.nativeTitle = panel.querySelector('.recentChatsTitle');
+        state.originalTitle = state.nativeTitle ? state.nativeTitle.textContent : 'Recent Chats';
+        state.layoutSettings = readGallerySettings(getContext());
+        state.galleryPage = 0;
 
         const grid = createElement('div', 'recentChatList ' + GRID_CLASS);
         grid.setAttribute('role', 'list');
         nativeList.insertAdjacentElement('afterend', grid);
         state.grid = grid;
+
+        const pagination = createElement('div', 'freesia-gallery-pagination');
+        grid.insertAdjacentElement('afterend', pagination);
+        state.paginationRoot = pagination;
 
         const detailRoot = createElement('section', 'freesia-gallery-detail');
         const filesRoot = createElement('section', 'freesia-gallery-files');
@@ -936,16 +1091,23 @@
         state.detailRoot = detailRoot;
         state.filesRoot = filesRoot;
 
-        if (state.title) {
-            const summary = createElement('small', 'freesia-gallery-summary', '');
-            state.title.insertAdjacentElement('afterend', summary);
-            state.summary = summary;
+        const headerTitle = panel.querySelector('.welcomeHeaderTitle');
+        if (headerTitle) {
+            const galleryTitle = createElement('div', 'freesia-gallery-title', '角色画廊');
+            headerTitle.insertBefore(galleryTitle, headerTitle.firstChild);
+            state.title = galleryTitle;
+            createViewToggle(headerTitle);
         }
 
-        const headerTitle = panel.querySelector('.welcomeHeaderTitle');
-        if (headerTitle) createViewToggle(headerTitle);
         const header = panel.querySelector('.welcomeHeader');
-        if (header) createBackButton(header);
+        if (header) {
+            createBackButton(header);
+            const summary = createElement('small', 'freesia-gallery-summary', '');
+            const shortcuts = header.querySelector('.welcomeShortcuts');
+            header.insertBefore(summary, shortcuts || null);
+            state.summary = summary;
+            createLayoutControls(header);
+        }
 
         panel.classList.add(ACTIVE_CLASS);
         state.page = 'gallery';
@@ -962,12 +1124,14 @@
         state.countObserver = null;
 
         if (state.grid) state.grid.remove();
+        if (state.paginationRoot) state.paginationRoot.remove();
+        if (state.layoutControls) state.layoutControls.remove();
         if (state.detailRoot) state.detailRoot.remove();
         if (state.filesRoot) state.filesRoot.remove();
         if (state.viewToggle) state.viewToggle.remove();
         if (state.backButton) state.backButton.remove();
         if (state.summary) state.summary.remove();
-        if (state.title && state.originalTitle !== null) state.title.textContent = state.originalTitle;
+        if (state.title) state.title.remove();
         if (state.panel) {
             state.panel.classList.remove(ACTIVE_CLASS, NATIVE_CLASS, ...PAGE_CLASSES);
         }
@@ -976,15 +1140,22 @@
         state.welcomeRecent = null;
         state.nativeList = null;
         state.grid = null;
+        state.paginationRoot = null;
+        state.layoutControls = null;
+        state.columnsSelect = null;
+        state.rowsSelect = null;
         state.detailRoot = null;
         state.filesRoot = null;
         state.title = null;
+        state.nativeTitle = null;
         state.originalTitle = null;
         state.backButton = null;
         state.viewToggle = null;
         state.viewToggleIcon = null;
         state.summary = null;
         state.page = 'gallery';
+        state.galleryPage = 0;
+        state.galleryGroups = [];
         state.selectedAvatar = '';
         state.detailCharacter = null;
         state.detailChats = [];
@@ -1090,6 +1261,24 @@
         openDetail: openDetail,
         openFiles: function () { setPage('files'); renderFiles(); },
         getSettings: function () { return Object.assign({}, state.settings); },
+        getLayoutSettings: function () { return Object.assign({}, state.layoutSettings); },
+        setLayoutSettings: function (settings) {
+            if (!settings || typeof settings !== 'object') return false;
+            const columns = parseInt(settings.columns, 10);
+            const rows = parseInt(settings.rows, 10);
+            if (settings.columns !== undefined && ![2, 3, 4].includes(columns)) return false;
+            if (settings.rows !== undefined && (!Number.isInteger(rows) || rows < 1 || rows > MAX_GALLERY_ROWS)) return false;
+            state.layoutSettings = {
+                columns: settings.columns === undefined ? state.layoutSettings.columns : columns,
+                rows: settings.rows === undefined ? state.layoutSettings.rows : rows,
+            };
+            if (state.columnsSelect) state.columnsSelect.value = String(state.layoutSettings.columns);
+            if (state.rowsSelect) state.rowsSelect.value = String(state.layoutSettings.rows);
+            state.galleryPage = 0;
+            saveGallerySettings();
+            renderGallery(state.galleryGroups, state.source, state.lastError);
+            return Object.assign({}, state.layoutSettings);
+        },
         getPage: function () { return state.page; },
         _groupCharacterChats: groupCharacterChats,
         _groupFallbackChats: groupFallbackChats,
