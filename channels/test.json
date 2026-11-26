@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.243",
     "source_path": "releases/v0.3.243/TLE.js",
-    "source_commit": "e498f6ea3a5ecc1209740bdd40d4defa5a12a6fe",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e498f6ea3a5ecc1209740bdd40d4defa5a12a6fe/releases/v0.3.243/TLE.js",
+    "source_commit": "5767370aacdc6b2f1fb8c2df5f927d2aa896c630",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5767370aacdc6b2f1fb8c2df5f927d2aa896c630/releases/v0.3.243/TLE.js",
     "changelog_path": "releases/v0.3.243/CHANGELOG.md",
-    "sha256": "2053346cf5e0b5d59877aa6e03ea2676a82ec245f11e5f05918030f0e6ebc80d",
-    "size_bytes": 812782
+    "sha256": "c7f2725e4e2e53091b0dc6a0279c82741948b9914b2581791ff2658ae7712ffb",
+    "size_bytes": 811669
   },
-  "status": "TEST 0.3.243: Source syntax compilation and static structural checks passed. Remote development source, pinned release source, and disabled installer match byte-for-byte; manifest URL, commit, SHA-256, and UTF-8 byte count are consistent. Reverse comparison confirms only the search-mode control DOM, CSS, aria-pressed synchronization, and version markers differ from v0.3.242. Companion catalog, schedule calculation, manual hold rules, and per-item application engine remain unchanged. GitHub Actions Node regression workflow and ST/TT visual/click/mobile-width acceptance pending.",
+  "status": "TEST 0.3.243: Organizer mode selector uses two always-visible native menu_button/menu_button_icon buttons. The selected mode uses SillyTavern's built-in .menu_button.active styling with aria-pressed; all private mode-button visual CSS has been removed, leaving only flex layout for the wrapper. Development source, pinned release source, and disabled fallback installer are synchronized; manifest SHA-256 and UTF-8 byte count match. Browser and ST acceptance scripts now target ordinary buttons and check native computed styles; Node regression guards native classes and absence of private mode CSS. Automated test execution, GitHub Actions, and ST/TT real-device acceptance are still pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
