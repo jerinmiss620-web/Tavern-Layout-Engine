@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.244",
+  "latest_version": "0.3.246",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.244",
-    "source_path": "releases/v0.3.244/TLE.js",
-    "source_commit": "01e0a0e7bbfa8622b9f247e5dfc723eb4c0ec56b",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/01e0a0e7bbfa8622b9f247e5dfc723eb4c0ec56b/releases/v0.3.244/TLE.js",
-    "changelog_path": "releases/v0.3.244/CHANGELOG.md",
-    "sha256": "ccf9331481fdfc7f57a0a47fd0ce88cdd66977a66640143c8dd823934d85905f",
-    "size_bytes": 811071
+    "version": "0.3.246",
+    "source_path": "releases/v0.3.246/TLE.js",
+    "source_commit": "9f2b48348af299d51a78446216efc6ac92d4b1e1",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/9f2b48348af299d51a78446216efc6ac92d4b1e1/releases/v0.3.246/TLE.js",
+    "changelog_path": "releases/v0.3.246/CHANGELOG.md",
+    "sha256": "d333e7528e9e3fab73faac4705ff291d68dcb82fa6f9f0b6e881e076746e97ec",
+    "size_bytes": 810124
   },
-  "status": "TEST 0.3.244: Organizer defaults to the existing resource-management module. A single native checkbox labeled 查找和替换 switches to content search/replace when checked and returns to resource management when unchecked. The checkbox has no custom class, inline style, or dedicated CSS; all appearance is inherited from the active SillyTavern/TauriTavern theme. The previous dual-button selector and its layout CSS are removed. Search-term memory, rule loading, scan/preview/replace, backup/restore, and the lower resource-list selection mechanism are retained. Development source, pinned release source, fallback import package, docs, and tests are synchronized. Automated tests, GitHub Actions, and ST/TT real-device acceptance remain pending.",
+  "status": "TEST 0.3.246: Organizer desktop headings inherit native .standoutHeader styling; vertical dividers and 1px grid tracks are removed while the three-column layout remains. The resource title and content-search switch share a horizontal heading row. The switch uses native label.checkbox_label and input.checkbox markup, with no dedicated checkbox CSS or visual overrides. Mobile retains its compact layout. Resource management, grouping, batch actions, search-term memory, content rules, scanning, preview, replacement, backup/restore, and resource selection are retained. Development source, pinned release, fallback import package, documentation, and tests are synchronized. Source syntax and static structure checks pass; full automated tests, GitHub Actions, and ST/TT real-device visual acceptance remain pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
