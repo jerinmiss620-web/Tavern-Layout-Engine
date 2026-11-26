@@ -57,15 +57,19 @@ assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.ve
 
 const plan = JSON.parse(read('release-plan.json'));
 const tle = process.argv.includes('--current') ? read('releases/v' + plan.core + '/TLE.js') : pinnedTle;
-if (manifest.release.version === '0.3.243') {
+if (manifest.release.version === '0.3.244') {
   const organizerSource = read('development/organizer/TLE.js');
   assert.equal(organizerSource, pinnedTle, 'Development Organizer source and pinned test Core must match byte-for-byte');
-  assert.equal((organizerSource.match(/button\.classList\.toggle\("active", selected\);/g) || []).length, 2,
-    'Both initial mount and mode switching must synchronize the native active class');
-  assert.doesNotMatch(organizerSource, /tle-content-mode-button/,
-    'Organizer mode buttons must not carry a private visual class or custom CSS');
-  assert.match(organizerSource, /button\.classList\.add\("menu_button_icon"\)/,
-    'Organizer mode buttons must retain the native host button class');
+  assert.match(organizerSource, /this\.modeToggle = n\("input"\);/,
+    'Organizer mode must use one native checkbox');
+  assert.match(organizerSource, /this\.modeToggle\.type = "checkbox";/,
+    'The native mode control must be a checkbox');
+  assert.match(organizerSource, /this\.modeToggle\.checked = this\.active;/,
+    'Checkbox state must follow the selected functional module');
+  assert.match(organizerSource, /this\.modeToggle\.checked \? "content" : "name"/,
+    'Checking the control enters content search; unchecking returns to resource management');
+  assert.doesNotMatch(organizerSource, /modeButtons|tle-content-mode-switch|tle-content-mode-button/,
+    'No dual-button selector or private mode styling hooks may remain');
 }
 const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
