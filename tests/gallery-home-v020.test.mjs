@@ -12,7 +12,7 @@ function createHomeMarkup() {
         '<div class="welcomePanel">' +
             '<div class="welcomeHeaderTitle">' +
                 '<img class="welcomeHeaderLogo" src="img/logo.png" alt="SillyTavern Logo">' +
-                '<span class="welcomeHeaderVersionDisplay">SillyTavern</span>' +
+                '<span class="welcomeHeaderVersionDisplay">SillyTavern 1.19.0 'release' (06bde939f)</span>' +
                 '<div class="mes_button showRecentChats"></div>' +
                 '<div class="mes_button recentChatsSettings"></div>' +
                 '<div class="mes_button hideRecentChats"></div>' +
@@ -144,7 +144,12 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(cards[0].querySelector('.freesia-gallery-card-latest .chatMessage').textContent, /latest preview/);
     assert.equal(cards[0].classList.contains('recentChat'), true);
     assert.match(css, /grid-template-columns: repeat\(var\(--freesia-gallery-columns, 4\), minmax\(0, 1fr\)\)/);
+    assert.match(css, /grid-auto-rows: 1fr; align-items: stretch/);
+    assert.match(css, /gap: clamp\(5px, 0\.7vw, 8px\)/);
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
+    assert.match(css, /\.freesia-gallery-card-latest \.chatMessageContainer \{ display: block/);
+    assert.match(css, /min-height: 2\.6em; max-height: 2\.6em/);
+    assert.match(css, /\.freesia-gallery-card-toolbar \.chatActions/);
     assert.doesNotMatch(css, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
     assert.doesNotMatch(css, /\.freesia-gallery-session-card \{[^}]*background/);
     assert.doesNotMatch(css, /\.freesia-gallery-description \{/);
@@ -153,7 +158,12 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.ok(panel.querySelector('.recentChatsSettings'));
     assert.ok(panel.querySelector('.recentChatList:not(.freesia-gallery-grid)').isConnected);
     assert.equal(panel.querySelector('.freesia-gallery-title').textContent, '角色画廊');
+    assert.match(panel.querySelector('.freesia-gallery-version').textContent, /SillyTavern 1\.19\.0/);
     assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
+    assert.doesNotMatch(panel.querySelector('.freesia-gallery-summary').textContent, /每页.*列.*行/);
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .chatActions'));
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatDate'));
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-latest .chatMessageContainer'));
     assert.equal(api.getLayoutSettings().columns, 4);
     assert.equal(api.getLayoutSettings().rows, 3);
     assert.equal(panel.querySelector('[aria-label="每行列数"]').options.length, 3);
@@ -302,6 +312,56 @@ test('gallery includes characters that have no recent chat records', async () =>
     assert.equal(emptyCharacter.querySelector('.freesia-gallery-card-latest .chatMessage').textContent, '暂无最近聊天记录');
 
     api.stop();
+    dom.window.close();
+});
+
+test('empty-chat cards reserve the same two-line preview region and keep all metadata rows', async () => {
+    const { dom, api, context } = setup();
+    context.characters.push({
+        avatar: 'c.png',
+        name: 'No Recent Chat',
+        description: 'No chat yet',
+        data: { extensions: {} },
+    });
+    await api.refresh();
+
+    const card = dom.window.document.querySelector('.freesia-gallery-card[data-avatar="c.png"]');
+    assert.ok(card);
+    assert.equal(card.querySelector('.freesia-gallery-card-heading .characterName').textContent, 'No Recent Chat');
+    assert.equal(card.querySelector('.freesia-gallery-chat-count').textContent, '0 个聊天 ›');
+    assert.equal(card.querySelector('.freesia-gallery-card-toolbar .chatActions').getAttribute('aria-hidden'), 'true');
+    assert.equal(card.querySelector('.freesia-gallery-card-date-row .chatDate').textContent, '—');
+    assert.equal(card.querySelector('.freesia-gallery-card-latest .chatMessage').textContent, '暂无最近聊天记录');
+    assert.ok(card.querySelector('.freesia-gallery-card-latest .chatStats'));
+    assert.equal(card.children.length, 4);
+
+    const css = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
+    assert.match(css, /grid-template-rows: auto minmax\\(2\\.6em, 2\\.6em\\) auto/);
+    assert.match(css, /grid-auto-rows: 1fr/);
+
+    api.stop();
+    dom.window.close();
+});
+
+test('gallery title keeps SillyTavern version text without the spider logo and restores native header in native mode', async () => {
+    const { dom, api } = setup();
+    await api.refresh();
+
+    const panel = dom.window.document.querySelector('.welcomePanel');
+    const titleGroup = panel.querySelector('.freesia-gallery-title-group');
+    assert.match(titleGroup.textContent, /角色画廊/);
+    assert.match(titleGroup.textContent, /SillyTavern 1\\.19\\.0 'release' \\(06bde939f\\)/);
+    assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
+
+    api.toggleView();
+    assert.equal(panel.classList.contains('freesia-gallery-native'), true);
+    assert.equal(panel.querySelector('.freesia-gallery-title-group').isConnected, true);
+    assert.equal(panel.querySelector('.welcomeHeaderVersionDisplay').textContent, "SillyTavern 1.19.0 'release' (06bde939f)");
+
+    api.stop();
+    assert.equal(panel.querySelector('.freesia-gallery-title-group'), null);
+    assert.equal(panel.querySelector('.welcomeHeaderVersionDisplay').textContent, "SillyTavern 1.19.0 'release' (06bde939f)");
+
     dom.window.close();
 });
 
