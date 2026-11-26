@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.265",
     "source_path": "releases/v0.3.265/TLE.js",
-    "source_commit": "0609c6cb6aad2514ee974491e63e19fce130a65e",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/0609c6cb6aad2514ee974491e63e19fce130a65e/releases/v0.3.265/TLE.js",
+    "source_commit": "4c57994ba414339038a32602eac0345e3dee6a58",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4c57994ba414339038a32602eac0345e3dee6a58/releases/v0.3.265/TLE.js",
     "changelog_path": "releases/v0.3.265/CHANGELOG.md",
-    "sha256": "969903798244e16fbfe01e0330a66a875b2d6e673e173643bca153c7f09422c7",
-    "size_bytes": 955381
+    "sha256": "febabceae305ce50e1e76cd5bfaa8145f0ea4dce3a9ece193bdb39db7c98bc2c",
+    "size_bytes": 955958
   },
-  "status": "TEST v0.3.265: 首页「记录预览 / 记录详情」命名与持久化开关；关闭时完整停止模块并恢复原生首页；右上角快速切换；最近会话/聊天文件标题独立左对齐；头像伪元素与 border-image 兼容设置。仅更新测试通道。",
+  "status": "TEST v0.3.265: 恢复首页 SillyTavern 版本号（标题下方小字）；记录详情角色名左对齐、绑定世界书右对齐；首页最近聊天信息区及消息预览垂直居中；保留记录预览开关与头像兼容设置。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
