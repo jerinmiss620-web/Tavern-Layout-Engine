@@ -2,21 +2,19 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.268 · 记录预览底部信息区修正
+## 开发分支测试版 v0.3.269 · 记录预览渐变过渡优化
 
-本版纠正 v0.3.267 的实机布局错误：信息遮罩不再从卡片顶部铺满整张头像，最近聊天概要也不再错误地显示成长段文字。
+根据实机截图，扩大头像底部信息区的渐变范围，并增加多段透明度过渡，消除渐变顶部突兀的横向色带。
 
-- **头像：** 保留 2:3 竖版，头像铺满卡片。
-- **底部信息区：** 遮罩只锚定卡片底部，上半部保持干净，不放角色名、日期、按钮或概要。
-- **信息顺序：** 角色名 / 聊天数量；日期 / 三个原生操作图标；最近聊天概要；底部右对齐消息数与文件大小。
-- **概要：** 严格最多两行，超出截断。
-- **渐变：** 仅用于底部信息区，不再覆盖整张头像。
-- **原生操作：** 保留按钮尺寸、内边距、图标与点击行为，只清除按钮底座、背景、边框和阴影。
-- **代码：** 直接替换错误布局规则和测试断言，不追加补丁；Core 与独立画廊源码保持一致。
+- **渐变范围：** 底部信息区最小高度扩大到卡片的 48%，最大高度限制为 60%。
+- **渐变曲线：** 增加多个透明度停靠点，从透明、微暗、半透明逐渐过渡到深色，避免短距离内突然变暗。
+- **内容位置：** 信息行仍由底部向上排列，使用底部对齐；扩大渐变区域不会把角色名、日期、概要和统计信息整体抬高。
+- **保持不变：** 2:3 头像、底部锚点、两行概要上限、原生操作按钮和点击行为。
+- **代码：** 直接替换原有渐变规则，不追加补丁；Core 与独立画廊源码保持一致。
 
 仅更新开发分支测试通道；正式 Stable Core、Loader Runtime 和 Bootstrap 不变。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.268/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.269/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 ## 一次安装，后续自动更新
 
 正式发布：**Core v0.3.259 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
@@ -43,7 +41,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 ## 当前开发分支（未发布）
 
-开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.268）；记录预览模块源码：`development/gallery-home/gallery-home.js`。
+开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.269）；记录预览模块源码：`development/gallery-home/gallery-home.js`。
 
 整理侠的资源管理现在直接位于自己的原生形态 `.drawer-content` 内，不再套用第二层 `.tle-search-surface`。抽屉图标、导航文字与全局搜索弹窗的跳转入口统一调用明确的开合控制器，直接维护 `openDrawer / closedDrawer`；打开时先关闭其他普通抽屉和 TLE 控制面板，移动端仍由原生导航生命周期收起侧栏。
 
@@ -61,7 +59,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 **独立测试入口已准备：** [v0.3.231 候选更新日志](releases/v0.3.231/CHANGELOG.md)；[测试步骤与稳定版恢复说明](development/organizer/TESTING.md)；[下载 Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json)。测试 Loader 默认关闭，使用独立 IndexedDB 与缓存键。测试前必须禁用 Bootstrap 1.0.6 并完整刷新；恢复时禁用测试 Loader、重新启用 Bootstrap 1.0.6 并完整刷新。两套 Loader 不得同时启用。
 
-v0.3.239 已正式发布为 Stable Core；本分支继续在同一开发线路上推进 v0.3.267。当前测试清单 `channels/test.json` 指向 v0.3.268；正式 `latest.json` 与 `release-plan.json` 保持 v0.3.239，Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。v0.3.261 补齐配套侠恢复上次聊天时的自动还原，并保留同页面 Core 热更新保护；v0.3.260 补齐全局世界书保存/应用及默认方案入口；v0.3.259 将整理侠拆分为「资源整理 / 查找替换」两个独立标签页；v0.3.258 修正管理分组状态图标；此前 v0.3.240 的信息站总开关与默认选项、v0.3.241 的配套侠初始化修复、v0.3.242 的整理侠搜索方式样式、v0.3.244 的原 checkbox 模块入口及 v0.3.246 的酒馆原生 `checkbox_label` 结构均只作用于测试分支，不改动已发布的 v0.3.239 源码。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.231 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。标题栏的同步、导入、导出按钮恢复继承酒馆 `menu_button` 主题样式，不再覆盖主题底色、边框、圆角、内边距和字体；按钮仅保留必要的排列与对齐规则。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.239。
+v0.3.239 已正式发布为 Stable Core；本分支继续在同一开发线路上推进 v0.3.267。当前测试清单 `channels/test.json` 指向 v0.3.269；正式 `latest.json` 与 `release-plan.json` 保持 v0.3.239，Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。v0.3.261 补齐配套侠恢复上次聊天时的自动还原，并保留同页面 Core 热更新保护；v0.3.260 补齐全局世界书保存/应用及默认方案入口；v0.3.259 将整理侠拆分为「资源整理 / 查找替换」两个独立标签页；v0.3.258 修正管理分组状态图标；此前 v0.3.240 的信息站总开关与默认选项、v0.3.241 的配套侠初始化修复、v0.3.242 的整理侠搜索方式样式、v0.3.244 的原 checkbox 模块入口及 v0.3.246 的酒馆原生 `checkbox_label` 结构均只作用于测试分支，不改动已发布的 v0.3.239 源码。此前 v0.3.223 的全局搜索拆分与世界书筛选、v0.3.224 的抽屉激活修复、v0.3.225 的 PC 三栏工作区及 v0.3.227 的整理侠初始化修复均保留。v0.3.231 保留 PC 三栏布局，并根据移动端实机截图继续调整：移除整理侠重复关闭按钮，将同步、导入、导出集中到标题右侧；同步按钮始终显示，不再要求先切换 UI 主题分类；分类和分组筛选使用 3px 常驻横向滚动指示条；批量操作按钮统一 30px 高并清除默认外边距。标题栏的同步、导入、导出按钮恢复继承酒馆 `menu_button` 主题样式，不再覆盖主题底色、边框、圆角、内边距和字体；按钮仅保留必要的排列与对齐规则。源码语法检查通过；PC/移动端 ST/TT 真实界面验收仍待进行。正式 Stable 仍为 Core v0.3.239。
 
 ## 发布与验证
 
