@@ -1,13 +1,18 @@
 ## 2026-11-27 · Core v0.3.264 首页角色画廊整合（测试候选）
 
 - 测试通道：`channels/test.json`，版本 `0.3.264`；源码：`releases/v0.3.264/TLE.js`。
+- 不可变源码 Commit：`27053c6292fabe217dc90e35219a9c9035bb6619`。
+- SHA-256：`998e3c795cb74380633bf63411918c97b55fe5fec4b9074ab94053a4318812b9`；UTF-8 字节数：`948195`。
+- 开发源码 `development/organizer/TLE.js`、固定发布源码及禁用状态备用导入包内嵌同一份 Core，逐字节一致。
 - 画廊独立模块维护于 `development/gallery-home/gallery-home.js`，并逐字节嵌入 Core；由 TLE Core 显式启动和销毁。
 - 清理原画廊 CSS 中重复选择器覆盖；每个组件选择器仅保留一份，移动端与桌面端差异通过 CSS 自定义属性及媒体断点表达。
 - 保留首页画廊/原生最近聊天切换、原生 Recent Chats Settings 齿轮、角色置顶、聊天操作、详情页、聊天文件页及原生角色管理跳转。
 - 移动端详情区保持左右布局；头像固定 3:4，右侧资料区 stretch 等高，描述框填充剩余高度并内部滚动。
 - 新增 `tests/tle-gallery-home.test.mjs`：校验模块与 Core 源码一致、生命周期接线、CSS 无重复选择器、移动端等高规则及源码语法。
+- GitHub Actions run [#45865264292](https://github.com/jerinmiss620-web/Tavern-Layout-Engine/actions/runs/45865264292) 已通过：源码语法、固定测试通道源码与备用导入包核验成功；现有自动化测试汇总 64 项通过、0 项失败，新增画廊结构/生命周期/CSS 清理断言亦通过。
+- **ST/TT PC 与移动端实机验收仍待用户完成。** 自动化通过不代表主题兼容性和实机交互验收完成。
 - 本版仅更新测试通道；Stable Core、Loader Runtime 与 Bootstrap 不变。
-- ST/TT PC/移动端实机验收待用户完成；自动化通过不代表实机验收完成。
+
 
 ## 2026-11-26 · Core v0.3.263 配套方案预览与更新按钮原生化（测试候选）
 
