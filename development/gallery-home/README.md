@@ -9,8 +9,8 @@
 - 以酒馆完整角色列表为数据源；即使角色没有最近聊天，也保留角色卡。
 - 网格列数可选 2、3、4 列，任何屏幕宽度都不会自动增加到 4 列以上；当前列数由独立设置控制。视口宽度不超过 480px 时自动限制为最多 3 列，并临时禁用 4 列选项；回到更宽屏幕后恢复桌面设置。
 - 每页行数可选 1～15 行，默认 3 行；每页最多创建 60 张角色卡（4 列 × 15 行），通过分页浏览完整角色库，避免一次性创建全部卡片 DOM。
-- 每页设置保存在独立的账号存储键 `freesiaGallerySettings`，不覆盖酒馆原生 Recent Chats Settings。
-- 画廊卡片头像统一使用 3:4 竖版比例；移动端角色详情头像也固定为 3:4，避免被资料区高度拉伸。图片使用 `object-fit: cover`。
+- 每页设置保存在独立的账号存储键 `freesiaGallerySettings`，不覆盖酒馆原生 Recent Chats Settings；设置控件追加在原生齿轮打开的 Recent Chats Settings 弹窗中，复用原生保存/取消入口，不在首页额外占位。
+- 画廊卡片和角色详情头像统一使用 3:4 竖版比例，桌面端不再被资料区高度拉伸；480px 以下移动端保留左侧头像与右侧角色名称，角色描述标题和文本框跨整行显示，避免挤在头像旁的窄列。图片使用 `object-fit: cover`。
 - 网格间距统一为 `clamp(5px, 0.7vw, 8px)`；2/3/4 列均通过 `minmax(0, 1fr)` 均分剩余宽度，不固定卡片宽度。
 - 每行等高，卡片使用统一的内部结构：头像、单行角色名称、聊天数量与原生操作按钮、最近聊天信息。
 - 最近聊天信息区固定为日期、两行预览、底部统计三个独立区域；日期与预览强制左对齐，统计区强制右对齐，避免继承主题中的居中排版。
@@ -50,7 +50,7 @@
 - 原生显示/隐藏最近聊天、Recent Chats Settings 齿轮与画廊/原生视图切换仍保留；切回原生最近聊天时恢复酒馆原有 Logo 与版本显示。
 - 返回按钮与角色数量摘要留在次级标题行左侧；文档、GitHub、Discord、临时聊天等原生快捷入口整体靠右。
 - 桌面端将「每行 / 每页」选择器并入次级标题行，缩小字号；移动端仍在快捷入口下方独立显示。
-- 进入角色详情或聊天文件页时，分页、角色数量摘要、布局选择器均隐藏；只有返回画廊后才恢复分页操作。
+- 进入角色详情或聊天文件页时，分页和角色数量摘要隐藏；只有返回画廊后才恢复。布局设置统一通过原生最近聊天设置齿轮打开。
 - 返回按钮放在次级标题行，避免与页面标题挤在一起；原生快捷入口保留。
 - 顶部摘要只显示角色总数与分页位置；列数和行数只由下方设置控件表达，不重复显示。
 - 直接读取账号存储 `recentChatsSettings`：
@@ -63,12 +63,12 @@
 
 ## 独立加载测试
 
-v0.2.7 恢复独立的角色置顶、修正页面标题按钮位置、去除跳转按钮箭头，并重排移动端三列工具栏与详情页头像比例。
+v0.2.7 将列数/行数设置并入酒馆原生 Recent Chats Settings 弹窗；移除首页额外设置控件；「详情/管理」移至「角色描述」标题行右侧；修正桌面头像比例和移动端描述区宽度。
 
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@2d94a43ff5f42aba1b95f54b075c9d1f456af2ac/development/gallery-home/Freesia-Gallery-Home-0.2.7.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@0bf302ae860ecebf2f65ad2691d1bb65952beecd/development/gallery-home/Freesia-Gallery-Home-0.2.7.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
