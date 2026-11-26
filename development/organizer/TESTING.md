@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.231`
+Current test Core: `v0.3.261`
 
 ## Import once
 
@@ -22,6 +22,17 @@ The installer is disabled by default. It reads the test manifest from this devel
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
 
 ## Test the current build
+
+### Companion plan startup restoration (v0.3.261)
+
+- In TT, enable the native **自动加载上次聊天** setting, fully exit and reopen TT, and let it restore the previous character chat without manually opening or switching characters.
+- Confirm the restored character's default companion plan is applied once, including the saved global World Info selection and UI theme.
+- Confirm a same-page TLE Core update/reload does **not** reapply the default or overwrite settings manually changed after startup.
+- Disable and re-enable TLE in the same host page; confirm it is not treated as a new host-page startup.
+- Switch to another character and confirm that character's default still applies; a character without a default must leave the current settings unchanged.
+- With day/night scheduling enabled, confirm the current time-slot plan takes priority on a fresh host-page startup, while an unexpired manual hold remains in control.
+- Repeat in ST and TT where available. Automated regression checks do not replace real-host acceptance.
+
 
 - Confirm the original **全局搜索** button is restored in the workspace header in every navigation mode. It opens its own centered modal and retains the original search index, search field, result navigation, and clear behavior.
 - Confirm the global-search modal contains a compact **整理侠** jump entry. Activating it closes the search modal and opens the Organizer drawer; it must not switch the search modal into a resource-management tab.
@@ -53,7 +64,7 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 2. Re-enable the original **TLE Permanent Bootstrap 1.0.6**.
 3. Fully refresh the host page.
 
-The stable Bootstrap/Loader uses its own independent Last Known Good cache and should restore the stable Core (currently v0.3.220). Verify TLE → **版本与更新** reports the Stable channel and Core v0.3.220. Keep the test Loader imported but disabled as a backup; do not delete either script.
+The stable Bootstrap/Loader uses its own independent Last Known Good cache and should restore the stable Core (currently v0.3.239). Verify TLE → **版本与更新** reports the Stable channel and Core v0.3.239. Keep the test Loader imported but disabled as a backup; do not delete either script.
 
 ## Updating the branch build
 

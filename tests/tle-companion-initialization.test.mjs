@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const manifest = JSON.parse(read('channels/test.json'));
 const source = read('development/organizer/TLE.js');
-const previous = read('releases/v0.3.240/TLE.js');
+const previous = read('releases/v0.3.260/TLE.js');
 const release = read(manifest.release.source_path);
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
 
@@ -52,6 +52,10 @@ assert.match(bind, /initialData\.scheduleTokens\[initialRole\.key\] = initialCho
 assert.match(bind, /companionRuntime\.lastRole = initialRole\?\.key \|\| '';/);
 assert.doesNotMatch(bind, /companionRuntime\.lastRole\s*=\s*''/);
 assert.doesNotMatch(bind, /On script reload, apply the selected role/);
+assert.match(bind, /const freshHostStartup = companionIsFreshHostStartup\(/);
+assert.match(bind, /HOST_WIN\[COMPANION_PAGE_STARTUP_KEY\] = true;/);
+assert.match(bind, /companionRuntime\.startupRestorePending = freshHostStartup;/);
+assert.match(bind, /if \(freshHostStartup && !initialRole\) companionQueueStartupRestore\(\);/);
 
 // Schedule tokens are migrated without discarding existing plans/defaults/schedules/manual holds.
 assert.match(source, /scheduleTokens: raw\.scheduleTokens && typeof raw\.scheduleTokens === 'object' \? raw\.scheduleTokens : \{\}/);
@@ -59,7 +63,26 @@ assert.match(source, /delete fresh\.scheduleTokens\[role\.key\]/);
 const handler = section(source, '  function companionOnChatChanged(', '  function companionBindEvents(');
 assert.match(handler, /const storedToken = data\.scheduleTokens\?\.\[key\] \|\| '';/);
 assert.match(handler, /data\.scheduleTokens\[key\] = token;/);
-assert.match(handler, /companionShouldAutoApply\(\{ choice, force, changed, boundaryChanged, manualHold \}\)/);
+assert.match(handler, /const startupRestore = companionRuntime\.startupRestorePending;/);
+assert.match(handler, /companionShouldAutoApply\(\{ choice, force, changed, boundaryChanged, manualHold, startupRestore \}\)/);
+assert.match(source, /function companionQueueStartupRestore\(attempt = 0\)/);
+assert.match(source, /companionRuntime\.startupRetryTimer = HOST_WIN\.setTimeout/);
+const cleanup = section(source, '  function companionCleanup() {', '  function setChatToolsPage(');
+assert.match(cleanup, /clearTimeout\(companionRuntime\.startupRetryTimer\)/);
+assert.match(cleanup, /companionRuntime\.startupRestorePending = false;/);
+
+// A new host Window means the host page has started; a prior Core instance or
+// page marker means this is only an in-document Core reload/re-enable.
+const startupHelper = section(source, '  function companionIsFreshHostStartup(', '  function companionCurrentRole(');
+const startupSandbox = {};
+vm.runInNewContext(startupHelper + '\nglobalThis.evaluate = companionIsFreshHostStartup;', startupSandbox);
+const isFreshHostStartup = startupSandbox.evaluate;
+assert.equal(isFreshHostStartup(null, false), true,
+  'a fresh host document must restore an already-open chat');
+assert.equal(isFreshHostStartup({}, false), false,
+  'a same-document Core update must not replay the default plan');
+assert.equal(isFreshHostStartup(null, true), false,
+  're-enabling Core in the same host document must not replay the default plan');
 
 // Exercise the exact decision helper used by the runtime.
 const helper = section(source, '  function companionShouldAutoApply(', '  async function companionApply(');
@@ -70,13 +93,19 @@ const defaultChoice = { id: 'default', slot: null };
 const scheduledChoice = { id: 'day', slot: { token: 'avatar-a|day-start|day' } };
 
 assert.equal(shouldApply({ choice: defaultChoice }), false,
-  'initializing an already-open role must not replay its default plan');
+  'a same-document Core initialization must not replay its default plan');
+assert.equal(shouldApply({ choice: defaultChoice, startupRestore: true }), true,
+  'a fresh host startup must restore the already-open role default');
+assert.equal(shouldApply({ choice: null, startupRestore: true }), false,
+  'a fresh host startup without a matching default must not change current settings');
 assert.equal(shouldApply({ choice: defaultChoice, changed: true }), true,
   'a real character switch must still apply the new role default');
 assert.equal(shouldApply({ choice: defaultChoice, force: true }), true,
   'an explicitly retried pending application must still run');
 assert.equal(shouldApply({ choice: scheduledChoice }), false,
-  'the same scheduled period must not reapply after a normal reload');
+  'a same-document Core reload must not reapply the same scheduled period');
+assert.equal(shouldApply({ choice: scheduledChoice, startupRestore: true }), true,
+  'a fresh host startup must restore the current scheduled plan');
 assert.equal(shouldApply({ choice: scheduledChoice, boundaryChanged: true }), true,
   'a missed day/night boundary must recover the current scheduled plan');
 assert.equal(shouldApply({ choice: scheduledChoice, boundaryChanged: true, manualHold: true }), false,

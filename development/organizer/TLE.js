@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.260
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.261
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -11247,14 +11247,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.260 · 分组工具栏顺序与重命名操作优化</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.261 · 分组工具栏顺序与重命名操作优化</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.260</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.261</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13084,6 +13084,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
 // 配套侠：角色方案与当前宿主快切控件共享同一套原生切换器。
   const COMPANION_KEY = 'tle.companion.v1';
+  const COMPANION_PAGE_STARTUP_KEY = '__TLE_COMPANION_PAGE_STARTUP_V1__';
   const COMPANION_FIELDS = [
     { id: 'profile', name: '连接配置', type: 'api' },
     { id: 'source', name: '接口来源', type: 'api' },
@@ -13097,7 +13098,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     lastRole: '', lastApplied: new Map(), applying: false, timer: 0,
     pending: null, source: null, listeners: [], scheduleTimer: 0,
     generationRetryTimer: 0, lastScheduleToken: '',
+    startupRestorePending: false, startupRetryTimer: 0,
   };
+  function companionIsFreshHostStartup(previousInstance, pageAlreadyInitialized) {
+    return !previousInstance && !pageAlreadyInitialized;
+  }
   function companionCurrentRole() {
     try {
       const context = HOST_WIN.SillyTavern?.getContext?.();
@@ -13654,10 +13659,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return '当前列表中不存在该项，或对应原生控件暂不可用';
   }
 
-  function companionShouldAutoApply({ choice, force = false, changed = false, boundaryChanged = false, manualHold = false }) {
-    if (!choice || (!force && !changed && !boundaryChanged)) return false;
+  function companionShouldAutoApply({ choice, force = false, changed = false, boundaryChanged = false, manualHold = false, startupRestore = false }) {
+    if (!choice || (!force && !changed && !boundaryChanged && !startupRestore)) return false;
     if (choice.slot && manualHold) return false;
-    if (!choice.slot && !changed && !force) return false;
+    if (!choice.slot && !changed && !force && !startupRestore) return false;
     return true;
   }
 
@@ -13816,7 +13821,22 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const data = companionRead();
       const choice = companionAutoTarget(data, role);
       companionArmSchedule(choice?.slot);
-      if (!key) { companionRuntime.lastScheduleToken = ''; return; }
+      if (!key) {
+        companionRuntime.lastScheduleToken = '';
+        const context = HOST_WIN.SillyTavern?.getContext?.();
+        if (context?.groupId != null) {
+          companionRuntime.startupRestorePending = false;
+          HOST_WIN.clearTimeout(companionRuntime.startupRetryTimer);
+          companionRuntime.startupRetryTimer = 0;
+        }
+        return;
+      }
+      if (companionRuntime.startupRetryTimer) {
+        HOST_WIN.clearTimeout(companionRuntime.startupRetryTimer);
+        companionRuntime.startupRetryTimer = 0;
+      }
+      const startupRestore = companionRuntime.startupRestorePending;
+      companionRuntime.startupRestorePending = false;
       const token = choice?.slot?.token || '';
       const storedToken = data.scheduleTokens?.[key] || '';
       const runtimeToken = companionRuntime.lastScheduleToken.startsWith(key + '|')
@@ -13830,12 +13850,40 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         companionSave(data);
       }
       const manualHold = Boolean(choice?.slot && companionManualHold(data, role, choice.slot));
-      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold })) return;
+      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold, startupRestore })) return;
       console.info('[配套侠] 自动应用角色「' + role.name + '」方案：' + choice.plan.name);
       void companionApply(choice.id, true);
     }, 350);
   }
+  function companionQueueStartupRestore(attempt = 0) {
+    if (state.destroyed || !companionRuntime.startupRestorePending || companionRuntime.startupRetryTimer) return;
+    if (attempt >= 30) {
+      companionRuntime.startupRestorePending = false;
+      console.info('[配套侠] 启动后仍未取得已恢复的角色上下文，跳过本次自动恢复。');
+      return;
+    }
+    companionRuntime.startupRetryTimer = HOST_WIN.setTimeout(() => {
+      companionRuntime.startupRetryTimer = 0;
+      if (state.destroyed || !companionRuntime.startupRestorePending) return;
+      const context = HOST_WIN.SillyTavern?.getContext?.();
+      if (context?.groupId != null) {
+        companionRuntime.startupRestorePending = false;
+        return;
+      }
+      if (companionCurrentRole()) {
+        companionOnChatChanged();
+        return;
+      }
+      companionQueueStartupRestore(attempt + 1);
+    }, 500);
+  }
   function companionBindEvents() {
+    const freshHostStartup = companionIsFreshHostStartup(
+      previousInstance,
+      Boolean(HOST_WIN[COMPANION_PAGE_STARTUP_KEY])
+    );
+    HOST_WIN[COMPANION_PAGE_STARTUP_KEY] = true;
+    companionRuntime.startupRestorePending = freshHostStartup;
     const context = HOST_WIN.SillyTavern?.getContext?.();
     const source = context?.eventSource;
     const types = context?.eventTypes || context?.event_types;
@@ -13862,10 +13910,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.addEventListener('visibilitychange', resume, { signal: state.abort.signal });
     HOST_WIN.addEventListener('focus', resume, { signal: state.abort.signal });
     HOST_WIN.addEventListener('pageshow', resume, { signal: state.abort.signal });
-    // Establish the already-open role as the initialization baseline.
-    // Loading or updating TLE is not a character switch and must not replay its default plan.
-    // Only a later host-reported role change may trigger the ordinary role default.
-    // The saved schedule token still allows a missed day/night boundary to recover once.
+    // A full host-document startup can restore the last chat before TLE binds
+    // CHAT_CHANGED / CHAT_LOADED. Restore that already-open role once.
+    // A same-document Core update or re-enable only establishes a baseline;
+    // it must not replay the role default or overwrite the user's current setup.
+    // Day/night tokens and manual holds still govern scheduled-plan precedence.
     const initialRole = companionCurrentRole();
     const initialData = companionRead();
     const initialChoice = companionAutoTarget(initialData, initialRole);
@@ -13873,7 +13922,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       ? (initialData.scheduleTokens?.[initialRole.key] || '')
       : '';
     // A pre-v0.3.241 schedule has no token yet. Seed its current period as a baseline
-    // instead of replaying a scheduled plan during the upgrade itself.
+    // instead of replaying a scheduled plan during an in-document Core update.
     if (initialRole && initialChoice?.slot && !savedScheduleToken) {
       initialData.scheduleTokens[initialRole.key] = initialChoice.slot.token;
       companionSave(initialData);
@@ -13881,13 +13930,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     companionRuntime.lastRole = initialRole?.key || '';
     companionRuntime.lastScheduleToken = savedScheduleToken || initialChoice?.slot?.token || '';
     companionOnChatChanged();
+    if (freshHostStartup && !initialRole) companionQueueStartupRestore();
   }
   function companionCleanup() {
     HOST_WIN.clearTimeout(companionRuntime.timer);
     HOST_WIN.clearTimeout(companionRuntime.scheduleTimer);
     HOST_WIN.clearTimeout(companionRuntime.generationRetryTimer);
+    HOST_WIN.clearTimeout(companionRuntime.startupRetryTimer);
     companionRuntime.scheduleTimer = 0;
     companionRuntime.generationRetryTimer = 0;
+    companionRuntime.startupRetryTimer = 0;
+    companionRuntime.startupRestorePending = false;
     companionRuntime.pending = null;
     if (companionRuntime.source) {
       const remove = companionRuntime.source.removeListener || companionRuntime.source.off;
@@ -17489,7 +17542,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.260',
+    version: '0.3.261',
     ready: false,
     destroy,
     state,
@@ -17940,5 +17993,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.260 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.261 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
