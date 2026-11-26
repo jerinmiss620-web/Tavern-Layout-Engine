@@ -482,8 +482,11 @@ test('empty-chat cards reserve the same two-line preview region and keep all met
     const card = dom.window.document.querySelector('.freesia-gallery-card[data-avatar="c.png"]');
     assert.ok(card);
     assert.equal(card.querySelector('.freesia-gallery-card-heading .characterName').textContent, 'No Recent Chat');
-    assert.equal(card.querySelector('.freesia-gallery-chat-count').textContent, '0 个聊天 ›');
-    assert.equal(card.querySelector('.freesia-gallery-card-toolbar .chatActions').getAttribute('aria-hidden'), 'true');
+    assert.equal(card.querySelector('.freesia-gallery-chat-count').textContent, '0 个聊天');
+    assert.equal(card.querySelector('.freesia-gallery-card-toolbar .chatActions').getAttribute('aria-hidden'), null);
+    assert.ok(card.querySelector('.freesia-gallery-card-toolbar .freesia-gallery-character-pin'));
+    assert.equal(card.querySelector('.freesia-gallery-card-toolbar .renameChat').disabled, true);
+    assert.equal(card.querySelector('.freesia-gallery-card-toolbar .deleteChat').disabled, true);
     assert.equal(card.querySelector('.freesia-gallery-card-date-row .chatDate').textContent, '—');
     assert.equal(card.querySelector('.freesia-gallery-card-latest .chatMessage').textContent, '暂无最近聊天记录');
     assert.ok(card.querySelector('.freesia-gallery-card-latest .chatStats'));
