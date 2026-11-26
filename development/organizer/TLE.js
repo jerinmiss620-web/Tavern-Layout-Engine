@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.252
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.253
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -5989,8 +5989,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         flex: 0 0 auto;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
-        gap: 6px;
+        justify-content: flex-start;
+        gap: 4px;
         min-width: 0;
       }
       .tle-quick-manager .tle-quick-group-actions > button { flex: 0 0 auto; }
@@ -6011,7 +6011,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       .tle-quick-manager .tle-quick-group-create-row > button,
       .tle-quick-manager .tle-quick-group-rename-row > button,
-      .tle-quick-manager .tle-quick-group-selection-actions > button,
+      .tle-quick-manager .tle-quick-group-management-actions > button,
       .tle-quick-manager .tle-quick-group-delete-actions > button {
         flex: 0 0 auto;
         width: auto;
@@ -6022,7 +6022,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       .tle-quick-manager .tle-quick-group-selection-summary { gap: 4px 8px; min-width: 0; }
       .tle-quick-manager .tle-quick-group-selection-name { overflow-wrap: anywhere; }
       .tle-quick-manager .tle-quick-group-selection-count { min-width: 0; opacity: .72; }
-      .tle-quick-manager .tle-quick-group-selection-actions,
+      .tle-quick-manager .tle-quick-group-management-hint {
+        display: block;
+        min-width: 0;
+        opacity: .72;
+        font-size: .82em;
+        line-height: 1.4;
+      }
+      .tle-quick-manager .tle-quick-group-management-actions,
       .tle-quick-manager .tle-quick-group-delete-actions { gap: 6px; min-width: 0; }
       .tle-quick-manager .tle-quick-group-delete-confirm { gap: 6px; min-width: 0; }
       .tle-quick-manager .tle-quick-group-delete-message { display: block; min-width: 0; white-space: normal; }
@@ -6207,10 +6214,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           overflow-y: auto;
           padding: 0 2px 2px 0;
         }
-        .tle-quick-manager .tle-quick-filter-bar > .tle-quick-filter {
+        .tle-quick-manager .tle-quick-filter-bar > .tle-quick-filter-item {
           flex: 0 0 auto;
           width: 100%;
           max-width: none;
+        }
+        .tle-quick-manager .tle-quick-filter-item > .tle-quick-filter {
+          flex: 1 1 auto;
+          width: auto;
+          max-width: 100%;
           justify-content: space-between;
           text-align: left;
           white-space: normal;
@@ -6219,8 +6231,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           display: flex;
           flex-wrap: wrap;
           align-items: center;
-          justify-content: space-between;
-          gap: 6px;
+          justify-content: flex-start;
+          gap: 4px;
         }
         .tle-quick-manager .tle-quick-group-actions > button {
           flex: 0 0 auto;
@@ -6321,10 +6333,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           -ms-overflow-style: none;
           -webkit-overflow-scrolling: touch;
         }
-        .tle-quick-manager .tle-quick-filter-bar > .tle-quick-filter {
+        .tle-quick-manager .tle-quick-filter-bar > .tle-quick-filter-item {
           width: auto;
           max-width: min(72vw, 260px);
           flex: 0 0 auto;
+        }
+        .tle-quick-manager .tle-quick-filter-item > .tle-quick-filter {
+          width: auto;
+          max-width: 100%;
+          flex: 1 1 auto;
         }
         .tle-quick-manager .tle-quick-filter-label {
           overflow: hidden;
@@ -6358,8 +6375,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           flex: 0 0 auto;
           min-height: 34px;
           margin: 0;
-          padding-inline: 6px;
-          font-size: .78em;
           white-space: nowrap;
         }
         .tle-quick-manager .tle-quick-group-editor { grid-area: manage; }
@@ -6420,18 +6435,38 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         .tle-quick-manager .tle-quick-status { grid-area: status; }
       }
 
-      .tle-quick-manager .tle-quick-filter {
+      .tle-quick-manager .tle-quick-filter-item {
         display: flex;
         flex: 0 0 auto;
         align-items: center;
+        gap: 5px;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+      }
+      .tle-quick-manager .tle-quick-filter-item > .tle-quick-filter {
+        display: flex;
+        flex: 1 1 auto;
+        align-items: center;
         justify-content: space-between;
         gap: 8px;
-        width: 100%;
+        width: auto;
         min-width: 0;
         max-width: 100%;
         text-align: left;
         cursor: pointer;
       }
+      .tle-quick-manager .tle-quick-filter-select {
+        display: flex;
+        flex: 0 0 28px;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        min-height: 28px;
+        cursor: pointer;
+      }
+      .tle-quick-manager .tle-quick-filter-select[hidden] { display: none !important; }
+      .tle-quick-manager .tle-quick-filter-select > input { margin: 0; }
       .tle-quick-manager .tle-quick-filter[aria-pressed="true"] {
         color: var(--SmartThemeQuoteColor, inherit);
         font-weight: 600;
@@ -8693,7 +8728,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let targetGroup = '';
     let viewGroup = '*';
     let editingGroupId = '';
-    let deletingGroupId = '';
+    let deletingGroupIds = [];
+    let managingGroups = false;
+    const selectedGroups = new Set();
     let entries = [];
     let loading = 0;
     let statusMessage = '';
@@ -8774,18 +8811,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     createRow.hidden = true;
     createRow.append(newGroupName, createButton, cancelCreateButton);
 
+    const groupManagementHint = quickNode(
+      'small',
+      'tle-quick-group-management-hint',
+      '仅可操作自定义分组；「全部项目」和「未分组」是系统目录，不可重命名或删除。勾选自定义分组可批量删除。'
+    );
     const selectedGroupSummary = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-selection-summary');
-    const selectedGroupLabel = quickNode('small', '', '当前选中分组：');
-    const selectedGroupName = quickNode('strong', 'tle-quick-group-selection-name', '未选择');
-    const selectedGroupCount = quickNode('small', 'tle-quick-group-selection-count', '点选下方分组后，可在这里重命名或删除。');
+    const selectedGroupLabel = quickNode('small', '', '当前目录：');
+    const selectedGroupName = quickNode('strong', 'tle-quick-group-selection-name', '全部项目');
+    const selectedGroupCount = quickNode('small', 'tle-quick-group-selection-count', '系统目录不可操作');
     selectedGroupSummary.append(selectedGroupLabel, selectedGroupName, selectedGroupCount);
 
-    const selectedGroupActions = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-selection-actions');
-    selectedGroupActions.setAttribute('aria-label', '分组操作');
-    const selectedGroupActionsLabel = quickNode('small', '', '分组操作：');
-    const renameGroupButton = quickButton('重命名', () => beginRenameGroup());
-    const deleteGroupButton = quickButton('删除分组', () => beginDeleteGroup());
-    selectedGroupActions.append(selectedGroupActionsLabel, renameGroupButton, deleteGroupButton);
+    const groupManagementActions = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-management-actions');
+    groupManagementActions.setAttribute('aria-label', '分组管理操作');
+    const renameGroupButton = quickButton('', () => beginRenameGroup(), 'menu_button tle-quick-icon-action');
+    renameGroupButton.title = '重命名当前自定义分组';
+    renameGroupButton.setAttribute('aria-label', '重命名当前分组');
+    const renameGroupIcon = quickNode('i', 'fa-solid fa-pen-to-square');
+    renameGroupIcon.setAttribute('aria-hidden', 'true');
+    renameGroupButton.append(renameGroupIcon);
+    const deleteGroupsButton = quickButton('', () => beginDeleteGroups(), 'menu_button tle-quick-icon-action');
+    deleteGroupsButton.title = '批量删除已勾选的自定义分组';
+    deleteGroupsButton.setAttribute('aria-label', '批量删除已选分组');
+    const deleteGroupsIcon = quickNode('i', 'fa-solid fa-trash-can');
+    deleteGroupsIcon.setAttribute('aria-hidden', 'true');
+    deleteGroupsButton.append(deleteGroupsIcon);
 
     const renameInput = quickNode('input', 'text_pole');
     renameInput.placeholder = '输入新的分组名称';
@@ -8798,8 +8848,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     renameEditor.append(renameInput, renameConfirmButton, renameCancelButton);
 
     const groupDeleteMessage = quickNode('small', 'tle-quick-group-delete-message');
-    const groupDeleteConfirmButton = quickButton('确认删除分组', () => deleteGroup());
-    const groupDeleteCancelButton = quickButton('取消', () => cancelDeleteGroup());
+    const groupDeleteConfirmButton = quickButton('确认删除所选分组', () => deleteGroups());
+    const groupDeleteCancelButton = quickButton('取消', () => cancelDeleteGroups());
     const groupDeleteActions = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-delete-actions');
     groupDeleteActions.append(groupDeleteConfirmButton, groupDeleteCancelButton);
     const groupDeleteConfirm = quickNode('div', 'flex-container flexFlowColumn tle-quick-group-delete-confirm');
@@ -8807,7 +8857,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     groupDeleteConfirm.append(groupDeleteMessage, groupDeleteActions);
 
     const groupSelection = quickNode('div', 'flex-container flexFlowColumn tle-quick-group-selection');
-    groupSelection.append(selectedGroupSummary, selectedGroupActions, renameEditor, groupDeleteConfirm);
+    groupSelection.hidden = true;
+    groupSelection.append(groupManagementHint, selectedGroupSummary, groupManagementActions, renameEditor, groupDeleteConfirm);
     const groupEditor = quickNode('div', 'tle-quick-group-editor flex-container flexFlowColumn');
     groupEditor.append(createRow, groupSelection);
 
@@ -8820,28 +8871,49 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const targetSelect = quickNode('select', 'text_pole');
     targetSelect.setAttribute('aria-label', '批量操作目标分组');
 
-    const newGroupToggle = quickButton('新建分组', () => {
+    const newGroupToggle = quickButton('', () => {
+      if (managingGroups) setGroupManagementMode(false);
       const opening = createRow.hidden;
       createRow.hidden = !opening;
       newGroupToggle.setAttribute('aria-expanded', String(opening));
       if (opening) {
         editingGroupId = '';
-        deletingGroupId = '';
+        deletingGroupIds = [];
         renameEditor.hidden = true;
         groupDeleteConfirm.hidden = true;
         newGroupName.focus({ preventScroll: true });
       } else newGroupName.value = '';
-    });
+    }, 'menu_button tle-quick-icon-action');
+    newGroupToggle.title = '新建分组';
+    newGroupToggle.setAttribute('aria-label', '新建分组');
     newGroupToggle.setAttribute('aria-expanded', 'false');
+    const newGroupIcon = quickNode('i', 'fa-solid fa-folder-plus');
+    newGroupIcon.setAttribute('aria-hidden', 'true');
+    newGroupToggle.append(newGroupIcon);
 
-    const autoGroupButton = quickButton('自动分组', () => autoGroupByPrefix());
-    autoGroupButton.title = '识别当前分类中名称具有相同开头的项目；只整理未分组项目，不覆盖已有分组归属。';
+    const manageGroupsToggle = quickButton('', () => setGroupManagementMode(!managingGroups), 'menu_button tle-quick-icon-action');
+    manageGroupsToggle.title = '管理分组';
+    manageGroupsToggle.setAttribute('aria-label', '管理分组');
+    manageGroupsToggle.setAttribute('aria-pressed', 'false');
+    const manageGroupsIcon = quickNode('i', 'fa-solid fa-folder-open');
+    manageGroupsIcon.setAttribute('aria-hidden', 'true');
+    manageGroupsToggle.append(manageGroupsIcon);
+
+    const autoGroupButton = quickButton('', () => {
+      if (managingGroups) setGroupManagementMode(false);
+      autoGroupByPrefix();
+    }, 'menu_button tle-quick-icon-action');
+    autoGroupButton.title = '自动分组';
+    autoGroupButton.setAttribute('aria-label', '自动分组');
+    const autoGroupIcon = quickNode('i', 'fa-solid fa-wand-magic-sparkles');
+    autoGroupIcon.setAttribute('aria-hidden', 'true');
+    autoGroupButton.append(autoGroupIcon);
 
     const toolbar = quickNode('div', 'tle-quick-toolbar');
     toolbar.append(targetSelect);
 
     const groupActions = quickNode('div', 'tle-quick-group-actions');
-    groupActions.append(newGroupToggle, autoGroupButton);
+    groupActions.append(newGroupToggle, manageGroupsToggle, autoGroupButton);
 
     const operations = quickNode('div', 'flex-container flexWrap tle-quick-operations');
     const selectVisibleButton = quickButton('全选当前结果', () => {
@@ -8953,8 +9025,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         targetGroup = '';
         viewGroup = '*';
         selected.clear();
+        selectedGroups.clear();
+        managingGroups = false;
+        groupSelection.hidden = true;
+        manageGroupsToggle.setAttribute('aria-pressed', 'false');
+        manageGroupsToggle.title = '管理分组';
+        manageGroupsToggle.setAttribute('aria-label', '管理分组');
+        manageGroupsToggle.querySelector('i').className = 'fa-solid fa-folder-open';
         editingGroupId = '';
-        deletingGroupId = '';
+        deletingGroupIds = [];
         newGroupName.value = '';
         renameInput.value = '';
         createRow.hidden = true;
@@ -9000,33 +9079,75 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         : '请先勾选需要删除的资源。' + deleteScopeHint);
     }
 
+    function syncManageGroupsToggle() {
+      manageGroupsToggle.setAttribute('aria-pressed', String(managingGroups));
+      manageGroupsToggle.title = managingGroups ? '完成分组管理' : '管理分组';
+      manageGroupsToggle.setAttribute('aria-label', manageGroupsToggle.title);
+      const icon = manageGroupsToggle.querySelector('i');
+      if (icon) icon.className = managingGroups ? 'fa-solid fa-check' : 'fa-solid fa-folder-open';
+    }
+
+    function setGroupManagementMode(enabled) {
+      const next = Boolean(enabled);
+      if (next === managingGroups) return;
+      managingGroups = next;
+      createRow.hidden = true;
+      newGroupName.value = '';
+      newGroupToggle.setAttribute('aria-expanded', 'false');
+      selectedGroups.clear();
+      editingGroupId = '';
+      deletingGroupIds = [];
+      renameEditor.hidden = true;
+      groupDeleteConfirm.hidden = true;
+      groupSelection.hidden = !managingGroups;
+      syncManageGroupsToggle();
+      render();
+    }
+
     function refreshGroupManagement(data = readQuickGroups()) {
       const groups = currentGroups(data);
+      for (const id of [...selectedGroups]) {
+        if (!groups.some(group => group.id === id)) selectedGroups.delete(id);
+      }
       const managedGroup = groups.find(group => group.id === viewGroup);
       const managedCount = managedGroup
         ? entries.filter(entry => quickAssignment(data, module, entry.key) === managedGroup.id).length
         : 0;
-      selectedGroupName.textContent = managedGroup?.name || '未选择';
-      selectedGroupCount.textContent = managedGroup ? `${managedCount} 项资源` : '先点选下方分组，再使用这里的操作。';
-      selectedGroupActions.hidden = false;
-      if (!managedGroup) {
-        editingGroupId = '';
-        deletingGroupId = '';
-      }
-      renameEditor.hidden = !managedGroup || editingGroupId !== managedGroup.id;
-      groupDeleteConfirm.hidden = !managedGroup || deletingGroupId !== managedGroup.id;
+      const selectedManagedGroups = groups.filter(group => selectedGroups.has(group.id));
+      selectedGroupName.textContent = managedGroup?.name || (viewGroup === '*' ? '全部项目' : '未分组');
+      selectedGroupCount.textContent = managedGroup
+        ? `${managedCount} 项资源 · 已勾选 ${selectedManagedGroups.length} 个分组`
+        : `系统目录不可操作 · 已勾选 ${selectedManagedGroups.length} 个分组`;
+      groupSelection.hidden = !managingGroups;
+      if (!managedGroup) editingGroupId = '';
+      renameEditor.hidden = !managingGroups || !managedGroup || editingGroupId !== managedGroup.id;
       if (managedGroup && !renameEditor.hidden && HOST_DOC.activeElement !== renameInput) renameInput.value = managedGroup.name;
-      if (managedGroup && !groupDeleteConfirm.hidden) {
-        groupDeleteMessage.textContent = `确认删除「${managedGroup.name}」？不会删除其中的资源；${managedCount} 项会移回「未分组」。`;
+
+      const deletingGroups = groups.filter(group => deletingGroupIds.includes(group.id) && selectedGroups.has(group.id));
+      if (!deletingGroups.length) deletingGroupIds = [];
+      groupDeleteConfirm.hidden = !managingGroups || !deletingGroups.length;
+      if (deletingGroups.length) {
+        const ids = new Set(deletingGroups.map(group => group.id));
+        const assignments = data.assignments[module] || Object.create(null);
+        const movedCount = Object.values(assignments).filter(id => ids.has(id)).length;
+        const names = deletingGroups.slice(0, 5).map(group => group.name).join('、');
+        const extra = deletingGroups.length > 5 ? ` 等另外 ${deletingGroups.length - 5} 个分组` : '';
+        groupDeleteMessage.textContent = `确认删除 ${deletingGroups.length} 个自定义分组（${names}${extra}）？不会删除其中的资源；${movedCount} 项资源将移回「未分组」。`;
       }
+
       const busy = Boolean(content?.busy || deleteBusy || scanBusy);
       renameInput.disabled = !managedGroup || busy;
-      renameGroupButton.disabled = !managedGroup || busy;
-      deleteGroupButton.disabled = !managedGroup || busy;
-      renameGroupButton.title = managedGroup ? `重命名分组「${managedGroup.name}」` : '先点选下方的自定义分组。';
-      deleteGroupButton.title = managedGroup ? `删除分组「${managedGroup.name}」；不会删除其中的资源。` : '先点选下方的自定义分组。';
+      renameGroupButton.disabled = !managingGroups || !managedGroup || busy;
+      deleteGroupsButton.disabled = !managingGroups || !selectedManagedGroups.length || busy;
+      renameGroupButton.title = managedGroup
+        ? `重命名当前分组「${managedGroup.name}」`
+        : '请先选择一个自定义分组；「全部项目」和「未分组」不可重命名。';
+      deleteGroupsButton.title = selectedManagedGroups.length
+        ? `批量删除已勾选的 ${selectedManagedGroups.length} 个自定义分组`
+        : '请勾选需要删除的自定义分组。';
+      groupFilters.querySelectorAll('.tle-quick-filter-select input').forEach(input => { input.disabled = busy; });
       renameConfirmButton.disabled = !managedGroup || busy;
-      groupDeleteConfirmButton.disabled = !managedGroup || busy;
+      groupDeleteConfirmButton.disabled = !deletingGroups.length || busy;
     }
 
     function getVisibleEntries(data = readQuickGroups()) {
@@ -9046,7 +9167,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     function setViewGroup(id) {
       viewGroup = id;
       editingGroupId = '';
-      deletingGroupId = '';
+      deletingGroupIds = [];
       renameEditor.hidden = true;
       groupDeleteConfirm.hidden = true;
       createRow.hidden = true;
@@ -9074,18 +9195,37 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         ...groups.map(group => ({ id: group.id, label: quickGroupLabel(group), count: assignedCount.get(group.id) || 0 })),
       ];
       for (const filter of filters) {
+        const group = groups.find(item => item.id === filter.id);
+        const item = quickNode('div', 'tle-quick-filter-item');
+        item.dataset.groupId = filter.id;
         const button = quickButton('', () => setViewGroup(filter.id), 'menu_button tle-quick-filter');
         button.dataset.groupId = filter.id;
         button.append(
           quickNode('span', 'tle-quick-filter-label', filter.label),
           quickNode('small', 'tle-quick-filter-count', String(filter.count))
         );
-        const group = groups.find(item => item.id === filter.id);
-        button.title = group ? '查看此分组；重命名和删除操作会作用于当前选中的分组。'
-          : filter.id === '' ? '查看尚未归组的项目。' : '查看当前分类的全部项目。';
+        button.title = group
+          ? (managingGroups ? `查看「${group.name}」；勾选右侧复选框可加入批量删除。` : `查看「${group.name}」；点击「管理分组」可重命名或批量删除。`)
+          : filter.id === '' ? '查看尚未归组的项目；系统目录不可重命名或删除。' : '查看全部项目；系统目录不可重命名或删除。';
         button.setAttribute('aria-label', `${filter.label}，${filter.count} 项`);
         button.setAttribute('aria-pressed', String(viewGroup === filter.id));
-        groupFilters.append(button);
+        item.append(button);
+        if (group) {
+          const selectLabel = quickNode('label', 'tle-quick-filter-select');
+          selectLabel.hidden = !managingGroups;
+          const checkbox = quickNode('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = selectedGroups.has(group.id);
+          checkbox.setAttribute('aria-label', `选择分组「${group.name}」用于批量删除`);
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked) selectedGroups.add(group.id);
+            else selectedGroups.delete(group.id);
+            refreshGroupManagement(data);
+          });
+          selectLabel.append(checkbox);
+          item.append(selectLabel);
+        }
+        groupFilters.append(item);
       }
       updateQuickHorizontalIndicator(groupFilters);
     }
@@ -9284,7 +9424,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         ...tabs.querySelectorAll('button'),
         ...operations.querySelectorAll('button'),
         ...groupEditor.querySelectorAll('button,input'),
-        targetSelect, newGroupToggle, autoGroupButton,
+        targetSelect, newGroupToggle, manageGroupsToggle, autoGroupButton,
+        ...groupFilters.querySelectorAll('.tle-quick-filter-select input'),
       ];
       const busyDisabled = busyControls.map(control => control.disabled);
       busyControls.forEach(control => { control.disabled = true; });
@@ -9454,7 +9595,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       viewGroup = id;
       targetGroup = id;
       editingGroupId = '';
-      deletingGroupId = '';
+      deletingGroupIds = [];
       createRow.hidden = true;
       newGroupName.value = '';
       newGroupToggle.setAttribute('aria-expanded', 'false');
@@ -9462,10 +9603,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     function beginRenameGroup() {
+      if (!managingGroups) { statusMessage = '请先点击「管理分组」。'; render(); return; }
       const group = currentGroups().find(item => item.id === viewGroup);
-      if (!group) { statusMessage = '请先在分组目录中选择一个分组。'; render(); return; }
+      if (!group) { statusMessage = '「全部项目」和「未分组」是系统目录，不可重命名；请先选择一个自定义分组。'; render(); return; }
       editingGroupId = group.id;
-      deletingGroupId = '';
+      deletingGroupIds = [];
       renameInput.value = group.name;
       render();
       renameInput.focus({ preventScroll: true });
@@ -9483,7 +9625,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const groups = currentGroups(data);
       const group = groups.find(item => item.id === viewGroup && item.id === editingGroupId);
       const name = renameInput.value.trim();
-      if (!group) { statusMessage = '请先在分组目录中选择需要重命名的分组。'; render(); return; }
+      if (!group) { statusMessage = '「全部项目」和「未分组」是系统目录，不可重命名。'; render(); return; }
       if (!name) { statusMessage = '分组名称不能为空。'; render(); return; }
       if (groups.some(item => item.id !== group.id && item.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
         statusMessage = '当前分类中已有同名分组。';
@@ -9495,38 +9637,54 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       saveAndRender(data, '分组名称已更新。');
     }
 
-    function beginDeleteGroup() {
-      const group = currentGroups().find(item => item.id === viewGroup);
-      if (!group) { statusMessage = '请先在分组目录中选择一个分组。'; render(); return; }
-      deletingGroupId = group.id;
+    function beginDeleteGroups() {
+      if (!managingGroups) { statusMessage = '请先点击「管理分组」。'; render(); return; }
+      const groups = currentGroups().filter(group => selectedGroups.has(group.id));
+      if (!groups.length) { statusMessage = '请先勾选需要删除的自定义分组。'; render(); return; }
+      deletingGroupIds = groups.map(group => group.id);
       editingGroupId = '';
+      renameEditor.hidden = true;
       render();
     }
 
-    function cancelDeleteGroup() {
-      deletingGroupId = '';
+    function cancelDeleteGroups() {
+      deletingGroupIds = [];
       groupDeleteConfirm.hidden = true;
       render();
     }
 
-    function deleteGroup() {
+    function deleteGroups() {
+      if (!managingGroups) { statusMessage = '请先点击「管理分组」。'; render(); return; }
       const data = readQuickGroups();
       const groups = currentGroups(data);
-      const group = groups.find(item => item.id === viewGroup && item.id === deletingGroupId);
-      if (!group) { statusMessage = '请先在分组目录中选择需要删除的分组。'; render(); return; }
-      const removedId = group.id;
-      const movedCount = entries.filter(entry => quickAssignment(data, module, entry.key) === removedId).length;
-      groups.splice(groups.indexOf(group), 1);
+      const removing = groups.filter(group => deletingGroupIds.includes(group.id) && selectedGroups.has(group.id));
+      if (!removing.length) {
+        statusMessage = '没有勾选可删除的自定义分组。';
+        deletingGroupIds = [];
+        render();
+        return;
+      }
+      const removedIds = new Set(removing.map(group => group.id));
+      const names = removing.slice(0, 5).map(group => group.name).join('、');
+      const extra = removing.length > 5 ? ` 等另外 ${removing.length - 5} 个分组` : '';
       const map = data.assignments[module] || Object.create(null);
-      for (const key of Object.keys(map)) if (map[key] === removedId) delete map[key];
+      let movedCount = 0;
+      for (const key of Object.keys(map)) {
+        if (removedIds.has(map[key])) {
+          delete map[key];
+          movedCount++;
+        }
+      }
       data.assignments[module] = map;
-      if (targetGroup === removedId) targetGroup = '';
-      if (viewGroup === removedId) viewGroup = '*';
+      for (const group of removing) groups.splice(groups.indexOf(group), 1);
+      if (removedIds.has(targetGroup)) targetGroup = '';
+      if (removedIds.has(viewGroup)) viewGroup = '*';
+      selectedGroups.clear();
       editingGroupId = '';
-      deletingGroupId = '';
+      deletingGroupIds = [];
       renameEditor.hidden = true;
       groupDeleteConfirm.hidden = true;
-      saveAndRender(data, `已删除「${group.name}」分组；资源没有删除，${movedCount} 项已移回「未分组」。`);
+      saveAndRender(data, `已删除 ${removing.length} 个自定义分组（${names}${extra}）；资源没有删除，${movedCount} 项已移回「未分组」。`);
     }
 
     function assignSelected() {
@@ -9733,7 +9891,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         ...tabs.querySelectorAll('button'),
         ...operations.querySelectorAll('button'),
         ...groupEditor.querySelectorAll('button,input'),
-        targetSelect, newGroupToggle, autoGroupButton,
+        targetSelect, newGroupToggle, manageGroupsToggle, autoGroupButton,
+        ...groupFilters.querySelectorAll('.tle-quick-filter-select input'),
       ].filter(Boolean);
       const disabledBefore = controls.map(control => control.disabled);
       controls.forEach(control => { control.disabled = true; });
@@ -10907,14 +11066,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.252 · 分组目录直接选择，重命名与删除跟随当前分组</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.253 · 分组目录直接选择，重命名与删除跟随当前分组</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.252</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.253</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -17015,7 +17174,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.252',
+    version: '0.3.253',
     ready: false,
     destroy,
     state,
@@ -17466,5 +17625,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.252 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.253 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
