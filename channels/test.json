@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.255",
+  "latest_version": "0.3.256",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.255",
-    "source_path": "releases/v0.3.255/TLE.js",
-    "source_commit": "a98c1de2bfd20ce85bd6d7ef6fbaa7a0d12d7a2d",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a98c1de2bfd20ce85bd6d7ef6fbaa7a0d12d7a2d/releases/v0.3.255/TLE.js",
-    "changelog_path": "releases/v0.3.255/CHANGELOG.md",
-    "sha256": "3f5b03fb65bf0fbf6da5118f5ee497c39bbf7973d71d1d12b1193e75a9480788",
-    "size_bytes": 829176
+    "version": "0.3.256",
+    "source_path": "releases/v0.3.256/TLE.js",
+    "source_commit": "5931367a92fbc81f25f412f4fbe19d74186a7206",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5931367a92fbc81f25f412f4fbe19d74186a7206/releases/v0.3.256/TLE.js",
+    "changelog_path": "releases/v0.3.256/CHANGELOG.md",
+    "sha256": "77e9dab95b3dc5e65dbf5803e1f394d79145a09ef0681f465024b651f5d03173",
+    "size_bytes": 829913
   },
-  "status": "TEST 0.3.255: 修复分组重命名错误读取当前视图的问题。重命名改为读取已勾选分组，恰好勾选一个自定义分组时可用；铅笔与垃圾桶图标移入分组目录顶部工具栏，仅管理模式显示。批量删除多个分组，资源不会被删除。",
+  "status": "TEST 0.3.256: 分组目录主要操作顺序调整为创建分组、自动分组、管理分组；重命名编辑行改为确认✓与取消×图标按钮并保持单行。保留已勾选分组重命名逻辑及批量删除行为。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",

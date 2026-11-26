@@ -2,19 +2,18 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.255 · 整理侠分组重命名逻辑与工具栏调整
+## 开发分支测试版 v0.3.256 · 分组工具栏顺序与重命名操作优化
 
-本次测试更新：修复分组重命名错误依赖「当前视图」的问题。重命名现在读取右侧复选框勾选的自定义分组；恰好勾选 1 个时可重命名，勾选 0 个或多个时禁用铅笔操作。批量删除继续读取已勾选的多个分组。
+本次测试更新：调整整理侠「分组目录」顶部操作顺序，并压缩重命名编辑行。
 
-- **操作入口：** 铅笔（重命名）和垃圾桶（批量删除）图标移至「分组目录」顶部工具栏，紧跟新建、管理、自动分组图标；仅在管理模式显示。
-- **重命名：** 勾选 1 个自定义分组后点击铅笔图标；不要求切换当前资源视图。
-- **批量删除：** 勾选一个或多个自定义分组后点击垃圾桶图标，并二次确认。
-- 「全部项目」和「未分组」仍为不可操作的系统目录。
-- 删除分组不会删除资源；所属资源会移回「未分组」。
-- 使用酒馆原生图标按钮样式，不新增 CSS 补丁；清理旧文字操作栏样式。
+- **工具栏顺序：** 创建分组 → 自动分组 → 管理分组；管理分组移至这三个主要操作的最后。已有的铅笔（重命名）和垃圾桶（批量删除）继续排列在其后。
+- **重命名编辑行：** 输入框后改为确认（✓）和取消（×）两个原生图标按钮；悬停可查看操作名称。
+- **不换行：** 重命名输入框、确认和取消按钮固定在同一行；仅输入框承担弹性收缩，不再让按钮折到下一行。
+- 保留 v0.3.255 的选择逻辑：重命名读取已勾选的唯一自定义分组，不依赖当前资源视图；批量删除仍读取多个已勾选分组。
+- 不新增 CSS 补丁；直接整理原有分组编辑行规则，按钮沿用酒馆原生 `.menu_button tle-quick-icon-action` 样式。
 - 仅更新开发分支测试通道；正式 Stable Core、Loader 和 Bootstrap 不变。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.255/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md)。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.256/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md)。
 
 ## 一次安装，后续自动更新
 
