@@ -1123,7 +1123,10 @@
             const nativeVersion = headerTitle.querySelector('.welcomeHeaderVersionDisplay');
             const version = createElement('span', 'freesia-gallery-version', nativeVersion ? nativeVersion.textContent.trim() : '');
             titleGroup.append(galleryTitle);
-            if (version.textContent) titleGroup.append(version);
+            if (version.textContent) {
+                titleGroup.append(createElement('span', 'freesia-gallery-title-separator', '·'));
+                titleGroup.append(version);
+            }
             headerTitle.insertBefore(titleGroup, headerTitle.firstChild);
             state.titleGroup = titleGroup;
             state.title = galleryTitle;
