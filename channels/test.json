@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.256",
+  "latest_version": "0.3.257",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.256",
-    "source_path": "releases/v0.3.256/TLE.js",
-    "source_commit": "5931367a92fbc81f25f412f4fbe19d74186a7206",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5931367a92fbc81f25f412f4fbe19d74186a7206/releases/v0.3.256/TLE.js",
-    "changelog_path": "releases/v0.3.256/CHANGELOG.md",
-    "sha256": "77e9dab95b3dc5e65dbf5803e1f394d79145a09ef0681f465024b651f5d03173",
-    "size_bytes": 829913
+    "version": "0.3.257",
+    "source_path": "releases/v0.3.257/TLE.js",
+    "source_commit": "edc1d669b7aab79be1ec51c5d81497e4c116e020",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/edc1d669b7aab79be1ec51c5d81497e4c116e020/releases/v0.3.257/TLE.js",
+    "changelog_path": "releases/v0.3.257/CHANGELOG.md",
+    "sha256": "ce01f6d98e5707f9c04d6a96a0ea88623502ef258dadcc1ae3a875955a78c6df",
+    "size_bytes": 830796
   },
-  "status": "TEST 0.3.256: 分组目录主要操作顺序调整为创建分组、自动分组、管理分组；重命名编辑行改为确认✓与取消×图标按钮并保持单行。保留已勾选分组重命名逻辑及批量删除行为。",
+  "status": "TEST 0.3.257: 整理侠分组删除确认区改为酒馆原生图标按钮：✓确认删除、×取消；按钮提供悬停名称，操作行保持单行。上方垃圾桶只进入确认状态，下方✓才执行删除；分组内资源不会删除，而是移回「未分组」。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
