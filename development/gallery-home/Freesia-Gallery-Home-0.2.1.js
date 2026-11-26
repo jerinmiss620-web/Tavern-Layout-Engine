@@ -371,6 +371,11 @@
             clone.removeAttribute('id');
             clone.setAttribute('aria-hidden', 'true');
             clone.title = name;
+            const clonedImage = clone.querySelector('img');
+            if (clonedImage) {
+                clonedImage.loading = 'lazy';
+                clonedImage.decoding = 'async';
+            }
             return clone;
         }
 
@@ -383,6 +388,7 @@
             : ''));
         image.alt = name;
         image.loading = 'lazy';
+        image.decoding = 'async';
         avatar.append(image);
         return avatar;
     }
