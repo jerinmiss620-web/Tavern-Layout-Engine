@@ -1,4 +1,4 @@
-# Freesia Gallery · 首页角色画廊 v0.2.13 TEST
+# Freesia Gallery · 首页角色画廊 v0.2.14 TEST
 
 独立测试模块。当前只改造 SillyTavern 欢迎首页，不接入 TLE Core，不修改 Bootstrap、导航栏、整理侠、信息站或正式频道。
 
@@ -12,11 +12,11 @@
 - 每页设置保存在独立的账号存储键 `freesiaGallerySettings`，不覆盖酒馆原生 Recent Chats Settings；设置控件追加在原生齿轮打开的 Recent Chats Settings 弹窗中，复用原生保存/取消入口，不在首页额外占位。
 - 画廊卡片和角色详情头像统一使用 3:4 竖版比例。详情页采用左右双列；桌面端资料区与头像等高，移动端资料区按内容自然收缩，描述框保留约三行高度，不强行撑满头像高度。图片使用 `object-fit: cover`。
 - 网格间距统一为 `clamp(5px, 0.7vw, 8px)`；2/3/4 列均通过 `minmax(0, 1fr)` 均分剩余宽度，不固定卡片宽度。
-- 每行等高，卡片使用统一的内部结构：头像、单行角色名称、最近聊天信息。聊天数量覆盖在头像左下角，不增加背景遮罩；文字使用 12～14px 自适应字号、常规字重和轻量 drop-shadow，并允许指针操作与文本选择；角色置顶按钮位于角色名称下方的独立操作栏，不覆盖头像。
+- 每行等高，卡片使用统一的内部结构：头像、单行角色名称、最近聊天信息。聊天数量覆盖在头像左下角，不增加背景遮罩；文字使用 12～14px 自适应字号、常规字重和轻量 drop-shadow，并允许指针操作与文本选择；角色置顶按钮与重命名、删除按钮合并在最近聊天日期行右侧的同一个原生 `.chatActions` 按钮组内，不覆盖头像，也不额外占用一行。
 - 最近聊天信息区固定为日期、两行预览、底部统计三个独立区域；日期与预览强制左对齐，统计区强制右对齐，避免继承主题中的居中排版。
-- 角色名称居中显示；聊天数量完整保留，重命名/删除按钮与独立的角色置顶按钮分行展示，避免三列窄卡片中数量和操作按钮互相挤压；日期独占一行且左对齐，聊天预览固定预留两行高度，消息统计行保留完整行高。
+- 角色名称居中显示；聊天数量完整保留，置顶、重命名、删除三个按钮合并在同一个原生按钮组中，日期位于按钮组左侧；不再额外创建置顶工具栏行。聊天预览固定预留两行高度，消息统计行保留完整行高。
 - 消息数与文件大小放在预览下方的独立统计行，不再与聊天概要并排挤占预览宽度。
-- 没有最近聊天的角色仍保留日期占位、两行预览区域、统计区域与工具栏占位，避免卡片高度缩短。
+- 没有最近聊天的角色仍保留日期占位、仅含置顶按钮的操作组、两行预览区域与统计区域；不显示重命名和删除按钮。
 - 卡片上半区（头像、角色名、聊天数量）点击进入我们自己的角色详情页。
 - 卡片下半区（最近聊天日期、聊天预览）点击直达该角色最近一次聊天。
 - 最近聊天预览最多两行；显示日期、消息数、文件大小。
@@ -63,12 +63,12 @@
 
 ## 独立加载测试
 
-v0.2.13 调整头像左下角聊天数量的可读性：字号改为 12～14px 自适应，字重由 600 降至 500，drop-shadow 收紧为 1px 模糊，并恢复指针响应与文本选择；不添加渐变背景，不使用 text-shadow。角色置顶按钮仍位于角色名称下方的独立操作栏。
+v0.2.14 撤销独立置顶工具栏：将角色置顶按钮放回最近聊天日期行右侧的原生 `.chatActions` 按钮组，与重命名、删除保持同一行，顺序为置顶、重命名、删除；删除额外工具栏 DOM 与 CSS 行，恢复卡片原有三段网格结构。无最近聊天时仅保留置顶按钮。
 
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@a0c5ec4e6e60cb910b6940361117a9dce237bb4a/development/gallery-home/Freesia-Gallery-Home-0.2.13.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@a86edbff5eb579c27c9c8014c7237293f8f6104b/development/gallery-home/Freesia-Gallery-Home-0.2.14.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
