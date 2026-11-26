@@ -1,4 +1,4 @@
-# Freesia Gallery · 首页角色画廊 v0.2.2 TEST
+# Freesia Gallery · 首页角色画廊 v0.2.3 TEST
 
 独立测试模块。当前只改造 SillyTavern 欢迎首页，不接入 TLE Core，不修改 Bootstrap、导航栏、整理侠、信息站或正式频道。
 
@@ -13,7 +13,7 @@
 - 角色头像统一使用 3:4 竖版比例，图片使用 `object-fit: cover`；画廊卡片与详情页头像采用相同约束。
 - 网格间距统一为 `clamp(5px, 0.7vw, 8px)`；2/3/4 列均通过 `minmax(0, 1fr)` 均分剩余宽度，不固定卡片宽度。
 - 每行等高，卡片使用统一的内部结构：头像、单行角色名称、聊天数量与原生操作按钮、最近聊天信息。
-- 角色名称独占一行；聊天数量与置顶/重命名/删除按钮同处一行；日期独占一行，避免被操作按钮挤压；聊天预览独占全宽并固定预留两行高度。
+- 角色名称独占一行；聊天数量与置顶/重命名/删除按钮同处一行；日期独占一行且左对齐，避免被操作按钮挤压；聊天预览独占全宽并固定预留两行高度、左对齐；消息统计行保留完整行高，不裁切文字。
 - 消息数与文件大小放在预览下方的独立统计行，不再与聊天概要并排挤占预览宽度。
 - 没有最近聊天的角色仍保留日期占位、两行预览区域、统计区域与工具栏占位，避免卡片高度缩短。
 - 卡片上半区（头像、角色名、聊天数量）点击进入我们自己的角色详情页。
@@ -30,6 +30,8 @@
 - 左侧显示角色头像。
 - 右侧显示角色名称、角色主世界书绑定名称（未绑定时不显示）。
 - 角色描述以只读 textarea 展示，沿用酒馆 `#description_textarea` 的原生类名、内联样式及可读取的计算高度（不复制其 ID），优先继承 `.text_pole` 与当前主题。
+- 标题区只显示角色名称与实际绑定的主世界书名称，不添加 `Char's lorebook` 等示例性英文前缀。
+- 「角色描述」标签与「详情/管理」按钮放在同一行，描述文本从下一行开始。
 - “详情/管理”按钮只负责跳转到酒馆原生角色编辑界面：调用原生 `selectCharacterById(index, { switchMenu: true })`。角色编辑、世界书绑定管理等全部归酒馆原生界面负责，本项目不重造管理功能。
 - 下方显示该角色的聊天文件总数、最新聊天及其他聊天记录。
 - 最新聊天和会话条目点击后打开对应聊天。
@@ -43,8 +45,9 @@
 
 ## 原生设置和原生能力
 
-- 欢迎首页顶部隐藏大蜘蛛 Logo，但保留 SillyTavern 完整版本文字；画廊标题显示为「角色画廊 · SillyTavern 版本信息」，版本文字使用较小、低对比度样式，窄屏允许自然换行。角色详情与聊天文件页沿用同一版本标识。
+- 欢迎首页顶部隐藏大蜘蛛 Logo，但保留 SillyTavern 完整版本文字；画廊标题与版本文字占据左侧可伸缩空间，齿轮、关闭、画廊/原生切换按钮靠右排列。
 - 原生显示/隐藏最近聊天、Recent Chats Settings 齿轮与画廊/原生视图切换仍保留；切回原生最近聊天时恢复酒馆原有 Logo 与版本显示。
+- 返回按钮与角色数量摘要留在次级标题行左侧；文档、GitHub、Discord、临时聊天等原生快捷入口整体靠右。
 - 返回按钮放在次级标题行，避免与页面标题挤在一起；原生快捷入口保留。
 - 顶部摘要只显示角色总数与分页位置；列数和行数只由下方设置控件表达，不重复显示。
 - 直接读取账号存储 `recentChatsSettings`：
@@ -60,7 +63,7 @@
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@f477011c074fee6cc001da51c38085066e03e154/development/gallery-home/Freesia-Gallery-Home-0.2.2.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@9e5aa6b99338b46f173e19e9597c7210b4be8bb9/development/gallery-home/Freesia-Gallery-Home-0.2.3.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
