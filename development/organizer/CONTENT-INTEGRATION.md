@@ -9,9 +9,16 @@
 - `TLE.js` 保持现有整理侠入口和三栏/移动布局。名称资源与内容结果共用 `quickResourceItemFrame`。未加载原扩展入口、面板、资源选择器或样式。
 - `scripts/build-organizer-content.mjs` 将控制器、原引擎、TT 和 ZIP 库打包到 Core 的标记区。运行时不需要另装原扩展前端，也不从可变网络地址加载这些模块。
 
+## v0.3.246 面板视觉结构
+
+- 桌面端三栏标题「资源类型」「分组目录」以及资源列表标题栏统一使用酒馆原生 `.standoutHeader` 类。资源标题栏本身承载动态资源类型标题与「查找和替换」开关，二者沿用现有 `flex-container alignItemsCenter justifySpaceBetween` 横向布局。
+- 模块开关使用 `label.checkbox_label`，内部 checkbox 使用酒馆原生 `input.checkbox` 类；不添加自定义 CSS，不覆盖背景、边框、圆角、尺寸、颜色、字体或间距。
+- 移除三栏之间的两个 `hr.tle-organizer-divider`，同时删除对应的 1px 网格列和专属分割线 CSS。三栏仍保留原有顺序、各自内容和独立滚动空间。
+- 移动端继续使用原有紧凑单列/横向筛选布局，不强行套用桌面三栏结构。
+
 ## 使用与安装
 
-测试通道使用 `channels/test.json`；手动备用安装包为 `releases/v0.3.244/TLE-0.3.244-TEST-import.json`（默认禁用）。只启用一条 TLE 加载链，避免独立 Core 与 Test Loader 重复执行。
+测试通道使用 `channels/test.json`；手动备用安装包为 `releases/v0.3.246/TLE-0.3.246-TEST-import.json`（默认禁用）。只启用一条 TLE 加载链，避免独立 Core 与 Test Loader 重复执行。
 
 PC SillyTavern：已安装且能运行的原版 Global Batch Replace v1.1.0 服务端可直接使用，更新 Core 即可查找、预览、替换、导出备份及整份恢复。v0.3.234 错误地要求原版没有返回的扫描指纹，导致结果被拦截；本版已修复，不必为了查找更换服务端。
 
