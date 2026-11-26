@@ -57,9 +57,11 @@ assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.ve
 
 const plan = JSON.parse(read('release-plan.json'));
 const tle = process.argv.includes('--current') ? read('releases/v' + plan.core + '/TLE.js') : pinnedTle;
-if (manifest.release.version === '0.3.244') {
+if (manifest.release.version === '0.3.245') {
   const organizerSource = read('development/organizer/TLE.js');
   assert.equal(organizerSource, pinnedTle, 'Development Organizer source and pinned test Core must match byte-for-byte');
+  assert.match(organizerSource, /this\.target = n\("label", "checkbox_label"\);/,
+    'The checkbox label must use SillyTavern native checkbox_label markup');
   assert.match(organizerSource, /this\.modeToggle = n\("input"\);/,
     'Organizer mode must use one native checkbox');
   assert.match(organizerSource, /this\.modeToggle\.type = "checkbox";/,
