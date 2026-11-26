@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.265",
+  "latest_version": "0.3.266",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.265",
-    "source_path": "releases/v0.3.265/TLE.js",
-    "source_commit": "4c57994ba414339038a32602eac0345e3dee6a58",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4c57994ba414339038a32602eac0345e3dee6a58/releases/v0.3.265/TLE.js",
-    "changelog_path": "releases/v0.3.265/CHANGELOG.md",
-    "sha256": "febabceae305ce50e1e76cd5bfaa8145f0ea4dce3a9ece193bdb39db7c98bc2c",
-    "size_bytes": 955958
+    "version": "0.3.266",
+    "source_path": "releases/v0.3.266/TLE.js",
+    "source_commit": "904ddc9cdb2acdc73e8aeec749100b9e5d230efe",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/904ddc9cdb2acdc73e8aeec749100b9e5d230efe/releases/v0.3.266/TLE.js",
+    "changelog_path": "releases/v0.3.266/CHANGELOG.md",
+    "sha256": "8097c14bdd52f3b17efb40f8f7fd8d5e1af07fc3e31424a0cf8cc947eb97c989",
+    "size_bytes": 958787
   },
-  "status": "TEST v0.3.265: 恢复首页 SillyTavern 版本号（标题下方小字）；记录详情角色名左对齐、绑定世界书右对齐；首页最近聊天信息区及消息预览垂直居中；保留记录预览开关与头像兼容设置。仅更新测试通道。",
+  "status": "TEST v0.3.266: 记录详情改为角色名→角色编辑、绑定世界书名→指定世界书编辑、聊天数量→当前角色聊天文件的文字导航；移除详情/管理和聊天文件按钮及角色描述标题行。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
