@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.242
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.243
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2124,22 +2124,17 @@ var TLEBatchLibrary = (() => {
     mount() {
       const n = this.node;
       this.searchRow = n("div", "tle-content-search-row flex-container");
-      this.target = n("div", "flex-container tle-content-mode-options");
-      this.target.setAttribute("role", "radiogroup");
+      this.target = n("div", "flex-container tle-content-mode-switch");
+      this.target.setAttribute("role", "group");
       this.target.setAttribute("aria-label", "\u641C\u7D22\u65B9\u5F0F");
+      this.modeButtons = new Map();
       for (const [value, text] of [["name", "\u8D44\u6E90\u540D\u79F0"], ["content", "\u67E5\u627E\u4E0E\u66FF\u6362"]]) {
-        const label = n("label", "checkbox_label tle-content-mode-option");
-        const radio = n("input", "tle-content-mode-radio");
-        radio.type = "radio";
-        radio.name = "tle-organizer-search-mode";
-        radio.value = value;
-        radio.checked = value === this.mode;
-        radio.addEventListener("change", () => {
-          if (radio.checked) void this.run(() => this.setMode(value));
-        });
-        const caption = n("span", "tle-content-mode-label", text);
-        label.append(radio, caption);
-        this.target.append(label);
+        const button = this.button(text, () => this.setMode(value));
+        button.classList.add("tle-content-mode-button");
+        button.type = "button";
+        button.setAttribute("aria-pressed", String(value === this.mode));
+        this.modeButtons.set(value, button);
+        this.target.append(button);
       }
       this.replace = n("input", "text_pole flex1");
       this.replace.type = "text";
@@ -2265,7 +2260,9 @@ var TLEBatchLibrary = (() => {
       if (this.active) this.rules[0].find = this.h.search.value;
       else this.nameQuery = this.h.search.value;
       this.mode = mode === "content" ? "content" : "name";
-      for (const radio of this.target.querySelectorAll("input")) radio.checked = radio.value === this.mode;
+      for (const [value, button] of this.modeButtons) {
+        button.setAttribute("aria-pressed", String(value === this.mode));
+      }
       this.controls.hidden = this.replace.hidden = this.replaceRow.hidden = this.findButton.hidden = !this.active;
       this.h.setContentMode(this.active);
       this.h.search.value = this.active ? this.rules[0].find : this.nameQuery;
@@ -5957,74 +5954,43 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         min-width: 0;
         overflow-wrap: anywhere;
       }
-      .tle-quick-manager .tle-content-mode-options {
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-      .tle-quick-manager .tle-content-mode-option {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
+      .tle-quick-manager .tle-content-mode-switch {
+        display: flex;
         flex: 0 0 auto;
-        width: auto;
-        gap: 0;
-        margin: 0;
-        padding: 0;
-        cursor: pointer;
-      }
-      .tle-quick-manager .tle-content-mode-radio {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        clip-path: inset(50%);
-        white-space: nowrap;
-      }
-      .tle-quick-manager .tle-content-mode-label {
-        position: relative;
-        display: inline-flex;
+        flex-wrap: nowrap;
         align-items: center;
-        min-height: 18px;
-        padding-left: 20px;
+        gap: 4px;
+        min-width: 0;
+      }
+      .tle-quick-manager .tle-content-mode-button {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        margin: 0;
+        padding: 4px 9px;
+        border: 1px solid var(--SmartThemeBorderColor, rgb(127 127 127 / 30%));
+        border-radius: 6px;
+        background: transparent;
+        color: inherit;
+        font-size: .86em;
+        font-weight: 500;
         line-height: 1.2;
+        white-space: nowrap;
         cursor: pointer;
-      }
-      .tle-quick-manager .tle-content-mode-label::before {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        width: 14px;
-        height: 14px;
-        border: 1px solid var(--SmartThemeBorderColor, currentColor);
-        border-radius: 3px;
-        background: var(--SmartThemeBlurTintColor, transparent);
         box-sizing: border-box;
-        content: "";
-        transform: translateY(-50%);
       }
-      .tle-quick-manager .tle-content-mode-radio:checked + .tle-content-mode-label::before {
+      .tle-quick-manager .tle-content-mode-button[aria-pressed="true"] {
+        border-color: var(--SmartThemeQuoteColor, currentColor);
+        background: color-mix(in srgb, var(--SmartThemeQuoteColor, currentColor) 14%, transparent);
+        color: var(--SmartThemeQuoteColor, inherit);
+        font-weight: 600;
+      }
+      .tle-quick-manager .tle-content-mode-button:not([aria-pressed="true"]):hover {
         border-color: var(--SmartThemeQuoteColor, currentColor);
       }
-      .tle-quick-manager .tle-content-mode-radio:checked + .tle-content-mode-label::after {
-        position: absolute;
-        top: 50%;
-        left: 5px;
-        width: 4px;
-        height: 7px;
-        margin-top: -5px;
-        border-right: 2px solid var(--SmartThemeQuoteColor, currentColor);
-        border-bottom: 2px solid var(--SmartThemeQuoteColor, currentColor);
-        content: "";
-        transform: rotate(45deg);
-      }
-      .tle-quick-manager .tle-content-mode-option:hover .tle-content-mode-label::before {
-        border-color: var(--SmartThemeQuoteColor, currentColor);
-      }
-      .tle-quick-manager .tle-content-mode-radio:focus-visible + .tle-content-mode-label::before {
+      .tle-quick-manager .tle-content-mode-button:focus-visible {
         outline: 2px solid var(--SmartThemeQuoteColor, currentColor);
         outline-offset: 2px;
       }
@@ -10771,14 +10737,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.242 · 整理侠搜索方式采用方框样式单选控件</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.243 · 整理侠搜索方式采用方框样式单选控件</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.242</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.243</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -16879,7 +16845,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.242',
+    version: '0.3.243',
     ready: false,
     destroy,
     state,
@@ -17330,5 +17296,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.242 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.243 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
