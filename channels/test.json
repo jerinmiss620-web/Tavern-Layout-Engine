@@ -13,7 +13,7 @@
     "sha256": "33c459a2974b46eb012284e48ca3d579bf323049f0d87e141536727bd4a0d0b9",
     "size_bytes": 820275
   },
-  "status": "TEST 0.3.251: 重做整理侠分组管理。分组目录可直接选择；新建入口独立；重命名和删除绑定左侧当前分组，右侧下拉只负责批量归组目标。修复重复内容锁定后的 disabled 状态恢复，并增加 Chromium 与 ST 分组交互回归。GitHub Actions 验证待运行；PC/TT 实际视觉验收待完成。",
+  "status": "TEST 0.3.251: 整理侠分组管理已重做。分组目录可直接选择；新建入口独立；重命名和删除绑定左侧当前分组，右侧下拉只负责批量归组目标。修复重复内容锁定后的 disabled 状态恢复。GitHub Actions validate 已通过：npm test、Organizer 0.3.251 静态回归、测试频道 pinned SHA/size 与远端校验均通过。PC/TT 实际视觉验收仍待完成。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
