@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.241",
+  "latest_version": "0.3.242",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.241",
-    "source_path": "releases/v0.3.241/TLE.js",
-    "source_commit": "b15f568d2a10756938645af935f2daa5ddddd89f",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b15f568d2a10756938645af935f2daa5ddddd89f/releases/v0.3.241/TLE.js",
-    "changelog_path": "releases/v0.3.241/CHANGELOG.md",
-    "sha256": "f5598d50c6f00783f6c6283294138ff64c70742a9dd7bb8938e0ab5d1d711946",
-    "size_bytes": 811378
+    "version": "0.3.242",
+    "source_path": "releases/v0.3.242/TLE.js",
+    "source_commit": "635912d742ce4e3ecbbe751890307a5d857fe730",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/635912d742ce4e3ecbbe751890307a5d857fe730/releases/v0.3.242/TLE.js",
+    "changelog_path": "releases/v0.3.242/CHANGELOG.md",
+    "sha256": "6e22b37cef30924f835f10b8b16cec4ef12a573a569e832d507781ec45b84fa9",
+    "size_bytes": 813880
   },
-  "status": "TEST v0.3.241: Companion initialization records the current role as a baseline and does not replay a default or existing scheduled plan during Core load/update/reload. For legacy schedules without a saved token, the current period is seeded without applying it; later missed day/night boundaries are recovered once. Same-period refreshes do not reapply. Existing manual holds, per-item partial application, unavailable-item reasons, and real role-switch behavior are preserved; automated and ST/TT runtime acceptance pending.",
+  "status": "TEST 0.3.242: Organizer search mode uses checkbox-like square visuals while retaining native radio semantics, radiogroup labeling, keyboard operation, and the existing search-mode change handler. v0.3.241 companion initialization protection, schedule-token recovery, manual holds, per-item partial application, and unavailable-item reasons remain included. Automated source and package checks pending; ST/TT visual and keyboard acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
