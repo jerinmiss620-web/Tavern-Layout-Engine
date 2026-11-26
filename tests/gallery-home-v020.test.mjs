@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.3.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.4.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -149,8 +149,11 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
     assert.match(css, /\.freesia-gallery-card-latest \.chatMessageContainer \{ display: block/);
     assert.match(css, /text-align: left !important/);
+    assert.match(css, /justify-content: flex-start !important/);
+    assert.match(css, /justify-content: flex-end !important/);
     assert.match(css, /grid-template-rows: auto minmax\(2\.6em, 2\.6em\) minmax\(1\.35em, auto\)/);
     assert.match(css, /\.chatStats \{[^}]*max-height: none;[^}]*overflow: visible/);
+    assert.match(css, /justify-self: stretch !important/);
     assert.match(css, /min-height: 2\.6em; max-height: 2\.6em/);
     assert.match(css, /\.freesia-gallery-card-toolbar \.chatActions/);
     assert.doesNotMatch(css, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
@@ -165,6 +168,9 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /\.welcomeHeaderTitle \{[^}]*justify-content: space-between;[^}]*width: 100%/);
     assert.match(css, /\.freesia-gallery-title-group \{[^}]*flex: 1 1 auto/);
     assert.match(css, /\.welcomeHeader \.welcomeShortcuts \{[^}]*justify-content: flex-end;[^}]*margin-inline-start: auto/);
+    assert.match(css, /@media screen and \(min-width: 821px\)/);
+    assert.match(css, /\.welcomeHeader > \.freesia-gallery-layout-controls \{ flex: 0 0 auto; flex-wrap: nowrap/);
+    assert.match(css, /\.welcomeHeader \[hidden\]/);
     assert.equal(panel.querySelector('.welcomeHeaderLogo').isConnected, true);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-summary').textContent, /每页.*列.*行/);
     assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .chatActions'));
@@ -193,6 +199,9 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.equal(panel.querySelector('.freesia-gallery-title').textContent, '角色详情');
     assert.equal(panel.querySelector('.recentChatsTitle').textContent, 'Recent Chats');
     assert.equal(panel.querySelector('.freesia-gallery-back').hidden, false);
+    assert.equal(panel.querySelector('.freesia-gallery-pagination').hidden, true);
+    assert.equal(panel.querySelector('.freesia-gallery-layout-controls').hidden, true);
+    assert.equal(panel.querySelector('.freesia-gallery-summary').hidden, true);
     assert.equal(panel.querySelector('.freesia-gallery-detail-name').textContent, 'Alpha');
     assert.match(panel.querySelector('.freesia-gallery-lorebook').textContent, /Alpha Lorebook/);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-lorebook').textContent, /Char's lorebook/);
@@ -205,6 +214,8 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     const detailCss = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
     assert.match(detailCss, /\.freesia-gallery-description-header \{ display: flex; align-items: center; justify-content: space-between/);
 
+    assert.match(detailCss, /\.freesia-gallery-detail-hero \{ display: grid;[^}]*align-items: stretch/);
+    assert.match(detailCss, /\.freesia-gallery-detail-avatar \{ display: block; align-self: stretch;[^}]*aspect-ratio: auto !important/);
     const description = panel.querySelector('.freesia-gallery-description');
     assert.match(description.value, /read-only character information/);
     assert.equal(description.tagName, 'TEXTAREA');
