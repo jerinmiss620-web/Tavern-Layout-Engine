@@ -187,7 +187,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /grid-auto-rows: 1fr; align-items: stretch/);
     assert.match(css, /gap: clamp\(5px, 0\.7vw, 8px\)/);
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
-    assert.match(css, /\.freesia-gallery-card \{ position: relative; display: grid; grid-template-rows: auto auto minmax\(0, 1fr\)/);
+    assert.match(css, /\.freesia-gallery-card \{ position: relative; display: grid; grid-template-rows: auto auto auto minmax\(0, 1fr\)/);
     assert.match(css, /\.freesia-gallery-title-separator \{ display: none !important/);
     assert.match(css, /\.freesia-gallery-detail-avatar \{ grid-column: 1; grid-row: 1/);
     assert.match(css, /\.freesia-gallery-card-latest > \.chatMessageContainer \{ display: flex !important/);
