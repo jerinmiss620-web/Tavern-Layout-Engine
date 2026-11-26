@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.6.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.7.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -175,7 +175,7 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
     assert.match(css, /\.freesia-gallery-card-toolbar \{ display: grid; grid-template-columns: minmax\(0, 1fr\)/);
     assert.match(css, /\.freesia-gallery-title-separator \{ display: none !important/);
-    assert.match(css, /\.freesia-gallery-detail-avatar \{ align-self: start !important/);
+    assert.match(css, /\.freesia-gallery-detail-avatar \{ grid-column: 1; grid-row: 1/);
     assert.match(css, /\.freesia-gallery-card-latest > \.chatMessageContainer \{ display: flex !important/);
     assert.match(css, /text-align: left !important/);
     assert.match(css, /justify-content: flex-start !important/);
@@ -281,10 +281,11 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.equal(panel.querySelector('.freesia-gallery-detail-name').textContent, 'Alpha');
     assert.match(panel.querySelector('.freesia-gallery-lorebook').textContent, /Alpha Lorebook/);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-lorebook').textContent, /Char's lorebook/);
-    assert.ok(panel.querySelector('.freesia-gallery-title-group .freesia-gallery-manage'));
+    assert.ok(panel.querySelector('.freesia-gallery-description-header .freesia-gallery-manage'));
     assert.equal(panel.querySelector('.freesia-gallery-detail-heading .freesia-gallery-manage'), null);
-    assert.equal(panel.querySelector('.freesia-gallery-title-group .freesia-gallery-manage').textContent, '详情/管理');
-    assert.doesNotMatch(panel.querySelector('.freesia-gallery-title-group .freesia-gallery-manage').textContent, />/);
+    assert.equal(panel.querySelector('.freesia-gallery-title-group .freesia-gallery-manage'), null);
+    assert.equal(panel.querySelector('.freesia-gallery-description-header .freesia-gallery-manage').textContent, '详情/管理');
+    assert.doesNotMatch(panel.querySelector('.freesia-gallery-description-header .freesia-gallery-manage').textContent, />/);
     const descriptionHeader = panel.querySelector('.freesia-gallery-description-header');
     assert.ok(descriptionHeader);
     assert.equal(descriptionHeader.children.length, 1);
@@ -292,7 +293,9 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.match(descriptionHeader.textContent, /角色描述/);
     const detailCss = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
     assert.match(detailCss, /\.freesia-gallery-description-header \{ display: block/);
-    assert.match(detailCss, /\.freesia-gallery-title-group \.freesia-gallery-manage/);
+    assert.match(detailCss, /\.freesia-gallery-description-header \.freesia-gallery-manage/);
+    assert.match(detailCss, /\.freesia-gallery-description \{ grid-column: 1 \/ -1/);
+    assert.match(detailCss, /\.freesia-gallery-detail-main \{ display: contents/);
 
     assert.match(detailCss, /\.freesia-gallery-detail-hero \{ display: grid;[^}]*align-items: stretch/);
     assert.match(detailCss, /\.freesia-gallery-detail-avatar \{ display: block; align-self: stretch;[^}]*aspect-ratio: auto !important/);
@@ -522,8 +525,87 @@ test('gallery title keeps SillyTavern version text without the spider logo and r
     dom.window.close();
 });
 
+test('native recent-chat settings gear opens the original popup with gallery layout controls appended', async () => {
+    const { dom, api, calls } = setup();
+    await api.refresh();
+
+    const panel = dom.window.document.querySelector('.welcomePanel');
+    const gear = panel.querySelector('.recentChatsSettings');
+    assert.ok(gear, 'the original recent-chat settings entry remains the only settings entry');
+    assert.equal(panel.querySelector('.freesia-gallery-layout-controls'), null);
+
+    const dialog = dom.window.document.createElement('dialog');
+    dialog.className = 'popup popup--animation-fast';
+    dialog.innerHTML = '<div class="popup-body">'
+        + '<div class="popup-content">Recent Chats Settings</div>'
+        + '<div class="popup-inputs">'
+        + '<label class="text_label justifyCenter"><span>Max recent chats</span><input class="text_pole result-control" id="maxRecentChats" value="15"></label>'
+        + '<label class="text_label justifyCenter"><span>Collapsed recent chats</span><input class="text_pole result-control" id="collapsedRecentChats" value="1"></label>'
+        + '</div>'
+        + '<div class="popup-controls"><div class="popup-button-ok menu_button" data-result="1">保存</div><div class="popup-button-cancel menu_button" data-result="0">取消</div></div>'
+        + '</div>';
+    gear.addEventListener('click', () => dom.window.document.body.append(dialog), { once: true });
+    gear.click();
+    await new Promise(resolve => dom.window.setTimeout(resolve, 0));
+
+    assert.ok(dialog.querySelector('#maxRecentChats'));
+    assert.ok(dialog.querySelector('#collapsedRecentChats'));
+    assert.ok(dialog.querySelector('.freesia-gallery-popup-layout-title'));
+    assert.equal(dialog.querySelector('.freesia-gallery-popup-layout-title').textContent, '角色画廊布局');
+    assert.ok(dialog.querySelector('#freesiaGalleryColumns'));
+    assert.ok(dialog.querySelector('#freesiaGalleryRows'));
+    assert.equal(dialog.querySelectorAll('.popup-button-ok').length, 1);
+    assert.equal(dialog.querySelectorAll('.popup-button-cancel').length, 1);
+    assert.equal(dialog.querySelectorAll('.popup-inputs').length, 2);
+    assert.equal(dialog.querySelector('#maxRecentChats').value, '15');
+    assert.equal(dialog.querySelector('#collapsedRecentChats').value, '1');
+
+    dialog.querySelector('#freesiaGalleryColumns').value = '2';
+    dialog.querySelector('#freesiaGalleryRows').value = '5';
+    dialog.querySelector('.popup-button-ok').click();
+
+    assert.deepEqual(api.getLayoutSettings(), { columns: 2, rows: 5 });
+    assert.deepEqual(JSON.parse(calls.storage.freesiaGallerySettings), { columns: 2, rows: 5 });
+    assert.equal(dialog.querySelector('#maxRecentChats').value, '15');
+    assert.equal(dialog.querySelector('#collapsedRecentChats').value, '1');
+
+    api.stop();
+    assert.equal(dialog.querySelector('.freesia-gallery-popup-layout-title'), null);
+    dom.window.close();
+});
+
+test('mobile gallery popup preserves the desktop four-column preference while capping the actual grid at three', async () => {
+    const { dom, api, calls } = setup();
+    dom.window.innerWidth = 390;
+    dom.window.dispatchEvent(new dom.window.Event('resize'));
+    await api.refresh();
+
+    const panel = dom.window.document.querySelector('.welcomePanel');
+    const dialog = dom.window.document.createElement('dialog');
+    dialog.className = 'popup';
+    dialog.innerHTML = '<div class="popup-body"><div class="popup-content">Recent Chats Settings</div>'
+        + '<div class="popup-inputs"><input id="maxRecentChats"><input id="collapsedRecentChats"></div>'
+        + '<div class="popup-controls"><div class="popup-button-ok">保存</div></div></div>';
+    dom.window.document.body.append(dialog);
+    await new Promise(resolve => dom.window.setTimeout(resolve, 0));
+
+    const columns = dialog.querySelector('#freesiaGalleryColumns');
+    assert.equal(columns.value, '4');
+    assert.equal(columns.querySelector('option[value="4"]').disabled, true);
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '3');
+
+    dialog.querySelector('#freesiaGalleryRows').value = '4';
+    dialog.querySelector('.popup-button-ok').click();
+    assert.deepEqual(api.getLayoutSettings(), { columns: 4, rows: 4 });
+    assert.deepEqual(JSON.parse(calls.storage.freesiaGallerySettings), { columns: 4, rows: 4 });
+    assert.equal(panel.querySelector('.freesia-gallery-grid').style.getPropertyValue('--freesia-gallery-columns'), '3');
+
+    api.stop();
+    dom.window.close();
+});
+
 test('layout settings persist, allow only 2/3/4 columns and 1-15 rows, and paginate without rendering every character', async () => {
-    const { dom, api, context, calls } = setup();
+    const { dom, api, calls, context } = setup();
     for (let index = 0; index < 65; index += 1) {
         context.characters.push({
             avatar: 'extra-' + index + '.png',
@@ -539,23 +621,17 @@ test('layout settings persist, allow only 2/3/4 columns and 1-15 rows, and pagin
     assert.equal(panel.querySelectorAll('.freesia-gallery-pagination button').length, 2);
     assert.equal(api.getLayoutSettings().columns, 4);
     assert.equal(api.getLayoutSettings().rows, 3);
+    assert.equal(panel.querySelector('.freesia-gallery-layout-controls'), null);
 
-    const columns = panel.querySelector('[aria-label="每行列数"]');
-    columns.value = '2';
-    columns.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
-    assert.equal(api.getLayoutSettings().columns, 2);
+    assert.deepEqual(api.setLayoutSettings({ columns: 2 }), { columns: 2, rows: 3 });
     assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 6);
     assert.equal(JSON.parse(calls.storage.freesiaGallerySettings).columns, 2);
 
-    const rows = panel.querySelector('[aria-label="每页显示行数"]');
-    rows.value = '15';
-    rows.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
-    assert.equal(api.getLayoutSettings().rows, 15);
+    assert.deepEqual(api.setLayoutSettings({ rows: 15 }), { columns: 2, rows: 15 });
     assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 30);
     assert.equal(JSON.parse(calls.storage.freesiaGallerySettings).rows, 15);
 
-    columns.value = '4';
-    columns.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    assert.deepEqual(api.setLayoutSettings({ columns: 4 }), { columns: 4, rows: 15 });
     assert.equal(panel.querySelectorAll('.freesia-gallery-card').length, 60);
     assert.equal(panel.querySelectorAll('.freesia-gallery-pagination button').length, 2);
     assert.equal(panel.querySelector('.freesia-gallery-summary').textContent.includes('第 1 / 2 页'), true);
