@@ -7,8 +7,8 @@
   "release": {
     "version": "0.3.271",
     "source_path": "releases/v0.3.271/TLE.js",
-    "source_commit": "6ba12bb8b06ce76bdc3d5596fc3218834db2a08a",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6ba12bb8b06ce76bdc3d5596fc3218834db2a08a/releases/v0.3.271/TLE.js",
+    "source_commit": "d2b4b45a437b25fedc7353b3c8a325e1b414c87d",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d2b4b45a437b25fedc7353b3c8a325e1b414c87d/releases/v0.3.271/TLE.js",
     "changelog_path": "releases/v0.3.271/CHANGELOG.md",
     "sha256": "7c2c64afe6f810b5d355fa66e95e7f5712f0bcadf6ccf0837b087796dc5fa9fb",
     "size_bytes": 958907
