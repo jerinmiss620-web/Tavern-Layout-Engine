@@ -68,7 +68,7 @@ v0.2.6 恢复独立的角色置顶、修正页面标题按钮位置、去除跳�
 在酒馆首页 Console 执行：
 
     const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@0a873ee4982504ef380e74b348fb5fd05e6b2d5e/development/gallery-home/Freesia-Gallery-Home-0.2.6.js';
+    s.src = 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@524d904b9158af92c948ee68b16afb607c76fde1/development/gallery-home/Freesia-Gallery-Home-0.2.6.js';
     s.onload = () => console.log('Freesia Gallery loaded', window.FreesiaGalleryHome?.version);
     s.onerror = error => console.error('Freesia Gallery failed to load', error);
     document.head.appendChild(s);
