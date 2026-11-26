@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.268",
+  "latest_version": "0.3.269",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.268",
-    "source_path": "releases/v0.3.268/TLE.js",
-    "source_commit": "8f95aaea003b844ec0b0197da7382af41bf17a44",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/8f95aaea003b844ec0b0197da7382af41bf17a44/releases/v0.3.268/TLE.js",
-    "changelog_path": "releases/v0.3.268/CHANGELOG.md",
-    "sha256": "6ebf50a3c5cae9d072fcbe48f4cd31d5a09c6ca31414ff28c22e243b67fe7ae5",
-    "size_bytes": 957596
+    "version": "0.3.269",
+    "source_path": "releases/v0.3.269/TLE.js",
+    "source_commit": "21a8eb7b26e7128a40d7d54d953381af656e2621",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/21a8eb7b26e7128a40d7d54d953381af656e2621/releases/v0.3.269/TLE.js",
+    "changelog_path": "releases/v0.3.269/CHANGELOG.md",
+    "sha256": "dcc2a60e92389031fe843b2a52e287b82666082b2f739954d69ae175cf530dce",
+    "size_bytes": 957726
   },
-  "status": "TEST v0.3.268: 修正记录预览信息遮罩从整卡覆盖为仅底部锚定；头像上半部保留干净；最近聊天概要严格最多两行；保留2:3头像与原生操作。仅更新测试通道。",
+  "status": "TEST v0.3.269: 扩大记录预览底部渐变区域，增加七段透明度过渡；信息内容继续底部对齐。保留2:3头像、两行概要及原生操作。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
