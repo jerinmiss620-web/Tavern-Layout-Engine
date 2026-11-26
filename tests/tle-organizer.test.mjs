@@ -88,11 +88,10 @@ assert.doesNotMatch(manager, /categoryDivider|groupDivider|tle-organizer-divider
 assert.match(manager, /categoryPane\.append\(categoryHeading, categoryRow\)/);
 assert.match(manager, /groupPane\.append\(groupHeader, groupActions, groupEditor, groupFilters\)/);
 assert.match(manager, /resourcePane\.append\(\s*resourceHeader, content\.searchRow, content\.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,\s*operations, list, status/);
-assert.match(manager, /workspace\.append\(categoryPane, categoryDivider, groupPane, groupDivider, resourcePane\)/);
+assert.match(manager, /workspace\.append\(categoryPane, groupPane, resourcePane\)/);
 assert.match(manager, /body\.append\(workspace\)/);
-assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) 1px minmax\(168px, \.92fr\) 1px minmax\(360px, 2\.3fr\)/);
-assert.match(source, /border-block-start: 1px solid var\(--SmartThemeBorderColor/);
-assert.match(source, /writing-mode: vertical-rl/);
+assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) minmax\(168px, \.92fr\) minmax\(360px, 2\.3fr\)/);
+assert.doesNotMatch(source, /tle-organizer-divider|writing-mode:\s*vertical-rl/);
 assert.match(readme, /第三方布局插件兼容性/);
 assert.match(readme, /不保证与第三方布局管理插件同时启用时的兼容性/);
 
