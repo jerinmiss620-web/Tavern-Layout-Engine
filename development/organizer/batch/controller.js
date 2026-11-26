@@ -38,25 +38,26 @@ export class OrganizerContent {
         this.target.append(this.modeToggle, n('span', '', '查找和替换'));
         this.replace = n('input', 'text_pole flex1'); this.replace.type = 'text'; this.replace.size = 1; this.replace.placeholder = '留空删除匹配文本'; this.replace.setAttribute('aria-label', '替换为'); this.replace.hidden = true;
         this.replace.addEventListener('input', () => { this.rules[0].replace = this.replace.value; this.invalidate(); void this.persist().catch(() => {}); });
-        this.findRow = n('div', 'flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px');
+        this.findRow = n('div', 'tle-content-find-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px');
         this.h.searchWrap.classList.add('flex1');
-        this.replaceRow = n('div', 'flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px'); this.replaceRow.hidden = true;
+        this.replaceRow = n('div', 'tle-content-replace-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px'); this.replaceRow.hidden = true;
         this.controls = n('div', 'tle-content-controls flex-container flexFlowColumn'); this.controls.hidden = true;
-        const actions = n('div', 'flex-container flexnowrap alignItemsCenter');
-        this.scopeSelect = n('select', 'text_pole flex1'); this.scopeSelect.setAttribute('aria-label', '内容搜索范围');
+        const actions = n('div', 'tle-content-action-row flex-container flexWrap alignItemsCenter');
+        this.scopeSelect = n('select', 'text_pole flex1 tle-content-scope-select'); this.scopeSelect.setAttribute('aria-label', '内容搜索范围');
         for (const [value, label] of [['all', '全部支持资源'], ['filtered', '当前筛选范围'], ['selected', '已选资源']]) { const o = n('option', '', label); o.value = value; this.scopeSelect.append(o); }
         this.scopeSelect.addEventListener('change', () => { this.scope = this.scopeSelect.value; this.invalidate(); });
         this.findButton = this.button('查找', () => this.scan()); this.findButton.hidden = true;
         this.previewButton = this.button('预览替换', () => this.preview()); this.previewButton.disabled = true;
         this.findRow.append(this.h.searchWrap, this.findButton);
-        const replaceLabel = n('label', 'flex-container flexnowrap alignItemsCenter flex1'); replaceLabel.append(n('span', '', '替换为'), this.replace);
+        const replaceLabel = n('label', 'tle-content-replace-label flex-container flexnowrap alignItemsCenter flex1'); replaceLabel.append(n('span', '', '替换为'), this.replace);
         this.replaceRow.append(replaceLabel, this.previewButton);
         if (this.h.heading) this.h.heading.append(this.target);
         else this.searchRow.append(this.target);
         this.searchRow.append(this.findRow, this.replaceRow);
         this.cancelButton = this.h.button('取消扫描', () => { this.cancelled = true; if (this.jobId) void this.api('cancel', { id: this.jobId }).catch(e => this.message(e.message)); }); this.cancelButton.hidden = true;
-        actions.append(this.scopeSelect, this.cancelButton,
-            this.button('备份与恢复', () => this.backups()));
+        this.backupButton = this.button('备份与恢复', () => this.backups());
+        this.backupButton.classList.add('tle-content-backup-button');
+        actions.append(this.scopeSelect, this.cancelButton, this.backupButton);
         this.ruleDetails = n('details', 'tle-content-rule-details');
         this.ruleDetails.append(n('summary', '', '规则组合与高级选项'));
         this.addRuleButton = this.button('添加规则', () => { if (this.rules.length >= 200) throw Error('最多 200 条规则。'); this.rules.push({ find: '', replace: '' }); this.invalidate(); this.renderRules(); });
@@ -82,7 +83,7 @@ export class OrganizerContent {
         this.paths.addEventListener('input', () => { this.invalidate(); void this.persist().catch(() => {}); });
         this.ruleHelp = n('small', 'tle-content-rule-help', 'JSON/YAML 仅扫描明确指定路径；未知字段不会递归修改。普通文本规则区分大小写，重叠优先长匹配，同长度按规则顺序。');
         this.ruleDetails.append(this.comboCreateRow, this.ruleRows, this.comboManageRow, this.ruleHelp, this.paths);
-        this.selectionTools = n('div', 'flex-container flexWrap');
+        this.selectionTools = n('div', 'tle-content-selection-tools flex-container flexWrap');
         this.selectionTools.append(this.button('全选当前结果', () => this.selectAll(true)), this.button('取消全选', () => this.selectAll(false)));
         this.confirm = n('div', 'tle-quick-transfer-confirm'); this.confirm.hidden = true;
         this.confirmText = n('p'); this.applyButton = this.button('确认替换', () => this.apply());

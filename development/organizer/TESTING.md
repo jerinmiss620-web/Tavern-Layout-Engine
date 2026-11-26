@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.261`
+Current test Core: `v0.3.262`
 
 ## Import once
 
@@ -16,7 +16,7 @@ The installer is disabled by default. It reads the test manifest from this devel
 2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
 3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
 4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.231**.
+5. Confirm the native prompt to install **TLE Core v0.3.262**.
 6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.231**.
 
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
@@ -58,13 +58,23 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 - On desktop, confirm the original three-column workspace remains unchanged and pane tint uses `rgb(from var(--SmartThemeQuoteColor) r g b / .12)`.
 - Check PC and mobile layouts separately, then repeat in ST and TT as applicable.
 
+### Organizer layout refinements (v0.3.262)
+
+- In the Companion Plans tab, confirm each plan's name and status badges remain on the left, with **设为默认 / 取消默认** and **应用** aligned on the right of the same title row.
+- Confirm the plan configuration summary is displayed below the title row; long names and badges must not overlap the action buttons.
+- In Organizer, confirm the header order is **整理侠 → 资源整理 / 查找替换 → 同步 / 导入 / 导出**.
+- Open **查找替换** at 320, 375, 402, and 768px widths. Confirm search and replacement inputs each have a clear row; scope and backup controls wrap only when necessary.
+- Confirm the controls area has no independent vertical scrollbar. The result list occupies the remaining height and owns its scrolling.
+- Confirm advanced rules remain collapsed initially and still expose combinations, extra rules, and JSON/YAML paths when expanded.
+- Repeat in ST and TT where available; source-level tests do not replace real-host visual acceptance.
+
 ## Return to stable
 
 1. Disable **TLE Organizer Branch Test Loader 0.3.0**.
 2. Re-enable the original **TLE Permanent Bootstrap 1.0.6**.
 3. Fully refresh the host page.
 
-The stable Bootstrap/Loader uses its own independent Last Known Good cache and should restore the stable Core (currently v0.3.239). Verify TLE → **版本与更新** reports the Stable channel and Core v0.3.239. Keep the test Loader imported but disabled as a backup; do not delete either script.
+The stable Bootstrap/Loader uses its own independent Last Known Good cache and should restore the stable Core (currently v0.3.239). Verify TLE → **版本与更新** reports the Stable channel and Core v0.3.259. Keep the test Loader imported but disabled as a backup; do not delete either script.
 
 ## Updating the branch build
 

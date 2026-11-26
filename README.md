@@ -2,22 +2,23 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.261 · 配套侠恢复聊天自动还原方案
+## 开发分支测试版 v0.3.262 · 配套方案与查找替换布局优化
 
-本次测试更新：修复 TT/ST 自动恢复上次聊天时，角色已打开但 TLE 错过打开/切换事件，导致默认配套方案没有应用的问题。
+本次测试更新：整理配套方案列表操作行，并重做整理侠查找替换页的窄屏布局。
 
-- **恢复上次聊天：** 新宿主页面启动时，如果酒馆已先恢复角色聊天，TLE 会直接识别当前角色并应用其默认方案，不要求用户再次打开角色或手动切换。
-- **Core 热更新保护：** 同一页面内的 Core 更新、热重载或重新启用仍只建立状态基线，不重复覆盖用户当前配置；页面标记仅保存在当前 Window，不写入持久存储。
-- **延迟加载兜底：** 如果角色上下文晚于 TLE 初始化，最多等待 15 秒并有限重试；原生聊天事件仍保留。
-- **日夜方案：** 页面启动时以当前时段方案优先；未到期的手动覆盖继续生效。
-- **其他规则：** 真正切换角色时仍应用该角色默认方案；没有默认方案时不改变当前配置。全局世界书和 UI 主题继续沿用 v0.3.260 的保存与逐项应用逻辑。
-- 仅更新开发分支测试通道，正式 Stable Core、Loader 和 Bootstrap 不变。
+- **配套方案：** 「设为默认 / 取消默认」与「应用」放到方案标题行右侧，配置摘要独立放在下方。
+- **整理侠标题：** 移动端恢复清晰顺序：整理侠标题、资源整理/查找替换标签、同步/导入/导出工具。
+- **查找替换：** 查找与替换分行；搜索范围与备份恢复按钮按可用宽度换行；移除操作区内部滚动条，让结果列表占用剩余空间。
+- **功能保持：** 不改扫描、替换、预览、规则组合及备份恢复逻辑；继续使用酒馆原生按钮样式。
+- 保留 v0.3.261 已验证的 TT 宿主重启后自动恢复角色默认方案逻辑。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.261/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
+仅更新开发分支测试通道；正式 Stable Core、Loader 和 Bootstrap 不变。
+
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.262/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.239 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.259 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -41,7 +42,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 ## 当前开发分支（未发布）
 
-开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.261）。
+开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.262）。
 
 整理侠的资源管理现在直接位于自己的原生形态 `.drawer-content` 内，不再套用第二层 `.tle-search-surface`。抽屉图标、导航文字与全局搜索弹窗的跳转入口统一调用明确的开合控制器，直接维护 `openDrawer / closedDrawer`；打开时先关闭其他普通抽屉和 TLE 控制面板，移动端仍由原生导航生命周期收起侧栏。
 

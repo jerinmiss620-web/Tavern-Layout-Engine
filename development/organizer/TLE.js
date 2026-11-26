@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.261
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.262
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2134,12 +2134,12 @@ var TLEBatchLibrary = (() => {
         void this.persist().catch(() => {
         });
       });
-      this.findRow = n("div", "flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
+      this.findRow = n("div", "tle-content-find-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
       this.h.searchWrap.classList.add("flex1");
-      this.replaceRow = n("div", "flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
+      this.replaceRow = n("div", "tle-content-replace-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
       this.controls = n("div", "tle-content-controls flex-container flexFlowColumn");
-      const actions = n("div", "flex-container flexnowrap alignItemsCenter");
-      this.scopeSelect = n("select", "text_pole flex1");
+      const actions = n("div", "tle-content-action-row flex-container flexWrap alignItemsCenter");
+      this.scopeSelect = n("select", "text_pole flex1 tle-content-scope-select");
       this.scopeSelect.setAttribute("aria-label", "\u5185\u5BB9\u641C\u7D22\u8303\u56F4");
       for (const [value, label] of [["all", "\u5168\u90E8\u652F\u6301\u8D44\u6E90"], ["filtered", "\u5F53\u524D\u7B5B\u9009\u8303\u56F4"], ["selected", "\u5DF2\u9009\u8D44\u6E90"]]) {
         const o = n("option", "", label);
@@ -2154,7 +2154,7 @@ var TLEBatchLibrary = (() => {
       this.previewButton = this.button("\u9884\u89C8\u66FF\u6362", () => this.preview());
       this.previewButton.disabled = true;
       this.findRow.append(this.h.searchWrap, this.findButton);
-      const replaceLabel = n("label", "flex-container flexnowrap alignItemsCenter flex1");
+      const replaceLabel = n("label", "tle-content-replace-label flex-container flexnowrap alignItemsCenter flex1");
       replaceLabel.append(n("span", "", "\u66FF\u6362\u4E3A"), this.replace);
       this.replaceRow.append(replaceLabel, this.previewButton);
       this.searchRow.append(this.findRow, this.replaceRow);
@@ -2166,11 +2166,9 @@ var TLEBatchLibrary = (() => {
         if (this.jobId) void this.api("cancel", { id: this.jobId }).catch((e) => this.message(e.message));
       });
       this.cancelButton.hidden = true;
-      actions.append(
-        this.scopeSelect,
-        this.cancelButton,
-        this.button("\u5907\u4EFD\u4E0E\u6062\u590D", () => this.backups())
-      );
+      this.backupButton = this.button("\u5907\u4EFD\u4E0E\u6062\u590D", () => this.backups());
+      this.backupButton.classList.add("tle-content-backup-button");
+      actions.append(this.scopeSelect, this.cancelButton, this.backupButton);
       this.ruleDetails = n("details", "tle-content-rule-details");
       this.ruleDetails.append(n("summary", "", "\u89C4\u5219\u7EC4\u5408\u4E0E\u9AD8\u7EA7\u9009\u9879"));
       this.addRuleButton = this.button("\u6DFB\u52A0\u89C4\u5219", () => {
@@ -2223,7 +2221,7 @@ var TLEBatchLibrary = (() => {
       });
       this.ruleHelp = n("small", "tle-content-rule-help", "JSON/YAML 仅扫描明确指定路径；未知字段不会递归修改。普通文本规则区分大小写，重叠优先长匹配，同长度按规则顺序。");
       this.ruleDetails.append(this.comboCreateRow, this.ruleRows, this.comboManageRow, this.ruleHelp, this.paths);
-      this.selectionTools = n("div", "flex-container flexWrap");
+      this.selectionTools = n("div", "tle-content-selection-tools flex-container flexWrap");
       this.selectionTools.append(this.button("\u5168\u9009\u5F53\u524D\u7ED3\u679C", () => this.selectAll(true)), this.button("\u53D6\u6D88\u5168\u9009", () => this.selectAll(false)));
       this.confirm = n("div", "tle-quick-transfer-confirm");
       this.confirm.hidden = true;
@@ -3687,6 +3685,9 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   padding-inline-start: 10px;
 }
 .tle-companion-title { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.tle-companion-heading-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; width: 100%; min-width: 0; }
+.tle-companion-heading-row > .tle-companion-title { flex: 1 1 140px; }
+.tle-companion-heading-row > .tle-companion-actions { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; flex-wrap: nowrap; gap: 6px; margin-inline-start: auto; }
 .tle-companion-default-badge {
   display: inline-flex; align-items: center; gap: 3px;
   padding: 2px 7px; border: 1px solid currentColor; border-radius: 20px;
@@ -4632,31 +4633,91 @@ body.tle-global-search-open { overflow: hidden !important; }
   flex: 0 0 auto;
   min-width: 0;
 }
-#tle-organizer-panel .tle-organizer-findreplace-page { gap: 8px; }
+#tle-organizer-panel .tle-organizer-findreplace-page { gap: 7px; }
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row > .flex-container {
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row > .tle-content-find-row,
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row > .tle-content-replace-row {
+  display: flex;
   flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
   width: 100%;
   min-width: 0;
 }
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-find-row > .tle-search-input-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-find-row > .tle-search-input-wrap input,
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-label > input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-find-row > button,
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-row > button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-label {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-label > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-controls {
   display: flex;
-  flex: 0 1 auto;
-  max-height: min(42vh, 360px);
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 6px;
   min-width: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: visible;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-action-row {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-scope-select {
+  flex: 1 1 220px;
+  width: auto;
+  min-width: 0;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-backup-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-rule-details {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-selection-tools {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-result-list {
   flex: 1 1 auto;
   min-height: 0 !important;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-status { flex: 0 0 auto; }
 #tle-organizer-panel .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0; }
@@ -4707,14 +4768,15 @@ body.tle-global-search-open { overflow: hidden !important; }
     flex: 1 1 calc(100% - 48px);
   }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
-    order: 1;
+    order: 0;
     flex: 0 0 auto;
     min-width: 0;
   }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-subtitle { display: none; }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-organizer-tabs {
+    order: 1;
     flex: 1 1 auto;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 2px;
   }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-organizer-tab { padding-inline: 6px; }
@@ -11247,14 +11309,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.261 · 分组工具栏顺序与重命名操作优化</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.262 · 分组工具栏顺序与重命名操作优化</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.261</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.262</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13310,13 +13372,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const isNight = rule?.enabled && rule.nightPlanId === plan.id;
       const row = quickNode('div', 'tle-companion-plan' + (isDefault ? ' is-default' : ''));
       const summary = quickNode('div', 'tle-companion-copy');
+      const headingRow = quickNode('div', 'tle-companion-heading-row');
       const titleRow = quickNode('div', 'tle-companion-title');
       titleRow.append(quickNode('strong', '', plan.name));
       if (isDefault) titleRow.append(quickNode('span', 'tle-companion-default-badge', '★ 角色默认'));
       if (isDay) titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☀ 日间'));
       if (isNight) titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
-      summary.append(titleRow);
-      summary.append(quickNode('small', '', companionPlanDetails(plan) || '空方案'));
       const controls = quickNode('div', 'tle-companion-actions');
       const setDefault = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
         companionToggleDefault(plan.id, role);
@@ -13326,7 +13387,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const apply = companionTextButton('应用', () => { void companionApply(plan.id); });
       apply.disabled = companionRuntime.applying;
       controls.append(setDefault, apply);
-      row.append(summary, controls);
+      headingRow.append(titleRow, controls);
+      summary.append(headingRow);
+      summary.append(quickNode('small', '', companionPlanDetails(plan) || '空方案'));
+      row.append(summary);
       list.append(row);
     }
   }
@@ -17542,7 +17606,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.261',
+    version: '0.3.262',
     ready: false,
     destroy,
     state,
@@ -17993,5 +18057,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.261 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.262 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

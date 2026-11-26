@@ -250,3 +250,17 @@ test('development build preserves a single Organizer, protected resource deletio
     const panel=s.slice(s.indexOf('  function createOrganizerPanel()'),s.indexOf('  function createRailControls()'));
     assert.doesNotMatch(panel,/<button[^>]*tle-search-clear/);
 });
+
+
+test('find/replace controls use a responsive action row and keep the result list as the scrolling region', async t => {
+    const f = fixture(t);
+    const actions = f.c.controls.querySelector('.tle-content-action-row');
+    assert.ok(actions, 'scope and backup actions share a responsive toolbar');
+    assert.equal(f.c.scopeSelect.parentElement, actions);
+    assert.equal(f.c.cancelButton.parentElement, actions);
+    assert.equal(f.c.backupButton.parentElement, actions);
+    assert.ok(f.c.findRow.classList.contains('tle-content-find-row'));
+    assert.ok(f.c.replaceRow.classList.contains('tle-content-replace-row'));
+    assert.ok(f.c.selectionTools.classList.contains('tle-content-selection-tools'));
+    assert.equal(f.c.ruleDetails.open, false, 'advanced rules stay collapsed by default');
+});
