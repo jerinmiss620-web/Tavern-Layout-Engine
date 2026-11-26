@@ -8814,7 +8814,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const groupManagementHint = quickNode(
       'small',
       'tle-quick-group-management-hint',
-      '重命名：点选下方一个自定义分组名称；批量删除：勾选分组右侧方框。仅限自定义分组，「全部项目」和「未分组」不可操作。'
+      '仅可操作自定义分组。重命名：点选下方一个自定义分组名称；批量删除：勾选分组右侧方框。「全部项目」和「未分组」不可操作。'
     );
     const selectedGroupSummary = quickNode('div', 'flex-container flexWrap alignItemsCenter tle-quick-group-selection-summary');
     const selectedGroupLabel = quickNode('small', '', '当前目录：');
