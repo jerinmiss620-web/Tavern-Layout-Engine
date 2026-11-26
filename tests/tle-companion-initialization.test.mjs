@@ -45,6 +45,9 @@ assert.equal(
 // A real initialization now records the already-open role instead of simulating a role change.
 const bind = section(source, '  function companionBindEvents() {', '  function companionCleanup() {');
 assert.match(bind, /const initialRole = companionCurrentRole\(\);/);
+assert.match(bind, /const initialChoice = companionAutoTarget\(initialData, initialRole\);/);
+assert.match(bind, /if \(initialRole && initialChoice\?\.slot && !savedScheduleToken\)/);
+assert.match(bind, /initialData\.scheduleTokens\[initialRole\.key\] = initialChoice\.slot\.token;/);
 assert.match(bind, /companionRuntime\.lastRole = initialRole\?\.key \|\| '';/);
 assert.doesNotMatch(bind, /companionRuntime\.lastRole\s*=\s*''/);
 assert.doesNotMatch(bind, /On script reload, apply the selected role/);
