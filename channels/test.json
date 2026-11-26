@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.260",
     "source_path": "releases/v0.3.260/TLE.js",
-    "source_commit": "890c07cbee5b82d9695039cd570599f3b7aea09c",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/890c07cbee5b82d9695039cd570599f3b7aea09c/releases/v0.3.260/TLE.js",
+    "source_commit": "3b0472a9e6200223e4fa6616b95a3d75b47059e1",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/3b0472a9e6200223e4fa6616b95a3d75b47059e1/releases/v0.3.260/TLE.js",
     "changelog_path": "releases/v0.3.260/CHANGELOG.md",
-    "sha256": "3da30d558c92763f281c8ed4383f7bde20509577b8a884736d99349bd8fb0d3d",
-    "size_bytes": 842961
+    "sha256": "5439bbc93bbcb58ef6171fd3df38f411028c1e3654be651ba656bb4432e20a19",
+    "size_bytes": 843147
   },
-  "status": "TEST 0.3.260: 配套侠新增全局世界书多选快照与整组同步应用；方案列表提供「设为默认 / 取消默认」按钮，设置新默认自动替换旧默认；保留角色切换自动应用边界。",
+  "status": "TEST 0.3.260: 配套侠新增全局世界书多选快照与整组同步应用；旧方案可勾选「全局世界书（未保存）」补录；方案列表提供「设为默认 / 取消默认」按钮，设置新默认自动替换旧默认。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
