@@ -273,6 +273,9 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.ok(sessions[0].querySelector('.chatActions .pinChat'));
     assert.ok(sessions[0].querySelector('.chatActions .renameChat'));
     assert.ok(sessions[0].querySelector('.chatActions .deleteChat'));
+    const actionKey = new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+    sessions[0].querySelector('.renameChat').dispatchEvent(actionKey);
+    assert.equal(calls.opened.length, 0, 'keyboard interaction on nested action must not open the chat');
     assert.ok(panel.querySelector('.freesia-gallery-session-list').classList.contains('recentChatList'));
     assert.match(panel.querySelector('.freesia-gallery-detail-chat-count').textContent, /3 个聊天/);
 
