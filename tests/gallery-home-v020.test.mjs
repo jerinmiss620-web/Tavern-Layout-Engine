@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.5.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.6.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -165,11 +165,17 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(cards[0].querySelector('.freesia-gallery-chat-count').textContent, /2 个聊天/);
     assert.match(cards[0].querySelector('.freesia-gallery-card-latest .chatMessage').textContent, /latest preview/);
     assert.equal(cards[0].classList.contains('recentChat'), true);
-    assert.equal(cards[0].querySelector('.chatActions .pinChat'), null, 'home gallery must not expose pin actions');
+    assert.equal(cards[0].querySelector('.chatActions .pinChat'), null, 'home pin is a character-level action, not a native chat pin');
+    assert.ok(cards[0].querySelector('.chatActions .freesia-gallery-character-pin'));
+    assert.ok(cards[0].querySelector('.chatActions .renameChat'));
+    assert.ok(cards[0].querySelector('.chatActions .deleteChat'));
     assert.match(css, /grid-template-columns: repeat\(var\(--freesia-gallery-columns, 4\), minmax\(0, 1fr\)\)/);
     assert.match(css, /grid-auto-rows: 1fr; align-items: stretch/);
     assert.match(css, /gap: clamp\(5px, 0\.7vw, 8px\)/);
     assert.match(css, /aspect-ratio: 3 \/ 4 !important/);
+    assert.match(css, /\.freesia-gallery-card-toolbar \{ display: grid; grid-template-columns: minmax\(0, 1fr\)/);
+    assert.match(css, /\.freesia-gallery-title-separator \{ display: none !important/);
+    assert.match(css, /\.freesia-gallery-detail-avatar \{ align-self: start !important/);
     assert.match(css, /\.freesia-gallery-card-latest > \.chatMessageContainer \{ display: flex !important/);
     assert.match(css, /text-align: left !important/);
     assert.match(css, /justify-content: flex-start !important/);
@@ -212,6 +218,32 @@ test('renders a bounded portrait gallery with native card structure and independ
     dom.window.close();
 });
 
+test('gallery character pin is independent from native chat pins and sorts the character card first', async () => {
+    const { dom, api, context } = setup();
+    await api.refresh();
+    const panel = dom.window.document.querySelector('.welcomePanel');
+    const initial = Array.from(panel.querySelectorAll('.freesia-gallery-card')).map(card => card.dataset.avatar);
+    assert.equal(initial[0], 'a.png');
+
+    const betaPin = panel.querySelector('.freesia-gallery-card[data-avatar="b.png"] .freesia-gallery-character-pin');
+    assert.ok(betaPin);
+    betaPin.click();
+
+    const reordered = Array.from(panel.querySelectorAll('.freesia-gallery-card')).map(card => card.dataset.avatar);
+    assert.equal(reordered[0], 'b.png');
+    const stored = JSON.parse(context.accountStorage.getItem('freesiaGalleryPinnedCharacters'));
+    assert.ok(stored['b.png']);
+    assert.equal(context.accountStorage.getItem('pinnedChats'), null);
+
+    panel.querySelector('.freesia-gallery-card[data-avatar="b.png"] .freesia-gallery-character-pin').click();
+    const restored = Array.from(panel.querySelectorAll('.freesia-gallery-card')).map(card => card.dataset.avatar);
+    assert.equal(restored[0], 'a.png');
+    assert.equal(JSON.parse(context.accountStorage.getItem('freesiaGalleryPinnedCharacters'))['b.png'], undefined);
+
+    api.stop();
+    dom.window.close();
+});
+
 test('limits gallery to at most three columns at viewport widths of 480px and below', async () => {
     const { dom, api } = setup();
     Object.defineProperty(dom.window, 'innerWidth', { value: 480, configurable: true });
@@ -249,7 +281,10 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.equal(panel.querySelector('.freesia-gallery-detail-name').textContent, 'Alpha');
     assert.match(panel.querySelector('.freesia-gallery-lorebook').textContent, /Alpha Lorebook/);
     assert.doesNotMatch(panel.querySelector('.freesia-gallery-lorebook').textContent, /Char's lorebook/);
-    assert.ok(panel.querySelector('.freesia-gallery-detail-heading .freesia-gallery-manage'));
+    assert.ok(panel.querySelector('.freesia-gallery-title-group .freesia-gallery-manage'));
+    assert.equal(panel.querySelector('.freesia-gallery-detail-heading .freesia-gallery-manage'), null);
+    assert.equal(panel.querySelector('.freesia-gallery-title-group .freesia-gallery-manage').textContent, '详情/管理');
+    assert.doesNotMatch(panel.querySelector('.freesia-gallery-title-group .freesia-gallery-manage').textContent, />/);
     const descriptionHeader = panel.querySelector('.freesia-gallery-description-header');
     assert.ok(descriptionHeader);
     assert.equal(descriptionHeader.children.length, 1);
@@ -257,7 +292,7 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.match(descriptionHeader.textContent, /角色描述/);
     const detailCss = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
     assert.match(detailCss, /\.freesia-gallery-description-header \{ display: block/);
-    assert.match(detailCss, /\.freesia-gallery-detail-heading \.freesia-gallery-manage/);
+    assert.match(detailCss, /\.freesia-gallery-title-group \.freesia-gallery-manage/);
 
     assert.match(detailCss, /\.freesia-gallery-detail-hero \{ display: grid;[^}]*align-items: stretch/);
     assert.match(detailCss, /\.freesia-gallery-detail-avatar \{ display: block; align-self: stretch;[^}]*aspect-ratio: auto !important/);
@@ -273,6 +308,7 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     assert.ok(sessions[0].querySelector('.chatActions .pinChat'));
     assert.ok(sessions[0].querySelector('.chatActions .renameChat'));
     assert.ok(sessions[0].querySelector('.chatActions .deleteChat'));
+    assert.match(detailCss, /\.freesia-gallery-session-card \.chatName \{[^}]*text-align: center/);
     const actionKey = new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
     sessions[0].querySelector('.renameChat').dispatchEvent(actionKey);
     assert.equal(calls.opened.length, 0, 'keyboard interaction on nested action must not open the chat');
@@ -331,6 +367,8 @@ test('chat files page uses native recent-chat rows and opens an older chat throu
     await api.openDetail('a.png');
 
     const filesButton = dom.window.document.querySelector('.freesia-gallery-detail-chat-header button');
+    assert.equal(filesButton.textContent, '聊天文件');
+    assert.doesNotMatch(filesButton.textContent, />/);
     filesButton.click();
     assert.equal(api.getPage(), 'files');
     assert.equal(dom.window.document.querySelectorAll('.freesia-gallery-file-list .recentChat').length, 3);
