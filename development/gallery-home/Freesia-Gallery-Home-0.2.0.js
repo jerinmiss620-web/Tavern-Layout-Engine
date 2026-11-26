@@ -76,6 +76,7 @@
         '#chat .welcomePanel.' + ACTIVE_CLASS + ' .freesia-gallery-view-toggle { cursor: pointer; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-files { display: none !important; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .welcomeRecent > .recentChatList:not(.' + GRID_CLASS + ') { display: flex !important; }',
+        '#chat .welcomePanel.' + ACTIVE_CLASS + '.' + NATIVE_CLASS + ' .freesia-gallery-summary { display: none !important; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-gallery .freesia-gallery-detail, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-gallery .freesia-gallery-files { display: none; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .' + GRID_CLASS + ', #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .' + GRID_CLASS + ' { display: none; }',
         '#chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-detail .freesia-gallery-files, #chat .welcomePanel.' + ACTIVE_CLASS + '.freesia-gallery-page-files .freesia-gallery-detail { display: none; }',
