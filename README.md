@@ -2,15 +2,17 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.246 · 整理侠原生面板视觉重塑
+## 开发分支测试版 v0.3.254 · 整理侠分组管理入口修复
 
-本次测试更新：整理侠三栏标题统一继承酒馆 `.standoutHeader` 原生样式；移除两条竖向分割线及对应网格轨道，三栏直接排布。资源列表标题与「查找和替换」开关共用同一标题栏，开关采用酒馆原生 `label.checkbox_label` + `input.checkbox` 结构，保持横向排列，不新增任何复选框视觉 CSS。保留资源管理、分组、搜索替换、批量操作及原有选择机制。详见 [v0.3.246 更新记录](releases/v0.3.246/CHANGELOG.md)。
+本次测试更新：修复「管理分组」模式下重命名与批量删除按钮已创建、却未挂载到操作容器的问题。进入管理模式后，明确显示「重命名」「批量删除」两个文字按钮，沿用酒馆原生 `.menu_button` 样式，不再要求用户猜图标。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.246/TLE-0.3.245-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
+- **重命名：** 点击下方一个自定义分组名称，将它设为当前目录，再点击「重命名」。
+- **批量删除：** 勾选自定义分组右侧的复选框，再点击「批量删除」并二次确认。
+- 「全部项目」和「未分组」为系统目录，不可重命名或删除。
+- 删除分组不会删除资源；所属资源会移回「未分组」。
+- 仅更新开发分支测试通道；正式 Stable Core、Loader 和 Bootstrap 不变。
 
-整理侠“资源名称 / 查找与替换”共用一个搜索框和原资源列表。已安装原版 Global Batch Replace v1.1.0 PC 服务端即可查找、预览、替换及整份恢复；[配套服务端插件](plugins/global-batch-replace/README-TLE.md) 增加 ZIP 导入和按文件恢复。TT 使用 Core 内置原生适配。
-
-[安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md) · [本版日志](releases/v0.3.246/CHANGELOG.md)。正式发布通道仍为下文版本。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.254/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/CONTENT-VALIDATION.md)。
 
 ## 一次安装，后续自动更新
 
