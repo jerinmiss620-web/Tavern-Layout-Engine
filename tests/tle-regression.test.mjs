@@ -60,11 +60,11 @@ const tle = process.argv.includes('--current') ? read('releases/v' + plan.core +
 if (manifest.release.version === '0.3.243') {
   const organizerSource = read('development/organizer/TLE.js');
   assert.equal(organizerSource, pinnedTle, 'Development Organizer source and pinned test Core must match byte-for-byte');
-  assert.equal((organizerSource.match(/button\.classList\\.toggle\("active", selected\);/g) || []).length, 2,
+  assert.equal((organizerSource.match(/button\.classList\.toggle\("active", selected\);/g) || []).length, 2,
     'Both initial mount and mode switching must synchronize the native active class');
   assert.doesNotMatch(organizerSource, /tle-content-mode-button/,
     'Organizer mode buttons must not carry a private visual class or custom CSS');
-  assert.match(organizerSource, /button\.classList\\.add\("menu_button_icon"\)/,
+  assert.match(organizerSource, /button\.classList\.add\("menu_button_icon"\)/,
     'Organizer mode buttons must retain the native host button class');
 }
 const loaderRelease = manifest.loader_release;
