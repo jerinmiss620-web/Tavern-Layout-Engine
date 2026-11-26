@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.260",
+  "latest_version": "0.3.261",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.260",
-    "source_path": "releases/v0.3.260/TLE.js",
-    "source_commit": "3b0472a9e6200223e4fa6616b95a3d75b47059e1",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/3b0472a9e6200223e4fa6616b95a3d75b47059e1/releases/v0.3.260/TLE.js",
-    "changelog_path": "releases/v0.3.260/CHANGELOG.md",
-    "sha256": "5439bbc93bbcb58ef6171fd3df38f411028c1e3654be651ba656bb4432e20a19",
-    "size_bytes": 843147
+    "version": "0.3.261",
+    "source_path": "releases/v0.3.261/TLE.js",
+    "source_commit": "3773f988a46bf4c6f15a9ed111e76b5e228c65cd",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/3773f988a46bf4c6f15a9ed111e76b5e228c65cd/releases/v0.3.261/TLE.js",
+    "changelog_path": "releases/v0.3.261/CHANGELOG.md",
+    "sha256": "d5b2e703ea3feff7810763c7273e8716d9bc86b645c25367742cd23ca271612a",
+    "size_bytes": 845561
   },
-  "status": "TEST 0.3.260: 配套侠新增全局世界书多选快照与整组同步应用；旧方案可勾选「全局世界书（未保存）」补录；方案列表提供「设为默认 / 取消默认」按钮，设置新默认自动替换旧默认。",
+  "status": "TEST 0.3.261: 完整宿主页面启动时自动恢复当前角色默认配套方案；同页面 Core 热更新/重新启用不重复应用；角色上下文延迟时有限重试；日夜方案与手动覆盖优先级保留。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
