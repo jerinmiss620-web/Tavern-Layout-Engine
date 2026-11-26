@@ -13,7 +13,7 @@
     "sha256": "6e22b37cef30924f835f10b8b16cec4ef12a573a569e832d507781ec45b84fa9",
     "size_bytes": 813880
   },
-  "status": "TEST 0.3.242: Organizer search mode uses checkbox-like square visuals while retaining native radio semantics, radiogroup labeling, keyboard operation, and the existing search-mode change handler. v0.3.241 companion initialization protection, schedule-token recovery, manual holds, per-item partial application, and unavailable-item reasons remain included. Automated source and package checks pending; ST/TT visual and keyboard acceptance pending.",
+  "status": "TEST 0.3.242: Source syntax compilation and remote pinned-source/installer/manifest consistency checks passed. Organizer search mode now uses checkbox-like square visuals while retaining native radio semantics, radiogroup labeling, keyboard operation, and the existing search-mode change handler. v0.3.241 companion initialization protection, schedule-token recovery, manual holds, per-item partial application, and unavailable-item reasons remain included. GitHub Actions Node regression workflow and ST/TT visual/keyboard acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
