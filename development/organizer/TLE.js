@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.273
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.274
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3016,6 +3016,7 @@ var TLEBatchLibrary = (() => {
       bg1: null,
       pseudo: null,
       renderMode: null,
+      backgroundSource: null,
       wallpaperObserver: null,
       wallpaperParentObserver: null,
       wallpaperThemeObserver: null,
@@ -11393,14 +11394,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.273 · 记录预览操作栏紧凑布局</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.274 · 记录预览操作栏紧凑布局</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.273</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.274</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11476,7 +11477,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <input type="checkbox" data-tle-setting="chat-fade-enabled">
           <span>启用渐隐侠 · 上下透明渐隐</span>
         </label>
-        <p class="tle-muted">默认关闭。开启后将 #bg1 壁纸镜像到 #chat 内部，保留消息原有毛玻璃，并对聊天区域进行上下透明渐隐；壁纸变化会自动同步。若当前主题的壁纸结构无法镜像，会保留开关状态但不强行启用遮罩。</p>
+        <p class="tle-muted">默认关闭。自动识别 #bg1 壁纸与 html/body 主题 CSS 背景：主题明确设置 CSS 背景图（包括渐变）时优先透出主题背景；普通底色下仍优先镜像可见壁纸。主题切换后自动重新识别，保留消息毛玻璃与上下透明渐隐，不覆盖主题装饰。</p>
         <label class="tle-row" style="justify-content:flex-start;gap:10px;margin:10px 0 0 24px;">
           <input type="checkbox" data-tle-setting="chat-fade-bottom-padding">
           <span>增加最新消息免遮挡留白（70px）</span>
@@ -12419,6 +12420,45 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return match ? Number(match[1]) : 1;
   }
 
+  function chatFadeIsTransparentColor(color) {
+    const value = String(color || '').trim();
+    return !value || value === 'transparent' || chatFadeAlphaOf(value) < 0.01;
+  }
+
+  function chatFadeHasPaintedBackground(style) {
+    if (!style) return false;
+    const image = String(style.backgroundImage || '').trim();
+    const hasImage = Boolean(image && image !== 'none');
+    const hasColor = !chatFadeIsTransparentColor(style.backgroundColor);
+    return hasImage || hasColor;
+  }
+
+  function getChatFadePageBackground() {
+    const elements = [HOST_DOC.body, HOST_DOC.documentElement];
+    for (const element of elements) {
+      if (!element) continue;
+      let style;
+      try {
+        style = HOST_WIN.getComputedStyle(element);
+      } catch {
+        continue;
+      }
+      if (chatFadeHasPaintedBackground(style)) return { element, style };
+    }
+    return null;
+  }
+
+  function chatFadeSelectBackgroundMode(hasWallpaper, pageBackground) {
+    const pageHasImage = Boolean(
+      pageBackground?.style?.backgroundImage &&
+      pageBackground.style.backgroundImage !== 'none'
+    );
+    if (pageHasImage) return 'page';
+    if (hasWallpaper) return 'wallpaper';
+    if (pageBackground) return 'page';
+    return 'none';
+  }
+
   const CHAT_FADE_PSEUDO_BEFORE_CLASS = 'tle-chat-fade-pseudo-before';
   const CHAT_FADE_PSEUDO_AFTER_CLASS = 'tle-chat-fade-pseudo-after';
   const CHAT_FADE_FIXED_CLASS = 'tle-chat-fade-fixed';
@@ -12457,6 +12497,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     state.chatFade.resizeObserver = null;
     state.chatFade.resizeChat = null;
     state.chatFade.wallpaperParent = null;
+    state.chatFade.bg1 = null;
+    state.chatFade.backgroundSource = null;
 
     if (state.chatFade.wallpaperRaf) {
       HOST_WIN.cancelAnimationFrame(state.chatFade.wallpaperRaf);
@@ -12517,6 +12559,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     state.chatFade.chat = null;
     state.chatFade.pseudo = null;
     state.chatFade.renderMode = null;
+    state.chatFade.backgroundSource = null;
   }
 
   function chatFadePseudoIsFree(chat, pseudo) {
@@ -12630,17 +12673,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   function bindChatFadeWallpaperSync(bg1 = getChatFadeBg1()) {
-    if (!bg1) return;
-
     const chat = getChatFadeChat();
     const hasResizeObserver = typeof HOST_WIN.ResizeObserver === 'function';
+    const parent = bg1?.parentElement || null;
     const resizeBindingReady = !hasResizeObserver
       || Boolean(state.chatFade.resizeObserver && state.chatFade.resizeChat === chat);
+    const wallpaperBindingReady = bg1
+      ? Boolean(state.chatFade.wallpaperObserver)
+      : !state.chatFade.wallpaperObserver;
+    const parentBindingReady = parent
+      ? Boolean(state.chatFade.wallpaperParentObserver)
+      : !state.chatFade.wallpaperParentObserver;
     const themeBindingReady = Boolean(state.chatFade.wallpaperThemeObserver);
+
     if (state.chatFade.bg1 === bg1 &&
-        state.chatFade.wallpaperObserver &&
-        state.chatFade.wallpaperParent === bg1.parentElement &&
-        resizeBindingReady && themeBindingReady) return;
+        state.chatFade.wallpaperParent === parent &&
+        wallpaperBindingReady &&
+        parentBindingReady &&
+        resizeBindingReady &&
+        themeBindingReady) return;
 
     state.chatFade.wallpaperObserver?.disconnect();
     state.chatFade.wallpaperParentObserver?.disconnect();
@@ -12651,20 +12702,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     state.chatFade.wallpaperThemeObserver = null;
     state.chatFade.resizeObserver = null;
     state.chatFade.resizeChat = null;
-
-    state.chatFade.bg1 = bg1;
-
-    const observer = new HOST_WIN.MutationObserver(scheduleChatFadeWallpaperSync);
-    observer.observe(bg1, {
-      attributes: true,
-      attributeFilter: ['style', 'class', 'src', 'srcset'],
-      childList: true,
-      subtree: true,
-    });
-    state.chatFade.wallpaperObserver = observer;
-
-    const parent = bg1.parentElement;
+    state.chatFade.bg1 = bg1 || null;
     state.chatFade.wallpaperParent = parent;
+
+    if (bg1) {
+      const observer = new HOST_WIN.MutationObserver(scheduleChatFadeWallpaperSync);
+      observer.observe(bg1, {
+        attributes: true,
+        attributeFilter: ['style', 'class', 'src', 'srcset'],
+        childList: true,
+        subtree: true,
+      });
+      state.chatFade.wallpaperObserver = observer;
+    }
 
     if (parent) {
       const parentObserver = new HOST_WIN.MutationObserver(() => {
@@ -12683,34 +12733,51 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       state.chatFade.wallpaperParentObserver = parentObserver;
     }
 
-    // #bg1 can keep the same node and inline style while a theme changes an
-    // inherited CSS variable/class or swaps a stylesheet. Observe only its
-    // ancestor chain plus stylesheet nodes in <head>; never poll the document.
-    const themeAncestors = new Set();
+    // Observe page-level theme backgrounds independently from #bg1. This keeps
+    // CSS-only themes working even when no wallpaper layer exists.
+    const themeAncestors = new Set([HOST_DOC.documentElement, HOST_DOC.body].filter(Boolean));
+    for (let ancestor = parent; ancestor; ancestor = ancestor.parentElement) {
+      themeAncestors.add(ancestor);
+      if (ancestor === HOST_DOC.documentElement) break;
+    }
+
     const isStylesheetNode = node => node?.nodeType === 1 && (
       node.tagName === 'STYLE'
       || (node.tagName === 'LINK' && node.relList?.contains('stylesheet'))
     );
     const containsStylesheetNode = node => isStylesheetNode(node)
       || Boolean(node?.querySelector?.('style, link[rel~="stylesheet"]'));
+    const containsWallpaperNode = node => node?.nodeType === 1 && (
+      node.id === 'bg1'
+      || node.matches?.('#bg1')
+      || Boolean(node.querySelector?.('#bg1'))
+    );
+
     const themeObserver = new HOST_WIN.MutationObserver(records => {
       const relevant = records.some(record => {
         if (record.type === 'attributes' && themeAncestors.has(record.target)) return true;
+
         const target = record.target?.nodeType === 1
           ? record.target
           : record.target?.parentElement;
         if (isStylesheetNode(target)) return true;
-        return [...record.addedNodes, ...record.removedNodes].some(containsStylesheetNode);
+
+        const changedNodes = [...record.addedNodes, ...record.removedNodes];
+        if (record.target === HOST_DOC.body && record.type === 'childList') {
+          if (changedNodes.some(node => containsWallpaperNode(node) || containsStylesheetNode(node))) return true;
+        }
+        return changedNodes.some(containsStylesheetNode);
       });
       if (relevant) scheduleChatFadeWallpaperSync();
     });
-    for (let ancestor = bg1.parentElement; ancestor; ancestor = ancestor.parentElement) {
-      themeAncestors.add(ancestor);
-      themeObserver.observe(ancestor, {
+
+    for (const ancestor of themeAncestors) {
+      const options = {
         attributes: true,
         attributeFilter: ['class', 'style', 'data-theme', 'data-theme-name', 'data-theme-mode'],
-      });
-      if (ancestor === HOST_DOC.documentElement) break;
+      };
+      if (ancestor === HOST_DOC.body) options.childList = true;
+      themeObserver.observe(ancestor, options);
     }
     if (HOST_DOC.head) {
       themeObserver.observe(HOST_DOC.head, {
@@ -12725,7 +12792,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     if (hasResizeObserver) {
       const resizeObserver = new HOST_WIN.ResizeObserver(scheduleChatFadeWallpaperSync);
-      resizeObserver.observe(bg1);
+      if (bg1) resizeObserver.observe(bg1);
       if (chat) resizeObserver.observe(chat);
       state.chatFade.resizeObserver = resizeObserver;
       state.chatFade.resizeChat = chat;
@@ -12744,34 +12811,38 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       setChatFadeStatus('渐隐侠已开启，等待聊天区域加载。');
       return false;
     }
-    if (!bg1) {
-      clearChatFadeVisual();
-      setChatFadeStatus('渐隐侠已开启，但当前页面未找到 #bg1 壁纸层。');
-      return false;
-    }
 
-    const bgCss = HOST_WIN.getComputedStyle(bg1);
+    bindChatFadeWallpaperSync(bg1);
+
     const chatCss = HOST_WIN.getComputedStyle(chat);
-    const backgroundImage = bgCss.backgroundImage;
+    const bgCss = bg1 ? HOST_WIN.getComputedStyle(bg1) : null;
+    const backgroundImage = String(bgCss?.backgroundImage || 'none');
     const hasBgImage = Boolean(backgroundImage && backgroundImage !== 'none');
-    const sourceImg = bg1.querySelector('img');
+    const sourceImg = bg1?.querySelector('img');
     const hasSourceImg = Boolean(sourceImg && (sourceImg.currentSrc || sourceImg.src));
+    const hasBgColor = bgCss ? !chatFadeIsTransparentColor(bgCss.backgroundColor) : false;
+    const bgRect = bg1 ? bg1.getBoundingClientRect() : null;
+    const bgLayerVisible = Boolean(
+      bg1 &&
+      bgCss &&
+      bgCss.display !== 'none' &&
+      bgCss.visibility !== 'hidden' &&
+      Number(bgCss.opacity) > 0 &&
+      bgRect &&
+      bgRect.width > 0 &&
+      bgRect.height > 0
+    );
+    const hasWallpaperSource = bgLayerVisible && (hasBgImage || hasSourceImg || hasBgColor);
+    const pageBackground = getChatFadePageBackground();
+    const backgroundMode = chatFadeSelectBackgroundMode(hasWallpaperSource, pageBackground);
     const maskSupported = Boolean(
       HOST_WIN.CSS?.supports?.('mask-image', 'linear-gradient(to bottom, transparent, black)') ||
       HOST_WIN.CSS?.supports?.('-webkit-mask-image', 'linear-gradient(to bottom, transparent, black)')
     );
-    const transparentChat = chatFadeAlphaOf(chatCss.backgroundColor) < 0.01;
 
-    bindChatFadeWallpaperSync(bg1);
-
-    if (!hasBgImage && !hasSourceImg) {
+    if (backgroundMode === 'none') {
       clearChatFadeVisual();
-      setChatFadeStatus('渐隐侠暂不可用：当前 #bg1 没有可镜像的 CSS 背景图或 img。未改变聊天显示。');
-      return false;
-    }
-    if (!transparentChat) {
-      clearChatFadeVisual();
-      setChatFadeStatus('渐隐侠暂不可用：当前主题的 #chat 背景不透明。未改变聊天显示。');
+      setChatFadeStatus('渐隐侠暂不可用：当前没有可镜像的 #bg1 壁纸，也未检测到 html/body 主题 CSS 背景。未改变聊天显示。');
       return false;
     }
     if (!maskSupported) {
@@ -12780,11 +12851,46 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       return false;
     }
 
-    const bgRect = bg1.getBoundingClientRect();
     const chatRect = chat.getBoundingClientRect();
-    if (!(bgRect.width > 0 && bgRect.height > 0 && chatRect.width > 0 && chatRect.height > 0)) {
+    if (!(chatRect.width > 0 && chatRect.height > 0)) {
       clearChatFadeVisual();
-      setChatFadeStatus('渐隐侠正在等待壁纸层与聊天区域完成布局。');
+      setChatFadeStatus('渐隐侠正在等待聊天区域完成布局。');
+      return false;
+    }
+
+    if (backgroundMode === 'page') {
+      const chatHasNativeBackground = !chatFadeIsTransparentColor(chatCss.backgroundColor)
+        || (chatCss.backgroundImage && chatCss.backgroundImage !== 'none');
+
+      clearChatFadeVisual();
+      chat.classList.add(CHAT_FADE_CLASS);
+      state.chatFade.chat = chat;
+      state.chatFade.bg1 = bg1 || null;
+      state.chatFade.active = true;
+      state.chatFade.pseudo = null;
+      state.chatFade.backgroundSource = 'page';
+      const pageElement = pageBackground.element === HOST_DOC.body ? 'body' : 'html';
+
+      if (chatHasNativeBackground) {
+        state.chatFade.renderMode = 'page-background-mask-only';
+        setChatFadeStatus('渐隐侠已启用：检测到 ' + pageElement + ' 主题 CSS 背景，但 #chat 自身也有背景装饰；仅应用上下透明渐隐，不替换主题背景。');
+      } else {
+        state.chatFade.renderMode = 'page-background';
+        setChatFadeStatus('渐隐侠已启用：当前使用 ' + pageElement + ' 主题 CSS 背景，不创建壁纸镜像；直接透出原背景并执行上下透明渐隐。');
+      }
+      return true;
+    }
+
+    if (!bg1 || !bgCss || !bgRect) {
+      clearChatFadeVisual();
+      setChatFadeStatus('渐隐侠暂不可用：未找到可用的 #bg1 壁纸层。未改变聊天显示。');
+      return false;
+    }
+
+    const transparentChat = chatFadeIsTransparentColor(chatCss.backgroundColor);
+    if (!transparentChat) {
+      clearChatFadeVisual();
+      setChatFadeStatus('渐隐侠暂不可用：当前主题的 #chat 背景不透明。未改变聊天显示。');
       return false;
     }
 
@@ -12818,6 +12924,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       state.chatFade.bg1 = bg1;
       state.chatFade.active = true;
       state.chatFade.pseudo = pseudo;
+      state.chatFade.backgroundSource = 'wallpaper';
       state.chatFade.renderMode = fixedMode ? 'fixed-pseudo' : 'sticky-pseudo';
       setChatFadeStatus('渐隐侠已启用：CSS 伪元素壁纸镜像、上下透明渐隐及主题毛玻璃采样均已运行；未向 #chat 插入节点。');
       return true;
@@ -12841,6 +12948,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       state.chatFade.bg1 = bg1;
       state.chatFade.active = true;
       state.chatFade.pseudo = null;
+      state.chatFade.backgroundSource = 'wallpaper';
       state.chatFade.renderMode = 'background-fallback';
       setChatFadeStatus('渐隐侠已启用：当前主题无法安全使用伪元素，已改用透明聊天背景绘制壁纸；未覆盖主题装饰或插入节点。');
       return true;
@@ -12851,6 +12959,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     state.chatFade.bg1 = bg1;
     state.chatFade.active = true;
     state.chatFade.pseudo = null;
+    state.chatFade.backgroundSource = 'wallpaper';
     state.chatFade.renderMode = 'mask-only';
     setChatFadeStatus('渐隐遮罩已启用；当前主题无法安全使用 #chat 伪元素或背景回退。为保护主题装饰，暂不绘制壁纸镜像。');
     return true;
@@ -12864,14 +12973,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!chatFadeEnabled || state.destroyed) return;
 
       const currentBg = getChatFadeBg1();
-      if (!currentBg) {
-        clearChatFadeVisual();
-        setChatFadeStatus('渐隐侠已开启，但暂时找不到 #bg1。等待壁纸层恢复。');
-        return;
-      }
-
       if (currentBg !== state.chatFade.bg1 ||
-          currentBg.parentElement !== state.chatFade.wallpaperParent) {
+          (currentBg && currentBg.parentElement !== state.chatFade.wallpaperParent)) {
         bindChatFadeWallpaperSync(currentBg);
       }
 
@@ -17305,6 +17408,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         bottomPaddingEnabled: chatFadeBottomPaddingEnabled,
         pseudo: state.chatFade.pseudo,
         renderMode: state.chatFade.renderMode,
+        backgroundSource: state.chatFade.backgroundSource,
         wallpaperObserverPresent: Boolean(state.chatFade.wallpaperObserver),
         parentObserverPresent: Boolean(state.chatFade.wallpaperParentObserver),
         themeObserverPresent: Boolean(state.chatFade.wallpaperThemeObserver),
@@ -17625,7 +17729,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.273';
+    const VERSION = '0.3.274';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -19615,7 +19719,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.273',
+    version: '0.3.274',
     ready: false,
     destroy,
     state,
@@ -20081,5 +20185,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.273 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.274 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

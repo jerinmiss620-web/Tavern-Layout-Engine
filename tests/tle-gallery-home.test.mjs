@@ -9,7 +9,7 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.273');
+assert.equal(version, '0.3.274');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
 assert.match(moduleSource, /const VERSION = '0.3.273'/);
@@ -18,7 +18,7 @@ assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery sta
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.273'/);
+assert.match(core, /version: '0\.3\.274'/);
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
