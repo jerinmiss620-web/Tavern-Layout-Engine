@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.11.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.12.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -166,15 +166,21 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.match(cards[0].querySelector('.freesia-gallery-card-latest .chatMessage').textContent, /latest preview/);
     assert.equal(cards[0].classList.contains('recentChat'), true);
     assert.equal(cards[0].querySelector('.chatActions .pinChat'), null, 'home pin is a character-level action, not a native chat pin');
-    assert.ok(cards[0].querySelector(':scope > .freesia-gallery-character-pin'));
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar .freesia-gallery-character-pin'));
+    assert.equal(cards[0].querySelector(':scope > .freesia-gallery-character-pin'), null, 'character pin must not overlay the avatar');
     assert.ok(cards[0].querySelector('.freesia-gallery-card-identity > .freesia-gallery-chat-count'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .renameChat'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .deleteChat'));
-    assert.equal(cards[0].querySelector('.freesia-gallery-card-toolbar'), null);
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .freesia-gallery-chat-actions'));
+    assert.ok(cards[0].querySelector('.freesia-gallery-card-toolbar'));
     assert.match(css, /\.freesia-gallery-chat-count \{ position: absolute;[^}]*background: none; filter: drop-shadow\(0 1px 2px rgba\(0, 0, 0, 0\.95\)\)/);
     assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*linear-gradient/);
     assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*background: linear-gradient/);
-    assert.match(css, /\.freesia-gallery-card > \.freesia-gallery-character-pin \{ position: absolute/);
+    assert.doesNotMatch(css, /\.freesia-gallery-card > \.freesia-gallery-character-pin \{ position: absolute/);
+    assert.match(css, /\.freesia-gallery-card-toolbar \{ display: flex; align-items: center; justify-content: flex-end/);
+    assert.match(css, /\.freesia-gallery-card-toolbar \.freesia-gallery-character-pin \{ display: inline-flex/);
+    assert.match(css, /\.freesia-gallery-chat-actions \{ display: flex; flex: 0 0 auto/);
+    assert.match(css, /\.freesia-gallery-card \{ position: relative; display: grid; grid-template-rows: auto auto auto minmax\(0, 1fr\)/);
     assert.match(css, /\.freesia-gallery-card-date-row \{ display: flex !important;[^}]*justify-content: space-between !important/);
     assert.match(css, /\.freesia-gallery-card-actions \{ display: flex; flex: 0 0 auto/);
     assert.match(css, /grid-template-columns: repeat\(var\(--freesia-gallery-columns, 4\), minmax\(0, 1fr\)\)/);
@@ -504,8 +510,8 @@ test('empty-chat cards reserve the same two-line preview region and keep all met
     assert.ok(card);
     assert.equal(card.querySelector('.freesia-gallery-card-heading .characterName').textContent, 'No Recent Chat');
     assert.equal(card.querySelector('.freesia-gallery-chat-count').textContent, '0 个聊天');
-    assert.equal(card.querySelector('.freesia-gallery-card-toolbar'), null);
-    assert.ok(card.querySelector(':scope > .freesia-gallery-character-pin'));
+    assert.ok(card.querySelector('.freesia-gallery-card-toolbar .freesia-gallery-character-pin'));
+    assert.equal(card.querySelector(':scope > .freesia-gallery-character-pin'), null);
     assert.equal(card.querySelector('.freesia-gallery-card-date-row .chatActions'), null,
         'no latest chat means there is no chat-level rename/delete target');
     assert.equal(card.querySelector('.freesia-gallery-card-date-row .chatDate').textContent, '—');
