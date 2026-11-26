@@ -72,7 +72,10 @@ assert.match(manager, /groupName\.disabled = !managedGroup/);
 assert.match(manager, /其中项目已恢复为未分组/);
 assert.match(source, /\.tle-quick-manager \.tle-quick-category-row \.tle-quick-tabs\s*\{[^}]*align-items:\s*flex-start;/s);
 assert.match(source, /\.tle-quick-manager \.tle-quick-category-row \.tle-quick-tabs > button\s*\{[^}]*align-self:\s*flex-start;[^}]*width:\s*auto;/s);
-assert.doesNotMatch(source, /\.tle-quick-category-row \.tle-quick-tabs > button\s*\{[^}]*width:\s*100%/s,
+const categoryButtonRule = source.match(/\.tle-quick-manager \.tle-quick-category-row \.tle-quick-tabs > button\s*\{([^}]*)\}/s)?.[1] || '';
+assert.match(categoryButtonRule, /(^|;)\s*width:\s*auto\s*;/,
+  'Desktop category buttons must use their natural width');
+assert.doesNotMatch(categoryButtonRule, /(^|;)\s*width:\s*100%\s*;/,
   'Desktop category buttons must not be forced to fill the entire category column');
 assert.match(manager, /quickButton\('批量删除资源'/);
 
