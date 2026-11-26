@@ -13,7 +13,7 @@
     "sha256": "2053346cf5e0b5d59877aa6e03ea2676a82ec245f11e5f05918030f0e6ebc80d",
     "size_bytes": 812782
   },
-  "status": "TEST 0.3.243: Organizer search mode now uses two persistent ordinary buttons instead of radio/checkbox controls. Both modes remain visible; aria-pressed and theme-colored active styling identify the current mode. Existing search term preservation, content-rule loading, scan/replace logic, v0.3.241 companion initialization protection, schedule-token recovery, manual holds, partial application, and unavailable-item reasons remain included. Static source checks pending final remote consistency verification; GitHub Actions and ST/TT runtime acceptance pending.",
+  "status": "TEST 0.3.243: Source syntax compilation and static structural checks passed. Remote development source, pinned release source, and disabled installer match byte-for-byte; manifest URL, commit, SHA-256, and UTF-8 byte count are consistent. Reverse comparison confirms only the search-mode control DOM, CSS, aria-pressed synchronization, and version markers differ from v0.3.242. Companion catalog, schedule calculation, manual hold rules, and per-item application engine remain unchanged. GitHub Actions Node regression workflow and ST/TT visual/click/mobile-width acceptance pending.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
