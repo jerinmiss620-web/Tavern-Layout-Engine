@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.7.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.8.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -289,12 +289,23 @@ test('detail page reuses native recent-chat rows and a readonly native text fiel
     const detailCss = dom.window.document.getElementById('freesia-gallery-home-style').textContent;
     assert.match(detailCss, /\.freesia-gallery-description-header \{ display: flex/);
     assert.match(detailCss, /\.freesia-gallery-description-header \.freesia-gallery-manage/);
-    assert.match(detailCss, /\.freesia-gallery-description \{ grid-column: 1 \/ -1/);
-    assert.match(detailCss, /\.freesia-gallery-detail-main \{ display: contents/);
-
-    assert.match(detailCss, /\.freesia-gallery-detail-hero \{ display: grid;[^}]*align-items: start/);
+    assert.match(detailCss, /\.freesia-gallery-detail-hero \{ display: grid;[^}]*align-items: stretch/);
+    assert.match(detailCss, /\.freesia-gallery-detail-main \{ display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 8px/);
+    assert.match(detailCss, /\.freesia-gallery-description \{ display: block; flex: 1 1 0; width: 100%; min-width: 0; min-height: 0 !important; height: 0 !important/);
+    assert.doesNotMatch(detailCss, /\.freesia-gallery-detail-main \{ display: contents/);
+    assert.doesNotMatch(detailCss, /\.freesia-gallery-description \{ grid-column: 1 \/ -1/);
+    assert.match(detailCss, /\.freesia-gallery-detail-hero \{ grid-template-columns: 104px minmax\(0, 1fr\); gap: 8px; align-items: stretch/);
+    assert.match(detailCss, /\.freesia-gallery-detail-heading \{ display: flex; flex: 0 0 auto; flex-wrap: nowrap/);
+    assert.match(detailCss, /\.freesia-gallery-description \{ flex: 1 1 0; width: 100% !important; min-width: 0; min-height: 0 !important; height: 0 !important/);
     assert.match(detailCss, /\.freesia-gallery-detail-avatar \{ display: block; align-self: start;[^}]*aspect-ratio: 3 \/ 4 !important/);
+    const hero = panel.querySelector('.freesia-gallery-detail-hero');
+    const detailMain = hero.querySelector('.freesia-gallery-detail-main');
+    assert.equal(hero.children.length, 2, 'avatar and information stay in the same two-column hero');
+    assert.equal(detailMain.children.length, 3, 'name, description header, and textarea remain grouped in the right column');
+    assert.equal(detailMain.children[0].classList.contains('freesia-gallery-detail-heading'), true);
+    assert.equal(detailMain.children[1].classList.contains('freesia-gallery-description-header'), true);
     const description = panel.querySelector('.freesia-gallery-description');
+    assert.equal(description.parentElement, detailMain, 'description stays beside the avatar instead of dropping to a full-width row');
     assert.match(description.value, /read-only character information/);
     assert.equal(description.tagName, 'TEXTAREA');
     assert.equal(description.readOnly, true);
