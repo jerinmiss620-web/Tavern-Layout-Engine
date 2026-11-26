@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.259",
     "source_path": "releases/v0.3.259/TLE.js",
-    "source_commit": "7688d7b60a27bd6a50fbb4cb90d8853e2e058d72",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/7688d7b60a27bd6a50fbb4cb90d8853e2e058d72/releases/v0.3.259/TLE.js",
+    "source_commit": "9fa303081d87f5ed8946bc11318f526530141735",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/9fa303081d87f5ed8946bc11318f526530141735/releases/v0.3.259/TLE.js",
     "changelog_path": "releases/v0.3.259/CHANGELOG.md",
-    "sha256": "9af6a03d182b409cfdbde78d1d5559912d0a108830ae3b75795b8c5cb860e406",
-    "size_bytes": 834439
+    "sha256": "4ebe3e08512cc51daea1a107303804ee93df790749459f079e2097461544093b",
+    "size_bytes": 834587
   },
   "status": "TEST 0.3.259: 整理侠标题行新增「资源整理 / 查找替换」两个独立标签，默认进入资源整理；查找替换拥有独立输入、控制区、结果列表和状态，不再挤占资源整理第三分栏。",
   "recommended_loader_version": "0.3.0",
