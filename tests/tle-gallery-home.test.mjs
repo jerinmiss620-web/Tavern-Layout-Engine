@@ -46,6 +46,8 @@ assert.match(moduleSource, /freesia-gallery-disable-avatar-pseudo/);
 assert.match(moduleSource, /freesia-gallery-disable-avatar-border-image/);
 assert.match(moduleSource, /border-image: none !important/);
 assert.match(moduleSource, /text-align: left !important/);
+assert.match(moduleSource, /freesia-gallery-detail-session-card \.chatName/);
+assert.match(moduleSource, /freesia-gallery-file-session-card \.chatName/);
 assert.match(moduleSource, /menu_button freesia-gallery-manage/);
 assert.doesNotMatch(moduleSource, /menu_button menu_button_icon freesia-gallery-manage/);
 assert.doesNotMatch(moduleSource, /freesia-gallery-version/);

@@ -17756,7 +17756,9 @@ function createTLEGalleryHome(window, document) {
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-description { display: block; flex: 1 1 0; width: 100%; min-width: 0; min-height: 0 !important; height: 0 !important; max-height: none !important; margin: var(--freesia-gallery-description-margin, initial); padding: var(--freesia-gallery-description-padding, initial); box-sizing: border-box; font-size: var(--freesia-gallery-description-size, inherit); line-height: var(--freesia-gallery-description-line, normal); overflow: auto; resize: none; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-start; text-align: left !important; flex-wrap: var(--freesia-gallery-detail-heading-wrap, wrap); gap: var(--freesia-gallery-detail-heading-gap, 8px 12px); min-width: 0; min-height: 0; overflow: var(--freesia-gallery-detail-heading-overflow, visible); }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card .chatNameContainer { display: flex; align-items: center; gap: 8px; min-width: 0; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card .chatName { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-align: left !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card .chatName { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-session-card .chatName { text-align: left !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-session-card .chatName { text-align: left !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card .chatDate { flex: 0 0 auto; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; margin-inline-start: auto; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-name { flex: var(--freesia-gallery-detail-name-flex, 0 1 auto); min-width: 0; max-width: var(--freesia-gallery-detail-name-max, 100%); margin: 0; font-size: var(--freesia-gallery-detail-name-size, 1.5em); font-weight: 500; line-height: var(--freesia-gallery-detail-name-line, normal); white-space: var(--freesia-gallery-detail-name-white-space, normal); overflow: var(--freesia-gallery-detail-name-overflow, visible); text-overflow: var(--freesia-gallery-detail-name-text-overflow, clip); overflow-wrap: var(--freesia-gallery-detail-name-wrap, anywhere); text-align: left !important; }",
@@ -18969,8 +18971,11 @@ function createTLEGalleryHome(window, document) {
         return actions;
     }
 
-    function createNativeSessionCard(chat, label, index) {
-        const card = createElement('article', 'recentChat freesia-gallery-session-card');
+    function createNativeSessionCard(chat, label, index, variant) {
+        const cardClass = variant === 'file'
+            ? 'recentChat freesia-gallery-session-card freesia-gallery-file-session-card'
+            : 'recentChat freesia-gallery-session-card freesia-gallery-detail-session-card';
+        const card = createElement('article', cardClass);
         card.dataset.file = chat.chatName;
         card.dataset.avatar = state.selectedAvatar;
         card.setAttribute('role', 'button');
@@ -19005,7 +19010,7 @@ function createTLEGalleryHome(window, document) {
     }
 
     function createDetailSession(chat, index) {
-        return createNativeSessionCard(chat, chat.chatName, index);
+        return createNativeSessionCard(chat, chat.chatName, index, 'detail');
     }
 
     async function openDetail(avatar) {
@@ -19141,7 +19146,7 @@ function createTLEGalleryHome(window, document) {
             list.append(createElement('div', 'freesia-gallery-empty', query ? '没有匹配的聊天文件。' : '没有聊天文件。'));
         } else {
             filtered.forEach(function (chat) {
-                list.append(createNativeSessionCard(chat, chat.chatName, -1));
+                list.append(createNativeSessionCard(chat, chat.chatName, -1, 'file'));
             });
         }
 
