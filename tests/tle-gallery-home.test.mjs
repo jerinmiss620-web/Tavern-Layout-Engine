@@ -48,6 +48,14 @@ assert.match(moduleSource, /border-image: none !important/);
 assert.match(moduleSource, /text-align: left !important/);
 assert.match(moduleSource, /freesia-gallery-detail-session-card \.chatName/);
 assert.match(moduleSource, /freesia-gallery-file-session-card \.chatName/);
+assert.ok(moduleSource.includes("nativeVersion.cloneNode(true)"), "Preserve the native SillyTavern version below the Record Preview title");
+assert.ok(moduleSource.includes(".freesia-gallery-title-group > .welcomeHeaderVersionDisplay"), "Render the version as a compact subtitle");
+assert.ok(moduleSource.includes("align-content: center;"), "Vertically center the latest-chat information group");
+assert.ok(moduleSource.includes("align-items: center !important; justify-content: flex-start !important; justify-self: stretch !important"), "Vertically center the latest message preview container");
+assert.ok(moduleSource.includes("-webkit-box-pack: center;"), "Vertically center short message preview text");
+assert.ok(moduleSource.includes("justify-content: space-between; text-align: left !important; flex-wrap: var(--freesia-gallery-detail-heading-wrap"), "Keep character and lorebook at opposite ends of one heading row");
+assert.ok(moduleSource.includes("text-align: right !important; }"), "Right-align the bound lorebook");
+
 assert.match(moduleSource, /menu_button freesia-gallery-manage/);
 assert.doesNotMatch(moduleSource, /menu_button menu_button_icon freesia-gallery-manage/);
 assert.doesNotMatch(moduleSource, /freesia-gallery-version/);
