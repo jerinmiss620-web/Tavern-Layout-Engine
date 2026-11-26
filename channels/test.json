@@ -7,10 +7,10 @@
   "release": {
     "version": "0.3.274",
     "source_path": "releases/v0.3.274/TLE.js",
-    "source_commit": "40da5ae7acc9a6ee1aa62f2f58f110bcd2f46046",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/40da5ae7acc9a6ee1aa62f2f58f110bcd2f46046/releases/v0.3.274/TLE.js",
+    "source_commit": "e3af3cb0a7801fcba2c426f433a0c24ecac6b162",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e3af3cb0a7801fcba2c426f433a0c24ecac6b162/releases/v0.3.274/TLE.js",
     "changelog_path": "releases/v0.3.274/CHANGELOG.md",
-    "sha256": "f77551882a17cf0441dac4f8bf0575b1117c622654908b99134e7559cdacebaa",
+    "sha256": "18bfb27c1b6f526c563879308b7933870c5f818a32a8a2149e4639f73aa388cf",
     "size_bytes": 963371
   },
   "status": "TEST v0.3.274：修复渐隐侠背景来源识别。主题明确设置 body/html CSS 背景图（含渐变）时优先使用原生页面背景；普通纯色底色下仍优先镜像可见 #bg1 壁纸。监听不再依赖 #bg1，主题切换自动重新识别。仅更新测试通道。",
