@@ -155,7 +155,9 @@ assert.match(manager, /resourceSearchRow\.append\(current\.searchWrap\)/);
 assert.match(source, /findReplacePage\.append\(content\.searchRow, content\.controls, contentList, contentStatus\)/,
   'Find/replace controls must live in the separate Organizer tab, not the three-pane resource workspace');
 assert.match(manager, /workspace\.append\(categoryPane, groupPane, resourcePane\)/);
-assert.match(manager, /body\.append\(workspace\)/);
+assert.match(source, /resourcePage\.append\(workspace\)/);
+assert.match(source, /body\.append\(resourcePage, findReplacePage\)/,
+  'The resource workspace and find/replace page must remain sibling tabs inside Organizer');
 assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) minmax\(168px, \.92fr\) minmax\(360px, 2\.3fr\)/);
 assert.match(source, /\.tle-quick-manager \.tle-quick-filter-item\s*\{[^}]*width:\s*100%/s);
 assert.match(source, /\.tle-quick-manager \.tle-quick-filter-select\s*\{[^}]*flex:\s*0 0 28px/s);
