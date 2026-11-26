@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.265",
     "source_path": "releases/v0.3.265/TLE.js",
-    "source_commit": "0697540dda820563767cf0167d099ff6cfbceb11",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/0697540dda820563767cf0167d099ff6cfbceb11/releases/v0.3.265/TLE.js",
+    "source_commit": "0609c6cb6aad2514ee974491e63e19fce130a65e",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/0609c6cb6aad2514ee974491e63e19fce130a65e/releases/v0.3.265/TLE.js",
     "changelog_path": "releases/v0.3.265/CHANGELOG.md",
-    "sha256": "67206d151c0e9b9e089105a6b55a72ab6f3302832d403b22ff8cd54c20935170",
-    "size_bytes": 954925
+    "sha256": "969903798244e16fbfe01e0330a66a875b2d6e673e173643bca153c7f09422c7",
+    "size_bytes": 955381
   },
-  "status": "TEST v0.3.265: 首页「记录预览 / 记录详情」命名与持久化开关；关闭时完整停止模块并恢复原生首页；右上角快速切换；头像伪元素与 border-image 兼容设置。仅更新测试通道。",
+  "status": "TEST v0.3.265: 首页「记录预览 / 记录详情」命名与持久化开关；关闭时完整停止模块并恢复原生首页；右上角快速切换；最近会话/聊天文件标题独立左对齐；头像伪元素与 border-image 兼容设置。仅更新测试通道。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
