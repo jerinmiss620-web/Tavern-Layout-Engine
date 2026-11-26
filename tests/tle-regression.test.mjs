@@ -57,12 +57,24 @@ assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.ve
 
 const plan = JSON.parse(read('release-plan.json'));
 const tle = process.argv.includes('--current') ? read('releases/v' + plan.core + '/TLE.js') : pinnedTle;
-if (manifest.release.version === '0.3.245') {
+if (manifest.release.version === '0.3.246') {
   const organizerSource = read('development/organizer/TLE.js');
   assert.equal(organizerSource, pinnedTle, 'Development Organizer source and pinned test Core must match byte-for-byte');
+  assert.match(organizerSource, /this\.modeToggle = n\("input", "checkbox"\);/,
+    'The checkbox uses the host native checkbox class');
+  assert.match(organizerSource, /const categoryHeading = quickNode\('strong', 'tle-organizer-pane-title standoutHeader', '资源类型'\);/,
+    'Resource type heading inherits standoutHeader');
+  assert.match(organizerSource, /const groupHeading = quickNode\('strong', 'tle-organizer-pane-title standoutHeader', '分组目录'\);/,
+    'Group heading inherits standoutHeader');
+  assert.match(organizerSource, /const resourceHeader = quickNode\('div', 'tle-content-heading standoutHeader flex-container alignItemsCenter justifySpaceBetween'\);/,
+    'Resource heading and checkbox share standoutHeader');
+  assert.match(organizerSource, /workspace\.append\(categoryPane, groupPane, resourcePane\);/,
+    'Organizer panes are laid out without divider elements');
+  assert.doesNotMatch(organizerSource, /tle-organizer-divider|1px minmax\(168px/,
+    'No Organizer divider DOM or grid tracks remain');
   assert.match(organizerSource, /this\.target = n\("label", "checkbox_label"\);/,
     'The checkbox label must use SillyTavern native checkbox_label markup');
-  assert.match(organizerSource, /this\.modeToggle = n\("input"\);/,
+  assert.match(organizerSource, /this\.modeToggle = n\("input", "checkbox"\);/,
     'Organizer mode must use one native checkbox');
   assert.match(organizerSource, /this\.modeToggle\.type = "checkbox";/,
     'The native mode control must be a checkbox');
