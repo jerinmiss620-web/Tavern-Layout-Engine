@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.262
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.263
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3679,6 +3679,36 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 .tle-companion-plan { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--SmartThemeBorderColor, #8886); }
 .tle-companion-copy { display: flex; flex: 1 1 170px; flex-direction: column; min-width: 0; gap: 4px; overflow-wrap: anywhere; }
 .tle-companion-copy > small { opacity: .8; }
+.tle-companion-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
+  gap: 4px 12px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+}
+.tle-companion-preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 5px 0;
+  border-top: 1px solid var(--SmartThemeBorderColor, #8886);
+}
+.tle-companion-preview-label {
+  color: var(--SmartThemeQuoteColor, inherit);
+  font-size: .74em;
+  line-height: 1.2;
+  opacity: .72;
+}
+.tle-companion-preview-value {
+  min-width: 0;
+  font-size: .84em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.tle-companion-preview-item.is-world-info { grid-column: 1 / -1; }
+.tle-companion-preview-empty { grid-column: 1 / -1; opacity: .72; }
 .tle-companion-list { min-height: 0; }
 .tle-companion-plan.is-default {
   border-inline-start: 3px solid var(--SmartThemeQuoteColor, currentColor);
@@ -4830,10 +4860,7 @@ body.tle-global-search-open { overflow: hidden !important; }
       #${ID.panel} .tle-update-policy { margin: -5px 0 2px; }
       #${ID.panel} .tle-version-meta { display: flex; flex-wrap: wrap; gap: 6px 9px; align-items: center; min-width: 0; margin-top: 3px; }
       #${ID.panel} .tle-version-meta [hidden] { display: none !important; }
-      #${ID.panel} .tle-update-pill { display: inline-flex; align-items: center; max-width: 100%; border: 1px solid color-mix(in srgb, #63ae84 45%, transparent); border-radius: 999px; padding: 3px 8px; background: color-mix(in srgb, #63ae84 12%, transparent); color: #63ae84; font: inherit; font-size: .83em; font-weight: 650; cursor: pointer; white-space: nowrap; }
-      #${ID.panel} .tle-update-pill:disabled { opacity: .55; cursor: default; }
-      #${ID.panel} .tle-update-check { display: inline-flex; align-items: center; background: transparent; border: 0; padding: 3px 5px; border-radius: 6px; cursor: pointer; color: inherit; font-size: .8em; opacity: .75; }
-      #${ID.panel} .tle-update-check:disabled { opacity: .45; cursor: default; }
+      #${ID.panel} .tle-version-meta > button { white-space: nowrap; }
       #${ID.nav} > button { position: relative; }
       #${ID.nav} .tle-engine-update-dot { position: absolute; top: 2px; right: 2px; width: 7px; height: 7px; border-radius: 50%; background: #63ae84; pointer-events: none; box-shadow: 0 0 0 1px var(--SmartThemeBlurTintColor, #282027); }
       #${ID.nav} .tle-engine-update-dot[hidden] { display: none !important; }
@@ -11309,14 +11336,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.262 · 分组工具栏顺序与重命名操作优化</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.263 · 分组工具栏顺序与重命名操作优化</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.262</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.263</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11326,11 +11353,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           </label>
           <p class="tle-muted tle-update-policy" data-tle-update-policy>仅自动安装校验通过的正式版，失败时保留回滚；不支持时会明确提示。</p>
           <div class="tle-version-meta">
-            <button type="button" class="tle-update-pill" data-tle-action="install-update" hidden>可更新</button>
-            <button type="button" class="tle-update-check" data-tle-action="check-update" hidden>检查更新</button>
-            <button type="button" class="tle-update-check" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>
-            <button type="button" class="tle-update-check" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>
-            <button type="button" class="tle-update-pill" data-tle-action="install-loader-update" hidden>更新 Loader</button>
+            <button type="button" class="menu_button tle-update-pill" data-tle-action="install-update" hidden>可更新</button>
+            <button type="button" class="menu_button tle-update-check" data-tle-action="check-update" hidden>检查更新</button>
+            <button type="button" class="menu_button tle-update-check" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>
+            <button type="button" class="menu_button tle-update-check" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>
+            <button type="button" class="menu_button tle-update-pill" data-tle-action="install-loader-update" hidden>更新 Loader</button>
           </div>
           <small class="tle-muted" data-tle-loader-status aria-live="polite">正在连接远程更新服务…</small>
             </div>
@@ -13248,9 +13275,27 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return fields;
   }
-  function companionPlanDetails(plan) {
-    return COMPANION_FIELDS.filter(field => plan.fields[field.id])
-      .map(field => field.name + '：' + (plan.fields[field.id].label || plan.fields[field.id].value)).join(' · ');
+  function companionPlanPreview(plan) {
+    const preview = quickNode('div', 'tle-companion-preview');
+    const fields = COMPANION_FIELDS.filter(field => plan.fields?.[field.id]);
+    if (!fields.length) {
+      preview.append(quickNode('small', 'tle-companion-preview-empty', '空方案'));
+      return preview;
+    }
+    for (const field of fields) {
+      const saved = plan.fields[field.id] || {};
+      const item = quickNode('div', 'tle-companion-preview-item'
+        + (field.id === 'worldInfo' ? ' is-world-info' : ''));
+      const label = quickNode('span', 'tle-companion-preview-label', field.name);
+      const rawValue = saved.label ?? saved.value;
+      const valueText = Array.isArray(rawValue)
+        ? rawValue.map(value => String(value)).join('、')
+        : rawValue == null || rawValue === '' ? '—' : String(rawValue);
+      const value = quickNode('span', 'tle-companion-preview-value', valueText);
+      item.append(label, value);
+      preview.append(item);
+    }
+    return preview;
   }
   function companionTextButton(label, action) {
     return quickButton(label, action, 'menu_button');
@@ -13389,7 +13434,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       controls.append(setDefault, apply);
       headingRow.append(titleRow, controls);
       summary.append(headingRow);
-      summary.append(quickNode('small', '', companionPlanDetails(plan) || '空方案'));
+      summary.append(companionPlanPreview(plan));
       row.append(summary);
       list.append(row);
     }
@@ -13648,7 +13693,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (data.schedules?.[role.key]?.enabled && data.schedules[role.key].nightPlanId === plan.id)
           titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
         copy.append(titleRow);
-        copy.append(quickNode('small', '', companionPlanDetails(plan)));
+        copy.append(companionPlanPreview(plan));
         const actions = quickNode('div', 'tle-companion-actions');
         const defaultButton = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
           if (companionToggleDefault(plan.id, role)) render();
@@ -17606,7 +17651,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.262',
+    version: '0.3.263',
     ready: false,
     destroy,
     state,
@@ -18057,5 +18102,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.262 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.263 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

@@ -2,20 +2,18 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.262 · 配套方案与查找替换布局优化
+## 开发分支测试版 v0.3.263 · 配套方案预览与更新按钮原生化
 
-本次测试更新：整理配套方案列表操作行，并重做整理侠查找替换页的窄屏布局。
+本次测试更新针对两个未完成的视觉问题：配套方案预览不再显示为一整段摘要文字；引擎面板更新按钮恢复酒馆原生按钮外观。
 
-- **配套方案：** 「设为默认 / 取消默认」与「应用」放到方案标题行右侧，配置摘要独立放在下方。
-- **整理侠标题：** 移动端恢复清晰顺序：整理侠标题、资源整理/查找替换标签、同步/导入/导出工具。
-- **查找替换：** 查找与替换分行；搜索范围与备份恢复按钮按可用宽度换行；移除操作区内部滚动条，让结果列表占用剩余空间。
-- **功能保持：** 不改扫描、替换、预览、规则组合及备份恢复逻辑；继续使用酒馆原生按钮样式。
-- 保留 v0.3.261 已验证的 TT 宿主重启后自动恢复角色默认方案逻辑。
+- **配套方案预览：** 使用统一的字段化双列布局，每项分别显示字段名与配置值；全局世界书占整行。方案列表和方案管理页共用同一组件。
+- **引擎更新按钮：** 五个更新/检查/接管操作统一增加酒馆原生 `menu_button` 类。
+- **样式清理：** 删除更新按钮原有的自定义背景、边框、圆角、内边距和文字样式，不再覆盖当前主题。
+- 不改配套方案保存、应用与自动更新业务逻辑。
 
 仅更新开发分支测试通道；正式 Stable Core、Loader 和 Bootstrap 不变。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.262/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
-
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.263/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 ## 一次安装，后续自动更新
 
 正式发布：**Core v0.3.259 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。

@@ -2,7 +2,7 @@
 
 Development branch: `feature/organizer-nav-worldbooks-20261125`
 
-Current test Core: `v0.3.262`
+Current test Core: `v0.3.263`
 
 ## Import once
 
@@ -16,8 +16,8 @@ The installer is disabled by default. It reads the test manifest from this devel
 2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
 3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
 4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.262**.
-6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.231**.
+5. Confirm the native prompt to install **TLE Core v0.3.263**.
+6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.263**.
 
 Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
 
@@ -58,7 +58,7 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 - On desktop, confirm the original three-column workspace remains unchanged and pane tint uses `rgb(from var(--SmartThemeQuoteColor) r g b / .12)`.
 - Check PC and mobile layouts separately, then repeat in ST and TT as applicable.
 
-### Organizer layout refinements (v0.3.262)
+### Organizer layout refinements (v0.3.263)
 
 - In the Companion Plans tab, confirm each plan's name and status badges remain on the left, with **设为默认 / 取消默认** and **应用** aligned on the right of the same title row.
 - Confirm the plan configuration summary is displayed below the title row; long names and badges must not overlap the action buttons.
@@ -67,6 +67,15 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 - Confirm the controls area has no independent vertical scrollbar. The result list occupies the remaining height and owns its scrolling.
 - Confirm advanced rules remain collapsed initially and still expose combinations, extra rules, and JSON/YAML paths when expanded.
 - Repeat in ST and TT where available; source-level tests do not replace real-host visual acceptance.
+
+### Companion preview and native update buttons (v0.3.263)
+
+- Open the Companion Plans list. Confirm connection profile, API source, model, preset, reasoning format, UI theme and saved World Info are displayed as separate labeled fields, not one continuous prose paragraph.
+- Confirm the preview uses a compact two-column layout where space permits; long values wrap without horizontal overflow. The World Info item spans the full preview width.
+- Open **配套侠 · 方案管理** and confirm its plan previews use the same structured layout as the compact list.
+- Open TLE → **版本与更新**. Confirm all five update-related actions (Core install, Core check, Loader adoption, Loader check, Loader install) visibly inherit the host's native `menu_button` appearance.
+- Confirm hidden/disabled states, dynamic button labels and click handlers remain unchanged.
+- Repeat in ST and TT with the active themes; verify narrow mobile widths and both light/dark themes.
 
 ## Return to stable
 
