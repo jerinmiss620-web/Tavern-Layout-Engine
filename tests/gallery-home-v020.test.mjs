@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.10.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.11.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
@@ -171,7 +171,9 @@ test('renders a bounded portrait gallery with native card structure and independ
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .renameChat'));
     assert.ok(cards[0].querySelector('.freesia-gallery-card-date-row .chatActions .deleteChat'));
     assert.equal(cards[0].querySelector('.freesia-gallery-card-toolbar'), null);
-    assert.match(css, /\.freesia-gallery-chat-count \{ position: absolute;[^}]*background: linear-gradient\(to top/);
+    assert.match(css, /\.freesia-gallery-chat-count \{ position: absolute;[^}]*background: none; filter: drop-shadow\(0 1px 2px rgba\(0, 0, 0, 0\.95\)\)/);
+    assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*linear-gradient/);
+    assert.doesNotMatch(css, /\.freesia-gallery-chat-count \{[^}]*background: linear-gradient/);
     assert.match(css, /\.freesia-gallery-card > \.freesia-gallery-character-pin \{ position: absolute/);
     assert.match(css, /\.freesia-gallery-card-date-row \{ display: flex !important;[^}]*justify-content: space-between !important/);
     assert.match(css, /\.freesia-gallery-card-actions \{ display: flex; flex: 0 0 auto/);
