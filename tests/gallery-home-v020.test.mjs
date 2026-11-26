@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { JSDOM } from 'jsdom';
 
-const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.1.js', import.meta.url));
+const scriptPath = fileURLToPath(new URL('../development/gallery-home/Freesia-Gallery-Home-0.2.2.js', import.meta.url));
 const script = readFileSync(scriptPath, 'utf8');
 
 function createHomeMarkup() {
