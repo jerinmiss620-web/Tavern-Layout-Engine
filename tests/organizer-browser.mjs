@@ -53,38 +53,22 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.waitForFunction(()=>window.harness?.content);
  await page.setViewportSize({width:1440,height:1000});
  const search=page.locator('#tle-organizer-panel input[type=search]');assert.equal(await search.count(),1);
- const modeButtons=page.locator('#tle-organizer-panel .tle-content-mode-switch > button');
- assert.equal(await modeButtons.count(),2,'Both ordinary mode buttons must always exist');
- const initialModeState=await modeButtons.evaluateAll(buttons=>buttons.map(button=>({
-  native:button.classList.contains('menu_button')&&button.classList.contains('menu_button_icon'),
-  active:button.classList.contains('active'),
-  pressed:button.getAttribute('aria-pressed'),
-  visible:!!(button.offsetWidth||button.offsetHeight||button.getClientRects().length)
- })));
- assert.deepEqual(initialModeState,[
-  {native:true,active:true,pressed:'true',visible:true},
-  {native:true,active:false,pressed:'false',visible:true}
- ]);
- const nativeStyleMatches=await modeButtons.evaluateAll(buttons=>{
-  const properties=['backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','paddingTop','paddingRight','color','fontSize','fontWeight','fontFamily','boxShadow'];
-  return buttons.map(button=>{
-   const probe=document.createElement('button');
-   probe.className='menu_button menu_button_icon'+(button.classList.contains('active')?' active':'');
-   probe.textContent='native';
-   button.parentElement.append(probe);
-   const actual=getComputedStyle(button),expected=getComputedStyle(probe);
-   const matches=properties.every(property=>actual[property]===expected[property]);
-   probe.remove();
-   return matches;
-  });
+ const modeToggle=page.getByRole('checkbox',{name:'查找和替换',exact:true});
+ assert.equal(await modeToggle.count(),1,'One native checkbox controls the content-search module');
+ assert.equal(await modeToggle.isChecked(),false,'Resource management is the default mode');
+ assert.equal(await modeToggle.getAttribute('class'),null,'The native checkbox has no custom class');
+ assert.equal(await modeToggle.getAttribute('style'),null,'The native checkbox has no inline styling');
+ const nativeCheckboxStyle=await modeToggle.evaluate(toggle=>{
+  const probe=document.createElement('input');probe.type='checkbox';toggle.parentElement.append(probe);
+  const properties=['appearance','accentColor','backgroundColor','borderTopColor','borderTopStyle','borderTopWidth','borderTopLeftRadius','width','height','marginTop','marginRight','color','boxShadow'];
+  const actual=getComputedStyle(toggle),expected=getComputedStyle(probe);
+  const matches=properties.every(property=>actual[property]===expected[property]);
+  probe.remove();return matches;
  });
- assert.deepEqual(nativeStyleMatches,[true,true],'Mode buttons must use unmodified SillyTavern menu_button styles');
+ assert.equal(nativeCheckboxStyle,true,'The mode toggle inherits the host checkbox appearance');
  await search.fill('预设');assert.equal(await page.locator('.tle-quick-list>.tle-quick-item').count(),1);
- await page.getByRole('button',{name:'查找与替换',exact:true}).click();await page.waitForFunction(()=>!harness.content.busy);
- assert.equal(await modeButtons.nth(0).getAttribute('aria-pressed'),'false');
- assert.equal(await modeButtons.nth(0).evaluate(button=>button.classList.contains('active')),false);
- assert.equal(await modeButtons.nth(1).getAttribute('aria-pressed'),'true');
- assert.equal(await modeButtons.nth(1).evaluate(button=>button.classList.contains('active')),true);
+ await modeToggle.check();await page.waitForFunction(()=>!harness.content.busy);
+ assert.equal(await modeToggle.isChecked(),true);
  await search.fill('旧签名');await page.getByLabel('替换为',{exact:true}).fill('');
  await page.getByRole('button',{name:'查找',exact:true}).click();await page.waitForFunction(()=>!harness.content.busy&&harness.content.snapshot?.status==='ready');
  assert.equal(await page.locator('#tle-organizer-panel .tle-quick-list').count(),1);
@@ -99,16 +83,15 @@ try{
  await page.getByRole('button',{name:'返回选择',exact:true}).click();
  for(const width of [320,375,390,768]){
   await page.setViewportSize({width,height:844});
-  assert.equal(await modeButtons.nth(0).isVisible(),true);assert.equal(await modeButtons.nth(1).isVisible(),true);
+  assert.equal(await modeToggle.isVisible(),true);
   const bounds=await page.evaluate(()=>({document:document.documentElement.scrollWidth,viewport:innerWidth,search:document.querySelector('#tle-organizer-panel input[type=search]').getBoundingClientRect().toJSON(),list:document.querySelector('.tle-quick-list').getBoundingClientRect().toJSON()}));
   assert.ok(bounds.document<=bounds.viewport+1,`horizontal page overflow at ${width}: ${JSON.stringify(bounds)}`);
   assert.ok(bounds.search.width>70&&bounds.search.height>15,`search size at ${width}: ${JSON.stringify(bounds)}`);
   assert.ok(bounds.list.height>50,`list remains usable at ${width}: ${JSON.stringify(bounds)}`);
   await page.screenshot({path:path.join(output,`mobile-${width}.png`),fullPage:true});
  }
- await page.getByRole('button',{name:'资源名称',exact:true}).click();await page.waitForFunction(()=>!harness.content.busy);
- assert.equal(await modeButtons.nth(0).getAttribute('aria-pressed'),'true');assert.equal(await modeButtons.nth(0).evaluate(button=>button.classList.contains('active')),true);
- assert.equal(await modeButtons.nth(1).getAttribute('aria-pressed'),'false');assert.equal(await search.inputValue(),'预设');
+ await modeToggle.uncheck();await page.waitForFunction(()=>!harness.content.busy);
+ assert.equal(await modeToggle.isChecked(),false);assert.equal(await search.inputValue(),'预设');
  assert.equal(await page.getByRole('button',{name:'批量删除资源',exact:true}).isVisible(),true);
  await page.locator('.tle-quick-list .tle-quick-item-check').check();assert.equal(await page.getByRole('button',{name:'批量删除资源',exact:true}).isEnabled(),true);
  await page.getByRole('button',{name:'批量删除资源',exact:true}).click();assert.equal(await page.getByRole('button',{name:'确认删除 1 项',exact:true}).isVisible(),true);
