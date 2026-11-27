@@ -13461,6 +13461,30 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return result;
   }
+  function companionPromptBaselineRestoreIssue(order, prompts, states, canToggle) {
+    const entries = Array.isArray(order) ? order : [];
+    const promptList = Array.isArray(prompts) ? prompts : [];
+    const byId = new Map();
+    for (const entry of entries) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      if (!byId.has(id)) byId.set(id, entry);
+    }
+    const promptMap = new Map(promptList.filter(prompt => prompt?.identifier != null)
+      .map(prompt => [String(prompt.identifier), prompt]));
+    const missing = [];
+    const locked = [];
+    for (const [id, enabled] of Object.entries(states || {})) {
+      const entry = byId.get(id);
+      const prompt = promptMap.get(id);
+      if (!entry || !prompt) {
+        missing.push(id);
+        continue;
+      }
+      if (!canToggle(prompt) && Boolean(entry.enabled) !== Boolean(enabled)) locked.push(id);
+    }
+    return { missing, locked };
+  }
   function companionPromptCurrentPresetName(context, manager) {
     try {
       const presetManager = context?.getPresetManager?.('openai');
@@ -13549,12 +13573,44 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return baseline;
   }
-  function companionPromptRestoreBaseline(manager, presetName) {
-    const baseline = companionRead().promptBaselines[presetName];
+  function companionPromptRestoreBaseline(manager, presetName, fallbackBaseline = null) {
+    const fail = message => {
+      const error = new Error(message);
+      error.code = 'TLE_PROMPT_BASELINE_RESTORE_FAILED';
+      return error;
+    };
+    let baseline = null;
+    try { baseline = companionRead().promptBaselines[presetName]; } catch {}
+    if (!baseline || typeof baseline !== 'object' || !Object.keys(baseline).length) baseline = fallbackBaseline;
     if (!baseline || typeof baseline !== 'object' || !Object.keys(baseline).length) {
-      throw new Error('找不到预设「' + (presetName || '未知') + '」的原始条目状态。');
+      throw fail('找不到预设「' + (presetName || '未知') + '」的原始条目状态。');
+    }
+    const order = companionPromptOrder(manager);
+    const prompts = manager?.serviceSettings?.prompts;
+    if (!Array.isArray(order) || !Array.isArray(prompts)) {
+      throw fail('预设「' + (presetName || '未知') + '」的原始条目列表尚未就绪，无法安全恢复。');
+    }
+    const canToggle = prompt => companionPromptCanToggle(manager, prompt);
+    const issue = companionPromptBaselineRestoreIssue(order, prompts, baseline, canToggle);
+    if (issue.missing.length || issue.locked.length) {
+      const details = [];
+      if (issue.missing.length) details.push('找不到条目标识：' + issue.missing.slice(0, 8).join('、') + (issue.missing.length > 8 ? ' 等' : ''));
+      if (issue.locked.length) details.push('条目被锁定且当前状态与原始状态不同：' + issue.locked.slice(0, 8).join('、') + (issue.locked.length > 8 ? ' 等' : ''));
+      throw fail('预设「' + (presetName || '未知') + '」的原始条目状态无法完整恢复（' + details.join('；') + '）。为避免角色专属状态串用，已停止后续操作。');
     }
     const result = companionPromptApplyToManager(manager, baseline);
+    const verify = companionPromptBaselineRestoreIssue(
+      companionPromptOrder(manager),
+      manager?.serviceSettings?.prompts,
+      baseline,
+      canToggle,
+    );
+    if (verify.missing.length || verify.locked.length) {
+      const details = [];
+      if (verify.missing.length) details.push('找不到条目标识：' + verify.missing.join('、'));
+      if (verify.locked.length) details.push('无法恢复的锁定条目标识：' + verify.locked.join('、'));
+      throw fail('预设「' + (presetName || '未知') + '」恢复后核验失败（' + details.join('；') + '）。为避免角色专属状态串用，已停止后续操作。');
+    }
     return { baseline, result };
   }
   function companionPromptRoleStateExists(overlay) {
@@ -13632,12 +13688,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (currentRole?.key !== overlay.roleKey || currentPreset !== overlay.presetName) {
           if (strategy === 'global' && currentPreset === overlay.presetName) {
             try {
-              const stored = companionRead().promptBaselines[overlay.presetName];
-              const baseline = stored && Object.keys(stored).length ? stored : fallbackBaseline;
-              if (baseline) companionPromptApplyToManager(manager, baseline);
+              companionPromptRestoreBaseline(manager, overlay.presetName, fallbackBaseline);
               manager.render?.(false);
             } catch (error) {
+              companionNotice('error', '保存后无法完整恢复预设原始条目状态；已保留旧角色隔离标记，阻止后续角色方案继续应用。');
               console.warn('[配套侠] 保存后恢复原始预设条目状态失败', error);
+              return;
             }
           }
           companionRuntime.promptOverlay = null;
@@ -13715,7 +13771,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         companionPromptStoreBaseline(presetName, snapshot.states, true);
         try {
           const nextBaseline = companionRead().promptBaselines[presetName] || baseline;
-          companionPromptApplyToManager(manager, nextBaseline);
+          companionPromptRestoreBaseline(manager, presetName, nextBaseline);
           manager.render?.(false);
           return persistBaseline(true, nextBaseline);
         } catch (error) {
@@ -13806,6 +13862,24 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       return { changed: 0, issue: error?.message || String(error) };
     }
   }
+  async function companionPromptPreflight(plan, role) {
+    const saved = plan?.fields?.promptEntries?.byRole?.[role.key];
+    if (!saved) return null;
+    try {
+      const { manager, presetName, strategy } = await companionPromptManager(true);
+      if (!saved.presetName || saved.presetName !== presetName) {
+        return { skippedReason: '方案记录的预设为「' + (saved.presetName || '未知') + '」，当前加载的是「' + (presetName || '未知') + '」。请先加载方案对应的预设，或重新读取当前条目状态。' };
+      }
+      if (strategy === 'global') {
+        companionPromptEnsureBaseline(manager, presetName);
+        companionPromptRestoreBaseline(manager, presetName);
+      }
+      return null;
+    } catch (error) {
+      if (error?.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED') throw error;
+      return { skippedReason: error?.message || '当前无法读取原生预设条目状态。' };
+    }
+  }
   function companionPromptReapplyActiveOverlay() {
     const overlay = companionRuntime.promptOverlay;
     const manager = companionRuntime.promptManager;
@@ -13884,8 +13958,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     if (overlay && strategy === 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
       if (!companionPromptRoleStateExists(overlay)) {
-        const baseline = companionRead().promptBaselines[presetName];
-        if (baseline) companionPromptApplyToManager(manager, baseline);
+        try { companionPromptRestoreBaseline(manager, presetName); }
+        catch (error) {
+          companionNotice('error', '无法完整恢复预设原始条目状态；已保留角色隔离标记，阻止原生保存。');
+          console.warn('[配套侠] 设置更新时恢复预设原始条目状态失败', error);
+          return;
+        }
         manager.render?.(false);
         companionRuntime.promptOverlay = null;
         companionPromptClearActive(overlay);
@@ -13897,17 +13975,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       catch { return; }
       const baseline = companionRead().promptBaselines[presetName];
       if (!baseline) return;
-      companionPromptStoreBaseline(presetName, snapshot.states, true);
-      companionPromptApplyToManager(manager, companionRead().promptBaselines[presetName] || baseline);
-      manager.render?.(false);
-      if (!companionPromptPersistCurrentSettings(manager, context)) companionPromptReapplyActiveOverlay();
+      if (!companionPromptStoreBaseline(presetName, snapshot.states, true)) {
+        companionNotice('warning', '新增条目的原始状态未能记录；已保留当前角色方案，未执行原生保存。');
+        companionPromptReapplyActiveOverlay();
+        return;
+      }
+      try {
+        companionPromptRestoreBaseline(manager, presetName);
+        manager.render?.(false);
+        if (!companionPromptPersistCurrentSettings(manager, context)) companionPromptReapplyActiveOverlay();
+      } catch (error) {
+        companionNotice('error', '无法完整恢复预设原始条目状态；已保留当前角色隔离状态，并阻止原生保存。');
+        console.warn('[配套侠] 设置更新时恢复预设原始条目状态失败', error);
+        companionPromptReapplyActiveOverlay();
+      }
       return;
     }
     if (overlay) {
       const samePreset = presetName === overlay.presetName;
       if (strategy === 'global' && samePreset) {
-        const baseline = companionRead().promptBaselines[overlay.presetName];
-        if (baseline) companionPromptApplyToManager(manager, baseline);
+        try { companionPromptRestoreBaseline(manager, overlay.presetName); }
+        catch (error) {
+          companionNotice('error', '无法完整恢复预设原始条目状态；已保留旧角色隔离标记，阻止后续角色方案继续应用。');
+          console.warn('[配套侠] 设置更新时恢复预设原始条目状态失败', error);
+          return;
+        }
         manager.render?.(false);
         companionRuntime.promptOverlay = null;
         companionPromptClearActive(overlay);
@@ -13932,8 +14024,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       throw new Error('方案记录的预设为「' + (saved.presetName || '未知') + '」，当前加载的是「' + (presetName || '未知') + '」。请先加载方案对应的预设，或重新读取当前条目状态。');
     }
     if (strategy === 'global') {
-      const baseline = companionPromptEnsureBaseline(manager, presetName);
-      companionPromptApplyToManager(manager, baseline);
+      companionPromptEnsureBaseline(manager, presetName);
+      companionPromptRestoreBaseline(manager, presetName);
     }
     const result = companionPromptApplyToManager(manager, saved.states || {});
     manager.render?.(false);
@@ -14642,12 +14734,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         throw new Error('无法安全恢复上一角色的原始预设条目状态，已停止应用新方案，避免角色状态串用或污染原始预设。' + resetResult.issue);
       }
       if (resetResult.changed) finished++;
+      const promptPreflight = await companionPromptPreflight(plan, role);
       for (const field of COMPANION_FIELDS) {
         const target = plan.fields[field.id];
         if (!target) continue;
         if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
         try {
           if (field.id === 'promptEntries') {
+            if (promptPreflight?.skippedReason) {
+              skipped.push({ name: field.name, target: '角色专属条目', reason: promptPreflight.skippedReason });
+              continue;
+            }
             const result = await companionApplyPromptEntries(target, role, id);
             if (result.noRoleState) continue;
             if (result.applied.length) finished++;
@@ -14684,6 +14781,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         } catch (error) {
           // Role changes and teardown are cancellation, not a missing plan item.
           if (state.destroyed || companionCurrentRole()?.key !== role.key) throw error;
+          if (error?.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED') throw error;
           skipped.push({
             name: field.name,
             target: String(target.label || target.value || '未命名项目'),
