@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const manifest = JSON.parse(read('channels/test.json'));
 const source = read('development/organizer/TLE.js');
-const previous = read('releases/v0.3.260/TLE.js');
+const previous = read('releases/v0.3.292/TLE.js');
 const release = read(manifest.release.source_path);
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
 
@@ -20,8 +20,8 @@ function section(text, startMarker, endMarker) {
   return text.slice(start, end);
 }
 
-// The change is deliberately limited to initialization/dispatch and schedule-token bookkeeping.
-// The configuration catalog, schedule calculation, manual hold and application engine stay intact.
+// This UI-only repair is compared with the exact v0.3.292 test-channel baseline.
+// The companion catalog, schedule calculation, manual hold and application engine must remain unchanged.
 assert.equal(
   section(source, '  const COMPANION_FIELDS = [', '  const companionRuntime = {'),
   section(previous, '  const COMPANION_FIELDS = [', '  const companionRuntime = {'),
