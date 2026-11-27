@@ -1,9 +1,9 @@
-// TLE integrated engine, based on 桃mini「哇！头像变清晰啦！」v4.5.13.
+// TLE integrated engine, based on 桃mini「哇！头像变清晰啦！」v4.5.14.
 // Original avatar-loading technique by 桃mini, integrated with the author's permission.
 // TLE host adaptation and compatibility handling: 小松鼠 & ChatGPT（小松7）.
 function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
   'use strict';
-  const VERSION = '4.5.13';
+  const VERSION = '4.5.14';
   const noop = () => false;
   if (WIN?.__TAURITAVERN__ || WIN?.__TAURI_RUNNING__ === true) {
     return { version: VERSION, owner: 'TT-native', host: 'tt', active: false, stop: noop,
@@ -15,9 +15,9 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
       getStatus: () => ({ version: VERSION, owner: 'TLE', host: 'st', active: false, reason: 'unsupported-host-api' }) };
   }
   const CHAT_SELECTOR = '.mesAvatarWrapper img';
-  const SELECTOR = '.mesAvatarWrapper img, #right-nav-panel #avatar-and-name-block .expander #avatar_div img, #right-nav-panel #rm_print_characters_block .character_select > .avatar img, #user_avatar_block > .avatar-container > .avatar img, .freesia-gallery-avatar img';
+  const SELECTOR = '.mesAvatarWrapper img, #right-nav-panel #avatar-and-name-block .expander #avatar_div img, #right-nav-panel #rm_print_characters_block .character_select > .avatar img, #user_avatar_block > .avatar-container > .avatar img, .freesia-gallery-avatar img, .freesia-gallery-avatar-frame img, .freesia-gallery-detail-avatar img';
   const INSTANCE = '__hdAvatar459Cleanup';
-  // Share the original instance key so standalone 桃mini 4.5.13 and TLE never
+  // Share the original instance key so standalone 桃mini 4.5.14 and TLE never
   // run two URL-rewriting engines against the same images.
   const previous = WIN[INSTANCE];
   if (typeof previous === 'function') {
@@ -231,7 +231,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
             else owner.eventRemoveListener?.(event, callback);
           });
         }
-      } catch (error) { console.warn('[高清头像 4.5.13] 事件绑定失败', name, error); }
+      } catch (error) { console.warn('[高清头像 4.5.14] 事件绑定失败', name, error); }
     }
   }
 
@@ -290,6 +290,6 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
     },
   };
   WIN.__TLE_HD_AVATAR_ENGINE__ = api;
-  console.log('[TLE HD Avatar] 桃mini 4.5.13 引擎已接管 ST 头像区域。');
+  console.log('[TLE HD Avatar] 桃mini 4.5.14 引擎已接管 ST 头像区域。');
   return api;
 }
