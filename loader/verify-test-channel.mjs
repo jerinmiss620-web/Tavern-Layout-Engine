@@ -151,7 +151,7 @@ assert.ok(tleSource.includes("organizerEntry: 'tle-organizer-entry'"), 'Dedicate
 assert.ok(tleSource.includes('state.organizerEntry = organizerEntry'), 'Organizer navigation item is not created');
 assert.ok(tleSource.includes("organizerEntry.className = 'drawer'"), 'Organizer must be a tenth native-shaped drawer');
 assert.ok(tleSource.includes("organizerToggle.className = 'drawer-toggle interactable'"), 'Organizer must own a native drawer toggle');
-assert.ok(tleSource.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable'"), 'Organizer must use a native drawer icon');
+assert.ok(tleSource.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable closedIcon'"), 'Organizer must use the native drawer icon with its initial closed state');
 assert.ok(tleSource.includes("panel.className = 'drawer-content closedDrawer'"), 'Organizer must own a drawer-content');
 assert.ok(tleSource.includes('state.organizerEntry?.appendChild(panel)'), 'Organizer content must be nested inside its drawer');
 assert.ok(tleSource.includes('holder.insertBefore(state.organizerEntry, organizerPosition)'), 'Organizer must follow the nine native drawers');
