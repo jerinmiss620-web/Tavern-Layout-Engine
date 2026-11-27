@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.287
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.288
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3678,35 +3678,34 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 #tle-chat-tools-panel .tle-companion-toolbar,
 .tle-companion-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 #tle-chat-tools-panel .tle-companion-toolbar > strong { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
-.tle-companion-plan { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--SmartThemeBorderColor, #8886); }
-.tle-companion-copy { display: flex; flex: 1 1 170px; flex-direction: column; min-width: 0; gap: 4px; overflow-wrap: anywhere; }
+.tle-companion-plan { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0; padding: 5px 0; }
+.tle-companion-copy { display: flex; flex: 1 1 170px; flex-direction: column; min-width: 0; gap: 2px; overflow-wrap: anywhere; }
 .tle-companion-copy > small { opacity: .8; }
 .tle-companion-preview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
-  gap: 4px 12px;
+  gap: 2px 8px;
   width: 100%;
   min-width: 0;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 .tle-companion-preview-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
-  padding: 5px 0;
-  border-top: 1px solid var(--SmartThemeBorderColor, #8886);
+  padding: 1px 0;
 }
 .tle-companion-preview-label {
   color: var(--SmartThemeQuoteColor, inherit);
-  font-size: .74em;
-  line-height: 1.2;
-  opacity: .72;
+  font-size: .72em;
+  line-height: 1.1;
+  opacity: .7;
 }
 .tle-companion-preview-value {
   min-width: 0;
-  font-size: .84em;
-  line-height: 1.35;
+  font-size: .82em;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 .tle-companion-preview-item.is-world-info { grid-column: 1 / -1; }
@@ -11382,14 +11381,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.287 · 记录预览头像与渐变边界同步</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.288 · 记录预览头像与渐变边界同步</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.287</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.288</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11399,11 +11398,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           </label>
           <p class="tle-muted tle-update-policy" data-tle-update-policy>仅自动安装校验通过的正式版，失败时保留回滚；不支持时会明确提示。</p>
           <div class="tle-version-meta">
-            <button type="button" class="menu_button tle-update-pill" data-tle-action="install-update" hidden>可更新</button>
-            <button type="button" class="menu_button tle-update-check" data-tle-action="check-update" hidden>检查更新</button>
-            <button type="button" class="menu_button tle-update-check" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>
-            <button type="button" class="menu_button tle-update-check" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>
-            <button type="button" class="menu_button tle-update-pill" data-tle-action="install-loader-update" hidden>更新 Loader</button>
+            <button type="button" class="menu_button" data-tle-action="install-update" hidden>可更新</button>
+            <button type="button" class="menu_button" data-tle-action="check-update" hidden>检查更新</button>
+            <button type="button" class="menu_button" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>
+            <button type="button" class="menu_button" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>
+            <button type="button" class="menu_button" data-tle-action="install-loader-update" hidden>更新 Loader</button>
           </div>
           <small class="tle-muted" data-tle-loader-status aria-live="polite">正在连接远程更新服务…</small>
             </div>
@@ -18038,7 +18037,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.287';
+    const VERSION = '0.3.288';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -20054,7 +20053,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.287',
+    version: '0.3.288',
     ready: false,
     destroy,
     state,
@@ -20512,5 +20511,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.287 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.288 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
