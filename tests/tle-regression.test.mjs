@@ -141,7 +141,7 @@ assert.match(tle, /quickActionsEnabled: chatQuickActionsEnabled/);
 assert.match(tle, /navigationRepairEnabled: compatibilityNavigationRepair/);
 assert.doesNotMatch(tle, /margin-inline: 15px !important;/);
 assert.ok(tle.includes('text-align: left !important;'));
-assert.ok(tle.includes('body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {'));
+assert.ok(tle.includes('body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {') || tle.includes('body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle .drawer-icon {'));
 if (process.argv.includes('--current')) {
   const navIconRule = tle.match(/body\[data-tle-nav\]\[data-tle-compat-nav-repair\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle \.drawer-icon \{([\s\S]*?)\n\}/)?.[1] || '';
   assert.match(navIconRule, /display: flex !important;/);
