@@ -2,7 +2,7 @@
 
 - 测试通道：`channels/test.json`，版本 `0.3.287`；源码：`releases/v0.3.287/TLE.js`。
 - 不可变源码 Commit：`fc29e5a9076f4a6bacfd98dc927f0f687a7b917c`。
-- SHA-256：`1a60903506e6b7a2285fe68f789f0c1e405f43c49d489dd918e25dd36e140cfd`；UTF-8 字节数：`979485`。
+- SHA-256：`993056acd37d9e3ac326fbbae4c1471ebcf8ed8968d1973714af4fde2f68a49c`；UTF-8 字节数：`979485`。
 - 开发 Core 源码、不可变发布源码及禁用状态测试导入包内嵌的 Core 完全一致；画廊模块逐字节嵌入 Core。
 - 移动端 820px 断点内 `--freesia-gallery-detail-main-gap` 为 `5px`；列宽 104px、列间距 8px 不变。
 - 画廊 CSS 结构测试覆盖无重复选择器、模块/Core 同步及移动端布局规则。

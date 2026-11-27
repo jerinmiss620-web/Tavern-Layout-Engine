@@ -10,7 +10,7 @@
     "source_commit": "fc29e5a9076f4a6bacfd98dc927f0f687a7b917c",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/fc29e5a9076f4a6bacfd98dc927f0f687a7b917c/releases/v0.3.287/TLE.js",
     "changelog_path": "releases/v0.3.287/CHANGELOG.md",
-    "sha256": "1a60903506e6b7a2285fe68f789f0c1e405f43c49d489dd918e25dd36e140cfd",
+    "sha256": "993056acd37d9e3ac326fbbae4c1471ebcf8ed8968d1973714af4fde2f68a49c",
     "size_bytes": 979485
   },
   "status": "TEST v0.3.287：移动端记录详情右侧资料区内部纵向间距调整为 5px；保持 104px 头像列与 8px 列间距。保留 v0.3.286 统一头像圆角及 v0.3.285 高清头像兼容。仅测试分支，正式版不变。",
