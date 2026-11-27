@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.285",
+  "latest_version": "0.3.286",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.285",
-    "source_path": "releases/v0.3.285/TLE.js",
-    "source_commit": "6c1b4b720febdcb6b3b32880df1a1268d4b36500",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6c1b4b720febdcb6b3b32880df1a1268d4b36500/releases/v0.3.285/TLE.js",
-    "changelog_path": "releases/v0.3.285/CHANGELOG.md",
-    "sha256": "7cfa2d602da9b5c2fc01ee38287563a04f65b5de871516c66af0b3cd4dc8c675",
-    "size_bytes": 979247
+    "version": "0.3.286",
+    "source_path": "releases/v0.3.286/TLE.js",
+    "source_commit": "d5dd4bb79be5ee4176a954a167d97b60e9a50668",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/d5dd4bb79be5ee4176a954a167d97b60e9a50668/releases/v0.3.286/TLE.js",
+    "changelog_path": "releases/v0.3.286/CHANGELOG.md",
+    "sha256": "9238b5e005ebe47f13ca66bede395fe7b6fa6aef666b098109e41b16a64225bb",
+    "size_bytes": 979485
   },
-  "status": "TEST v0.3.285：修复记录预览与记录详情高清头像失效。TLE 内置高清头像引擎现在识别新的 .freesia-gallery-avatar-frame，同时保留旧结构兼容；并延续 v0.3.284 整理侠图标状态修复。仅测试分支，正式版不变。",
+  "status": "TEST v0.3.286：统一记录详情头像与记录预览卡片的 12px 圆角。共享同一头像圆角变量，详情页外层容器裁切，内部图片继承圆角。保留 v0.3.285 高清头像选择器修复。仅测试分支，正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
