@@ -7,8 +7,8 @@ const manifest = JSON.parse(read('channels/test.json'));
 const source = read(manifest.release.source_path);
 
 assert.equal(manifest.release.version, '0.3.278');
-assert.equal(manifest.latest_version, '0.3.275');
-assert.ok(source.includes("version: '0.3.275'"));
+assert.equal(manifest.latest_version, '0.3.278');
+assert.ok(source.includes("version: '0.3.278'"));
 new vm.Script(source, { filename: 'TLE v' + manifest.release.version });
 
 function section(text, startMarker, endMarker) {
