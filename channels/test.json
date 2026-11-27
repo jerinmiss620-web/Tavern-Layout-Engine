@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.290",
     "source_path": "releases/v0.3.290/TLE.js",
-    "source_commit": "c3b5764bb10765e41fd70bee56e0cd6aa58f0bf9",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c3b5764bb10765e41fd70bee56e0cd6aa58f0bf9/releases/v0.3.290/TLE.js",
+    "source_commit": "aaac70c8ef6f9aac7019c359622a82c3efa46e1b",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/aaac70c8ef6f9aac7019c359622a82c3efa46e1b/releases/v0.3.290/TLE.js",
     "changelog_path": "releases/v0.3.290/CHANGELOG.md",
-    "sha256": "0f3362b8919e72ac91175d6683055757012eed83ccf3bfea603bfe76c32d61b4",
-    "size_bytes": 999384
+    "sha256": "3d5725349aafd5f22ca745a918b2db5d0ec3bf57aa3e39151a9b2996091945fe",
+    "size_bytes": 1001612
   },
-  "status": "TEST v0.3.290：配套侠新增角色专属提示词条目状态快照。只保存稳定 identifier 与 enabled，不复制预设正文或顺序；编辑正文、名称和排序不影响匹配。新增条目保留预设当前状态，删除或无法匹配的条目单独跳过。正式 latest.json 保持 v0.3.289。",
+  "status": "TEST v0.3.290：配套侠新增角色专属提示词条目状态快照。只保存稳定 identifier 与 enabled，不复制预设正文或顺序；切换角色时先重新加载绑定的最新预设作为基线，再叠加角色专属开关状态。正文、名称和排序变化不影响匹配；新增条目沿用预设当前保存状态，删除或无法匹配的条目单独跳过。正式 latest.json 保持 v0.3.289。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
