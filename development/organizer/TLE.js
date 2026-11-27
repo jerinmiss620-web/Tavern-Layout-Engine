@@ -3731,6 +3731,8 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 .tle-companion-field { display: grid; grid-template-columns: auto minmax(64px, .6fr) minmax(0, 2fr); align-items: center; gap: 7px; min-width: 0; }
 .tle-companion-field > .text_pole { width: 100%; min-width: 0; }
 .tle-companion-field-label { font-size: .88em; }
+.tle-companion-prompt-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; min-width: 0; }
+.tle-companion-prompt-tools > small { min-width: 0; overflow-wrap: anywhere; }
 .tle-companion-default { display: flex; flex-direction: row !important; align-items: center; gap: 8px; }
 .tle-companion-actions > .menu_button { white-space: nowrap; }
 .tle-companion-default-action {
@@ -13333,11 +13335,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 // 配套侠：角色方案与当前宿主快切控件共享同一套原生切换器。
   const COMPANION_KEY = 'tle.companion.v1';
   const COMPANION_PAGE_STARTUP_KEY = '__TLE_COMPANION_PAGE_STARTUP_V1__';
+  const COMPANION_PROMPT_BRIDGE_KEY = '__TLE_COMPANION_PROMPT_SAVE_BRIDGE_V1__';
   const COMPANION_FIELDS = [
     { id: 'profile', name: '连接配置', type: 'api' },
     { id: 'source', name: '接口来源', type: 'api' },
     { id: 'model', name: '模型', type: 'api' },
     { id: 'preset', name: '预设', type: 'preset' },
+    { id: 'promptEntries', name: '预设条目开关', type: 'promptEntries' },
     { id: 'reasoning', name: '推理格式', type: 'reasoning' },
     { id: 'worldInfo', name: '全局世界书', type: 'worldInfo' },
     { id: 'theme', name: 'UI 主题', type: 'theme' },
@@ -13347,6 +13351,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     pending: null, source: null, listeners: [], scheduleTimer: 0,
     generationRetryTimer: 0, lastScheduleToken: '',
     startupRestorePending: false, startupRetryTimer: 0,
+    promptOverlay: null, promptManager: null, promptBridge: null, promptResetPending: false,
   };
   function companionIsFreshHostStartup(previousInstance, pageAlreadyInitialized) {
     return !previousInstance && !pageAlreadyInitialized;
@@ -13371,13 +13376,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           schedules: raw.schedules && typeof raw.schedules === 'object' ? raw.schedules : {},
           manualHolds: raw.manualHolds && typeof raw.manualHolds === 'object' ? raw.manualHolds : {},
           scheduleTokens: raw.scheduleTokens && typeof raw.scheduleTokens === 'object' ? raw.scheduleTokens : {},
+          promptBaselines: raw.promptBaselines && typeof raw.promptBaselines === 'object' ? raw.promptBaselines : {},
+          promptActive: raw.promptActive && typeof raw.promptActive === 'object' ? raw.promptActive : {},
         };
       }
     } catch (error) { console.warn('[配套侠] 读取方案失败', error); }
-    return { schema: 1, plans: [], defaults: {}, schedules: {}, manualHolds: {}, scheduleTokens: {} };
+    return { schema: 1, plans: [], defaults: {}, schedules: {}, manualHolds: {}, scheduleTokens: {}, promptBaselines: {}, promptActive: {} };
   }
   function companionSave(data) {
     try {
+      data.promptBaselines = data.promptBaselines && typeof data.promptBaselines === 'object' ? data.promptBaselines : {};
+      data.promptActive = data.promptActive && typeof data.promptActive === 'object' ? data.promptActive : {};
       HOST_WIN.localStorage.setItem(COMPANION_KEY, JSON.stringify(data));
       return true;
     } catch (error) {
@@ -13402,6 +13411,316 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (field.id === 'model') return item.section === '模型';
     return true;
   }
+  function companionPromptMergeStateMaps(existing, current) {
+    const merged = Object.create(null);
+    for (const [id, enabled] of Object.entries(existing || {})) if (id) merged[id] = Boolean(enabled);
+    for (const [id, enabled] of Object.entries(current || {})) if (id) merged[id] = Boolean(enabled);
+    return merged;
+  }
+  function companionPromptExtendStateMap(existing, current) {
+    const extended = companionPromptMergeStateMaps(existing, {});
+    for (const [id, enabled] of Object.entries(current || {})) {
+      if (id && !Object.prototype.hasOwnProperty.call(extended, id)) extended[id] = Boolean(enabled);
+    }
+    return extended;
+  }
+  function companionPromptApplyStateMap(order, states, promptMap, canToggle) {
+    const entries = Array.isArray(order) ? order : [];
+    const byId = new Map();
+    for (const entry of entries) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      if (!byId.has(id)) byId.set(id, entry);
+    }
+    const result = { applied: [], changed: [], missing: [], locked: [], newEntries: [] };
+    for (const [id, enabled] of Object.entries(states || {})) {
+      const entry = byId.get(id);
+      const prompt = promptMap.get(id);
+      if (!entry || !prompt) { result.missing.push(id); continue; }
+      if (!canToggle(prompt)) { result.locked.push(id); continue; }
+      result.applied.push(id);
+      const next = Boolean(enabled);
+      if (Boolean(entry.enabled) !== next) { entry.enabled = next; result.changed.push(id); }
+    }
+    for (const entry of entries) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      if (!Object.prototype.hasOwnProperty.call(states || {}, id) && promptMap.has(id) && canToggle(promptMap.get(id))) {
+        result.newEntries.push(id);
+      }
+    }
+    return result;
+  }
+  function companionPromptCurrentPresetName(context, manager) {
+    try {
+      const presetManager = context?.getPresetManager?.('openai');
+      const selected = presetManager?.getSelectedPresetName?.();
+      if (typeof selected === 'string' && selected.trim()) return selected.trim();
+    } catch {}
+    const configured = context?.chatCompletionSettings?.preset_settings_openai
+      ?? manager?.serviceSettings?.preset_settings_openai;
+    if (typeof configured === 'string' && configured.trim()) return configured.trim();
+    const select = quickSelect('settings_preset_openai');
+    const option = select?.selectedOptions?.[0] || select?.options[select.selectedIndex];
+    const label = String(option?.textContent || '').trim();
+    return label && label !== '—' ? label : '';
+  }
+  function companionPromptOrder(manager) {
+    if (!manager) return null;
+    const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+    if (strategy === 'global') {
+      const dummyId = manager.configuration?.promptOrder?.dummyId;
+      const list = manager.serviceSettings?.prompt_order?.find(item =>
+        dummyId != null && String(item?.character_id) === String(dummyId));
+      if (Array.isArray(list?.order)) return list.order;
+    }
+    try {
+      const order = manager.getPromptOrderForCharacter?.(manager.activeCharacter);
+      if (Array.isArray(order)) return order;
+    } catch {}
+    return null;
+  }
+  function companionPromptCanToggle(manager, prompt) {
+    if (!prompt || !prompt.identifier) return false;
+    try {
+      if (typeof manager.isPromptToggleAllowed === 'function') return Boolean(manager.isPromptToggleAllowed(prompt));
+    } catch { return false; }
+    if (prompt.marker) return false;
+    return !(manager.configuration?.toggleDisabled || []).includes(prompt.identifier);
+  }
+  function companionPromptSnapshotFromManager(manager, presetName) {
+    const order = companionPromptOrder(manager);
+    const prompts = manager?.serviceSettings?.prompts;
+    if (!Array.isArray(order) || !Array.isArray(prompts) || !prompts.length) {
+      throw new Error('原生预设条目列表尚未就绪。请先在酒馆加载一个对话补全预设。');
+    }
+    const promptMap = new Map(prompts.filter(prompt => prompt?.identifier != null)
+      .map(prompt => [String(prompt.identifier), prompt]));
+    const states = Object.create(null);
+    for (const entry of order) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      const prompt = promptMap.get(id);
+      if (!prompt || !companionPromptCanToggle(manager, prompt)) continue;
+      states[id] = Boolean(entry.enabled);
+    }
+    if (!Object.keys(states).length) throw new Error('当前预设没有可记录的可切换条目。');
+    return { presetName, states };
+  }
+  function companionPromptApplyToManager(manager, states) {
+    const order = companionPromptOrder(manager);
+    const prompts = manager?.serviceSettings?.prompts;
+    if (!Array.isArray(order) || !Array.isArray(prompts)) throw new Error('原生预设条目列表尚未就绪。');
+    const promptMap = new Map(prompts.filter(prompt => prompt?.identifier != null)
+      .map(prompt => [String(prompt.identifier), prompt]));
+    return companionPromptApplyStateMap(order, states, promptMap,
+      prompt => companionPromptCanToggle(manager, prompt));
+  }
+  function companionPromptStoreBaseline(presetName, states, extend = false) {
+    if (!presetName) return false;
+    const data = companionRead();
+    const next = extend
+      ? companionPromptExtendStateMap(data.promptBaselines[presetName], states)
+      : companionPromptMergeStateMaps({}, states);
+    if (JSON.stringify(data.promptBaselines[presetName] || {}) === JSON.stringify(next)) return true;
+    data.promptBaselines[presetName] = next;
+    return companionSave(data);
+  }
+  function companionPromptEnsureBaseline(manager, presetName) {
+    const current = companionPromptSnapshotFromManager(manager, presetName);
+    const data = companionRead();
+    const existing = data.promptBaselines[presetName];
+    const baseline = existing
+      ? companionPromptExtendStateMap(existing, current.states)
+      : companionPromptMergeStateMaps({}, current.states);
+    if (JSON.stringify(existing || {}) !== JSON.stringify(baseline)) {
+      data.promptBaselines[presetName] = baseline;
+      if (!companionSave(data)) throw new Error('无法保存预设原始条目状态，已停止覆盖。');
+    }
+    return baseline;
+  }
+  function companionPromptSaveRoleState(overlay, snapshot) {
+    if (!overlay?.planId || !overlay.roleKey || !snapshot?.states) return false;
+    const data = companionRead();
+    const plan = data.plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
+    if (!plan) return false;
+    const field = plan.fields?.promptEntries || {};
+    const byRole = { ...(field.byRole || {}) };
+    const previous = byRole[overlay.roleKey];
+    byRole[overlay.roleKey] = {
+      presetName: overlay.presetName,
+      states: companionPromptMergeStateMaps(previous?.states, snapshot.states),
+    };
+    plan.fields.promptEntries = { byRole };
+    const saved = companionSave(data);
+    if (saved) companionRefreshList();
+    return saved;
+  }
+  function companionPromptMarkActive(overlay) {
+    if (!overlay?.roleKey || !overlay.planId || !overlay.presetName) return;
+    const data = companionRead();
+    data.promptActive[overlay.roleKey] = { planId: overlay.planId, presetName: overlay.presetName };
+    companionSave(data);
+  }
+  function companionPromptClearActive(overlay) {
+    if (!overlay?.roleKey) return;
+    const data = companionRead();
+    const active = data.promptActive[overlay.roleKey];
+    if (!active || !overlay.planId || active.planId === overlay.planId) {
+      delete data.promptActive[overlay.roleKey];
+      companionSave(data);
+    }
+  }
+  function companionInstallPromptSaveBridge(manager) {
+    if (!manager || typeof manager.saveServiceSettings !== 'function') return;
+    const previous = manager[COMPANION_PROMPT_BRIDGE_KEY];
+    if (previous?.wrapper === manager.saveServiceSettings && previous.owner === state) {
+      companionRuntime.promptManager = manager;
+      companionRuntime.promptBridge = { manager, ...previous };
+      return;
+    }
+    if (previous?.wrapper === manager.saveServiceSettings && typeof previous.original === 'function') {
+      manager.saveServiceSettings = previous.original;
+    }
+    const original = manager.saveServiceSettings;
+    const wrapper = function (...args) {
+      if (state.destroyed || companionRuntime.applying || companionRuntime.promptInternalWrite) {
+        return original.apply(this, args);
+      }
+      const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+      const role = companionCurrentRole();
+      const presetName = companionPromptCurrentPresetName(context, manager);
+      const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+      let snapshot;
+      try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
+      catch { return original.apply(this, args); }
+      const overlay = companionRuntime.promptOverlay;
+      if (overlay && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+        const saved = companionPromptSaveRoleState(overlay, snapshot);
+        if (strategy !== 'global' || !saved) {
+          if (!saved) companionNotice('warning', '角色条目状态未能写入配套方案；本次原生保存仍会继续。');
+          return original.apply(this, args);
+        }
+        const baseline = companionRead().promptBaselines[presetName];
+        if (!baseline) return original.apply(this, args);
+        companionPromptStoreBaseline(presetName, snapshot.states, true);
+        companionPromptApplyToManager(manager, companionRead().promptBaselines[presetName]);
+        const restore = () => {
+          if (state.destroyed) return;
+          const currentRole = companionCurrentRole();
+          const currentPreset = companionPromptCurrentPresetName(HOST_WIN.SillyTavern?.getContext?.() || {}, manager);
+          if (currentRole?.key !== overlay.roleKey || currentPreset !== overlay.presetName) {
+            companionPromptApplyToManager(manager, companionRead().promptBaselines[overlay.presetName] || baseline);
+            companionRuntime.promptOverlay = null;
+            companionPromptClearActive(overlay);
+            manager.render?.(false);
+            return;
+          }
+          companionPromptApplyToManager(manager, snapshot.states);
+          manager.render?.(false);
+        };
+        let pending;
+        try { pending = original.apply(this, args); }
+        catch (error) { restore(); throw error; }
+        return Promise.resolve(pending).finally(restore);
+      }
+      if (overlay) {
+        const samePreset = presetName === overlay.presetName;
+        if (strategy === 'global' && samePreset) {
+          const baseline = companionRead().promptBaselines[overlay.presetName];
+          if (baseline) companionPromptApplyToManager(manager, baseline);
+          manager.render?.(false);
+        }
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+        if (strategy === 'global' && samePreset) return original.apply(this, args);
+      }
+      if (strategy === 'global' && presetName) companionPromptStoreBaseline(presetName, snapshot.states, false);
+      return original.apply(this, args);
+    };
+    const bridge = { owner: state, original, wrapper };
+    try {
+      manager[COMPANION_PROMPT_BRIDGE_KEY] = bridge;
+      manager.saveServiceSettings = wrapper;
+      companionRuntime.promptManager = manager;
+      companionRuntime.promptBridge = { manager, ...bridge };
+    } catch (error) {
+      console.warn('[配套侠] 无法接入原生提示词保存接口', error);
+    }
+  }
+  async function companionPromptManager(waitForReady = true) {
+    let module;
+    try { module = await quickImport('/scripts/openai.js'); }
+    catch (error) { throw new Error('无法读取酒馆原生对话补全管理器：' + (error?.message || error)); }
+    try { await module?.getPresetApplicationPromise?.(); }
+    catch (error) { throw new Error('预设切换尚未完成：' + (error?.message || error)); }
+    const attempts = waitForReady ? 20 : 1;
+    for (let i = 0; i < attempts && !state.destroyed; i++) {
+      const manager = module?.promptManager;
+      const order = companionPromptOrder(manager);
+      if (manager && Array.isArray(manager.serviceSettings?.prompts) && Array.isArray(order) && order.length) {
+        companionInstallPromptSaveBridge(manager);
+        const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+        return {
+          manager, context, order,
+          presetName: companionPromptCurrentPresetName(context, manager),
+          strategy: manager.configuration?.promptOrder?.strategy || 'global',
+        };
+      }
+      if (i + 1 < attempts) await new Promise(resolve => HOST_WIN.setTimeout(resolve, 50));
+    }
+    throw new Error('原生对话补全条目管理器尚未就绪。请先在酒馆加载对话补全预设，再重试。');
+  }
+  async function companionPromptReadCurrentState() {
+    const { manager, presetName } = await companionPromptManager(true);
+    if (!presetName) throw new Error('无法识别当前加载的对话补全预设名称。');
+    return companionPromptSnapshotFromManager(manager, presetName);
+  }
+  async function companionPromptResetOverlay() {
+    if (!companionRuntime.promptOverlay) return { changed: 0 };
+    try {
+      const manager = companionRuntime.promptManager || (await companionPromptManager(true)).manager;
+      companionRuntime.promptManager = manager;
+      const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+      const presetName = companionPromptCurrentPresetName(context, manager);
+      const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+      const overlay = companionRuntime.promptOverlay;
+      let result = { changed: [] };
+      if (strategy === 'global' && presetName === overlay.presetName) {
+        const baseline = companionRead().promptBaselines[overlay.presetName];
+        if (baseline) result = companionPromptApplyToManager(manager, baseline);
+      }
+      companionRuntime.promptOverlay = null;
+      companionPromptClearActive(overlay);
+      if (result.changed?.length) manager.render?.(false);
+      return { changed: result.changed?.length || 0 };
+    } catch (error) {
+      return { changed: 0, issue: error?.message || String(error) };
+    }
+  }
+  async function companionApplyPromptEntries(target, role, planId) {
+    const saved = target?.byRole?.[role.key];
+    if (!saved) return { noRoleState: true, applied: [], changed: [], missing: [], locked: [], newEntries: [] };
+    const { manager, presetName, strategy } = await companionPromptManager(true);
+    if (!saved.presetName || saved.presetName !== presetName) {
+      throw new Error('方案记录的预设为「' + (saved.presetName || '未知') + '」，当前加载的是「' + (presetName || '未知') + '」。请先加载方案对应的预设，或重新读取当前条目状态。');
+    }
+    if (strategy === 'global') {
+      const baseline = companionPromptEnsureBaseline(manager, presetName);
+      companionPromptApplyToManager(manager, baseline);
+    }
+    const result = companionPromptApplyToManager(manager, saved.states || {});
+    manager.render?.(false);
+    const overlay = { roleKey: role.key, planId, presetName };
+    if (result.applied.length) {
+      companionRuntime.promptOverlay = overlay;
+      companionPromptMarkActive(overlay);
+    }
+    if (strategy !== 'global' && result.changed.length && typeof manager.saveServiceSettings === 'function') {
+      await manager.saveServiceSettings();
+    }
+    return result;
+  }
   async function companionCatalogs() {
     const catalogs = {};
     for (const type of ['api', 'preset', 'reasoning', 'worldInfo', 'theme']) {
@@ -13413,11 +13732,26 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         console.warn('[配套侠] 无法读取 ' + type + ' 列表', error);
       }
     }
+    try { catalogs.promptEntries = await companionPromptReadCurrentState(); }
+    catch (error) {
+      catalogs.promptEntries = null;
+      catalogs.promptEntriesError = error?.message || String(error);
+      console.info('[配套侠] 当前无法读取原生预设条目状态：' + catalogs.promptEntriesError);
+    }
     return catalogs;
   }
-  function companionSnapshot(catalogs) {
+  function companionSnapshot(catalogs, role) {
     const fields = {};
     for (const field of COMPANION_FIELDS) {
+      if (field.id === 'promptEntries') {
+        if (role && catalogs.promptEntries) {
+          fields.promptEntries = { byRole: { [role.key]: {
+            presetName: catalogs.promptEntries.presetName,
+            states: companionPromptMergeStateMaps({}, catalogs.promptEntries.states),
+          } } };
+        }
+        continue;
+      }
       if (field.id === 'worldInfo') {
         const selected = (catalogs.worldInfo || []).filter(item => item.selected && !item.disabled && item.value != null && String(item.value) !== '');
         const items = selected.map(item => ({ value: String(item.value), label: item.label }));
@@ -13434,19 +13768,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return fields;
   }
-  function companionPlanPreview(plan) {
+  function companionPlanPreview(plan, role) {
     const preview = quickNode('div', 'tle-companion-preview');
-    const fields = COMPANION_FIELDS.filter(field => plan.fields?.[field.id]);
+    const fields = COMPANION_FIELDS.filter(field => field.id === 'promptEntries'
+      ? Boolean(plan.fields?.promptEntries?.byRole?.[role?.key])
+      : Boolean(plan.fields?.[field.id]));
     if (!fields.length) {
       preview.append(quickNode('small', 'tle-companion-preview-empty', '空方案'));
       return preview;
     }
     for (const field of fields) {
-      const saved = plan.fields[field.id] || {};
+      const saved = field.id === 'promptEntries'
+        ? plan.fields.promptEntries.byRole[role.key]
+        : plan.fields[field.id] || {};
       const item = quickNode('div', 'tle-companion-preview-item'
         + (field.id === 'worldInfo' ? ' is-world-info' : ''));
       const label = quickNode('span', 'tle-companion-preview-label', field.name);
-      const rawValue = saved.label ?? saved.value;
+      const rawValue = field.id === 'promptEntries'
+        ? `${Object.keys(saved.states || {}).length} 项 · ${saved.presetName || '未知预设'}`
+        : saved.label ?? saved.value;
       const valueText = Array.isArray(rawValue)
         ? rawValue.map(value => String(value)).join('、')
         : rawValue == null || rawValue === '' ? '—' : String(rawValue);
@@ -13593,12 +13933,56 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       controls.append(setDefault, apply);
       headingRow.append(titleRow, controls);
       summary.append(headingRow);
-      summary.append(companionPlanPreview(plan));
+      summary.append(companionPlanPreview(plan, role));
       row.append(summary);
       list.append(row);
     }
   }
-  function companionEditorRow(field, catalogs, saved) {
+  function companionEditorRow(field, catalogs, saved, role, capturePromptDefault = false) {
+    if (field.id === 'promptEntries') {
+      const line = quickNode('div', 'tle-companion-field');
+      const toggle = quickNode('input');
+      toggle.type = 'checkbox';
+      const savedRole = saved?.byRole?.[role?.key] || null;
+      const initial = savedRole || (capturePromptDefault ? catalogs.promptEntries : null);
+      const promptState = { value: initial ? {
+        presetName: initial.presetName,
+        states: companionPromptMergeStateMaps({}, initial.states),
+      } : null };
+      toggle.checked = Boolean(promptState.value);
+      const name = quickNode('span', 'tle-companion-field-label', field.name);
+      const tools = quickNode('div', 'tle-companion-prompt-tools');
+      const status = quickNode('small', '', '');
+      const readButton = companionTextButton(promptState.value ? '重读' : '读取', async () => {
+        readButton.disabled = true;
+        status.textContent = '正在读取…';
+        try {
+          const snapshot = await companionPromptReadCurrentState();
+          promptState.value = snapshot;
+          toggle.checked = true;
+          status.textContent = `${Object.keys(snapshot.states).length} 项 · ${snapshot.presetName}`;
+          status.title = '只保存条目标识与启用状态；正文、名称和排序跟随原生预设';
+        } catch (error) {
+          status.textContent = '暂不可读取';
+          status.title = error?.message || String(error);
+          companionNotice('warning', status.title);
+        } finally { readButton.disabled = false; }
+      });
+      readButton.title = '从当前已加载的原生对话补全预设读取条目启用状态';
+      if (promptState.value) {
+        status.textContent = `${Object.keys(promptState.value.states || {}).length} 项 · ${promptState.value.presetName || '未知预设'}`;
+        status.title = '只保存条目标识与启用状态；正文、名称和排序跟随原生预设';
+      } else {
+        status.textContent = catalogs.promptEntriesError ? '原生条目未就绪' : '尚未记录';
+        status.title = catalogs.promptEntriesError || '点击读取，从当前原生预设记录条目启用状态';
+      }
+      toggle.addEventListener('change', () => {
+        if (toggle.checked && !promptState.value) status.textContent = '请先读取当前状态';
+      });
+      tools.append(status, readButton);
+      line.append(toggle, name, tools);
+      return { line, toggle, select: null, choices: [], saved, promptState };
+    }
     const line = quickNode('div', 'tle-companion-field');
     const toggle = quickNode('input');
     toggle.type = 'checkbox';
@@ -13679,6 +14063,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const role = companionCurrentRole();
     if (!role) { companionNotice('warning', '请先进入单角色聊天。'); return; }
     if (companionRuntime.applying) return;
+    if (companionRuntime.promptOverlay && companionRuntime.promptOverlay.roleKey !== role.key) {
+      await companionPromptResetOverlay();
+    }
     closeChatTools(false);
     const savedData = companionRead();
     const source = savedData.plans.find(p => p.id === planId && p.roles.includes(role.key));
@@ -13689,16 +14076,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const catalogs = await companionCatalogs();
     if (quickPanel !== shell || state.destroyed) return;
     pending.remove();
-    const fields = source && !replaceCurrent ? source.fields : companionSnapshot(catalogs);
+    const fields = source && !replaceCurrent ? source.fields : companionSnapshot(catalogs, role);
     const form = quickNode('div', 'tle-companion-editor');
     const nameLabel = quickNode('label', '', '方案名称');
     const nameInput = quickNode('input', 'text_pole');
     nameInput.maxLength = 64;
     nameInput.value = source ? source.name + (duplicate ? ' · 副本' : '') : '新方案';
     nameLabel.append(nameInput);
-    form.append(nameLabel, quickNode('p', 'tle-muted', '未勾选的项目保持原样。全局世界书支持多选并按清单同步；壁纸自动跟随 UI 主题，不单独保存。'));
+    form.append(nameLabel, quickNode('p', 'tle-muted', '未勾选的项目保持原样。预设条目只记录标识与开关，正文、名称和排序跟随原生预设；请先在原生提示词管理器调整，再读取当前状态。全局世界书支持多选；壁纸自动跟随 UI 主题。'));
     const rows = COMPANION_FIELDS.map(field => {
-      const item = companionEditorRow(field, catalogs, fields[field.id]);
+      const item = companionEditorRow(field, catalogs, fields[field.id], role, !source || replaceCurrent);
       form.append(item.line);
       return { field, ...item };
     });
@@ -13708,6 +14095,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!name) { companionNotice('warning', '请填写方案名称。'); return; }
       const nextFields = {};
       for (const row of rows) {
+        if (row.field.id === 'promptEntries') {
+          const baseByRole = source && !duplicate
+            ? { ...(source.fields?.promptEntries?.byRole || {}) }
+            : {};
+          if (row.toggle.checked) {
+            const snapshot = row.promptState?.value;
+            if (!snapshot?.presetName || !snapshot.states || !Object.keys(snapshot.states).length) {
+              companionNotice('warning', '尚未读取有效的预设条目状态。请先加载目标预设，再点击读取。');
+              return;
+            }
+            const targetPreset = nextFields.preset?.label;
+            if (targetPreset && targetPreset !== snapshot.presetName) {
+              companionNotice('warning', '方案选择的预设为「' + targetPreset + '」，但读取状态来自「' + snapshot.presetName + '」。请先在酒馆加载目标预设，再重新读取条目状态。');
+              return;
+            }
+            baseByRole[role.key] = {
+              presetName: snapshot.presetName,
+              states: companionPromptMergeStateMaps({}, snapshot.states),
+            };
+          } else {
+            delete baseByRole[role.key];
+          }
+          if (Object.keys(baseByRole).length) nextFields.promptEntries = { byRole: baseByRole };
+          continue;
+        }
         if (!row.toggle.checked) continue;
         if (row.field.id === 'worldInfo') {
           const items = [...row.select.selectedOptions].map(option => ({
@@ -13899,6 +14311,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (select.disabled) return '全局世界书控件当前不可用';
       return '方案中的部分全局世界书当前不存在或不可用';
     }
+    if (field.id === 'promptEntries') {
+      return '原生对话补全条目管理器尚未就绪，或方案绑定的预设与当前预设不一致';
+    }
     if (field.id === 'theme') {
       const select = withQuickThemeControl(control => control);
       if (!select) return 'UI 主题控件尚未挂载；TT 用户设置面板暂未就绪';
@@ -13994,11 +14409,24 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let finished = 0;
     try {
       const skipped = [];
+      const resetResult = await companionPromptResetOverlay();
+      if (resetResult.issue) skipped.push({ name: '预设条目开关', target: '上一角色', reason: resetResult.issue });
+      else if (resetResult.changed) finished++;
       for (const field of COMPANION_FIELDS) {
         const target = plan.fields[field.id];
         if (!target) continue;
         if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
         try {
+          if (field.id === 'promptEntries') {
+            const result = await companionApplyPromptEntries(target, role, id);
+            if (result.noRoleState) continue;
+            if (result.applied.length) finished++;
+            const details = [];
+            if (result.missing.length) details.push('找不到 ' + result.missing.length + ' 个已记录条目标识（' + result.missing.slice(0, 5).join('、') + (result.missing.length > 5 ? ' 等' : '') + '）');
+            if (result.locked.length) details.push(result.locked.length + ' 个条目当前被原生管理器锁定');
+            if (details.length) skipped.push({ name: field.name, target: result.missing.length + result.locked.length + ' 项', reason: details.join('；') + '；其余匹配项已独立应用，新条目保持当前状态' });
+            continue;
+          }
           if (field.id === 'worldInfo') {
             await quickCatalog('worldInfo', false, state.abort.signal);
             if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
@@ -14090,6 +14518,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const choice = companionAutoTarget(data, role);
       companionArmSchedule(choice?.slot);
       if (!key) {
+        if (changed || companionRuntime.promptResetPending) {
+          if (isNativeGenerationVisible()) companionRuntime.promptResetPending = true;
+          else { companionRuntime.promptResetPending = false; void companionPromptResetOverlay(); }
+        }
         companionRuntime.lastScheduleToken = '';
         const context = HOST_WIN.SillyTavern?.getContext?.();
         if (context?.groupId != null) {
@@ -14118,7 +14550,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         companionSave(data);
       }
       const manualHold = Boolean(choice?.slot && companionManualHold(data, role, choice.slot));
-      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold, startupRestore })) return;
+      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold, startupRestore })) {
+        if (changed || companionRuntime.promptResetPending) {
+          if (isNativeGenerationVisible()) companionRuntime.promptResetPending = true;
+          else { companionRuntime.promptResetPending = false; void companionPromptResetOverlay(); }
+        }
+        return;
+      }
       console.info('[配套侠] 自动应用角色「' + role.name + '」方案：' + choice.plan.name);
       void companionApply(choice.id, true);
     }, 350);
@@ -14168,7 +14606,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       for (const key of ['GENERATION_ENDED', 'GENERATION_STOPPED']) {
         if (typeof types[key] !== 'string' || !types[key]) continue;
         if (companionRuntime.listeners.some(l => l.type === types[key])) continue;
-        const handler = () => { if (companionRuntime.pending) companionOnChatChanged(true); };
+        const handler = () => { if (companionRuntime.pending || companionRuntime.promptResetPending) companionOnChatChanged(true); };
         source.on(types[key], handler);
         companionRuntime.listeners.push({ type: types[key], handler });
       }
@@ -14185,6 +14623,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     // Day/night tokens and manual holds still govern scheduled-plan precedence.
     const initialRole = companionCurrentRole();
     const initialData = companionRead();
+    if (freshHostStartup && Object.keys(initialData.promptActive || {}).length) {
+      initialData.promptActive = {};
+      companionSave(initialData);
+    } else if (!freshHostStartup && initialRole) {
+      const active = initialData.promptActive?.[initialRole.key];
+      const presetName = companionPromptCurrentPresetName(context, null);
+      if (active?.planId && active.presetName && active.presetName === presetName
+        && initialData.plans.some(plan => plan.id === active.planId && plan.roles.includes(initialRole.key))) {
+        companionRuntime.promptOverlay = { roleKey: initialRole.key, planId: active.planId, presetName: active.presetName };
+      }
+    }
     const initialChoice = companionAutoTarget(initialData, initialRole);
     const savedScheduleToken = initialRole
       ? (initialData.scheduleTokens?.[initialRole.key] || '')
@@ -14198,6 +14647,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     companionRuntime.lastRole = initialRole?.key || '';
     companionRuntime.lastScheduleToken = savedScheduleToken || initialChoice?.slot?.token || '';
     companionOnChatChanged();
+    void companionPromptManager(true).catch(() => {});
     if (freshHostStartup && !initialRole) companionQueueStartupRestore();
   }
   function companionCleanup() {
@@ -14210,6 +14660,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     companionRuntime.startupRetryTimer = 0;
     companionRuntime.startupRestorePending = false;
     companionRuntime.pending = null;
+    const bridge = companionRuntime.promptBridge;
+    if (bridge?.manager) {
+      try {
+        if (bridge.manager.saveServiceSettings === bridge.wrapper) bridge.manager.saveServiceSettings = bridge.original;
+        if (bridge.manager[COMPANION_PROMPT_BRIDGE_KEY]?.wrapper === bridge.wrapper) delete bridge.manager[COMPANION_PROMPT_BRIDGE_KEY];
+      } catch {}
+    }
+    companionRuntime.promptBridge = null;
+    companionRuntime.promptManager = null;
     if (companionRuntime.source) {
       const remove = companionRuntime.source.removeListener || companionRuntime.source.off;
       if (typeof remove === 'function') {
