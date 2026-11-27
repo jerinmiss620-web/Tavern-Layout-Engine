@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.290",
     "source_path": "releases/v0.3.290/TLE.js",
-    "source_commit": "b28d6c5833a243425d04ce36101dfd84fc392e2e",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b28d6c5833a243425d04ce36101dfd84fc392e2e/releases/v0.3.290/TLE.js",
+    "source_commit": "24e36d8ee15171d6344f2591d8de04f69a6e3b70",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/24e36d8ee15171d6344f2591d8de04f69a6e3b70/releases/v0.3.290/TLE.js",
     "changelog_path": "releases/v0.3.290/CHANGELOG.md",
-    "sha256": "70415a3cc8de047c835c40639dc4b55189d09582f1aa3062eaad283faf10fdf2",
-    "size_bytes": 1015259
+    "sha256": "148b0390f7c4f7f67bf08a566088827cbff7fd2c0b294a0270b97e4df3f905a3",
+    "size_bytes": 1020584
   },
   "status": "TEST v0.3.290：基于 main / v0.3.289 的独立候选构建。配套侠新增角色专属预设条目开关；只保存稳定 identifier → enabled，不复制正文、名称或顺序。新增条目保留预设原生状态，只有显式重新读取并保存方案才纳入；切换角色前恢复原始预设，无法安全恢复时停止应用或取消原生保存。正式 latest.json 保持 v0.3.289。",
   "recommended_loader_version": "0.3.0",
