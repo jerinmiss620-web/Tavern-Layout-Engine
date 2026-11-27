@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.287",
+  "latest_version": "0.3.288",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.287",
-    "source_path": "releases/v0.3.287/TLE.js",
-    "source_commit": "fc29e5a9076f4a6bacfd98dc927f0f687a7b917c",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/fc29e5a9076f4a6bacfd98dc927f0f687a7b917c/releases/v0.3.287/TLE.js",
-    "changelog_path": "releases/v0.3.287/CHANGELOG.md",
-    "sha256": "993056acd37d9e3ac326fbbae4c1471ebcf8ed8968d1973714af4fde2f68a49c",
-    "size_bytes": 979485
+    "version": "0.3.288",
+    "source_path": "releases/v0.3.288/TLE.js",
+    "source_commit": "5d1575a1c740960e851d0c4ec1c2a3f05ff1ff4a",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5d1575a1c740960e851d0c4ec1c2a3f05ff1ff4a/releases/v0.3.288/TLE.js",
+    "changelog_path": "releases/v0.3.288/CHANGELOG.md",
+    "sha256": "d8373d5ec1efa74b8f18a5b3c60f5778eff1769738d72605f21a9f68b1f50d43",
+    "size_bytes": 979279
   },
-  "status": "TEST v0.3.287：移动端记录详情右侧资料区内部纵向间距调整为 5px；保持 104px 头像列与 8px 列间距。保留 v0.3.286 统一头像圆角及 v0.3.285 高清头像兼容。仅测试分支，正式版不变。",
+  "status": "TEST v0.3.288：继承正式版 v0.3.264 的配套方案紧凑预览与原生更新按钮修复；移动端记录详情内部间距 5px，头像列宽 104px、列间距 8px。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
