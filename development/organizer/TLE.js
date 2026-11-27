@@ -13351,7 +13351,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     pending: null, source: null, listeners: [], scheduleTimer: 0,
     generationRetryTimer: 0, lastScheduleToken: '',
     startupRestorePending: false, startupRetryTimer: 0,
-    promptOverlay: null, promptManager: null, promptBridge: null, promptResetPending: false,
+    promptOverlay: null, promptManager: null, promptBridge: null, promptResetPending: false, promptSuppressSettingsEvent: false,
   };
   function companionIsFreshHostStartup(previousInstance, pageAlreadyInitialized) {
     return !previousInstance && !pageAlreadyInitialized;
@@ -13584,7 +13584,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     const original = manager.saveServiceSettings;
     const wrapper = function (...args) {
-      if (state.destroyed || companionRuntime.applying || companionRuntime.promptInternalWrite) {
+      if (state.destroyed || companionRuntime.applying || companionRuntime.promptInternalWrite || companionRuntime.promptSuppressSettingsEvent) {
         return original.apply(this, args);
       }
       const context = HOST_WIN.SillyTavern?.getContext?.() || {};
@@ -13607,10 +13607,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         companionPromptApplyToManager(manager, companionRead().promptBaselines[presetName]);
         const restore = () => {
           if (state.destroyed) return;
+          if (companionRuntime.promptSuppressSettingsEvent) companionRuntime.promptSuppressSettingsEvent = false;
           const currentRole = companionCurrentRole();
           const currentPreset = companionPromptCurrentPresetName(HOST_WIN.SillyTavern?.getContext?.() || {}, manager);
           if (currentRole?.key !== overlay.roleKey || currentPreset !== overlay.presetName) {
-            companionPromptApplyToManager(manager, companionRead().promptBaselines[overlay.presetName] || baseline);
+            if (currentPreset === overlay.presetName) {
+              companionPromptApplyToManager(manager, companionRead().promptBaselines[overlay.presetName] || baseline);
+            }
             companionRuntime.promptOverlay = null;
             companionPromptClearActive(overlay);
             manager.render?.(false);
@@ -13620,7 +13623,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           manager.render?.(false);
         };
         let pending;
-        try { pending = original.apply(this, args); }
+        try {
+          companionRuntime.promptSuppressSettingsEvent = true;
+          pending = original.apply(this, args);
+        }
         catch (error) { restore(); throw error; }
         return Promise.resolve(pending).finally(restore);
       }
@@ -13696,6 +13702,95 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       return { changed: result.changed?.length || 0 };
     } catch (error) {
       return { changed: 0, issue: error?.message || String(error) };
+    }
+  }
+  function companionPromptReapplyActiveOverlay() {
+    const overlay = companionRuntime.promptOverlay;
+    const manager = companionRuntime.promptManager;
+    if (!overlay || !manager) return;
+    const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+    const role = companionCurrentRole();
+    const presetName = companionPromptCurrentPresetName(context, manager);
+    if (role?.key !== overlay.roleKey || presetName !== overlay.presetName) return;
+    const plan = companionRead().plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
+    const saved = plan?.fields?.promptEntries?.byRole?.[overlay.roleKey];
+    if (!saved) return;
+    companionPromptApplyToManager(manager, saved.states || {});
+    manager.render?.(false);
+  }
+  function companionPromptPersistCurrentSettings(manager, context) {
+    const save = typeof context?.saveSettingsDebounced === 'function'
+      ? context.saveSettingsDebounced.bind(context)
+      : typeof manager?.saveServiceSettings === 'function'
+        ? manager.saveServiceSettings.bind(manager)
+        : null;
+    if (!save) return false;
+    companionRuntime.promptSuppressSettingsEvent = true;
+    try {
+      const result = save();
+      if (result && typeof result.catch === 'function') {
+        result.catch(error => {
+          companionRuntime.promptSuppressSettingsEvent = false;
+          console.warn('[配套侠] 保存预设基础条目状态失败', error);
+          companionPromptReapplyActiveOverlay();
+        });
+      }
+      return true;
+    } catch (error) {
+      companionRuntime.promptSuppressSettingsEvent = false;
+      console.warn('[配套侠] 保存预设基础条目状态失败', error);
+      return false;
+    }
+  }
+  function companionPromptOnSettingsUpdated() {
+    if (state.destroyed) return;
+    if (companionRuntime.promptSuppressSettingsEvent) {
+      companionRuntime.promptSuppressSettingsEvent = false;
+      companionPromptReapplyActiveOverlay();
+      return;
+    }
+    if (companionRuntime.applying) return;
+    const manager = companionRuntime.promptManager;
+    if (!manager) {
+      void companionPromptManager(false).catch(() => {});
+      return;
+    }
+    const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+    const role = companionCurrentRole();
+    const presetName = companionPromptCurrentPresetName(context, manager);
+    const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+    const overlay = companionRuntime.promptOverlay;
+    if (overlay && strategy === 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+      let snapshot;
+      try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
+      catch { return; }
+      const baseline = companionRead().promptBaselines[presetName];
+      if (!baseline) return;
+      companionPromptStoreBaseline(presetName, snapshot.states, true);
+      companionPromptApplyToManager(manager, companionRead().promptBaselines[presetName] || baseline);
+      manager.render?.(false);
+      if (!companionPromptPersistCurrentSettings(manager, context)) companionPromptReapplyActiveOverlay();
+      return;
+    }
+    if (overlay) {
+      const samePreset = presetName === overlay.presetName;
+      if (strategy === 'global' && samePreset) {
+        const baseline = companionRead().promptBaselines[overlay.presetName];
+        if (baseline) companionPromptApplyToManager(manager, baseline);
+        manager.render?.(false);
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+        if (companionPromptPersistCurrentSettings(manager, context)) return;
+      } else {
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+      }
+    }
+    if (strategy === 'global' && presetName) {
+      try {
+        const snapshot = companionPromptSnapshotFromManager(manager, presetName);
+        companionPromptStoreBaseline(presetName, snapshot.states, false);
+      } catch {}
     }
   }
   async function companionApplyPromptEntries(target, role, planId) {
@@ -14609,6 +14704,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         const handler = () => { if (companionRuntime.pending || companionRuntime.promptResetPending) companionOnChatChanged(true); };
         source.on(types[key], handler);
         companionRuntime.listeners.push({ type: types[key], handler });
+      }
+      if (typeof types.SETTINGS_UPDATED === 'string' && types.SETTINGS_UPDATED
+        && !companionRuntime.listeners.some(l => l.type === types.SETTINGS_UPDATED)) {
+        const handler = () => companionPromptOnSettingsUpdated();
+        source.on(types.SETTINGS_UPDATED, handler);
+        companionRuntime.listeners.push({ type: types.SETTINGS_UPDATED, handler });
       }
       companionRuntime.source = source;
     }
