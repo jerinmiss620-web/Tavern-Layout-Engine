@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "project": "Tavern Layout Engine",
+  "channel": "test",
+  "latest_version": "0.3.290",
+  "minimum_loader_version": "0.3.0",
+  "release": {
+    "version": "0.3.290",
+    "source_path": "releases/v0.3.290/TLE.js",
+    "source_commit": "b28d6c5833a243425d04ce36101dfd84fc392e2e",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b28d6c5833a243425d04ce36101dfd84fc392e2e/releases/v0.3.290/TLE.js",
+    "changelog_path": "releases/v0.3.290/CHANGELOG.md",
+    "sha256": "70415a3cc8de047c835c40639dc4b55189d09582f1aa3062eaad283faf10fdf2",
+    "size_bytes": 1015259
+  },
+  "status": "TEST v0.3.290：基于 main / v0.3.289 的独立候选构建。配套侠新增角色专属预设条目开关；只保存稳定 identifier → enabled，不复制正文、名称或顺序。新增条目保留预设原生状态，只有显式重新读取并保存方案才纳入；切换角色前恢复原始预设，无法安全恢复时停止应用或取消原生保存。正式 latest.json 保持 v0.3.289。",
+  "recommended_loader_version": "0.3.0",
+  "loader_release": {
+    "version": "0.3.0",
+    "source_path": "loader/TLE-Remote-Loader-Companion-Prompt-Test-0.3.0.js",
+    "source_commit": "15e9587b4cd2718d68325d8c342c521bdaac835e",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/15e9587b4cd2718d68325d8c342c521bdaac835e/loader/TLE-Remote-Loader-Companion-Prompt-Test-0.3.0.js",
+    "sha256": "fe5d97356556ad22319afda844ab650b6c7d0b9f36b945863556ba37fc015fe9",
+    "size_bytes": 39982,
+    "installer_path": "loader/TLE-Remote-Loader-Companion-Prompt-Test-0.3.0.json",
+    "installer_commit": "15e9587b4cd2718d68325d8c342c521bdaac835e",
+    "installer_url": "https://github.com/jerinmiss620-web/Tavern-Layout-Engine/blob/15e9587b4cd2718d68325d8c342c521bdaac835e/loader/TLE-Remote-Loader-Companion-Prompt-Test-0.3.0.json"
+  }
+}

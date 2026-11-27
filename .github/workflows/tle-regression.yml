@@ -22,6 +22,9 @@ jobs:
           else
             npm test -- --development
           fi
+      - name: Verify companion prompt-state Test Loader and immutable artifact
+        if: startsWith(github.ref, 'refs/heads/feature/companion-prompt-state-')
+        run: node loader/verify-companion-prompt-state-channel.mjs
       - name: Verify Organizer branch test channel and pinned installer
         if: github.ref == 'refs/heads/feature/organizer-nav-worldbooks-20261125'
         run: node loader/verify-test-channel.mjs --remote
