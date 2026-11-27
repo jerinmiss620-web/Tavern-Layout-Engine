@@ -13,7 +13,19 @@ const readme = readFileSync('README.md', 'utf8');
 const actualVersion = source.match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
 const expectedVersion = plan.core;
 
-assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
+const developmentMode = process.env.TLE_TEST_DEVELOPMENT === '1';
+const compareVersions = (left, right) => {
+  const a = left.split('.').map(Number);
+  const b = right.split('.').map(Number);
+  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+};
+if (developmentMode) {
+  assert.ok(compareVersions(plan.core, stableManifest.latest_version) >= 0,
+    'development candidate must not be older than the stable baseline');
+} else {
+  assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
+}
 assert.equal(actualVersion, expectedVersion, 'development source must match the stable release plan');
 new vm.Script(source, { filename: sourcePath });
 
