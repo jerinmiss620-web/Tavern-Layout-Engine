@@ -59,10 +59,36 @@ assert.equal(
 
 assert.equal(
   api.maskHeroApplyTextRules('A.B A.B', [
+    { find: 'A.B', replace: 'assert.equal(
+  api.maskHeroApplyTextRules('A.B A.B', [
     { find: 'A.B', replace: '$&', regex: false },
   ]),
   '$& $&',
   'literal matching treats regex punctuation and replacement tokens as ordinary text',
+);', regex: false },
+  ]),
+  'assert.equal(
+  api.maskHeroApplyTextRules('A.B A.B', [
+    { find: 'A.B', replace: '$&', regex: false },
+  ]),
+  '$& $&',
+  'literal matching treats regex punctuation and replacement tokens as ordinary text',
+); assert.equal(
+  api.maskHeroApplyTextRules('A.B A.B', [
+    { find: 'A.B', replace: '$&', regex: false },
+  ]),
+  '$& $&',
+  'literal matching treats regex punctuation and replacement tokens as ordinary text',
+);',
+  'literal matching treats regex punctuation and replacement tokens as ordinary text',
+);
+
+assert.equal(
+  api.maskHeroApplyTextRules('EMAIL email Email', [
+    { find: 'email', replace: '[email]', regex: false, caseInsensitive: true },
+  ]),
+  '[email] [email] [email]',
+  'literal matching honors the case-insensitive option',
 );
 
 assert.equal(
