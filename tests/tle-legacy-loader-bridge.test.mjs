@@ -11,7 +11,11 @@ new vm.Script(tle);
 new vm.Script(loader);
 assert.equal(test.channel, 'test');
 assert.match(loader, /const CHANNEL = 'test'/);
-assert.match(loader, /main\/channels\/test\.json/);
+if (version === '0.3.290') {
+  assert.match(loader, /feature\/companion-prompt-entry-states-20261127\/channels\/test\.json/);
+} else {
+  assert.match(loader, /main\/channels\/test\.json/);
+}
 assert.match(loader, /checkRemote: \(\) => checkRemote\(\{ promptUpdate: true \}\)/);
 assert.match(tle, /function getLegacyTestLoader\(\)/);
 assert.match(tle, /loader\?\.channel === 'test'/);
