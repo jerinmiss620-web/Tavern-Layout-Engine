@@ -10,7 +10,7 @@
     "source_commit": "aaac70c8ef6f9aac7019c359622a82c3efa46e1b",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/aaac70c8ef6f9aac7019c359622a82c3efa46e1b/releases/v0.3.290/TLE.js",
     "changelog_path": "releases/v0.3.290/CHANGELOG.md",
-    "sha256": "3d5725349aafd5f22ca745a918b2db5d0ec3bf57aa3e39151a9b2996091945fe",
+    "sha256": "4e22ce1e86c39b7068fba6b1732922b82b5dca202d7dc3b22d8441622d860715",
     "size_bytes": 1001612
   },
   "status": "TEST v0.3.290：配套侠新增角色专属提示词条目状态快照。只保存稳定 identifier 与 enabled，不复制预设正文或顺序；切换角色时先重新加载绑定的最新预设作为基线，再叠加角色专属开关状态。正文、名称和排序变化不影响匹配；新增条目沿用预设当前保存状态，删除或无法匹配的条目单独跳过。正式 latest.json 保持 v0.3.289。",
