@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.283
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.286
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -4096,8 +4096,10 @@ body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings
   margin: 0 !important;
   box-sizing: border-box !important;
   pointer-events: auto !important;
-  opacity: var(--tle-nav-icon-opacity, 0.7) !important;
   visibility: visible !important;
+}
+body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon:not(.closedIcon) {
+  opacity: var(--tle-nav-icon-opacity, 0.7) !important;
 }
 body[data-tle-nav][data-tle-compat-nav-repair]:not([data-tle-nav="icons"]) #top-settings-holder#top-settings-holder > .drawer > .tle-drawer-label {
   display: block !important;
@@ -11380,14 +11382,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.283 · 记录预览头像与渐变边界同步</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.286 · 记录预览头像与渐变边界同步</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.283</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.286</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -15967,7 +15969,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       state.organizerEntry?.appendChild(panel);
       state.organizerObserver = new HOST_WIN.MutationObserver(() => {
         const isOpen = panel.classList.contains('openDrawer');
-        state.organizerEntry?.querySelector(':scope > .drawer-toggle')?.setAttribute('aria-expanded', String(isOpen));
+        const toggle = state.organizerEntry?.querySelector(':scope > .drawer-toggle');
+        toggle?.setAttribute('aria-expanded', String(isOpen));
+        syncOrganizerIconState(isOpen);
         panel.setAttribute('aria-hidden', String(!isOpen));
       });
       state.organizerObserver.observe(panel, { attributes: true, attributeFilter: ['class'] });
@@ -16064,7 +16068,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     organizerToggle.title = '整理侠 · 资源分组与批量管理';
     const organizerIcon = HOST_DOC.createElement('div');
     organizerIcon.id = ID.organizerToggle;
-    organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable';
+    organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable closedIcon';
     organizerIcon.setAttribute('aria-hidden', 'true');
     organizerToggle.appendChild(organizerIcon);
     organizerEntry.appendChild(organizerToggle);
@@ -16260,12 +16264,20 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
   }
 
+  function syncOrganizerIconState(isOpen) {
+    const icon = state.organizerEntry?.querySelector(':scope > .drawer-toggle > .drawer-icon');
+    if (!icon) return;
+    icon.classList.toggle('openIcon', Boolean(isOpen));
+    icon.classList.toggle('closedIcon', !isOpen);
+  }
+
   function setOrganizerDrawerOpen(open) {
     const panel = state.organizerPanel;
     const toggle = state.organizerEntry?.querySelector(':scope > .drawer-toggle');
     if (!panel || !toggle || quickPanel?.content?.writing) return;
 
     const expanded = Boolean(open);
+    syncOrganizerIconState(expanded);
     const wasOpen = panel.classList.contains('openDrawer');
     if (expanded === wasOpen) {
       if (expanded && !(quickPanel?.embedded && quickPanel.module === 'groups')) {
@@ -17725,12 +17737,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   let galleryHome = null;
   let hdAvatarEngine = null;
 
-// TLE integrated engine, based on 桃mini「哇！头像变清晰啦！」v4.5.13.
+// TLE integrated engine, based on 桃mini「哇！头像变清晰啦！」v4.5.14.
 // Original avatar-loading technique by 桃mini, integrated with the author's permission.
 // TLE host adaptation and compatibility handling: 小松鼠 & ChatGPT（小松7）.
 function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
   'use strict';
-  const VERSION = '4.5.13';
+  const VERSION = '4.5.14';
   const noop = () => false;
   if (WIN?.__TAURITAVERN__ || WIN?.__TAURI_RUNNING__ === true) {
     return { version: VERSION, owner: 'TT-native', host: 'tt', active: false, stop: noop,
@@ -17742,9 +17754,9 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
       getStatus: () => ({ version: VERSION, owner: 'TLE', host: 'st', active: false, reason: 'unsupported-host-api' }) };
   }
   const CHAT_SELECTOR = '.mesAvatarWrapper img';
-  const SELECTOR = '.mesAvatarWrapper img, #right-nav-panel #avatar-and-name-block .expander #avatar_div img, #right-nav-panel #rm_print_characters_block .character_select > .avatar img, #user_avatar_block > .avatar-container > .avatar img, .freesia-gallery-avatar img';
+  const SELECTOR = '.mesAvatarWrapper img, #right-nav-panel #avatar-and-name-block .expander #avatar_div img, #right-nav-panel #rm_print_characters_block .character_select > .avatar img, #user_avatar_block > .avatar-container > .avatar img, .freesia-gallery-avatar img, .freesia-gallery-avatar-frame img, .freesia-gallery-detail-avatar img';
   const INSTANCE = '__hdAvatar459Cleanup';
-  // Share the original instance key so standalone 桃mini 4.5.13 and TLE never
+  // Share the original instance key so standalone 桃mini 4.5.14 and TLE never
   // run two URL-rewriting engines against the same images.
   const previous = WIN[INSTANCE];
   if (typeof previous === 'function') {
@@ -17958,7 +17970,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
             else owner.eventRemoveListener?.(event, callback);
           });
         }
-      } catch (error) { console.warn('[高清头像 4.5.13] 事件绑定失败', name, error); }
+      } catch (error) { console.warn('[高清头像 4.5.14] 事件绑定失败', name, error); }
     }
   }
 
@@ -18017,7 +18029,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
     },
   };
   WIN.__TLE_HD_AVATAR_ENGINE__ = api;
-  console.log('[TLE HD Avatar] 桃mini 4.5.13 引擎已接管 ST 头像区域。');
+  console.log('[TLE HD Avatar] 桃mini 4.5.14 引擎已接管 ST 头像区域。');
   return api;
 }
 
@@ -18026,7 +18038,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.283';
+    const VERSION = '0.3.286';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -18100,9 +18112,10 @@ function createTLEGalleryHome(window, document) {
     };
 
     const CSS = [
+        "#chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-avatar-radius: 12px; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .welcomeRecent > .recentChatList:not(." + GRID_CLASS + ") { display: none !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: auto; align-items: start; align-content: start; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; align-self: start; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: 12px; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: var(--freesia-gallery-card-radius) !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; overflow: hidden; cursor: default; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; align-self: start; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: var(--freesia-gallery-avatar-radius, 12px); border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: var(--freesia-gallery-card-radius) !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; overflow: hidden; cursor: default; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: inherit !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; cursor: pointer; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .freesia-gallery-avatar-frame { position: absolute; inset: 0; display: block; width: 100% !important; height: 100% !important; min-width: 0 !important; max-width: none !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 0 !important; overflow: hidden; box-sizing: border-box; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: inherit !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .freesia-gallery-avatar-frame > img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0 !important; max-width: none !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 0 !important; box-sizing: border-box; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: inherit !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; object-fit: cover !important; object-position: center !important; }",
@@ -18153,8 +18166,8 @@ function createTLEGalleryHome(window, document) {
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-page-detail .freesia-gallery-files, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-page-files .freesia-gallery-detail { display: none; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-page-detail .freesia-gallery-detail, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-page-files .freesia-gallery-files { display: block; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-hero { display: grid; grid-template-columns: var(--freesia-gallery-detail-columns, minmax(180px, 262px) minmax(0, 1fr)); gap: var(--freesia-gallery-detail-gap, 24px); align-items: stretch; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-avatar { display: block; align-self: start; grid-column: 1; grid-row: 1; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4 !important; min-width: 0; min-height: 0; overflow: hidden; position: relative; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-avatar { display: block; align-self: start; grid-column: 1; grid-row: 1; width: 100% !important; height: auto !important; aspect-ratio: 3 / 4 !important; min-width: 0; min-height: 0; overflow: hidden; position: relative; border-radius: var(--freesia-gallery-avatar-radius, 12px) !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: inherit !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-main { display: flex; flex-direction: column; align-self: stretch; width: 100%; height: auto; min-width: 0; min-height: 0; gap: var(--freesia-gallery-detail-main-gap, 8px); box-sizing: border-box; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-description { display: block; flex: 1 1 0; width: 100%; min-width: 0; min-height: 0 !important; height: 0 !important; max-height: none !important; margin: var(--freesia-gallery-description-margin, initial); padding: var(--freesia-gallery-description-padding, initial); box-sizing: border-box; font-size: var(--freesia-gallery-description-size, inherit); line-height: var(--freesia-gallery-description-line, normal); overflow: auto; resize: none; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; text-align: left !important; flex-wrap: var(--freesia-gallery-detail-heading-wrap, wrap); gap: var(--freesia-gallery-detail-heading-gap, 8px 12px); width: 100%; min-width: 0; min-height: 0; overflow: var(--freesia-gallery-detail-heading-overflow, visible); }",
@@ -20041,7 +20054,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.283',
+    version: '0.3.286',
     ready: false,
     destroy,
     state,
@@ -20499,5 +20512,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.283 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.286 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
