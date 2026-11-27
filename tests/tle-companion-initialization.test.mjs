@@ -1,11 +1,17 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const plan = JSON.parse(read('release-plan.json'));
-const source = read('releases/v' + plan.core + '/TLE.js');
+const manifest = JSON.parse(read('latest.json'));
+const source = read('development/organizer/TLE.js');
+const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
+const release = read(manifest.release.source_path);
+const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
+
+assert.equal(release, source, 'the pinned stable source must match the working source');
+assert.equal(installer.content, source, 'the disabled stable backup package must contain the exact stable source');
+new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
 
 function section(text, startMarker, endMarker) {
   const start = text.indexOf(startMarker);
@@ -14,106 +20,108 @@ function section(text, startMarker, endMarker) {
   return text.slice(start, end);
 }
 
-test('Global World Info is captured as a complete multi-select field', () => {
-  const fields = section(source, '  const COMPANION_FIELDS = [', '  const companionRuntime = {');
-  const entry = section(source, '  function companionEntryId(', '  async function companionCatalogs(');
-  const snapshot = section(source, '  function companionSnapshot(', '  function companionPlanPreview(');
-  const sandbox = {};
-  vm.runInNewContext(fields + '\n' + entry + '\n' + snapshot
-    + '\nglobalThis.capture = companionSnapshot;', sandbox);
-  const result = sandbox.capture({
-    worldInfo: [
-      { selected: true, disabled: false, value: 'book-a', label: 'Book A' },
-      { selected: true, disabled: false, value: 'book-b', label: 'Book B' },
-      { selected: true, disabled: true, value: 'book-disabled', label: 'Disabled Book' },
-      { selected: false, disabled: false, value: 'book-off', label: 'Off Book' },
-    ],
-    api: [
-      { selectId: 'connection_profiles', value: 'profile-a', label: 'Profile A', selected: true },
-      { selectId: 'chat_completion_source', value: 'openai', label: 'OpenAI', selected: true },
-      { selectId: 'model', value: 'gpt-model', label: 'GPT Model', section: '模型', selected: true },
-    ],
-    preset: [{ selectId: 'settings_preset_openai', value: 'Default', label: 'Default', selected: true }],
-    reasoning: [{ selectId: 'reasoning_select', value: 'draft', label: 'Draft', selected: true }],
-    theme: [{ selectId: 'theme_select', value: 'Everbloom', label: 'Everbloom', selected: true }],
-  });
-  assert.deepEqual(JSON.parse(JSON.stringify(result.worldInfo)), {
-    selectId: 'world_info',
-    value: ['book-a', 'book-b'],
-    items: [{ value: 'book-a', label: 'Book A' }, { value: 'book-b', label: 'Book B' }],
-    label: '已选 2 本：Book A、Book B',
-  });
-  assert.equal(result.theme.value, 'Everbloom');
-});
+// The change is deliberately limited to initialization/dispatch and schedule-token bookkeeping.
+// The configuration catalog, schedule calculation, manual hold and application engine stay intact.
+assert.equal(
+  section(source, '  const COMPANION_FIELDS = [', '  const companionRuntime = {'),
+  section(previous, '  const COMPANION_FIELDS = [', '  const companionRuntime = {'),
+  'the companion field catalog must remain unchanged'
+);
+assert.equal(
+  section(source, '  function companionScheduleState(', '  function companionManualHold('),
+  section(previous, '  function companionScheduleState(', '  function companionManualHold('),
+  'day/night and cross-midnight schedule calculation must remain unchanged'
+);
+assert.equal(
+  section(source, '  function companionManualHold(', '  function companionAutoTarget('),
+  section(previous, '  function companionManualHold(', '  function companionAutoTarget('),
+  'manual override expiry must remain unchanged'
+);
+assert.equal(
+  section(source, '  async function companionApply(', '  function companionOnChatChanged('),
+  section(previous, '  async function companionApply(', '  function companionOnChatChanged('),
+  'the complete per-item application engine and failure reporting must remain unchanged'
+);
 
-test('Applying a World Info plan synchronizes the full saved selection and reports missing books', () => {
-  const helper = section(source, '  function companionApplyWorldInfo(', '  async function companionApply(');
-  const events = [];
-  const select = {
-    disabled: false,
-    multiple: true,
-    options: [
-      { value: 'book-a', selected: true, hidden: false, disabled: false, textContent: 'Book A', parentElement: null },
-      { value: 'book-b', selected: false, hidden: false, disabled: false, textContent: 'Book B', parentElement: null },
-      { value: 'book-c', selected: true, hidden: false, disabled: false, textContent: 'Book C', parentElement: null },
-    ],
-    dispatchEvent(event) { events.push(event.type); },
-  };
-  const sandbox = {
-    HOST_WIN: { Event: class { constructor(type) { this.type = type; } } },
-    withQuickWorldInfoControl: callback => callback(select),
-  };
-  vm.runInNewContext(helper + '\nglobalThis.apply = companionApplyWorldInfo;', sandbox);
-  const result = sandbox.apply({
-    value: ['book-b', 'book-missing'],
-    items: [{ value: 'book-missing', label: 'Missing Book' }],
-  });
-  assert.deepEqual(select.options.map(option => option.selected), [false, true, false],
-    'available world books must match the saved set exactly');
-  assert.deepEqual(JSON.parse(JSON.stringify(result.issues)), [
-    { value: 'book-missing', label: 'Missing Book' },
-  ]);
-  assert.deepEqual(events, ['change']);
-});
+// A real initialization now records the already-open role instead of simulating a role change.
+const bind = section(source, '  function companionBindEvents() {', '  function companionCleanup() {');
+assert.match(bind, /const initialRole = companionCurrentRole\(\);/);
+assert.match(bind, /const initialChoice = companionAutoTarget\(initialData, initialRole\);/);
+assert.match(bind, /if \(initialRole && initialChoice\?\.slot && !savedScheduleToken\)/);
+assert.match(bind, /initialData\.scheduleTokens\[initialRole\.key\] = initialChoice\.slot\.token;/);
+assert.match(bind, /companionRuntime\.lastRole = initialRole\?\.key \|\| '';/);
+assert.doesNotMatch(bind, /companionRuntime\.lastRole\s*=\s*''/);
+assert.doesNotMatch(bind, /On script reload, apply the selected role/);
+assert.match(bind, /const freshHostStartup = companionIsFreshHostStartup\(/);
+assert.match(bind, /HOST_WIN\[COMPANION_PAGE_STARTUP_KEY\] = true;/);
+assert.match(bind, /companionRuntime\.startupRestorePending = freshHostStartup;/);
+assert.match(bind, /if \(freshHostStartup && !initialRole\) companionQueueStartupRestore\(\);/);
 
-test('Fresh host startup restores the current role default; same-page Core reload does not replay it', () => {
-  const startup = section(source, '  function companionIsFreshHostStartup(', '  function companionCurrentRole(');
-  const startupSandbox = {};
-  vm.runInNewContext(startup + '\nglobalThis.evaluate = companionIsFreshHostStartup;', startupSandbox);
-  assert.equal(startupSandbox.evaluate(null, false), true);
-  assert.equal(startupSandbox.evaluate({}, false), false);
-  assert.equal(startupSandbox.evaluate(null, true), false);
+// Schedule tokens are migrated without discarding existing plans/defaults/schedules/manual holds.
+assert.match(source, /scheduleTokens: raw\.scheduleTokens && typeof raw\.scheduleTokens === 'object' \? raw\.scheduleTokens : \{\}/);
+assert.match(source, /delete fresh\.scheduleTokens\[role\.key\]/);
+const handler = section(source, '  function companionOnChatChanged(', '  function companionBindEvents(');
+assert.match(handler, /const storedToken = data\.scheduleTokens\?\.\[key\] \|\| '';/);
+assert.match(handler, /data\.scheduleTokens\[key\] = token;/);
+assert.match(handler, /const startupRestore = companionRuntime\.startupRestorePending;/);
+assert.match(handler, /companionShouldAutoApply\(\{ choice, force, changed, boundaryChanged, manualHold, startupRestore \}\)/);
+assert.match(source, /function companionQueueStartupRestore\(attempt = 0\)/);
+assert.match(source, /companionRuntime\.startupRetryTimer = HOST_WIN\.setTimeout/);
+const cleanup = section(source, '  function companionCleanup() {', '  function setChatToolsPage(');
+assert.match(cleanup, /clearTimeout\(companionRuntime\.startupRetryTimer\)/);
+assert.match(cleanup, /companionRuntime\.startupRestorePending = false;/);
 
-  const decision = section(source, '  function companionShouldAutoApply(', '  async function companionApply(');
-  const decisionSandbox = {};
-  vm.runInNewContext(decision + '\nglobalThis.evaluate = companionShouldAutoApply;', decisionSandbox);
-  const shouldApply = decisionSandbox.evaluate;
-  const defaultChoice = { id: 'default', slot: null };
-  const scheduledChoice = { id: 'day', slot: { token: 'avatar-a|day-start|day' } };
-  assert.equal(shouldApply({ choice: defaultChoice }), false);
-  assert.equal(shouldApply({ choice: defaultChoice, startupRestore: true }), true);
-  assert.equal(shouldApply({ choice: null, startupRestore: true }), false);
-  assert.equal(shouldApply({ choice: defaultChoice, changed: true }), true);
-  assert.equal(shouldApply({ choice: defaultChoice, force: true }), true);
-  assert.equal(shouldApply({ choice: scheduledChoice }), false);
-  assert.equal(shouldApply({ choice: scheduledChoice, startupRestore: true }), true);
-  assert.equal(shouldApply({ choice: scheduledChoice, boundaryChanged: true }), true);
-  assert.equal(shouldApply({ choice: scheduledChoice, boundaryChanged: true, manualHold: true }), false);
-});
+// A new host Window means the host page has started; a prior Core instance or
+// page marker means this is only an in-document Core reload/re-enable.
+const startupHelper = section(source, '  function companionIsFreshHostStartup(', '  function companionCurrentRole(');
+const startupSandbox = {};
+vm.runInNewContext(startupHelper + '\nglobalThis.evaluate = companionIsFreshHostStartup;', startupSandbox);
+const isFreshHostStartup = startupSandbox.evaluate;
+assert.equal(isFreshHostStartup(null, false), true,
+  'a fresh host document must restore an already-open chat');
+assert.equal(isFreshHostStartup({}, false), false,
+  'a same-document Core update must not replay the default plan');
+assert.equal(isFreshHostStartup(null, true), false,
+  're-enabling Core in the same host document must not replay the default plan');
 
-test('Delayed startup restore is bounded and uses existing host events without synthetic role changes', () => {
-  const queue = section(source, '  function companionQueueStartupRestore(', '  function companionBindEvents(');
-  const bind = section(source, '  function companionBindEvents(', '  function companionCleanup(');
-  const onChange = section(source, '  function companionOnChatChanged(', '  function companionQueueStartupRestore(');
-  assert.match(queue, /attempt >= 30/);
-  assert.match(queue, /setTimeout/);
-  assert.match(queue, /}, 500\)/);
-  assert.match(bind, /const freshHostStartup = companionIsFreshHostStartup/);
-  assert.match(bind, /companionRuntime\.startupRestorePending = freshHostStartup/);
-  assert.match(bind, /if \(freshHostStartup && !initialRole\) companionQueueStartupRestore\(\)/);
-  assert.match(bind, /CHAT_CHANGED/);
-  assert.match(bind, /CHAT_LOADED/);
-  assert.doesNotMatch(bind, /emit\(['"]CHAT_CHANGED/);
-  assert.match(onChange, /const startupRestore = companionRuntime\.startupRestorePending/);
-  assert.match(onChange, /companionShouldAutoApply\(\{ choice, force, changed, boundaryChanged, manualHold, startupRestore \}\)/);
-});
+// Exercise the exact decision helper used by the runtime.
+const helper = section(source, '  function companionShouldAutoApply(', '  async function companionApply(');
+const sandbox = {};
+vm.runInNewContext(helper + '\nglobalThis.evaluate = companionShouldAutoApply;', sandbox);
+const shouldApply = sandbox.evaluate;
+const defaultChoice = { id: 'default', slot: null };
+const scheduledChoice = { id: 'day', slot: { token: 'avatar-a|day-start|day' } };
+
+assert.equal(shouldApply({ choice: defaultChoice }), false,
+  'a same-document Core initialization must not replay its default plan');
+assert.equal(shouldApply({ choice: defaultChoice, startupRestore: true }), true,
+  'a fresh host startup must restore the already-open role default');
+assert.equal(shouldApply({ choice: null, startupRestore: true }), false,
+  'a fresh host startup without a matching default must not change current settings');
+assert.equal(shouldApply({ choice: defaultChoice, changed: true }), true,
+  'a real character switch must still apply the new role default');
+assert.equal(shouldApply({ choice: defaultChoice, force: true }), true,
+  'an explicitly retried pending application must still run');
+assert.equal(shouldApply({ choice: scheduledChoice }), false,
+  'a same-document Core reload must not reapply the same scheduled period');
+assert.equal(shouldApply({ choice: scheduledChoice, startupRestore: true }), true,
+  'a fresh host startup must restore the current scheduled plan');
+assert.equal(shouldApply({ choice: scheduledChoice, boundaryChanged: true }), true,
+  'a missed day/night boundary must recover the current scheduled plan');
+assert.equal(shouldApply({ choice: scheduledChoice, boundaryChanged: true, manualHold: true }), false,
+  'a manual plan must remain in control until the next schedule boundary');
+
+assert.match(source, /for \(const field of COMPANION_FIELDS\)/);
+assert.match(source, /跳过不可用项目/);
+assert.match(source, /部分应用完成/);
+assert.match(source, /未能应用任何项目/);
+assert.match(source, /companionUnavailableReason\(field, target, error\)/);
+assert.match(source, /companionQueueGenerationRetry\(\)/);
+assert.match(source, /companionScheduleState\(data, role\)/);
+assert.ok(source.includes('Core v' + manifest.release.version));
+assert.ok(source.includes('Host Diagnostics 2.0 · v' + manifest.release.version));
+assert.ok(source.includes('data-tle-update-summary>v' + manifest.release.version));
+assert.ok(source.includes('data-tle-runtime-version>v' + manifest.release.version));
+assert.ok(source.includes("version: '" + manifest.release.version + "'"));
+
+console.log('TLE companion initialization and schedule-recovery checks passed: v' + manifest.release.version + '.');

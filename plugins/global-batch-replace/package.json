@@ -1,0 +1,14 @@
+{
+  "name": "tavern-global-batch-replace-server",
+  "version": "1.1.0-tle.2",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "archiver": "7.0.1",
+    "crc": "4.3.2",
+    "png-chunk-text": "1.0.0",
+    "png-chunks-extract": "1.0.0",
+    "yaml": "2.8.3",
+    "yauzl": "3.2.1"
+  }
+}

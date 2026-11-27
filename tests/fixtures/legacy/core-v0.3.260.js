@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.264
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.260
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2134,12 +2134,12 @@ var TLEBatchLibrary = (() => {
         void this.persist().catch(() => {
         });
       });
-      this.findRow = n("div", "tle-content-find-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
+      this.findRow = n("div", "flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
       this.h.searchWrap.classList.add("flex1");
-      this.replaceRow = n("div", "tle-content-replace-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
+      this.replaceRow = n("div", "flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px");
       this.controls = n("div", "tle-content-controls flex-container flexFlowColumn");
-      const actions = n("div", "tle-content-action-row flex-container flexWrap alignItemsCenter");
-      this.scopeSelect = n("select", "text_pole flex1 tle-content-scope-select");
+      const actions = n("div", "flex-container flexnowrap alignItemsCenter");
+      this.scopeSelect = n("select", "text_pole flex1");
       this.scopeSelect.setAttribute("aria-label", "\u5185\u5BB9\u641C\u7D22\u8303\u56F4");
       for (const [value, label] of [["all", "\u5168\u90E8\u652F\u6301\u8D44\u6E90"], ["filtered", "\u5F53\u524D\u7B5B\u9009\u8303\u56F4"], ["selected", "\u5DF2\u9009\u8D44\u6E90"]]) {
         const o = n("option", "", label);
@@ -2154,7 +2154,7 @@ var TLEBatchLibrary = (() => {
       this.previewButton = this.button("\u9884\u89C8\u66FF\u6362", () => this.preview());
       this.previewButton.disabled = true;
       this.findRow.append(this.h.searchWrap, this.findButton);
-      const replaceLabel = n("label", "tle-content-replace-label flex-container flexnowrap alignItemsCenter flex1");
+      const replaceLabel = n("label", "flex-container flexnowrap alignItemsCenter flex1");
       replaceLabel.append(n("span", "", "\u66FF\u6362\u4E3A"), this.replace);
       this.replaceRow.append(replaceLabel, this.previewButton);
       this.searchRow.append(this.findRow, this.replaceRow);
@@ -2166,9 +2166,11 @@ var TLEBatchLibrary = (() => {
         if (this.jobId) void this.api("cancel", { id: this.jobId }).catch((e) => this.message(e.message));
       });
       this.cancelButton.hidden = true;
-      this.backupButton = this.button("\u5907\u4EFD\u4E0E\u6062\u590D", () => this.backups());
-      this.backupButton.classList.add("tle-content-backup-button");
-      actions.append(this.scopeSelect, this.cancelButton, this.backupButton);
+      actions.append(
+        this.scopeSelect,
+        this.cancelButton,
+        this.button("\u5907\u4EFD\u4E0E\u6062\u590D", () => this.backups())
+      );
       this.ruleDetails = n("details", "tle-content-rule-details");
       this.ruleDetails.append(n("summary", "", "\u89C4\u5219\u7EC4\u5408\u4E0E\u9AD8\u7EA7\u9009\u9879"));
       this.addRuleButton = this.button("\u6DFB\u52A0\u89C4\u5219", () => {
@@ -2221,7 +2223,7 @@ var TLEBatchLibrary = (() => {
       });
       this.ruleHelp = n("small", "tle-content-rule-help", "JSON/YAML 仅扫描明确指定路径；未知字段不会递归修改。普通文本规则区分大小写，重叠优先长匹配，同长度按规则顺序。");
       this.ruleDetails.append(this.comboCreateRow, this.ruleRows, this.comboManageRow, this.ruleHelp, this.paths);
-      this.selectionTools = n("div", "tle-content-selection-tools flex-container flexWrap");
+      this.selectionTools = n("div", "flex-container flexWrap");
       this.selectionTools.append(this.button("\u5168\u9009\u5F53\u524D\u7ED3\u679C", () => this.selectAll(true)), this.button("\u53D6\u6D88\u5168\u9009", () => this.selectAll(false)));
       this.confirm = n("div", "tle-quick-transfer-confirm");
       this.confirm.hidden = true;
@@ -3676,47 +3678,15 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 #tle-chat-tools-panel .tle-companion-toolbar,
 .tle-companion-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 #tle-chat-tools-panel .tle-companion-toolbar > strong { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
-.tle-companion-plan { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0; padding: 5px 0; }
-.tle-companion-copy { display: flex; flex: 1 1 170px; flex-direction: column; min-width: 0; gap: 2px; overflow-wrap: anywhere; }
+.tle-companion-plan { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 10px 0; border-bottom: 1px solid var(--SmartThemeBorderColor, #8886); }
+.tle-companion-copy { display: flex; flex: 1 1 170px; flex-direction: column; min-width: 0; gap: 4px; overflow-wrap: anywhere; }
 .tle-companion-copy > small { opacity: .8; }
-.tle-companion-preview {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
-  gap: 2px 8px;
-  width: 100%;
-  min-width: 0;
-  margin-top: 2px;
-}
-.tle-companion-preview-item {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-  padding: 1px 0;
-}
-.tle-companion-preview-label {
-  color: var(--SmartThemeQuoteColor, inherit);
-  font-size: .72em;
-  line-height: 1.1;
-  opacity: .7;
-}
-.tle-companion-preview-value {
-  min-width: 0;
-  font-size: .82em;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-.tle-companion-preview-item.is-world-info { grid-column: 1 / -1; }
-.tle-companion-preview-empty { grid-column: 1 / -1; opacity: .72; }
 .tle-companion-list { min-height: 0; }
 .tle-companion-plan.is-default {
   border-inline-start: 3px solid var(--SmartThemeQuoteColor, currentColor);
   padding-inline-start: 10px;
 }
 .tle-companion-title { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.tle-companion-heading-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; width: 100%; min-width: 0; }
-.tle-companion-heading-row > .tle-companion-title { flex: 1 1 140px; }
-.tle-companion-heading-row > .tle-companion-actions { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; flex-wrap: nowrap; gap: 6px; margin-inline-start: auto; }
 .tle-companion-default-badge {
   display: inline-flex; align-items: center; gap: 3px;
   padding: 2px 7px; border: 1px solid currentColor; border-radius: 20px;
@@ -4662,91 +4632,31 @@ body.tle-global-search-open { overflow: hidden !important; }
   flex: 0 0 auto;
   min-width: 0;
 }
-#tle-organizer-panel .tle-organizer-findreplace-page { gap: 7px; }
+#tle-organizer-panel .tle-organizer-findreplace-page { gap: 8px; }
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row > .tle-content-find-row,
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row > .tle-content-replace-row {
-  display: flex;
+#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-search-row > .flex-container {
   flex: 0 0 auto;
-  align-items: center;
-  gap: 6px;
   width: 100%;
   min-width: 0;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-find-row > .tle-search-input-wrap {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-find-row > .tle-search-input-wrap input,
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-label > input {
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-find-row > button,
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-row > button {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-label {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-replace-label > span {
-  flex: 0 0 auto;
-  white-space: nowrap;
 }
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-controls {
   display: flex;
-  flex: 0 0 auto;
-  flex-direction: column;
-  gap: 6px;
+  flex: 0 1 auto;
+  max-height: min(42vh, 360px);
   min-width: 0;
-  overflow: visible;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-action-row {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-scope-select {
-  flex: 1 1 220px;
-  width: auto;
-  min-width: 0;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-backup-button {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-rule-details {
-  flex: 0 0 auto;
-  min-width: 0;
-}
-#tle-organizer-panel .tle-organizer-findreplace-page .tle-content-selection-tools {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-result-list {
   flex: 1 1 auto;
   min-height: 0 !important;
   overflow: auto;
-  overscroll-behavior: contain;
 }
 #tle-organizer-panel .tle-organizer-findreplace-page .tle-content-status { flex: 0 0 auto; }
 #tle-organizer-panel .tle-quick-manager .tle-quick-list { flex: 1 1 auto; min-height: 0; }
@@ -4797,15 +4707,14 @@ body.tle-global-search-open { overflow: hidden !important; }
     flex: 1 1 calc(100% - 48px);
   }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-heading-copy {
-    order: 0;
+    order: 1;
     flex: 0 0 auto;
     min-width: 0;
   }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-search-subtitle { display: none; }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-organizer-tabs {
-    order: 1;
     flex: 1 1 auto;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 2px;
   }
   #tle-organizer-panel.drawer-content > .tle-search-heading .tle-organizer-tab { padding-inline: 6px; }
@@ -4859,7 +4768,10 @@ body.tle-global-search-open { overflow: hidden !important; }
       #${ID.panel} .tle-update-policy { margin: -5px 0 2px; }
       #${ID.panel} .tle-version-meta { display: flex; flex-wrap: wrap; gap: 6px 9px; align-items: center; min-width: 0; margin-top: 3px; }
       #${ID.panel} .tle-version-meta [hidden] { display: none !important; }
-      #${ID.panel} .tle-version-meta > button { white-space: nowrap; }
+      #${ID.panel} .tle-update-pill { display: inline-flex; align-items: center; max-width: 100%; border: 1px solid color-mix(in srgb, #63ae84 45%, transparent); border-radius: 999px; padding: 3px 8px; background: color-mix(in srgb, #63ae84 12%, transparent); color: #63ae84; font: inherit; font-size: .83em; font-weight: 650; cursor: pointer; white-space: nowrap; }
+      #${ID.panel} .tle-update-pill:disabled { opacity: .55; cursor: default; }
+      #${ID.panel} .tle-update-check { display: inline-flex; align-items: center; background: transparent; border: 0; padding: 3px 5px; border-radius: 6px; cursor: pointer; color: inherit; font-size: .8em; opacity: .75; }
+      #${ID.panel} .tle-update-check:disabled { opacity: .45; cursor: default; }
       #${ID.nav} > button { position: relative; }
       #${ID.nav} .tle-engine-update-dot { position: absolute; top: 2px; right: 2px; width: 7px; height: 7px; border-radius: 50%; background: #63ae84; pointer-events: none; box-shadow: 0 0 0 1px var(--SmartThemeBlurTintColor, #282027); }
       #${ID.nav} .tle-engine-update-dot[hidden] { display: none !important; }
@@ -11335,14 +11247,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.264 · 分组工具栏顺序与重命名操作优化</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.260 · 分组工具栏顺序与重命名操作优化</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.264</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.260</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -11352,11 +11264,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           </label>
           <p class="tle-muted tle-update-policy" data-tle-update-policy>仅自动安装校验通过的正式版，失败时保留回滚；不支持时会明确提示。</p>
           <div class="tle-version-meta">
-            <button type="button" class="menu_button" data-tle-action="install-update" hidden>可更新</button>
-            <button type="button" class="menu_button" data-tle-action="check-update" hidden>检查更新</button>
-            <button type="button" class="menu_button" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>
-            <button type="button" class="menu_button" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>
-            <button type="button" class="menu_button" data-tle-action="install-loader-update" hidden>更新 Loader</button>
+            <button type="button" class="tle-update-pill" data-tle-action="install-update" hidden>可更新</button>
+            <button type="button" class="tle-update-check" data-tle-action="check-update" hidden>检查更新</button>
+            <button type="button" class="tle-update-check" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>
+            <button type="button" class="tle-update-check" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>
+            <button type="button" class="tle-update-pill" data-tle-action="install-loader-update" hidden>更新 Loader</button>
           </div>
           <small class="tle-muted" data-tle-loader-status aria-live="polite">正在连接远程更新服务…</small>
             </div>
@@ -13172,7 +13084,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
 // 配套侠：角色方案与当前宿主快切控件共享同一套原生切换器。
   const COMPANION_KEY = 'tle.companion.v1';
-  const COMPANION_PAGE_STARTUP_KEY = '__TLE_COMPANION_PAGE_STARTUP_V1__';
   const COMPANION_FIELDS = [
     { id: 'profile', name: '连接配置', type: 'api' },
     { id: 'source', name: '接口来源', type: 'api' },
@@ -13186,11 +13097,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     lastRole: '', lastApplied: new Map(), applying: false, timer: 0,
     pending: null, source: null, listeners: [], scheduleTimer: 0,
     generationRetryTimer: 0, lastScheduleToken: '',
-    startupRestorePending: false, startupRetryTimer: 0,
   };
-  function companionIsFreshHostStartup(previousInstance, pageAlreadyInitialized) {
-    return !previousInstance && !pageAlreadyInitialized;
-  }
   function companionCurrentRole() {
     try {
       const context = HOST_WIN.SillyTavern?.getContext?.();
@@ -13274,27 +13181,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return fields;
   }
-  function companionPlanPreview(plan) {
-    const preview = quickNode('div', 'tle-companion-preview');
-    const fields = COMPANION_FIELDS.filter(field => plan.fields?.[field.id]);
-    if (!fields.length) {
-      preview.append(quickNode('small', 'tle-companion-preview-empty', '空方案'));
-      return preview;
-    }
-    for (const field of fields) {
-      const saved = plan.fields[field.id] || {};
-      const item = quickNode('div', 'tle-companion-preview-item'
-        + (field.id === 'worldInfo' ? ' is-world-info' : ''));
-      const label = quickNode('span', 'tle-companion-preview-label', field.name);
-      const rawValue = saved.label ?? saved.value;
-      const valueText = Array.isArray(rawValue)
-        ? rawValue.map(value => String(value)).join('、')
-        : rawValue == null || rawValue === '' ? '—' : String(rawValue);
-      const value = quickNode('span', 'tle-companion-preview-value', valueText);
-      item.append(label, value);
-      preview.append(item);
-    }
-    return preview;
+  function companionPlanDetails(plan) {
+    return COMPANION_FIELDS.filter(field => plan.fields[field.id])
+      .map(field => field.name + '：' + (plan.fields[field.id].label || plan.fields[field.id].value)).join(' · ');
   }
   function companionTextButton(label, action) {
     return quickButton(label, action, 'menu_button');
@@ -13416,12 +13305,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const isNight = rule?.enabled && rule.nightPlanId === plan.id;
       const row = quickNode('div', 'tle-companion-plan' + (isDefault ? ' is-default' : ''));
       const summary = quickNode('div', 'tle-companion-copy');
-      const headingRow = quickNode('div', 'tle-companion-heading-row');
       const titleRow = quickNode('div', 'tle-companion-title');
       titleRow.append(quickNode('strong', '', plan.name));
       if (isDefault) titleRow.append(quickNode('span', 'tle-companion-default-badge', '★ 角色默认'));
       if (isDay) titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☀ 日间'));
       if (isNight) titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
+      summary.append(titleRow);
+      summary.append(quickNode('small', '', companionPlanDetails(plan) || '空方案'));
       const controls = quickNode('div', 'tle-companion-actions');
       const setDefault = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
         companionToggleDefault(plan.id, role);
@@ -13431,10 +13321,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const apply = companionTextButton('应用', () => { void companionApply(plan.id); });
       apply.disabled = companionRuntime.applying;
       controls.append(setDefault, apply);
-      headingRow.append(titleRow, controls);
-      summary.append(headingRow);
-      summary.append(companionPlanPreview(plan));
-      row.append(summary);
+      row.append(summary, controls);
       list.append(row);
     }
   }
@@ -13692,7 +13579,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (data.schedules?.[role.key]?.enabled && data.schedules[role.key].nightPlanId === plan.id)
           titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
         copy.append(titleRow);
-        copy.append(companionPlanPreview(plan));
+        copy.append(quickNode('small', '', companionPlanDetails(plan)));
         const actions = quickNode('div', 'tle-companion-actions');
         const defaultButton = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
           if (companionToggleDefault(plan.id, role)) render();
@@ -13767,10 +13654,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return '当前列表中不存在该项，或对应原生控件暂不可用';
   }
 
-  function companionShouldAutoApply({ choice, force = false, changed = false, boundaryChanged = false, manualHold = false, startupRestore = false }) {
-    if (!choice || (!force && !changed && !boundaryChanged && !startupRestore)) return false;
+  function companionShouldAutoApply({ choice, force = false, changed = false, boundaryChanged = false, manualHold = false }) {
+    if (!choice || (!force && !changed && !boundaryChanged)) return false;
     if (choice.slot && manualHold) return false;
-    if (!choice.slot && !changed && !force && !startupRestore) return false;
+    if (!choice.slot && !changed && !force) return false;
     return true;
   }
 
@@ -13929,22 +13816,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const data = companionRead();
       const choice = companionAutoTarget(data, role);
       companionArmSchedule(choice?.slot);
-      if (!key) {
-        companionRuntime.lastScheduleToken = '';
-        const context = HOST_WIN.SillyTavern?.getContext?.();
-        if (context?.groupId != null) {
-          companionRuntime.startupRestorePending = false;
-          HOST_WIN.clearTimeout(companionRuntime.startupRetryTimer);
-          companionRuntime.startupRetryTimer = 0;
-        }
-        return;
-      }
-      if (companionRuntime.startupRetryTimer) {
-        HOST_WIN.clearTimeout(companionRuntime.startupRetryTimer);
-        companionRuntime.startupRetryTimer = 0;
-      }
-      const startupRestore = companionRuntime.startupRestorePending;
-      companionRuntime.startupRestorePending = false;
+      if (!key) { companionRuntime.lastScheduleToken = ''; return; }
       const token = choice?.slot?.token || '';
       const storedToken = data.scheduleTokens?.[key] || '';
       const runtimeToken = companionRuntime.lastScheduleToken.startsWith(key + '|')
@@ -13958,40 +13830,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         companionSave(data);
       }
       const manualHold = Boolean(choice?.slot && companionManualHold(data, role, choice.slot));
-      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold, startupRestore })) return;
+      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold })) return;
       console.info('[配套侠] 自动应用角色「' + role.name + '」方案：' + choice.plan.name);
       void companionApply(choice.id, true);
     }, 350);
   }
-  function companionQueueStartupRestore(attempt = 0) {
-    if (state.destroyed || !companionRuntime.startupRestorePending || companionRuntime.startupRetryTimer) return;
-    if (attempt >= 30) {
-      companionRuntime.startupRestorePending = false;
-      console.info('[配套侠] 启动后仍未取得已恢复的角色上下文，跳过本次自动恢复。');
-      return;
-    }
-    companionRuntime.startupRetryTimer = HOST_WIN.setTimeout(() => {
-      companionRuntime.startupRetryTimer = 0;
-      if (state.destroyed || !companionRuntime.startupRestorePending) return;
-      const context = HOST_WIN.SillyTavern?.getContext?.();
-      if (context?.groupId != null) {
-        companionRuntime.startupRestorePending = false;
-        return;
-      }
-      if (companionCurrentRole()) {
-        companionOnChatChanged();
-        return;
-      }
-      companionQueueStartupRestore(attempt + 1);
-    }, 500);
-  }
   function companionBindEvents() {
-    const freshHostStartup = companionIsFreshHostStartup(
-      previousInstance,
-      Boolean(HOST_WIN[COMPANION_PAGE_STARTUP_KEY])
-    );
-    HOST_WIN[COMPANION_PAGE_STARTUP_KEY] = true;
-    companionRuntime.startupRestorePending = freshHostStartup;
     const context = HOST_WIN.SillyTavern?.getContext?.();
     const source = context?.eventSource;
     const types = context?.eventTypes || context?.event_types;
@@ -14018,11 +13862,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.addEventListener('visibilitychange', resume, { signal: state.abort.signal });
     HOST_WIN.addEventListener('focus', resume, { signal: state.abort.signal });
     HOST_WIN.addEventListener('pageshow', resume, { signal: state.abort.signal });
-    // A full host-document startup can restore the last chat before TLE binds
-    // CHAT_CHANGED / CHAT_LOADED. Restore that already-open role once.
-    // A same-document Core update or re-enable only establishes a baseline;
-    // it must not replay the role default or overwrite the user's current setup.
-    // Day/night tokens and manual holds still govern scheduled-plan precedence.
+    // Establish the already-open role as the initialization baseline.
+    // Loading or updating TLE is not a character switch and must not replay its default plan.
+    // Only a later host-reported role change may trigger the ordinary role default.
+    // The saved schedule token still allows a missed day/night boundary to recover once.
     const initialRole = companionCurrentRole();
     const initialData = companionRead();
     const initialChoice = companionAutoTarget(initialData, initialRole);
@@ -14030,7 +13873,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       ? (initialData.scheduleTokens?.[initialRole.key] || '')
       : '';
     // A pre-v0.3.241 schedule has no token yet. Seed its current period as a baseline
-    // instead of replaying a scheduled plan during an in-document Core update.
+    // instead of replaying a scheduled plan during the upgrade itself.
     if (initialRole && initialChoice?.slot && !savedScheduleToken) {
       initialData.scheduleTokens[initialRole.key] = initialChoice.slot.token;
       companionSave(initialData);
@@ -14038,17 +13881,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     companionRuntime.lastRole = initialRole?.key || '';
     companionRuntime.lastScheduleToken = savedScheduleToken || initialChoice?.slot?.token || '';
     companionOnChatChanged();
-    if (freshHostStartup && !initialRole) companionQueueStartupRestore();
   }
   function companionCleanup() {
     HOST_WIN.clearTimeout(companionRuntime.timer);
     HOST_WIN.clearTimeout(companionRuntime.scheduleTimer);
     HOST_WIN.clearTimeout(companionRuntime.generationRetryTimer);
-    HOST_WIN.clearTimeout(companionRuntime.startupRetryTimer);
     companionRuntime.scheduleTimer = 0;
     companionRuntime.generationRetryTimer = 0;
-    companionRuntime.startupRetryTimer = 0;
-    companionRuntime.startupRestorePending = false;
     companionRuntime.pending = null;
     if (companionRuntime.source) {
       const remove = companionRuntime.source.removeListener || companionRuntime.source.off;
@@ -17650,7 +17489,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   const api = {
-    version: '0.3.264',
+    version: '0.3.260',
     ready: false,
     destroy,
     state,
@@ -18101,5 +17940,5 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.264 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.260 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

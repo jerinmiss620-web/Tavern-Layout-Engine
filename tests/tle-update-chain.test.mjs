@@ -123,7 +123,7 @@ async function boot({ empty = false, transient = null } = {}) {
   host.matchMedia = query => ({ matches: false, media: query, addEventListener() {}, removeEventListener() {} });
   host.CSS = { escape: s => s, supports: () => false };
   host.document.elementsFromPoint = () => [];
-  host.console = frame.console = { info() {}, warn() {}, error(...args) { errors.push(args.map(String).join(' ')); } };
+  host.console = frame.console = { debug() {}, log() {}, info() {}, warn() {}, error(...args) { errors.push(args.map(String).join(' ')); } };
   frame.confirm = () => { throw Error('Unexpected confirmation during automatic update'); };
   frame.TextEncoder = TextEncoder; frame.Blob = Blob;
   const blobs = new Map(); let blobID = 0;
@@ -182,6 +182,12 @@ async function boot({ empty = false, transient = null } = {}) {
   if (empty) await waitFor(() => host[B] && !host[B].getInfo().busy, 'offline bootstrap');
   else await settled();
   if (transient) {
+    // Loader exposes busy=false briefly between cache restoration and its
+    // first remote Core install. Wait for the real Core instance before
+    // asserting that Bootstrap has dismissed its startup-failure dialog.
+    await waitFor(() => host[C]?.version === plan.core &&
+      host[C]?.ready === true && host[C]?.state?.destroyed === false,
+      'Core becomes healthy after transient recovery');
     assert.equal(targetedRequests, 2, 'first failure must recover on the second request');
     assert.equal(host[B].getInfo().remoteFailure, null);
     assert.equal(host.document.getElementById('tle-bootstrap-failure-dialog'), null);

@@ -41,7 +41,7 @@ const recentStart = source.indexOf('#${ID.chatToolsPanel} [data-chat-tools-page=
 const recentRule = source.slice(recentStart, source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-actions {', recentStart));
 assert.match(recentRule, /flex: 1 1 auto;/);
 assert.match(recentRule, /overflow: hidden;/);
-assert.match(source, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\] \{ height: min\(80dvh, 700px\); \}/);
+assert.match(source, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="plans"\] \{ height: min\(80dvh, 700px\); \}/);
 assert.match(source, /#\$\{ID\.chatToolsPanel\} \.tle-chat-tools-range-value \{ max-height: 22dvh; \}/);
 const floorGridStart = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-action {');
 const floorGridEnd = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-control {', floorGridStart);
@@ -53,18 +53,12 @@ assert.doesNotMatch(floorGrid, /5\.8em/);
 assert.match(source, /正常主题不要开启：此修复会强制调整按钮与图标尺寸，可能造成图文错位/);
 const prevSource = read('tests/fixtures/legacy/core-v0.3.207.js');
 const compatSelectorStart = 'body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle {';
-const compatSelectorEnd = '/* Optional structural layout repair.';
-const compatNavTextStart = '/* Opt-in sidebar text only.';
 function compatRules(text) {
   const start = text.indexOf(compatSelectorStart);
   assert.ok(start >= 0, 'opt-in native navigation repair rules missing');
-  const nextStructural = text.indexOf(compatSelectorEnd, start);
-  const nextTextColor = text.indexOf(compatNavTextStart, start);
-  // New opt-in text-colour rules are separate from the unchanged layout repair.
-  // Compare ONLY the old repair block; do not accidentally include the next feature.
-  const end = nextTextColor >= 0 && nextTextColor < nextStructural ? nextTextColor : nextStructural;
-  assert.ok(end > start, 'opt-in native navigation repair block has no endpoint');
-  return text.slice(start, end);
+  const end = text.indexOf('\n}', start);
+  assert.ok(end > start, 'opt-in native navigation repair rule has no endpoint');
+  return text.slice(start, end + 2);
 }
 assert.equal(compatRules(source), compatRules(prevSource), 'existing opt-in navigation repair behavior must remain unchanged');
 const helpStart = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-range-help {');

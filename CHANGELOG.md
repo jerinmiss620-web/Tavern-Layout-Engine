@@ -1,8 +1,12 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.264 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
+目前正式版：**Core v0.3.289 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
+
+## 2026-11-27 · Core v0.3.289 · 记录预览与主样式历史补丁清理（正式发布）
+
+详见 [本版完整日志](releases/v0.3.289/CHANGELOG.md)。清理记录预览未使用状态与等价 CSS 历史覆盖；移动端详情区内部间距保持 5px、头像列宽 104px、列间距 8px。保留高清头像引擎、角色记录、配套侠与整理侠完整功能。Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
 
 ## 2026-11-27 · Core v0.3.264 · 配套侠修复与紧凑预览、更新按钮原生化（正式发布）
 
@@ -18,6 +22,7 @@
 
 ## Core 更新记录
 
+- [v0.3.289](releases/v0.3.289/CHANGELOG.md)
 - [v0.3.259](releases/v0.3.259/CHANGELOG.md)
 - [v0.3.239](releases/v0.3.239/CHANGELOG.md)
 - [v0.3.220](releases/v0.3.220/CHANGELOG.md)
@@ -78,7 +83,7 @@
 ## 2026-11-27 · 历史发布产物清理
 
 - 按 RELEASING.md 统一规则，移除 v0.3.217、v0.3.218、v0.3.219、v0.3.220、v0.3.239、v0.3.259 中遗留的 Core 可执行源码与导入包；各版本 CHANGELOG.md 保留。
-- 当前正式版 v0.3.264 的源码与正式导入包保持不变。
+- 第一阶段清理保留了当时仍在使用的 v0.3.264；v0.3.289 晋升后，v0.3.264 源码与导入包也转为历史产物并从发布目录移除，原始不可变 Commit 仍可追溯。
 - 不改写 Git 历史；旧版不可变 Commit 仍可追溯，回归所需样本继续保留在 tests/fixtures/legacy/。
 - latest.json、旧 Loader 兼容用 channels/test.json、Loader Runtime 与 Bootstrap 均不变。
 
