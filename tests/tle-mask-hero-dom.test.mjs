@@ -42,6 +42,7 @@ const functions = [
 vm.runInNewContext(helpers + '\n' + functions + `
 globalThis.maskHeroDom = {
   maskHeroApplyTextRules,
+  maskHeroMessageKind,
   maskHeroApplyTextNode,
   maskHeroApplyImage,
   maskHeroApplyFloorReplacement,
