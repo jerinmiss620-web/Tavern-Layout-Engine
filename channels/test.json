@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.279",
+  "latest_version": "0.3.280",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.279",
-    "source_path": "releases/v0.3.279/TLE.js",
-    "source_commit": "700519bedcf29f2d076e66291662b5fd206293b8",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/700519bedcf29f2d076e66291662b5fd206293b8/releases/v0.3.279/TLE.js",
-    "changelog_path": "releases/v0.3.279/CHANGELOG.md",
-    "sha256": "7deab920dc8420a0d5b93aa34f15c630792241cd9c7c73d29543d959699f0c80",
-    "size_bytes": 981251
+    "version": "0.3.280",
+    "source_path": "releases/v0.3.280/TLE.js",
+    "source_commit": "e39d9f7528023a042604119905d1bbcedb85ed50",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/e39d9f7528023a042604119905d1bbcedb85ed50/releases/v0.3.280/TLE.js",
+    "changelog_path": "releases/v0.3.280/CHANGELOG.md",
+    "sha256": "b2afb4483fc4d657256adc9aa7a16fb3924df1a8481346e7c9fff693ee2485c0",
+    "size_bytes": 985034
   },
-  "status": "TEST v0.3.279：记录预览卡片使用独立 16px 圆角，覆盖主题圆形头像规则；首页原生设置新增显示范围，默认只显示有聊天记录的角色并按最近聊天时间排序，也可显示全部角色（已聊天优先、未聊天置后）。每页数量由网格行列决定并保留分页。为识别更多角色，最近聊天索引请求最多读取 1000 个聊天文件。仅测试分支，等待自动化与 ST/TT 实机验收；正式版不变。",
+  "status": "TEST v0.3.280：记录预览渐变层按头像图片实际显示边界定位，宽度、位置、高度和底部圆角同步；窗口尺寸或网格布局变化后重新计算。保留主题头像边框与描边。仅测试分支，正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
