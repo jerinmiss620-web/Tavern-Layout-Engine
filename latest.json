@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.264",
+  "latest_version": "0.3.288",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.264",
-    "source_path": "releases/v0.3.264/TLE.js",
-    "source_commit": "804252af14dd0d28c862c1e53016bae34055744e",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/804252af14dd0d28c862c1e53016bae34055744e/releases/v0.3.264/TLE.js",
-    "changelog_path": "releases/v0.3.264/CHANGELOG.md",
-    "sha256": "8dc60be7d05f0d0928ca5e1e0cb26b81fa0b70f3ca7c501ee165071b93d5c728",
-    "size_bytes": 848818
+    "version": "0.3.288",
+    "source_path": "releases/v0.3.288/TLE.js",
+    "source_commit": "93a50c48c192aa52af68a65f1ce309213ad2c33f",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/93a50c48c192aa52af68a65f1ce309213ad2c33f/releases/v0.3.288/TLE.js",
+    "changelog_path": "releases/v0.3.288/CHANGELOG.md",
+    "sha256": "d8373d5ec1efa74b8f18a5b3c60f5778eff1769738d72605f21a9f68b1f50d43",
+    "size_bytes": 979279
   },
-  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
+  "notes": "Stable Core 0.3.288 integrates the character-record/gallery work while preserving the published 0.3.264 companion preview and native update-button fixes. Node 24 regression and immutable artifact verification are required before main promotion."
 }
