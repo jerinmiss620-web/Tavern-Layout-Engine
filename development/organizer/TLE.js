@@ -3002,6 +3002,11 @@ var TLEBatchLibrary = (() => {
         onlyCurrent: false,
         filterButton: null,
       },
+      maskHero: {
+        observer: null, frame: 0, textNodes: new Map(), nameElements: new Set(),
+        floorElements: new Set(), imageElements: new Map(), objectUrls: new Map(),
+        appliedConfig: null, appliedChatKey: '',
+      },
     },
     floorZeroClearanceChat: null,
     floorZeroClearanceFrame: 0,
@@ -3617,7 +3622,8 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 }
 #${ID.chatToolsPanel}[hidden] { display: none !important; }
 #${ID.chatToolsPanel}[data-page="recent"],
-#${ID.chatToolsPanel}[data-page="plans"] { height: min(80dvh, 700px); }
+#${ID.chatToolsPanel}[data-page="plans"],
+#${ID.chatToolsPanel}[data-page="mask"] { height: min(80dvh, 700px); }
 #${ID.chatToolsPanel} [hidden] { display: none !important; }
 #${ID.chatToolsPanel} .tle-chat-tools-header {
   display: flex;
@@ -3673,7 +3679,25 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   flex: 1 1 auto;
   overflow: hidden;
 }
-
+#${ID.chatToolsPanel} [data-chat-tools-page="mask"] { flex: 1 1 auto; overflow-y: auto; }
+#${ID.chatToolsPanel} .tle-mask-hero-root { display:flex; flex-direction:column; gap:12px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-toolbar,
+#${ID.chatToolsPanel} .tle-mask-hero-actions,
+#${ID.chatToolsPanel} .tle-mask-hero-rule-row,
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-toolbar > select,
+#${ID.chatToolsPanel} .tle-mask-hero-toolbar > input { flex:1 1 120px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-section { display:flex; flex-direction:column; gap:7px; min-width:0; padding-top:8px; border-top:1px solid var(--SmartThemeBorderColor,currentColor); }
+#${ID.chatToolsPanel} .tle-mask-hero-field { display:flex; flex:1 1 140px; flex-direction:column; gap:4px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-field > input,
+#${ID.chatToolsPanel} .tle-mask-hero-field > textarea,
+#${ID.chatToolsPanel} .tle-mask-hero-rule-row > input,
+#${ID.chatToolsPanel} .tle-mask-hero-rule-row > textarea { width:100%; min-width:0; box-sizing:border-box; }
+#${ID.chatToolsPanel} .tle-mask-hero-rule-row > .tle-mask-hero-rule-find,
+#${ID.chatToolsPanel} .tle-mask-hero-rule-row > .tle-mask-hero-rule-replace { flex:1 1 120px; }
+#${ID.chatToolsPanel} .tle-mask-hero-rule-options { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+#${ID.chatToolsPanel} .tle-mask-hero-status { min-height:1.3em; color:var(--SmartThemeQuoteColor,inherit); font-size:.85em; }
+#${ID.chatToolsPanel} .tle-mask-hero-note { font-size:.82em; line-height:1.45; opacity:.78; }
 
 #tle-chat-tools-panel [data-chat-tools-page="plans"] { flex: 1 1 auto; overflow-y: auto; }
 #tle-chat-tools-panel .tle-companion-toolbar,
@@ -3989,7 +4013,8 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
     width: calc(100vw - 16px);
     max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 58px);
   }
-  #${ID.chatToolsPanel}[data-page="recent"] {
+  #${ID.chatToolsPanel}[data-page="recent"],
+  #${ID.chatToolsPanel}[data-page="mask"] {
     height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 58px);
   }
   #${ID.chatToolsPanel} .tle-chat-tools-range-value { max-height: 22dvh; }
@@ -3999,6 +4024,17 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   #${ID.chatToolsPanel} .tle-chat-tools-control { gap: 4px; }
   #${ID.chatToolsPanel} .tle-chat-tools-submit-group { gap: 3px; }
   #${ID.chatToolsPanel} [data-chat-action-submit] { min-width: 2.9em; padding-inline: 5px; }
+}
+/* Mask Hero visual-only overlays; original message text remains in the DOM. */
+#chat .mes .name_text[data-tle-mask-name],
+#chat .mes .mes_text[data-tle-mask-floor] { visibility:hidden !important; }
+#chat .mes .name_text[data-tle-mask-name]::after {
+  content:attr(data-tle-mask-name); display:inline; visibility:visible; white-space:pre-wrap;
+}
+#chat .mes .mes_text[data-tle-mask-floor] { position:relative; }
+#chat .mes .mes_text[data-tle-mask-floor]::after {
+  content:attr(data-tle-mask-floor); display:block; position:absolute; inset:0;
+  visibility:visible; white-space:pre-wrap; pointer-events:none;
 }
 /* Diagnostic escape hatch:
    - fixed top-right only; never anchor critical controls in bottom corners.
@@ -6997,6 +7033,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   const CHAT_FADE_ENABLED_KEY = 'tle.chatFade.enabled';
   const SCROLL_BOTTOM_ENABLED_KEY = 'tle.scrollBottom.enabled';
   const CHAT_FADE_BOTTOM_PADDING_KEY = 'tle.chatFade.bottomPadding';
+  const MASK_HERO_ENABLED_KEY = 'tle.maskHero.enabled';
+  let maskHeroEnabled = getStoredBool(MASK_HERO_ENABLED_KEY, false);
+  let maskHeroRuntime = {
+    plans: maskHeroLoadPlans(), draft: maskHeroCreateEmptyDraft(), selectedPlanId: '',
+    status: '打码侠默认关闭。', dbPromise: null,
+  };
   let chatToolsEnabled = getStoredBool(CHAT_TOOLS_ENABLED_KEY, true);
   let chatQuickActionsEnabled = getStoredBool(CHAT_QUICK_ACTIONS_ENABLED_KEY, true);
   let chatFadeEnabled = getStoredBool(CHAT_FADE_ENABLED_KEY, false);
@@ -7016,7 +7058,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     try { HOST_WIN.localStorage.setItem(CHAT_TOOLS_ENABLED_KEY, String(chatToolsEnabled)); } catch {}
     const input = state.panel?.querySelector('[data-tle-setting="chat-tools-enabled"]');
     if (input) input.checked = chatToolsEnabled;
-    if (!chatToolsEnabled) closeChatTools(false);
+    if (!chatToolsEnabled) {
+      setMaskHeroEnabled(false);
+      closeChatTools(false);
+    }
     queueChatShortcutRefresh();
   }
 
@@ -7027,6 +7072,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (input) input.checked = chatQuickActionsEnabled;
     const actions = state.chatTools.panel?.querySelector('[data-chat-quick-actions]');
     if (actions) actions.hidden = !chatQuickActionsEnabled;
+  }
+
+  function setMaskHeroEnabled(enabled) {
+    maskHeroEnabled = Boolean(enabled) && chatToolsEnabled;
+    try { HOST_WIN.localStorage.setItem(MASK_HERO_ENABLED_KEY, String(maskHeroEnabled)); } catch {}
+    const input = state.panel?.querySelector('[data-tle-setting="mask-hero-enabled"]');
+    if (input) input.checked = maskHeroEnabled;
+    const tab = state.chatTools.panel?.querySelector('[data-chat-tools-tab="mask"]');
+    if (tab) tab.hidden = !maskHeroEnabled;
+    if (!maskHeroEnabled) {
+      maskHeroClearEffects();
+      if (state.chatTools.page === 'mask') setChatToolsPage('tools', false);
+      maskHeroRuntime.status = '打码侠已关闭；已保存方案保留。';
+    } else {
+      maskHeroRuntime.status = '打码侠已启用。选择或编辑方案后，点击「应用」才会处理当前聊天。';
+      maskHeroRenderPage();
+    }
+    const status = state.chatTools.panel?.querySelector('[data-mask-hero-status]');
+    if (status) status.textContent = maskHeroRuntime.status;
   }
 
   function setScrollBottomEnabled(enabled) {
@@ -11487,6 +11551,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         </label>
         <p class="tle-muted">默认开启。关闭后隐藏聊天界面右上角的会话侠入口，并关闭已打开的面板；楼层侠和最近聊天功能一并停用。</p>
         <label class="tle-row" style="justify-content:flex-start;gap:10px;margin-top:12px;">
+          <input type="checkbox" data-tle-setting="mask-hero-enabled">
+          <span>启用打码侠</span>
+        </label>
+        <p class="tle-muted">默认关闭。启用后在会话侠中显示独立的「打码侠」页面；只替换当前聊天的显示层，不修改聊天文件、角色卡或原始消息数据。关闭时卸除效果，保留已保存方案。</p>
+        <label class="tle-row" style="justify-content:flex-start;gap:10px;margin-top:12px;">
           <input type="checkbox" data-tle-setting="chat-quick-actions-enabled">
           <span>在会话侠标题栏显示聊天快捷操作</span>
         </label>
@@ -11636,6 +11705,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (chatShortcutDestinationInput) chatShortcutDestinationInput.value = chatShortcutDestination;
     const chatToolsEnabledInput = panel.querySelector('[data-tle-setting="chat-tools-enabled"]');
     if (chatToolsEnabledInput) chatToolsEnabledInput.checked = chatToolsEnabled;
+    const maskHeroEnabledInput = panel.querySelector('[data-tle-setting="mask-hero-enabled"]');
+    if (maskHeroEnabledInput) maskHeroEnabledInput.checked = maskHeroEnabled;
     const chatQuickActionsEnabledInput = panel.querySelector('[data-tle-setting="chat-quick-actions-enabled"]');
     if (chatQuickActionsEnabledInput) chatQuickActionsEnabledInput.checked = chatQuickActionsEnabled;
     const chatFadeEnabledInput = panel.querySelector('[data-tle-setting="chat-fade-enabled"]');
@@ -15223,7 +15294,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function setChatToolsPage(page, refresh = true) {
     const tools = state.chatTools;
     const panel = tools.panel;
-    if (!panel || !['tools', 'recent', 'plans'].includes(page)) return;
+    if (!panel || !['tools', 'recent', 'plans', 'mask'].includes(page)) return;
+    if (page === 'mask' && !maskHeroEnabled) return;
     tools.page = page;
     panel.dataset.page = page;
     panel.querySelectorAll('[data-chat-tools-tab]').forEach(button => {
@@ -15242,6 +15314,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       tools.recent.loading = false;
       void refreshRecentChats();
     }
+    if (page === 'mask' && refresh) maskHeroRenderPage();
   }
 
   async function openRecentChatItem(row) {
@@ -15783,6 +15856,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         <button type="button" class="menu_button tle-chat-tools-tab active" data-chat-tools-tab="tools" aria-pressed="true">楼层侠</button>
         <button type="button" class="menu_button tle-chat-tools-tab" data-chat-tools-tab="recent" aria-pressed="false">最近聊天</button>
         <button type="button" class="menu_button tle-chat-tools-tab" data-chat-tools-tab="plans" aria-pressed="false">配套方案</button>
+        <button type="button" class="menu_button tle-chat-tools-tab" data-chat-tools-tab="mask" aria-pressed="false" hidden>打码侠</button>
       </nav>
       <section class="tle-chat-tools-page" data-chat-tools-page="tools">
         <div class="tle-chat-tools-actions" data-tle-chat-tools-actions></div>
@@ -15827,6 +15901,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         <div class="tle-companion-actions">
           <button type="button" class="menu_button" data-companion-action="manager">管理方案</button>
         </div>
+      </section>
+      <section class="tle-chat-tools-page" data-chat-tools-page="mask" hidden>
+        <div class="tle-mask-hero-root" data-mask-hero-root></div>
       </section>`;
 
     for (const action of CHAT_ACTIONS) {
@@ -15852,6 +15929,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.body.append(button, panel);
     state.chatTools.button = button;
     state.chatTools.panel = panel;
+    maskHeroSyncTabVisibility();
+    maskHeroRenderPage();
+    panel.addEventListener('change', event => {
+      const target = event.target;
+      const avatarInput = target?.closest?.('[data-mask-avatar-type]');
+      if (avatarInput) { void maskHeroHandleAvatarInput(avatarInput); return; }
+      const planSelect = target?.closest?.('[data-mask-plan-select]');
+      if (planSelect) maskHeroLoadSelectedPlan(planSelect.value);
+    });
 
     HOST_DOC.addEventListener('pointerdown', event => {
       if (!state.chatTools.open) return;
@@ -17618,6 +17704,32 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const chatToolsPanel = target.closest('#' + ID.chatToolsPanel);
     if (chatToolsPanel) {
+      const maskAction = target.closest('[data-mask-hero-action]');
+      if (maskAction) {
+        event.preventDefault();
+        event.stopPropagation();
+        const action = maskAction.dataset.maskHeroAction;
+        const index = Number(maskAction.dataset.index);
+        if (action === 'apply') void maskHeroApplyDraft().catch(error => maskHeroSetStatus(error?.message || '应用打码方案失败。'));
+        if (action === 'restore') { maskHeroClearEffects(); maskHeroSetStatus('当前聊天的打码效果已卸除；原始显示已恢复。'); }
+        if (action === 'save') void maskHeroSavePlan().catch(error => maskHeroSetStatus(error?.message || '保存方案失败。'));
+        if (action === 'delete') void maskHeroDeleteSelectedPlan().catch(error => maskHeroSetStatus(error?.message || '删除方案失败。'));
+        if (action === 'add-floor') maskHeroAddRule('floor');
+        if (action === 'add-text') maskHeroAddRule('text');
+        if (action === 'remove-floor') maskHeroRemoveRule('floor', index);
+        if (action === 'remove-text') maskHeroRemoveRule('text', index);
+        if (action === 'clear-avatar') {
+          maskHeroReadDraftFromUI();
+          const type = maskAction.dataset.avatarType;
+          if (['user', 'char'].includes(type)) {
+            maskHeroRuntime.draft.avatarAssets[type] = '';
+            maskHeroRuntime.draft.avatarNames[type] = '';
+            maskHeroRenderPage();
+            maskHeroSetStatus((type === 'user' ? 'User' : 'Char') + ' 头像覆盖已清除；保存方案后生效。');
+          }
+        }
+        return;
+      }
       const quickAction = target.closest('[data-chat-quick-action]');
       if (quickAction) {
         event.preventDefault();
@@ -18405,6 +18517,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       quickSwitch: { moduleIds: QUICK_MODULES.map(item => item.id), groups: quickGroupSummary, groupManagerOpen: Boolean(quickPanel?.embedded && state.globalSearchOpen && state.globalSearchView === 'resources'), pickerOpen: Boolean(HOST_DOC.querySelector('#tle-quick-picker')) },
       optionalFolds: { enabled: foldConfig.enabled, options: { ...foldConfig.options }, activeFoldCount: foldRecords.size, observerPresent: Boolean(state.presetFoldObserver) },
       chatTools: { enabled: chatToolsEnabled, quickActionsEnabled: chatQuickActionsEnabled, open: state.chatTools.open, buttonPresent: Boolean(state.chatTools.button?.isConnected), panelPresent: Boolean(state.chatTools.panel?.isConnected), recentLoading: state.chatTools.recent.loading, recentItemCount: state.chatTools.recent.items?.length || 0, currentChatFilter: state.chatTools.recent.onlyCurrent, actions: CHAT_ACTIONS.map(item => item.id) },
+      maskHero: { enabled: maskHeroEnabled, planCount: maskHeroRuntime.plans.length, applied: Boolean(state.chatTools.maskHero.appliedConfig), activeChatKey: state.chatTools.maskHero.appliedChatKey },
       chatShortcut: { present: Boolean(state.chatShortcut?.isConnected), destination: chatShortcutDestination },
       chatFade: {
         enabled: chatFadeEnabled,
@@ -20966,6 +21079,7 @@ function createTLEGalleryHome(window, document) {
     state.floorZeroClearanceFrame = 0;
     clearFloorZeroClearance();
     closeQuickPanel(false);
+    maskHeroClearEffects();
     closeChatTools(false);
     companionCleanup();
     optionalCleanup();
@@ -21152,6 +21266,9 @@ function createTLEGalleryHome(window, document) {
 
     const chatToolsEnabledSetting = event.target.closest?.('[data-tle-setting="chat-tools-enabled"]');
     if (chatToolsEnabledSetting) setChatToolsEnabled(chatToolsEnabledSetting.checked);
+
+    const maskHeroEnabledSetting = event.target.closest?.('[data-tle-setting="mask-hero-enabled"]');
+    if (maskHeroEnabledSetting) setMaskHeroEnabled(maskHeroEnabledSetting.checked);
 
     const chatQuickActionsSetting = event.target.closest?.('[data-tle-setting="chat-quick-actions-enabled"]');
     if (chatQuickActionsSetting) setChatQuickActionsEnabled(chatQuickActionsSetting.checked);
