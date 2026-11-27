@@ -33,7 +33,7 @@ assert.match(tle, /button\.style\.setProperty\('right'/);
 assert.doesNotMatch(tle, /width: fit-content !important;/);
 assert.match(tle, /organizerEntry\.className = 'drawer'/, 'Organizer must be a native-shaped tenth drawer');
 assert.match(tle, /organizerToggle\.className = 'drawer-toggle interactable'/);
-assert.match(tle, /organizerIcon\.className = 'drawer-icon fa-solid fa-layer-group interactable'/);
+assert.match(tle, /organizerIcon\.className = 'drawer-icon fa-solid fa-layer-group interactable closedIcon'/, 'Organizer starts in the native closed-icon state so Tavern opacity rules apply');
 assert.match(tle, /panel\.className = 'drawer-content closedDrawer'/, 'Organizer must own its drawer-content');
 assert.match(tle, /state\.organizerEntry\?\.appendChild\(panel\)/, 'Organizer content must be nested inside its drawer');
 assert.match(tle, /holder\.insertBefore\(state\.organizerEntry, organizerPosition\)/, 'Organizer must follow the nine native drawers');
