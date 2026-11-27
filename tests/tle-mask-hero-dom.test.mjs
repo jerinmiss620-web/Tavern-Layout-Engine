@@ -33,6 +33,7 @@ const sandbox = {
 };
 const helpers = section('  function maskHeroIsUnsafeRegex(', '  function maskHeroValidateDraft(');
 const functions = [
+  section('  function maskHeroMessageKind(', '  function maskHeroApplyTextNode('),
   section('  function maskHeroApplyTextNode(', '  function maskHeroApplyImage('),
   section('  function maskHeroApplyImage(', '  function maskHeroApplyFloorReplacement('),
   section('  function maskHeroApplyFloorReplacement(', '  function maskHeroProcessChat('),
@@ -49,6 +50,19 @@ globalThis.maskHeroDom = {
 `, sandbox);
 const api = sandbox.maskHeroDom;
 const body = window.document.querySelector('.mes_text');
+
+// User/Char/System message classification follows the native message attributes.
+const userMessage = window.document.createElement('div');
+userMessage.className = 'mes';
+userMessage.setAttribute('is_user', 'true');
+assert.equal(api.maskHeroMessageKind(userMessage), 'user');
+const charMessage = window.document.createElement('div');
+charMessage.className = 'mes';
+assert.equal(api.maskHeroMessageKind(charMessage), 'char');
+const systemMessage = window.document.createElement('div');
+systemMessage.className = 'mes';
+systemMessage.setAttribute('is_system', 'true');
+assert.equal(api.maskHeroMessageKind(systemMessage), '');
 
 // Local replacements change only the rendered Text node and preserve its original value.
 const textNode = window.document.createTextNode('Contact secret@example.com');
