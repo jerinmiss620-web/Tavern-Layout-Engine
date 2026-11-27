@@ -18,7 +18,7 @@ new vm.Script(tle);
 new vm.Script(loader);
 assert.equal(test.channel, 'test');
 assert.match(loader, /const CHANNEL = 'test'/);
-assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
+assert.match(loader, /Tavern-Layout-Engine\/main\/channels\/test\.json/, 'legacy Test Loader must keep reading the main compatibility manifest');
 assert.match(loader, /checkRemote: \(\) => checkRemote\(\{ promptUpdate: true \}\)/);
 assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
 assert.match(loader, /tle\.loader\.organizerBranchTest\.lastKnownGood\.v1/);
