@@ -22,6 +22,7 @@ const runtime = {
   imageElements: new Map(),
   objectUrls: new Map(),
   listeners: [],
+  applyGeneration: 0,
   appliedConfig: null,
   appliedChatKey: '',
 };

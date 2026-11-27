@@ -143,6 +143,9 @@ assert.match(source, /element\.replaceChildren\(\.\.\.before, record\.original, 
 assert.match(source, /message\.querySelectorAll\('\.mesAvatarWrapper img, \.avatar img'\)/);
 assert.match(source, /#chat \.mes_edit, #chat \.mes_edit_button, #chat \[data-mes-edit\]/);
 assert.match(source, /切换聊天会自动卸除/);
+assert.match(source, /addEventListener\('click', unmaskBeforeNativeEdit/);
+assert.match(source, /runtime\.applyGeneration \+= 1/);
+assert.match(source, /已取消旧的应用操作/);
 
 const runtime = section(
   source,
