@@ -4,6 +4,16 @@
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
 
+## 2026-11-27 · Core v0.3.290 · 导航兼容修复图标居中
+
+- 将导航兼容性修复中 `.drawer-icon` 的 `display: block` 改为 `display: flex`，恢复主题原有的 Flex 图标居中机制。
+- 明确设置 `align-items: center` 与 `justify-content: center`，修复开启导航兼容性修复后图标靠上、不居中的问题。
+- 保留原有图标尺寸、点击区域、可见性与透明度规则；不改变导航交互和其他兼容性选项。
+- 新增回归断言，检查图标 Flex 布局、双轴居中及开发源码与正式源码逐字节一致。
+- Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
+
+Node 24 全量回归、正式清单远端核验及下载发布字节后的更新链重放，以本次正式发布工作流结果为准。ST/TT 全主题实机视觉矩阵仍未全部覆盖；自动化回归不替代真实宿主验收。
+
 ## 2026-11-27 · Core v0.3.289 · 记录预览与主样式历史补丁清理（正式发布）
 
 详见 [本版完整日志](releases/v0.3.289/CHANGELOG.md)。清理记录预览未使用状态与等价 CSS 历史覆盖；移动端详情区内部间距保持 5px、头像列宽 104px、列间距 8px。保留高清头像引擎、角色记录、配套侠与整理侠完整功能。Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
@@ -22,6 +32,7 @@
 
 ## Core 更新记录
 
+- [v0.3.290](releases/v0.3.290/CHANGELOG.md)
 - [v0.3.289](releases/v0.3.289/CHANGELOG.md)
 - [v0.3.259](releases/v0.3.259/CHANGELOG.md)
 - [v0.3.239](releases/v0.3.239/CHANGELOG.md)
