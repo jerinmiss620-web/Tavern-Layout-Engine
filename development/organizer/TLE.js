@@ -15655,7 +15655,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
 
     const note = maskHeroCreateNode('p', 'tle-mask-hero-note',
-      '仅处理当前聊天的消息显示节点。原始聊天文件、角色卡和消息数据不会被写入；局部替换只对原始文本执行一次，替换结果不会再次参与后续规则。头像文件保存在本机 IndexedDB。');
+      '仅处理当前聊天的消息显示节点。原始聊天文件、角色卡和消息数据不会被写入；局部替换逐个文本节点执行，不跨富文本标签拼接；替换结果不会再次参与后续规则。头像文件保存在本机 IndexedDB。');
     root.replaceChildren(toolbar, actions, status, nameSection, floorSection, textSection, avatarSection, note);
   }
 
@@ -15826,12 +15826,26 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function maskHeroApplyFloorReplacement(body, replacement) {
     const records = state.chatTools.maskHero.floorElements;
     const previous = records.get(body);
-    if (previous && body.childNodes.length === 1 && body.firstChild === previous.appliedNode) return;
-    // If the host replaced message contents while masked, the new DOM is authoritative.
+    const replacementText = String(replacement ?? '');
+    if (previous && body.contains(previous.appliedNode) && previous.appliedNode.nodeValue === replacementText) {
+      if (body.childNodes.length === 1) return;
+      // Preserve any host-added nodes while keeping the detached original fragment reversible.
+      const original = HOST_DOC.createDocumentFragment();
+      for (const child of [...body.childNodes]) {
+        if (child === previous.appliedNode) original.appendChild(previous.original);
+        else original.appendChild(child);
+      }
+      const appliedNode = HOST_DOC.createTextNode(replacementText);
+      body.replaceChildren(appliedNode);
+      body.setAttribute('data-tle-mask-floor', 'true');
+      records.set(body, { original, appliedNode });
+      return;
+    }
+    // If the host replaced the applied text node, its new DOM is authoritative.
     if (previous) records.delete(body);
     const original = HOST_DOC.createDocumentFragment();
     while (body.firstChild) original.appendChild(body.firstChild);
-    const appliedNode = HOST_DOC.createTextNode(String(replacement ?? ''));
+    const appliedNode = HOST_DOC.createTextNode(replacementText);
     body.appendChild(appliedNode);
     body.setAttribute('data-tle-mask-floor', 'true');
     records.set(body, { original, appliedNode });
@@ -15905,7 +15919,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (runtime.frame) HOST_WIN.cancelAnimationFrame(runtime.frame);
     runtime.frame = 0;
     for (const [node, record] of runtime.textNodes) {
-      if (node?.isConnected && node.nodeValue === record.applied) node.nodeValue = record.original;
+      if (node && node.nodeValue === record.applied) node.nodeValue = record.original;
     }
     runtime.textNodes.clear();
     for (const element of runtime.nameElements) element?.removeAttribute?.('data-tle-mask-name');
@@ -15925,7 +15939,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     runtime.floorElements.clear();
     for (const [img, record] of runtime.imageElements) {
-      if (!img?.isConnected || img.getAttribute('src') !== record.appliedSrc) continue;
+      if (!img || img.getAttribute('src') !== record.appliedSrc) continue;
       for (const key of ['src', 'srcset', 'sizes', 'alt']) {
         const value = record.original[key];
         if (value === null || value === undefined) img.removeAttribute(key);
