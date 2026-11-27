@@ -22,11 +22,13 @@ const OWNER = 'jerinmiss620-web';
 const REPO = 'Tavern-Layout-Engine';
 const REMOTE = process.argv.includes('--remote');
 
-const legacyFiles = {
+const readRawText = path => readFileSync(join(ROOT, path), 'utf8');
+const manifest = JSON.parse(readRawText('channels/test.json'));
+const legacyFiles = manifest.release?.version === '0.3.204' ? {
   'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.json': 'tests/fixtures/legacy/test-loader-v0.3.0.json',
-};
+} : {};
 function readText(path) {
   return readFileSync(join(ROOT, legacyFiles[path] || path), 'utf8');
 }
@@ -67,7 +69,6 @@ async function checkRemoteSource(url, expectedHash, expectedSize, label) {
   return bytes;
 }
 
-const manifest = JSON.parse(readText('channels/test.json'));
 assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
 assert.equal(manifest.channel, 'test');
@@ -144,38 +145,36 @@ assert.ok(tleSource.includes('diagnosticButtonObserver'));
 assert.ok(tleSource.includes('buttonDisplayPriority'));
 assert.ok(tleSource.includes('buttonReceivesHit'));
 
- // v0.3.196 feature contract: two floor inputs, opt-in navigation repair,
- // and native chat quick actions inside 会话侠.
- assert.ok(tleSource.includes("id: 'range'"), 'Floor tools must use one shared range input');
- assert.ok(tleSource.includes("buttons: [{ id: 'hide', label: '隐藏' }, { id: 'unhide', label: '恢复' }]"));
- assert.ok(tleSource.includes('data-chat-action-clear'), 'Floor inputs must have clear controls');
- assert.ok(tleSource.includes('请输入有效范围，例如 90-90'));
- assert.ok(tleSource.includes('data-tle-setting="compat-nav-repair"'));
- assert.ok(tleSource.includes('width: fit-content !important;'));
- assert.ok(tleSource.includes('data-chat-quick-action="new"'));
- assert.ok(tleSource.includes('option_start_new_chat'));
- assert.ok(tleSource.includes('option_close_chat'));
- assert.ok(tleSource.includes('option_select_chat'));
- assert.ok(tleSource.includes('querySelectorAll(`#options [id="${id}"]`)'));
- assert.ok(tleSource.includes('navigationRepairEnabled: compatibilityNavigationRepair'));
- assert.ok(tleSource.includes('quickActionsEnabled: chatQuickActionsEnabled'));
- assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="labels"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
- assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="info"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
- assert.ok(tleSource.includes('function findNavigationControlForEvent(event)'));
- assert.ok(tleSource.includes('function getNavigationEventDetails(button, event)'));
- assert.ok(tleSource.includes('targetArea'));
- assert.ok(tleSource.includes('iconReceivesHit'));
- assert.ok(tleSource.includes('labelReceivesHit'));
- assert.ok(tleSource.includes('iconCenterButtonReceivesHit'));
- assert.ok(tleSource.includes('iconPseudoElements'));
- assert.ok(tleSource.includes('function recordNavigationPointerDown(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickCapture(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickDocumentBubble(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickWindowBubble(event)'));
- assert.ok(tleSource.includes('nativeControls: navigationControlDiagnostics'));
- assert.ok(tleSource.includes('drawerOpenAfterDispatch'));
- assert.ok(tleSource.includes('buttonPresentInHitStack: hitNodes.some'));
- assert.ok(!/body\[data-tle-compat-nav-repair\]\[data-tle-nav="icons"\][\s\S]{0,500}margin-inline: 15px !important;/.test(tleSource));
+// Organizer branch contract. The separate tests/tle-organizer-worldbook.test.mjs
+// exercise catalog classification, stable group-key migration and cleanup behavior.
+assert.ok(tleSource.includes("organizerEntry: 'tle-organizer-entry'"), 'Dedicated Organizer navigation entry missing');
+assert.ok(tleSource.includes('state.organizerEntry = organizerEntry'), 'Organizer navigation item is not created');
+assert.ok(tleSource.includes("organizerEntry.className = 'drawer'"), 'Organizer must be a tenth native-shaped drawer');
+assert.ok(tleSource.includes("organizerToggle.className = 'drawer-toggle interactable'"), 'Organizer must own a native drawer toggle');
+assert.ok(tleSource.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable closedIcon'"), 'Organizer must use the native drawer icon with its initial closed state');
+assert.ok(tleSource.includes("panel.className = 'drawer-content closedDrawer'"), 'Organizer must own a drawer-content');
+assert.ok(tleSource.includes('state.organizerEntry?.appendChild(panel)'), 'Organizer content must be nested inside its drawer');
+assert.ok(tleSource.includes('holder.insertBefore(state.organizerEntry, organizerPosition)'), 'Organizer must follow the nine native drawers');
+assert.ok(tleSource.includes("panel.className = 'tle-global-search-overlay'"), 'Original global search must retain its independent modal');
+const organizerStart = tleSource.indexOf('function createOrganizerPanel()');
+const organizerEnd = tleSource.indexOf('function createRailControls()', organizerStart);
+assert.ok(organizerStart >= 0 && organizerEnd > organizerStart, 'Organizer panel factory must be present');
+const organizerFactory = tleSource.slice(organizerStart, organizerEnd);
+assert.ok(!organizerFactory.includes('tle-global-search-overlay'), 'Organizer must not use the global-search modal overlay');
+assert.ok(!organizerFactory.includes('tle-search-surface'), 'Organizer must not use a nested search surface');
+assert.ok(tleSource.includes('const available = globalSearchEnabled;'), 'Organizer visibility must not depend on navigation mode');
+assert.ok(tleSource.includes('function buildWorldInfoCatalog('), 'Unified World Info catalog missing');
+assert.ok(tleSource.includes('function quickManagerCatalog('), 'Resource manager is not using the unified catalog');
+assert.ok(tleSource.includes("JSON.stringify(['world_info', name])"), 'Worldbook group keys are not name-stable');
+assert.ok(tleSource.includes("native.deleteWorldInfo(entry.value)"), 'Worldbook deletion must use the native API');
+assert.ok(tleSource.includes('removeWorldInfoExtraLinks(native.world_info, entry.value)'), 'Worldbook deletion must clean extra-book references');
+assert.ok(tleSource.includes('function scanWorldInfoBindings()'), 'Opt-in shallow character scan missing');
+assert.ok(tleSource.includes('context.unshallowCharacter(pending[index].index)'), 'Shallow character scan must use the host context API');
+assert.ok(tleSource.includes('疑似孤儿'), 'Suspected orphan state missing');
+assert.ok(loaderSource.includes('TLE_Organizer_Branch_Test_Cache'), 'Branch test Loader must use an isolated cache database');
+assert.ok(loaderSource.includes('tle.loader.organizerBranchTest.lastKnownGood.v1'), 'Branch test Loader must use isolated cache keys');
+assert.equal(installer.enabled, false, 'Test Loader installer must be disabled by default');
+
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
