@@ -13760,6 +13760,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const presetName = companionPromptCurrentPresetName(context, manager);
     const strategy = manager.configuration?.promptOrder?.strategy || 'global';
     const overlay = companionRuntime.promptOverlay;
+    if (overlay && strategy !== 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+      try {
+        const snapshot = companionPromptSnapshotFromManager(manager, presetName);
+        companionPromptSaveRoleState(overlay, snapshot);
+      } catch {}
+      return;
+    }
     if (overlay && strategy === 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
       let snapshot;
       try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
