@@ -8,11 +8,11 @@
   "release": {
     "version": "0.3.295",
     "source_path": "releases/v0.3.295/TLE.js",
-    "source_commit": "76319ebe2fa8e696d448d0ee0da167dcc2988dd4",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/76319ebe2fa8e696d448d0ee0da167dcc2988dd4/releases/v0.3.295/TLE.js",
+    "source_commit": "ec2af3609a8abd44c4b74cef0c12887cced7c19f",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ec2af3609a8abd44c4b74cef0c12887cced7c19f/releases/v0.3.295/TLE.js",
     "changelog_path": "releases/v0.3.295/CHANGELOG.md",
-    "sha256": "bb21bb20cecaa4af113afb08b7bdec2cf8ca17331fa977124f770d506fd439d2",
-    "size_bytes": 1073412
+    "sha256": "8ce024c1dfcf2b1ef7dfd38cfa37abdfbaff56df7753e2abc3981fdbf7150a05",
+    "size_bytes": 1073290
   },
   "status": "TEST v0.3.295 · 打码侠首轮实现。请在 TLE 引擎面板手动启用打码侠后测试；不修改正式版 latest.json / release-plan.json。重点验证名称、楼层、正文精确/正则替换、头像覆盖、方案保存恢复、聊天切换与原生编辑安全。",
   "loader_release": {
