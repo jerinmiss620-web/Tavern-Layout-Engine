@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.291",
+  "latest_version": "0.3.294",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.291",
-    "source_path": "releases/v0.3.291/TLE.js",
-    "source_commit": "c1acb11dd8db9434dfe4c08848495b73261ef611",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c1acb11dd8db9434dfe4c08848495b73261ef611/releases/v0.3.291/TLE.js",
-    "changelog_path": "releases/v0.3.291/CHANGELOG.md",
-    "sha256": "acf29b28abeee1cb711879f377876f5965bcff999f9ee3df244766c691b51ca2",
-    "size_bytes": 979548
+    "version": "0.3.294",
+    "source_path": "releases/v0.3.294/TLE.js",
+    "source_commit": "648da321089e1f9534ccf859c901ab76fbb0f90f",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/648da321089e1f9534ccf859c901ab76fbb0f90f/releases/v0.3.294/TLE.js",
+    "changelog_path": "releases/v0.3.294/CHANGELOG.md",
+    "sha256": "a14149c6525f8ab186d48b59db0183e42f9ae973c7379a541d1a46fb11071a63",
+    "size_bytes": 1029725
   },
-  "notes": "Verified on main: Node 24 full regression, remote immutable-source verification, and downloaded Bootstrap → Loader → Core update-chain replay all passed. Real ST/TT theme-device visual coverage remains a separate manual matrix. See VALIDATION.md."
+  "notes": "Core v0.3.294 is based on stable Core v0.3.291 and adds role-scoped prompt-entry state plus a collapsed multi-select World Info picker. Loader Runtime v0.3.6 and Bootstrap v1.0.6 are unchanged. See VALIDATION.md."
 }
