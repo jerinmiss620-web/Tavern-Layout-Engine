@@ -1,8 +1,18 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.290 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
+目前正式版：**Core v0.3.291 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
+
+## 2026-11-27 · Core v0.3.291 · 导航图标可见性与透明度完整修复（候选验证通过）
+
+- 修复兼容性规则把 `.closedIcon` 排除在透明度控制之外的问题；闭合状态与打开状态统一应用透明度变量。
+- 图标选择器由直接子元素改为后代匹配，兼容主题在图标外增加包装元素的 DOM 结构。
+- 对图标内部 glyph 与 `::before` 贴图补充可见性、透明度恢复规则。
+- 透明度变量仍由滑杆实时写入 `body` 的 `--tle-nav-icon-opacity`；兼容规则由宿主文档 `<head>` 中的 `#tle-core-style` 注入。
+- 新增 JSDOM 回归：模拟主题将 open/closed 图标及内部 glyph 隐藏，验证恢复显示、可见性、透明度与包装层 DOM。
+- 候选分支 Node 24 全量回归 Run #46032465127 通过；正式 main 远端更新链核验待整合后执行。
+- Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
 
 ## 2026-11-27 · Core v0.3.290 · 导航兼容修复图标居中
 
@@ -32,6 +42,7 @@ Node 24 全量回归、正式清单远端核验及下载发布字节后的更新
 
 ## Core 更新记录
 
+- [v0.3.291](releases/v0.3.291/CHANGELOG.md)
 - [v0.3.290](releases/v0.3.290/CHANGELOG.md)
 - [v0.3.289](releases/v0.3.289/CHANGELOG.md)
 - [v0.3.259](releases/v0.3.259/CHANGELOG.md)

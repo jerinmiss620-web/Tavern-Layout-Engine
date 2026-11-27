@@ -1,8 +1,19 @@
 # 自动更新验证记录 — 2026-11-27
 
-当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.290。
+当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.291。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
+
+## 2026-11-27 · Core v0.3.291 · 导航图标可见性与透明度完整修复
+
+- 候选分支 Node 24 全量回归 Run #46032465127 通过。
+- JSDOM 专项测试模拟主题将 open/closed 图标和内部 glyph 隐藏；新规则恢复图标显示、visibility 与 glyph opacity，并验证图标包装层匹配。
+- 修复 `.drawer-icon:not(.closedIcon)` 排除闭合状态的问题；透明度现在直接应用于所有图标状态。
+- 图标选择器改为后代匹配；内部 glyph 与 `::before` 贴图纳入恢复规则。
+- CSS 由 Core 注入宿主文档 `<head>` 中的 `#tle-core-style`；透明度变量写入 `body` 内联样式 `--tle-nav-icon-opacity`。
+- 开发源码、正式源码、备份包内源码与不可变 Commit 固定源码逐字节一致；SHA-256：`acf29b28abeee1cb711879f377876f5965bcff999f9ee3df244766c691b51ca2`；UTF-8 字节数：`979548`。
+- 正式 main 远端清单核验及更新链重放待整合后执行；ST/TT 全主题视觉矩阵仍需实机覆盖。
+- Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
 
 ## 2026-11-27 · Core v0.3.290 · 导航兼容修复图标居中
 

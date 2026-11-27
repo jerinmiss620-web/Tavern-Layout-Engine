@@ -13,5 +13,5 @@
     "sha256": "acf29b28abeee1cb711879f377876f5965bcff999f9ee3df244766c691b51ca2",
     "size_bytes": 979548
   },
-  "notes": "Candidate release. CI and immutable-source verification are required before promotion. See VALIDATION.md."
+  "notes": "Candidate branch Node 24 full regression and immutable-source/package equality checks passed. Main-branch remote manifest verification and downloaded update-chain replay are pending promotion. See VALIDATION.md."
 }
