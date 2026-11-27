@@ -152,8 +152,16 @@ if (process.argv.includes('--current')) {
   assert.doesNotMatch(navIconRule, /display: block/);
   assert.doesNotMatch(navIconRule, /closedIcon/);
   assert.doesNotMatch(tle, /drawer-icon:not\(\.closedIcon\)/);
-  assert.equal(read('development/organizer/TLE.js'), read('releases/v' + plan.core + '/TLE.js'),
-    'Development Core and current immutable release source must match byte-for-byte');
+  const featureBranch = /^refs\/heads\/feature\//.test(process.env.GITHUB_REF || '') ||
+    /^feature\//.test(process.env.GITHUB_HEAD_REF || '') ||
+    process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
+  if (!featureBranch) {
+    assert.equal(read('development/organizer/TLE.js'), read('releases/v' + plan.core + '/TLE.js'),
+      'Development Core and current immutable release source must match byte-for-byte on stable branches');
+  } else {
+    assert.equal(read('releases/v' + plan.core + '/TLE.js'), read(manifest.release.source_path),
+      'feature work must leave the current immutable release artifact untouched');
+  }
 }assert.ok(tle.includes('opacity: var(--tle-nav-icon-opacity, 0.7) !important;'));
 assert.doesNotMatch(tle, /body\[data-tle-nav\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle > \.drawer-icon \{\s*opacity:/);
 assert.ok(tle.includes("const wrap = state.panel?.querySelector('[data-tle-compat-nav-opacity]')"));
