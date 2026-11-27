@@ -10,7 +10,7 @@
     "source_commit": "5d1575a1c740960e851d0c4ec1c2a3f05ff1ff4a",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/5d1575a1c740960e851d0c4ec1c2a3f05ff1ff4a/releases/v0.3.288/TLE.js",
     "changelog_path": "releases/v0.3.288/CHANGELOG.md",
-    "sha256": "d8373d5ec1efa74b8f18a5b3c60f5778eff1769738d72605f21a9f68b1f50d43",
+    "sha256": "eeeeb349b10122aefa773fa31bc55b815a01f72ce38f37a0981c35b71e5f21cc",
     "size_bytes": 979279
   },
   "status": "TEST v0.3.288：继承正式版 v0.3.264 的配套方案紧凑预览与原生更新按钮修复；移动端记录详情内部间距 5px，头像列宽 104px、列间距 8px。",

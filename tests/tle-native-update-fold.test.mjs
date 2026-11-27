@@ -3,11 +3,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const plan = JSON.parse(read('release-plan.json'));
-const source = read('releases/v' + plan.core + '/TLE.js');
-const pack = JSON.parse(read('releases/v' + plan.core + '/TLE-' + plan.core + '-import.json'));
+const manifest = JSON.parse(read('channels/test.json'));
+const source = read(manifest.release.source_path);
+const pack = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
 new vm.Script(source);
-assert.equal(pack.content, source, 'published installer must match the current Core source');
+assert.equal(pack.content, source, 'test installer must match the current test Core');
 assert.match(source, /<section class="tle-section" data-tle-update-details>/);
 assert.match(source, /<div class="inline-drawer">[\s\S]*?<div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">/);
 assert.match(source, /data-tle-update-summary/);
