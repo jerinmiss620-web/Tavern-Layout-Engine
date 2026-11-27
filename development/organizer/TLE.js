@@ -16688,13 +16688,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.body.append(button, panel);
     state.chatTools.button = button;
     state.chatTools.panel = panel;
-    HOST_DOC.addEventListener('pointerdown', event => {
+    const unmaskBeforeNativeEdit = event => {
       if (!state.chatTools.maskHero.appliedConfig) return;
       if (event.target?.closest?.('#chat .mes_edit, #chat .mes_edit_button, #chat [data-mes-edit]')) {
         maskHeroClearEffects();
         maskHeroSetStatus('已进入酒馆原生编辑，打码效果已临时卸除。');
       }
-    }, { capture: true, signal: state.abort.signal });
+    };
+    HOST_DOC.addEventListener('pointerdown', unmaskBeforeNativeEdit, { capture: true, signal: state.abort.signal });
+    HOST_DOC.addEventListener('click', unmaskBeforeNativeEdit, { capture: true, signal: state.abort.signal });
     maskHeroSyncTabVisibility();
     maskHeroRenderPage();
     panel.addEventListener('change', event => {
