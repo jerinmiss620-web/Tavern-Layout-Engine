@@ -14,7 +14,7 @@ function section(text, startMarker, endMarker) {
 const helpers = section(
   source,
   '  function maskHeroIsUnsafeRegex(',
-  '  function maskHeroValidateDraft(',
+  '  function maskHeroCreateEmptyDraft(',
 );
 const sandbox = {};
 vm.runInNewContext(helpers + '\nglobalThis.maskHeroHelpers = { maskHeroIsUnsafeRegex, maskHeroApplyTextRules, maskHeroValidateDraft };', sandbox);
