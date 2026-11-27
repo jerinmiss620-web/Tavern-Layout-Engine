@@ -15317,6 +15317,702 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (page === 'mask' && refresh) maskHeroRenderPage();
   }
 
+  function maskHeroIsUnsafeRegex(pattern) {
+    const value = String(pattern || '');
+    if (value.length > 256) return true;
+    if (/\\[1-9]/.test(value)) return true;
+    if (/\([^)]*[+*{][^)]*\)[+*{]/.test(value)) return true;
+    if (/\([^)]*\|[^)]*\)[+*{]/.test(value)) return true;
+    return false;
+  }
+
+  function maskHeroApplyTextRules(text, rules) {
+    const original = String(text ?? '');
+    if (!original || original.length > 20000 || !Array.isArray(rules) || !rules.length) return original;
+    const matches = [];
+    for (let ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
+      const rule = rules[ruleIndex] || {};
+      const find = String(rule.find ?? '');
+      if (!find) continue;
+      const replacement = String(rule.replace ?? '');
+      if (rule.regex) {
+        if (maskHeroIsUnsafeRegex(find)) continue;
+        let expression;
+        try { expression = new RegExp(find, rule.caseInsensitive ? 'gi' : 'g'); }
+        catch { continue; }
+        if (expression.test('')) continue;
+        expression.lastIndex = 0;
+        let match;
+        while ((match = expression.exec(original))) {
+          if (!match[0].length) {
+            expression.lastIndex += 1;
+            continue;
+          }
+          matches.push({ start: match.index, end: match.index + match[0].length, replacement, ruleIndex });
+        }
+      } else {
+        let offset = 0;
+        while (offset <= original.length - find.length) {
+          const index = original.indexOf(find, offset);
+          if (index < 0) break;
+          matches.push({ start: index, end: index + find.length, replacement, ruleIndex });
+          offset = index + find.length;
+        }
+      }
+    }
+    if (!matches.length) return original;
+    matches.sort((a, b) => a.start - b.start || a.ruleIndex - b.ruleIndex || b.end - a.end);
+    const output = [];
+    let cursor = 0;
+    for (const match of matches) {
+      if (match.start < cursor) continue;
+      output.push(original.slice(cursor, match.start), match.replacement);
+      cursor = match.end;
+    }
+    if (cursor === 0) return original;
+    output.push(original.slice(cursor));
+    return output.join('');
+  }
+
+  function maskHeroValidateDraft(draft) {
+    if (!draft || typeof draft !== 'object') throw new Error('打码方案格式无效。');
+    if (String(draft.userName || '').length > 100 || String(draft.charName || '').length > 100) {
+      throw new Error('名称替换内容最多 100 个字符。');
+    }
+    const floors = Array.isArray(draft.floorRules) ? draft.floorRules : [];
+    const rules = Array.isArray(draft.textRules) ? draft.textRules : [];
+    if (floors.length > 30) throw new Error('指定楼层规则最多 30 条。');
+    if (rules.length > 50) throw new Error('正文替换规则最多 50 条。');
+    const seenFloors = new Set();
+    for (const rule of floors) {
+      if (rule?.floor === '' || rule?.floor === null || rule?.floor === undefined) {
+        throw new Error('请为每条楼层替换规则填写楼层号。');
+      }
+      const floor = Number(rule.floor);
+      if (!Number.isInteger(floor) || floor < 0 || floor > 100000) throw new Error('楼层号必须是 0–100000 的整数。');
+      if (seenFloors.has(floor)) throw new Error('同一个楼层不能重复设置整体替换规则。');
+      seenFloors.add(floor);
+      if (String(rule?.replace ?? '').length > 5000) throw new Error('单条楼层替换内容最多 5000 个字符。');
+    }
+    for (const rule of rules) {
+      const find = String(rule?.find ?? '');
+      if (!find) continue;
+      if (find.length > (rule.regex ? 256 : 500)) throw new Error('查找内容过长，请缩短规则。');
+      if (String(rule?.replace ?? '').length > 2000) throw new Error('单条正文替换内容最多 2000 个字符。');
+      if (rule.regex) {
+        if (maskHeroIsUnsafeRegex(find)) throw new Error('该正则包含高风险结构或超过长度限制，请简化表达式。');
+        let expression;
+        try { expression = new RegExp(find, 'g'); }
+        catch (error) { throw new Error('正则表达式无效：' + (error?.message || error)); }
+        if (expression.test('')) throw new Error('正则不能匹配空字符串，以免产生大量无意义匹配。');
+      }
+    }
+    return true;
+  }
+
+  function maskHeroCreateEmptyDraft() {
+    return {
+      name: '',
+      userName: '',
+      charName: '',
+      floorRules: [],
+      textRules: [],
+      avatarAssets: { user: '', char: '' },
+      avatarNames: { user: '', char: '' },
+    };
+  }
+
+  function maskHeroNormalizePlan(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const empty = maskHeroCreateEmptyDraft();
+    const draft = {
+      id: String(raw.id || ''),
+      name: String(raw.name || '').slice(0, 40),
+      userName: String(raw.userName || '').slice(0, 100),
+      charName: String(raw.charName || '').slice(0, 100),
+      floorRules: Array.isArray(raw.floorRules) ? raw.floorRules.slice(0, 30).map(rule => ({
+        floor: String(rule?.floor ?? ''),
+        replace: String(rule?.replace ?? '').slice(0, 5000),
+      })) : empty.floorRules,
+      textRules: Array.isArray(raw.textRules) ? raw.textRules.slice(0, 50).map(rule => ({
+        find: String(rule?.find ?? '').slice(0, 500),
+        replace: String(rule?.replace ?? '').slice(0, 2000),
+        regex: Boolean(rule?.regex),
+        caseInsensitive: Boolean(rule?.caseInsensitive),
+      })) : empty.textRules,
+      avatarAssets: {
+        user: String(raw.avatarAssets?.user || ''),
+        char: String(raw.avatarAssets?.char || ''),
+      },
+      avatarNames: {
+        user: String(raw.avatarNames?.user || ''),
+        char: String(raw.avatarNames?.char || ''),
+      },
+    };
+    return draft.id && draft.name ? draft : null;
+  }
+
+  function maskHeroLoadPlans() {
+    try {
+      const raw = JSON.parse(HOST_WIN.localStorage.getItem('tle.maskHero.plans.v1') || '[]');
+      return Array.isArray(raw) ? raw.map(maskHeroNormalizePlan).filter(Boolean).slice(0, 30) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function maskHeroPersistPlans() {
+    try {
+      HOST_WIN.localStorage.setItem('tle.maskHero.plans.v1', JSON.stringify(maskHeroRuntime.plans));
+    } catch {
+      throw new Error('打码方案保存失败：本地存储空间不足或不可用。');
+    }
+  }
+
+  function maskHeroCreateNode(tag, className = '', text = '') {
+    const node = HOST_DOC.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = String(text);
+    return node;
+  }
+
+  function maskHeroCreateButton(label, action, extra = {}) {
+    const button = maskHeroCreateNode('button', 'menu_button', label);
+    button.type = 'button';
+    button.dataset.maskHeroAction = action;
+    if (extra.title) button.title = extra.title;
+    if (extra.index !== undefined) button.dataset.index = String(extra.index);
+    return button;
+  }
+
+  function maskHeroCreateField(labelText, field, value, type = 'text') {
+    const label = maskHeroCreateNode('label', 'tle-mask-hero-field');
+    label.append(maskHeroCreateNode('span', '', labelText));
+    const input = HOST_DOC.createElement(type === 'textarea' ? 'textarea' : 'input');
+    input.className = 'text_pole';
+    if (type === 'textarea') input.rows = 2;
+    else input.type = type;
+    input.dataset.maskField = field;
+    input.value = String(value ?? '');
+    label.append(input);
+    return label;
+  }
+
+  function maskHeroSetStatus(message) {
+    maskHeroRuntime.status = String(message || '');
+    const status = state.chatTools.panel?.querySelector('[data-mask-hero-status]');
+    if (status) status.textContent = maskHeroRuntime.status;
+  }
+
+  function maskHeroReadDraftFromUI() {
+    const root = state.chatTools.panel?.querySelector('[data-mask-hero-root]');
+    if (!root) return maskHeroRuntime.draft;
+    const draft = {
+      ...maskHeroRuntime.draft,
+      name: root.querySelector('[data-mask-field="planName"]')?.value || '',
+      userName: root.querySelector('[data-mask-field="userName"]')?.value || '',
+      charName: root.querySelector('[data-mask-field="charName"]')?.value || '',
+      floorRules: [...root.querySelectorAll('[data-mask-floor-row]')].map(row => ({
+        floor: row.querySelector('[data-mask-floor-field="floor"]')?.value ?? '',
+        replace: row.querySelector('[data-mask-floor-field="replace"]')?.value ?? '',
+      })).filter(rule => rule.floor !== '' || rule.replace !== ''),
+      textRules: [...root.querySelectorAll('[data-mask-text-row]')].map(row => ({
+        find: row.querySelector('[data-mask-text-field="find"]')?.value || '',
+        replace: row.querySelector('[data-mask-text-field="replace"]')?.value || '',
+        regex: Boolean(row.querySelector('[data-mask-text-field="regex"]')?.checked),
+        caseInsensitive: Boolean(row.querySelector('[data-mask-text-field="caseInsensitive"]')?.checked),
+      })).filter(rule => rule.find),
+    };
+    maskHeroRuntime.draft = draft;
+    return draft;
+  }
+
+  function maskHeroRenderPage() {
+    const page = state.chatTools.panel?.querySelector('[data-chat-tools-page="mask"]');
+    const root = page?.querySelector('[data-mask-hero-root]');
+    if (!root) return;
+    if (!maskHeroEnabled) {
+      root.replaceChildren(maskHeroCreateNode('p', 'tle-mask-hero-note', '请先在 TLE 引擎面板中启用打码侠。'));
+      return;
+    }
+    const draft = maskHeroRuntime.draft || maskHeroCreateEmptyDraft();
+    const toolbar = maskHeroCreateNode('div', 'tle-mask-hero-toolbar');
+    const select = HOST_DOC.createElement('select');
+    select.className = 'text_pole';
+    select.dataset.maskPlanSelect = '';
+    const emptyOption = HOST_DOC.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = '当前编辑内容（未选择方案）';
+    select.append(emptyOption);
+    for (const plan of maskHeroRuntime.plans) {
+      const option = HOST_DOC.createElement('option');
+      option.value = plan.id;
+      option.textContent = plan.name;
+      select.append(option);
+    }
+    select.value = maskHeroRuntime.selectedPlanId || '';
+    const nameInput = HOST_DOC.createElement('input');
+    nameInput.className = 'text_pole';
+    nameInput.type = 'text';
+    nameInput.maxLength = 40;
+    nameInput.placeholder = '方案名称';
+    nameInput.dataset.maskField = 'planName';
+    nameInput.value = draft.name || '';
+    toolbar.append(select, nameInput);
+
+    const actions = maskHeroCreateNode('div', 'tle-mask-hero-actions');
+    actions.append(
+      maskHeroCreateButton('应用', 'apply'),
+      maskHeroCreateButton('卸除效果', 'restore'),
+      maskHeroCreateButton('保存方案', 'save'),
+      maskHeroCreateButton('删除方案', 'delete')
+    );
+    const status = maskHeroCreateNode('div', 'tle-mask-hero-status', maskHeroRuntime.status);
+    status.dataset.maskHeroStatus = '';
+
+    const nameSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    nameSection.append(maskHeroCreateNode('strong', '', '名称替换'));
+    const nameFields = maskHeroCreateNode('div', 'tle-mask-hero-toolbar');
+    nameFields.append(
+      maskHeroCreateField('User 名称 →', 'userName', draft.userName),
+      maskHeroCreateField('Char 名称 →', 'charName', draft.charName)
+    );
+    nameSection.append(nameFields);
+
+    const floorSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    floorSection.append(maskHeroCreateNode('strong', '', '指定楼层正文整体替换'));
+    const floorRows = maskHeroCreateNode('div');
+    (draft.floorRules || []).forEach((rule, index) => {
+      const row = maskHeroCreateNode('div', 'tle-mask-hero-rule-row');
+      row.dataset.maskFloorRow = '';
+      const floor = HOST_DOC.createElement('input');
+      floor.className = 'text_pole';
+      floor.type = 'number';
+      floor.min = '0';
+      floor.max = '100000';
+      floor.placeholder = '楼层号';
+      floor.dataset.maskFloorField = 'floor';
+      floor.value = String(rule.floor ?? '');
+      const replacement = HOST_DOC.createElement('textarea');
+      replacement.className = 'text_pole';
+      replacement.rows = 2;
+      replacement.placeholder = '该楼层显示为…';
+      replacement.dataset.maskFloorField = 'replace';
+      replacement.value = String(rule.replace ?? '');
+      row.append(floor, replacement, maskHeroCreateButton('×', 'remove-floor', { title: '删除此楼层规则', index }));
+      floorRows.append(row);
+    });
+    floorSection.append(floorRows, maskHeroCreateButton('添加楼层规则', 'add-floor'));
+
+    const textSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    textSection.append(maskHeroCreateNode('strong', '', '正文局部替换'));
+    const textRows = maskHeroCreateNode('div');
+    (draft.textRules || []).forEach((rule, index) => {
+      const row = maskHeroCreateNode('div', 'tle-mask-hero-rule-row');
+      row.dataset.maskTextRow = '';
+      const find = HOST_DOC.createElement('input');
+      find.className = 'text_pole tle-mask-hero-rule-find';
+      find.type = 'text';
+      find.placeholder = '查找内容';
+      find.dataset.maskTextField = 'find';
+      find.value = String(rule.find ?? '');
+      const replacement = HOST_DOC.createElement('input');
+      replacement.className = 'text_pole tle-mask-hero-rule-replace';
+      replacement.type = 'text';
+      replacement.placeholder = '替换为';
+      replacement.dataset.maskTextField = 'replace';
+      replacement.value = String(rule.replace ?? '');
+      const options = maskHeroCreateNode('div', 'tle-mask-hero-rule-options');
+      const regexLabel = maskHeroCreateNode('label');
+      const regex = HOST_DOC.createElement('input');
+      regex.type = 'checkbox';
+      regex.checked = Boolean(rule.regex);
+      regex.dataset.maskTextField = 'regex';
+      regexLabel.append(regex, HOST_DOC.createTextNode('正则'));
+      const caseLabel = maskHeroCreateNode('label');
+      const caseInsensitive = HOST_DOC.createElement('input');
+      caseInsensitive.type = 'checkbox';
+      caseInsensitive.checked = Boolean(rule.caseInsensitive);
+      caseInsensitive.dataset.maskTextField = 'caseInsensitive';
+      caseLabel.append(caseInsensitive, HOST_DOC.createTextNode('忽略大小写'));
+      options.append(regexLabel, caseLabel);
+      row.append(find, replacement, options, maskHeroCreateButton('×', 'remove-text', { title: '删除此规则', index }));
+      textRows.append(row);
+    });
+    textSection.append(textRows, maskHeroCreateButton('添加替换规则', 'add-text'));
+
+    const avatarSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    avatarSection.append(maskHeroCreateNode('strong', '', '头像覆盖'));
+    for (const type of ['user', 'char']) {
+      const row = maskHeroCreateNode('div', 'tle-mask-hero-avatar-row');
+      const label = maskHeroCreateNode('label', 'tle-mask-hero-field');
+      label.append(maskHeroCreateNode('span', '', type === 'user' ? 'User 头像' : 'Char 头像'));
+      const file = HOST_DOC.createElement('input');
+      file.type = 'file';
+      file.accept = 'image/png,image/jpeg,image/webp,image/gif,image/avif';
+      file.dataset.maskAvatarType = type;
+      label.append(file);
+      row.append(label);
+      const note = maskHeroCreateNode('small', 'tle-mask-hero-note',
+        draft.avatarAssets?.[type] ? ('已保存图片：' + (draft.avatarNames?.[type] || '本地图片')) : '未选择覆盖图片');
+      row.append(note, maskHeroCreateButton('清除', 'clear-avatar', { title: '清除头像覆盖' }));
+      row.lastChild.dataset.avatarType = type;
+      avatarSection.append(row);
+    }
+
+    const note = maskHeroCreateNode('p', 'tle-mask-hero-note',
+      '仅处理当前聊天的消息显示节点。原始聊天文件、角色卡和消息数据不会被写入；局部替换只对原始文本执行一次，替换结果不会再次参与后续规则。头像文件保存在本机 IndexedDB。');
+    root.replaceChildren(toolbar, actions, status, nameSection, floorSection, textSection, avatarSection, note);
+  }
+
+  function maskHeroSyncTabVisibility() {
+    const tab = state.chatTools.panel?.querySelector('[data-chat-tools-tab="mask"]');
+    if (tab) tab.hidden = !maskHeroEnabled;
+  }
+
+  function maskHeroLoadSelectedPlan(planId) {
+    maskHeroRuntime.selectedPlanId = String(planId || '');
+    const plan = maskHeroRuntime.plans.find(item => item.id === maskHeroRuntime.selectedPlanId);
+    if (plan) {
+      maskHeroRuntime.draft = {
+        ...maskHeroCreateEmptyDraft(),
+        ...plan,
+        floorRules: plan.floorRules.map(rule => ({ ...rule })),
+        textRules: plan.textRules.map(rule => ({ ...rule })),
+        avatarAssets: { ...plan.avatarAssets },
+        avatarNames: { ...plan.avatarNames },
+      };
+      maskHeroSetStatus('已载入方案：' + plan.name);
+    } else {
+      maskHeroRuntime.draft = maskHeroCreateEmptyDraft();
+      maskHeroSetStatus('当前编辑内容尚未保存为方案。');
+    }
+    maskHeroRenderPage();
+  }
+
+  function maskHeroOpenAssetDb() {
+    if (maskHeroRuntime.dbPromise) return maskHeroRuntime.dbPromise;
+    if (!HOST_WIN.indexedDB) return Promise.reject(new Error('当前浏览器不支持 IndexedDB，无法持久保存头像文件。'));
+    maskHeroRuntime.dbPromise = new Promise((resolve, reject) => {
+      const request = HOST_WIN.indexedDB.open('TLEMaskHeroAssets', 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains('assets')) db.createObjectStore('assets', { keyPath: 'id' });
+      };
+      request.onsuccess = () => {
+        const db = request.result;
+        db.onversionchange = () => { db.close(); maskHeroRuntime.dbPromise = null; };
+        resolve(db);
+      };
+      request.onerror = () => { maskHeroRuntime.dbPromise = null; reject(request.error || new Error('头像存储初始化失败。')); };
+      request.onblocked = () => { maskHeroRuntime.dbPromise = null; reject(new Error('头像存储被其他页面占用，请关闭重复的酒馆页面后重试。')); };
+    });
+    return maskHeroRuntime.dbPromise;
+  }
+
+  async function maskHeroStoreAsset(record) {
+    const db = await maskHeroOpenAssetDb();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction('assets', 'readwrite');
+      const request = transaction.objectStore('assets').put(record);
+      request.onsuccess = () => {};
+      transaction.oncomplete = () => resolve(record);
+      transaction.onerror = () => reject(transaction.error || new Error('头像文件保存失败。'));
+      transaction.onabort = () => reject(transaction.error || new Error('头像文件保存事务中断。'));
+    });
+  }
+
+  async function maskHeroGetAsset(id) {
+    if (!id) return null;
+    const db = await maskHeroOpenAssetDb();
+    return new Promise((resolve, reject) => {
+      const request = db.transaction('assets', 'readonly').objectStore('assets').get(id);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('头像文件读取失败。'));
+    });
+  }
+
+  async function maskHeroDeleteAsset(id) {
+    if (!id) return;
+    const db = await maskHeroOpenAssetDb();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction('assets', 'readwrite');
+      transaction.objectStore('assets').delete(id);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error || new Error('头像文件清理失败。'));
+    });
+  }
+
+  async function maskHeroCleanupUnusedAssets() {
+    try {
+      const used = new Set();
+      for (const plan of maskHeroRuntime.plans) {
+        for (const id of Object.values(plan.avatarAssets || {})) if (id) used.add(id);
+      }
+      const db = await maskHeroOpenAssetDb();
+      const records = await new Promise((resolve, reject) => {
+        const request = db.transaction('assets', 'readonly').objectStore('assets').getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+      for (const record of records) if (!used.has(record.id)) await maskHeroDeleteAsset(record.id);
+    } catch (error) {
+      console.warn('[TLE Mask Hero] 头像资源清理失败', error);
+    }
+  }
+
+  async function maskHeroHandleAvatarInput(input) {
+    const type = input?.dataset?.maskAvatarType;
+    const file = input?.files?.[0];
+    if (!['user', 'char'].includes(type) || !file) return;
+    maskHeroReadDraftFromUI();
+    if (!/^image\/(png|jpeg|webp|gif|avif)$/i.test(file.type || '')) {
+      maskHeroSetStatus('头像仅支持 PNG、JPEG、WebP、GIF 或 AVIF 图片。');
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      maskHeroSetStatus('单张头像图片不能超过 5 MB。');
+      input.value = '';
+      return;
+    }
+    try {
+      const id = 'mask-' + (HOST_WIN.crypto?.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2)));
+      await maskHeroStoreAsset({ id, blob: file.slice(0, file.size, file.type), type: file.type, name: file.name || 'avatar' });
+      maskHeroRuntime.draft.avatarAssets[type] = id;
+      maskHeroRuntime.draft.avatarNames[type] = file.name || '本地图片';
+      maskHeroSetStatus((type === 'user' ? 'User' : 'Char') + ' 头像已保存到本机；保存方案后会长期保留。');
+      maskHeroRenderPage();
+    } catch (error) {
+      maskHeroSetStatus(error?.message || '头像保存失败。');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  function maskHeroMessageKind(message) {
+    if (!message) return '';
+    if (message.classList.contains('is_system') || message.getAttribute('is_system') === 'true') return '';
+    if (message.classList.contains('is_user') || message.getAttribute('is_user') === 'true' || message.dataset.isUser === 'true') return 'user';
+    return 'char';
+  }
+
+  function maskHeroApplyTextNode(node, rules) {
+    if (!node || !node.isConnected || !node.nodeValue) return;
+    const parent = node.parentElement;
+    if (!parent || parent.closest('script,style,textarea,input,button,pre,code,[contenteditable="true"],[data-tle-mask-hero-ui]')) return;
+    const records = state.chatTools.maskHero.textNodes;
+    const previous = records.get(node);
+    const original = previous && node.nodeValue === previous.applied ? previous.original : node.nodeValue;
+    const output = maskHeroApplyTextRules(original, rules);
+    if (output !== original) {
+      records.set(node, { original, applied: output });
+      if (node.nodeValue !== output) node.nodeValue = output;
+    } else if (previous) {
+      if (node.nodeValue === previous.applied) node.nodeValue = original;
+      records.delete(node);
+    }
+  }
+
+  function maskHeroApplyImage(img, objectUrl) {
+    const records = state.chatTools.maskHero.imageElements;
+    const previous = records.get(img);
+    const current = {
+      src: img.getAttribute('src'),
+      srcset: img.getAttribute('srcset'),
+      sizes: img.getAttribute('sizes'),
+      alt: img.getAttribute('alt'),
+    };
+    if (previous && current.src === previous.appliedSrc) return;
+    records.set(img, { original: current, appliedSrc: objectUrl });
+    img.setAttribute('src', objectUrl);
+    img.removeAttribute('srcset');
+  }
+
+  function maskHeroProcessChat() {
+    const runtime = state.chatTools.maskHero;
+    const config = runtime.appliedConfig;
+    if (!maskHeroEnabled || !config) return;
+    const context = getActiveChatActionContext();
+    if (!context || (runtime.appliedChatKey && context.chatKey !== runtime.appliedChatKey)) {
+      maskHeroClearEffects();
+      maskHeroSetStatus('已切换或离开聊天，打码效果已自动卸除。');
+      return;
+    }
+    const chat = HOST_DOC.getElementById('chat');
+    if (!chat) return;
+    for (const message of chat.querySelectorAll('.mes')) {
+      const kind = maskHeroMessageKind(message);
+      if (!kind) continue;
+      const nameReplacement = kind === 'user' ? config.userName : config.charName;
+      if (nameReplacement) {
+        for (const name of message.querySelectorAll('.name_text')) {
+          name.setAttribute('data-tle-mask-name', nameReplacement);
+          runtime.nameElements.add(name);
+        }
+      }
+      const floor = Number(message.getAttribute('mesid') ?? message.dataset.mesid);
+      const floorRule = config.floorRules.find(rule => Number(rule.floor) === floor);
+      const body = message.querySelector('.mes_text');
+      if (body && floorRule) {
+        body.setAttribute('data-tle-mask-floor', String(floorRule.replace ?? ''));
+        runtime.floorElements.add(body);
+      } else if (body && config.textRules.length && !body.hasAttribute('data-tle-mask-floor')) {
+        const walker = HOST_DOC.createTreeWalker(body, HOST_WIN.NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) maskHeroApplyTextNode(node, config.textRules);
+      }
+      const avatarUrl = runtime.objectUrls.get(kind);
+      if (avatarUrl) {
+        for (const img of message.querySelectorAll('.mesAvatarWrapper img, .avatar img')) maskHeroApplyImage(img, avatarUrl);
+      }
+    }
+  }
+
+  function maskHeroScheduleProcess() {
+    const runtime = state.chatTools.maskHero;
+    if (!runtime.appliedConfig || runtime.frame || state.destroyed) return;
+    runtime.frame = HOST_WIN.requestAnimationFrame(() => {
+      runtime.frame = 0;
+      maskHeroProcessChat();
+    });
+  }
+
+  function maskHeroObserveChat() {
+    const runtime = state.chatTools.maskHero;
+    runtime.observer?.disconnect();
+    runtime.observer = null;
+    const chat = HOST_DOC.getElementById('chat');
+    if (!chat) return;
+    runtime.observer = new HOST_WIN.MutationObserver(() => maskHeroScheduleProcess());
+    runtime.observer.observe(chat, {
+      subtree: true, childList: true, characterData: true, attributes: true,
+      attributeFilter: ['src', 'srcset'],
+    });
+  }
+
+  function maskHeroClearEffects() {
+    const runtime = state.chatTools.maskHero;
+    runtime.observer?.disconnect();
+    runtime.observer = null;
+    if (runtime.frame) HOST_WIN.cancelAnimationFrame(runtime.frame);
+    runtime.frame = 0;
+    for (const [node, record] of runtime.textNodes) {
+      if (node?.isConnected && node.nodeValue === record.applied) node.nodeValue = record.original;
+    }
+    runtime.textNodes.clear();
+    for (const element of runtime.nameElements) element?.removeAttribute?.('data-tle-mask-name');
+    runtime.nameElements.clear();
+    for (const element of runtime.floorElements) element?.removeAttribute?.('data-tle-mask-floor');
+    runtime.floorElements.clear();
+    for (const [img, record] of runtime.imageElements) {
+      if (!img?.isConnected || img.getAttribute('src') !== record.appliedSrc) continue;
+      for (const key of ['src', 'srcset', 'sizes', 'alt']) {
+        const value = record.original[key];
+        if (value === null || value === undefined) img.removeAttribute(key);
+        else img.setAttribute(key, value);
+      }
+    }
+    runtime.imageElements.clear();
+    for (const url of runtime.objectUrls.values()) {
+      try { HOST_WIN.URL.revokeObjectURL(url); } catch {}
+    }
+    runtime.objectUrls.clear();
+    runtime.appliedConfig = null;
+    runtime.appliedChatKey = '';
+  }
+
+  async function maskHeroApplyDraft() {
+    if (!maskHeroEnabled) throw new Error('请先在 TLE 引擎面板启用打码侠。');
+    const draft = maskHeroReadDraftFromUI();
+    maskHeroValidateDraft(draft);
+    const context = getActiveChatActionContext();
+    const chat = HOST_DOC.getElementById('chat');
+    if (!context || !chat) throw new Error('请先进入一个角色或群聊，再应用打码方案。');
+    maskHeroClearEffects();
+    try {
+      for (const type of ['user', 'char']) {
+        const assetId = draft.avatarAssets?.[type];
+        if (!assetId) continue;
+        const asset = await maskHeroGetAsset(assetId);
+        if (!asset?.blob) throw new Error((type === 'user' ? 'User' : 'Char') + ' 头像文件不存在，请重新选择图片。');
+        const url = HOST_WIN.URL.createObjectURL(asset.blob);
+        state.chatTools.maskHero.objectUrls.set(type, url);
+      }
+      state.chatTools.maskHero.appliedConfig = {
+        ...draft,
+        floorRules: draft.floorRules.map(rule => ({ ...rule })),
+        textRules: draft.textRules.map(rule => ({ ...rule })),
+      };
+      state.chatTools.maskHero.appliedChatKey = context.chatKey || '';
+      maskHeroProcessChat();
+      maskHeroObserveChat();
+      maskHeroSetStatus('已应用到当前聊天。原始聊天数据未修改；切换聊天会自动卸除。');
+    } catch (error) {
+      maskHeroClearEffects();
+      throw error;
+    }
+  }
+
+  async function maskHeroSavePlan() {
+    const draft = maskHeroReadDraftFromUI();
+    maskHeroValidateDraft(draft);
+    const name = String(draft.name || '').trim();
+    if (!name) throw new Error('请先填写方案名称。');
+    if (name.length > 40) throw new Error('方案名称最多 40 个字符。');
+    let plan = maskHeroRuntime.plans.find(item => item.id === maskHeroRuntime.selectedPlanId);
+    if (!plan && maskHeroRuntime.plans.length >= 30) throw new Error('最多保存 30 套打码方案。');
+    const id = plan?.id || ('mask-plan-' + (HOST_WIN.crypto?.randomUUID?.() || Date.now().toString(36)));
+    plan = { ...draft, id, name };
+    const next = maskHeroNormalizePlan(plan);
+    if (!next) throw new Error('方案内容无效。');
+    if (maskHeroRuntime.selectedPlanId) {
+      const index = maskHeroRuntime.plans.findIndex(item => item.id === maskHeroRuntime.selectedPlanId);
+      if (index >= 0) maskHeroRuntime.plans[index] = next;
+      else maskHeroRuntime.plans.push(next);
+    } else maskHeroRuntime.plans.push(next);
+    maskHeroRuntime.selectedPlanId = id;
+    maskHeroRuntime.draft = {
+      ...next,
+      floorRules: next.floorRules.map(rule => ({ ...rule })),
+      textRules: next.textRules.map(rule => ({ ...rule })),
+      avatarAssets: { ...next.avatarAssets },
+      avatarNames: { ...next.avatarNames },
+    };
+    maskHeroPersistPlans();
+    maskHeroRenderPage();
+    maskHeroSetStatus('方案「' + name + '」已保存。');
+    void maskHeroCleanupUnusedAssets();
+  }
+
+  async function maskHeroDeleteSelectedPlan() {
+    const id = maskHeroRuntime.selectedPlanId;
+    if (!id) throw new Error('请先选择要删除的方案。');
+    const plan = maskHeroRuntime.plans.find(item => item.id === id);
+    maskHeroRuntime.plans = maskHeroRuntime.plans.filter(item => item.id !== id);
+    maskHeroPersistPlans();
+    if (state.chatTools.maskHero.appliedConfig && state.chatTools.maskHero.appliedConfig.id === id) maskHeroClearEffects();
+    maskHeroRuntime.selectedPlanId = '';
+    maskHeroRuntime.draft = maskHeroCreateEmptyDraft();
+    maskHeroRenderPage();
+    maskHeroSetStatus('方案「' + (plan?.name || '') + '」已删除；其他方案不受影响。');
+    void maskHeroCleanupUnusedAssets();
+  }
+
+  function maskHeroAddRule(type) {
+    maskHeroReadDraftFromUI();
+    if (type === 'floor') maskHeroRuntime.draft.floorRules.push({ floor: '', replace: '' });
+    if (type === 'text') maskHeroRuntime.draft.textRules.push({ find: '', replace: '', regex: false, caseInsensitive: false });
+    maskHeroRenderPage();
+  }
+
+  function maskHeroRemoveRule(type, index) {
+    maskHeroReadDraftFromUI();
+    if (type === 'floor') maskHeroRuntime.draft.floorRules.splice(index, 1);
+    if (type === 'text') maskHeroRuntime.draft.textRules.splice(index, 1);
+    maskHeroRenderPage();
+  }
+
   async function openRecentChatItem(row) {
     if (!row || row.dataset.opening === 'true') return;
     const avatarId = row.dataset.avatar || '';
