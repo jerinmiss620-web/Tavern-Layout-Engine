@@ -76,13 +76,12 @@ assert.match(moduleSource, /grid-auto-rows: auto; align-items: start; align-cont
 assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*aspect-ratio: 2 \/ 3; align-self: start;/, "Each card keeps its 2:3 aspect ratio without grid-item stretching");
 assert.doesNotMatch(moduleSource, /GRID_CLASS \+ " \{[^"]*(?:grid-auto-rows: 1fr|align-items: stretch)/, "Gallery grid must not force portrait cards into equal stretched row heights");
 assert.match(moduleSource, /const overlay = createElement\('div', 'freesia-gallery-card-overlay'\)/);
-assert.match(moduleSource, /window\.getComputedStyle\(nativeImage\)/, "The cloned avatar captures the theme's computed radius before insertion");
 assert.match(moduleSource, /overlay\.append\(heading, dateRow, messageContainer, stats\);/);
 assert.match(moduleSource, /card\.append\(identity, overlay\);/);
 assert.doesNotMatch(moduleSource, /freesia-gallery-card-latest|--freesia-gallery-action-size|--freesia-gallery-action-padding/);
 assert.match(moduleSource, /-webkit-line-clamp: 2; line-clamp: 2;/, "The recent-chat preview is capped at exactly two lines");
 assert.doesNotMatch(moduleSource, /-webkit-line-clamp: 12|line-clamp: 12/, "The preview must not expand into a long paragraph");
-assert.match(moduleSource, /\.freesia-gallery-card-overlay \{[^}]*inset: auto 0 0;[^}]*justify-content: flex-end;[^}]*width: auto;[^}]*min-height: var\(--freesia-gallery-overlay-min-height, 48%\);[^}]*height: auto;[^}]*max-height: var\(--freesia-gallery-overlay-max-height, 60%\);[^}]*linear-gradient\(180deg/, "The gradient follows the measured avatar box and scales its height with the image");
+assert.match(moduleSource, /\.freesia-gallery-card-overlay \{[^}]*inset: auto 0 0;[^}]*width: auto;[^}]*min-height: 48%;[^}]*height: auto;[^}]*max-height: 60%;[^}]*linear-gradient\(180deg/, "The gradient uses a fixed overlay area attached to the TLE avatar card");
 assert.match(moduleSource, /\.freesia-gallery-card-overlay \{[^}]*gap: 2px;[^}]*padding: 30px 5px 5px;/, "The overlay uses compact vertical spacing and five-pixel side/bottom padding");
 assert.match(moduleSource, /rgba\(0, 0, 0, 0\) 0%, rgba\(0, 0, 0, 0\.035\) 14%, rgba\(0, 0, 0, 0\.12\) 30%, rgba\(0, 0, 0, 0\.32\) 46%, rgba\(0, 0, 0, 0\.56\) 64%, rgba\(0, 0, 0, 0\.78\) 82%, rgba\(0, 0, 0, 0\.92\) 100%/, "The gradient fades gradually across an expanded area with multiple intermediate stops");
 assert.doesNotMatch(moduleSource, /\.freesia-gallery-card-overlay \{[^}]*inset: 0;/, "The overlay must not cover the full card");
