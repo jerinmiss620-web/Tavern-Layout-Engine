@@ -6,7 +6,7 @@
 - 开发 Core 源码、不可变发布源码及禁用状态测试导入包内嵌的 Core 完全一致；画廊模块逐字节嵌入 Core。
 - 移动端 820px 断点内 `--freesia-gallery-detail-main-gap` 为 `5px`；列宽 104px、列间距 8px 不变。
 - 画廊 CSS 结构测试覆盖无重复选择器、模块/Core 同步及移动端布局规则。
-- GitHub Actions 自动化结果待本次提交完成后记录；ST/TT 实机验收仍需单独完成。本版仅更新测试通道，不修改 Stable Core、Loader Runtime 或 Bootstrap。
+- GitHub Actions run [#45961257496](https://github.com/jerinmiss620-web/Tavern-Layout-Engine/actions/runs/45961257496) 已通过：全量源码更新模拟、兼容性与发布保护、测试通道固定源码 SHA/字节数及备用导入包核验均成功。正式通道远端发布验证按测试分支策略跳过；ST/TT 实机验收仍需单独完成。本版仅更新测试通道，不修改 Stable Core、Loader Runtime 或 Bootstrap。
 
 ## 2026-11-27 · Core v0.3.266 记录详情文字导航重构（测试候选）
 
