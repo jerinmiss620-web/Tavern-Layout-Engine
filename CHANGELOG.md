@@ -75,6 +75,13 @@
 - 保留最新正式版与 Bootstrap 安装入口；历史兼容测试样本原字节迁至 `tests/fixtures/legacy/`。
 - 保留旧 Test 通道清单兼容历史客户端，修正主仓库版本指引和发布模板。
 
+## 2026-11-27 · 历史发布产物清理
+
+- 按 RELEASING.md 统一规则，移除 v0.3.217、v0.3.218、v0.3.219、v0.3.220、v0.3.239、v0.3.259 中遗留的 Core 可执行源码与导入包；各版本 CHANGELOG.md 保留。
+- 当前正式版 v0.3.264 的源码与正式导入包保持不变。
+- 不改写 Git 历史；旧版不可变 Commit 仍可追溯，回归所需样本继续保留在 tests/fixtures/legacy/。
+- latest.json、旧 Loader 兼容用 channels/test.json、Loader Runtime 与 Bootstrap 均不变。
+
 ## 2026-11-24 · 历史产物归档
 
 - v0.3.211～v0.3.215 的旧源码与独立安装包从 main 展示目录移除，各版本 CHANGELOG.md 保留；固定 Commit 中的历史发布字节仍可追溯。
