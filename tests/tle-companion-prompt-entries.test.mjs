@@ -31,6 +31,28 @@ const tests = [
   },
 
   {
+    name: 'detects missing baseline identifiers and locked entries whose live state differs, while allowing already-correct locked and new entries',
+    run() {
+      const issue = helpers.companionPromptBaselineRestoreIssue(
+        [
+          { identifier: 'available', enabled: true },
+          { identifier: 'locked', enabled: true },
+          { identifier: 'locked-correct', enabled: false },
+          { identifier: 'new-entry', enabled: true },
+        ],
+        [
+          { identifier: 'available' },
+          { identifier: 'locked', locked: true },
+          { identifier: 'locked-correct', locked: true },
+          { identifier: 'new-entry' },
+        ],
+        { available: false, locked: false, 'locked-correct': false, deleted: true },
+        prompt => !prompt.locked,
+      );
+      assert.deepEqual(plain(issue), { missing: ['deleted'], locked: ['locked'] });
+    },
+  },
+  {
     name: 'stores only identifier-to-enabled mappings and merges updates without losing stale identifiers',
     run() {
       const merged = helpers.companionPromptMergeStateMaps(
@@ -135,6 +157,55 @@ const tests = [
   },
 ];
 
+  {
+    name: 'baseline restore blocks missing and mismatched locked entries before mutation',
+    run() {
+      const restoreStart = source.indexOf('function companionPromptRestoreBaseline');
+      const restoreEnd = source.indexOf('function companionPromptRoleStateExists', restoreStart);
+      const restoreSource = source.slice(restoreStart, restoreEnd);
+      const build = ({ baseline, order, prompts, canToggle }) => {
+        const sandbox = vm.createContext({});
+        sandbox.applyCalls = 0;
+        sandbox.companionRead = () => ({ promptBaselines: { SharedPreset: baseline } });
+        sandbox.companionPromptOrder = () => order;
+        sandbox.companionPromptCanToggle = (_manager, prompt) => canToggle(prompt);
+        sandbox.companionPromptApplyToManager = () => {
+          sandbox.applyCalls++;
+          return { applied: [], changed: [], missing: [], locked: [], newEntries: [] };
+        };
+        new vm.Script(helperSource + '\n' + restoreSource + '\nthis.restore = companionPromptRestoreBaseline;').runInContext(sandbox);
+        const manager = { serviceSettings: { prompts } };
+        return { sandbox, manager };
+      };
+      const locked = build({
+        baseline: { locked: false },
+        order: [{ identifier: 'locked', enabled: true }],
+        prompts: [{ identifier: 'locked', locked: true }],
+        canToggle: prompt => !prompt.locked,
+      });
+      assert.throws(() => locked.sandbox.restore(locked.manager, 'SharedPreset'),
+        error => error.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED');
+      assert.equal(locked.sandbox.applyCalls, 0, 'A locked mismatch must be detected before any preset mutation');
+      const missing = build({
+        baseline: { deleted: true },
+        order: [],
+        prompts: [],
+        canToggle: () => true,
+      });
+      assert.throws(() => missing.sandbox.restore(missing.manager, 'SharedPreset'),
+        error => error.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED');
+      assert.equal(missing.sandbox.applyCalls, 0, 'A missing baseline identifier must stop restoration before mutation');
+      const alreadyCorrect = build({
+        baseline: { locked: true },
+        order: [{ identifier: 'locked', enabled: true }],
+        prompts: [{ identifier: 'locked', locked: true }],
+        canToggle: prompt => !prompt.locked,
+      });
+      const result = alreadyCorrect.sandbox.restore(alreadyCorrect.manager, 'SharedPreset');
+      assert.equal(result.baseline.locked, true, 'A locked entry already matching the baseline is safe');
+      assert.equal(alreadyCorrect.sandbox.applyCalls, 1);
+    },
+  },
 for (const test of tests) {
   test.run();
   console.log('✓ ' + test.name);
@@ -204,14 +275,39 @@ assert.match(bridge, /persistBaseline\(true, baseline\)/);
 assert.doesNotMatch(bridge, /companionPromptApplyToManager\(manager, snapshot\.states\)/,
   'Restoring an overlay must not reapply new identifiers that are not in the saved role map');
 
+const restoreStart = source.indexOf('function companionPromptRestoreBaseline');
+const restoreEnd = source.indexOf('function companionPromptRoleStateExists', restoreStart);
+const restore = source.slice(restoreStart, restoreEnd);
+assert.match(restore, /companionPromptBaselineRestoreIssue/);
+assert.match(restore, /TLE_PROMPT_BASELINE_RESTORE_FAILED/);
+assert.ok(restore.indexOf('companionPromptBaselineRestoreIssue') < restore.indexOf('companionPromptApplyToManager'),
+  'Baseline restoration must preflight recorded identifiers before mutating the preset');
+
+const preflightStart = source.indexOf('async function companionPromptPreflight');
+const preflightEnd = source.indexOf('function companionPromptReapplyActiveOverlay', preflightStart);
+const preflight = source.slice(preflightStart, preflightEnd);
+assert.match(preflight, /companionPromptRestoreBaseline/);
+assert.match(preflight, /TLE_PROMPT_BASELINE_RESTORE_FAILED/);
+
+const applyEntriesStart = source.indexOf('async function companionApplyPromptEntries');
+const applyEntriesEnd = source.indexOf('async function companionCatalogs', applyEntriesStart);
+assert.match(source.slice(applyEntriesStart, applyEntriesEnd), /companionPromptRestoreBaseline/);
+
+
 const resetStart = source.indexOf('async function companionPromptResetOverlay');
 const resetEnd = source.indexOf('function companionPromptReapplyActiveOverlay', resetStart);
 const reset = source.slice(resetStart, resetEnd);
 assert.match(reset, /companionPromptRestoreBaseline/);
+assert.ok(reset.indexOf('companionPromptRestoreBaseline') < reset.indexOf('companionRuntime.promptOverlay = null'),
+  'The active overlay must not be cleared until its native baseline has been restored');
 const applyStart = source.indexOf('async function companionApply(');
 const applyEnd = source.indexOf('function companionOnChatChanged(', applyStart);
 const apply = source.slice(applyStart, applyEnd);
 assert.match(apply, /if \(resetResult\.issue\) \{[\s\S]*?throw new Error/,
   'A failed previous-role reset must stop the new plan before it can capture the wrong baseline');
+assert.ok(apply.includes('await companionPromptPreflight(plan, role)'),
+  'The new plan must validate its prompt baseline before applying any other fields');
+assert.ok(apply.includes("error?.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED'"),
+  'A prompt baseline safety failure must escape the per-field skip handler and stop the plan');
 
 console.log('✓ companion prompt-entry integration contract');
