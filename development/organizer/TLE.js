@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.279
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.283
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2838,8 +2838,6 @@ var TLEBatchLibrary = (() => {
   const COMPAT_PANEL_BG_COLOR_KEY = 'tle.compatibility.panelBackgroundColor';
   const COMPAT_NAV_TEXT_KEY = 'tle.compatibility.navTextEnabled';
   const COMPAT_NAV_TEXT_COLOR_KEY = 'tle.compatibility.navTextColor';
-  const HOME_AVATAR_PSEUDO_DISABLED_KEY = 'tle.compatibility.homeAvatarPseudoDisabled';
-  const HOME_AVATAR_BORDER_IMAGE_DISABLED_KEY = 'tle.compatibility.homeAvatarBorderImageDisabled';
   const NAV_EDGE_SWIPE_KEY = 'tle.navigation.edgeSwipe';
   // Only retain a restoration marker if TLE changed ST's native gesture from on to off.
   const NAV_NATIVE_GESTURE_RESTORE_KEY = 'tle.navigation.restoreNativeGestures';
@@ -2876,8 +2874,6 @@ var TLEBatchLibrary = (() => {
 
   let compatibilityNavText = getStoredBool(COMPAT_NAV_TEXT_KEY, false);
   let compatibilityNavTextColor = getStoredString(COMPAT_NAV_TEXT_COLOR_KEY, '#ffffff');
-  let homeAvatarPseudoDisabled = getStoredBool(HOME_AVATAR_PSEUDO_DISABLED_KEY, true);
-  let homeAvatarBorderImageDisabled = getStoredBool(HOME_AVATAR_BORDER_IMAGE_DISABLED_KEY, true);
   if (!/^#[0-9a-f]{6}$/i.test(compatibilityNavTextColor)) compatibilityNavTextColor = '#ffffff';
   // The setting can be tested from a PC; touch listeners remain mobile-only.
   let navEdgeSwipeEnabled = getStoredBool(NAV_EDGE_SWIPE_KEY, false);
@@ -3060,8 +3056,6 @@ var TLEBatchLibrary = (() => {
       HOST_WIN.localStorage.setItem(COMPAT_PANEL_BG_COLOR_KEY, compatibilityPanelBackgroundColor);
       HOST_WIN.localStorage.setItem(COMPAT_NAV_TEXT_KEY, String(compatibilityNavText));
       HOST_WIN.localStorage.setItem(COMPAT_NAV_TEXT_COLOR_KEY, compatibilityNavTextColor);
-      HOST_WIN.localStorage.setItem(HOME_AVATAR_PSEUDO_DISABLED_KEY, String(homeAvatarPseudoDisabled));
-      HOST_WIN.localStorage.setItem(HOME_AVATAR_BORDER_IMAGE_DISABLED_KEY, String(homeAvatarBorderImageDisabled));
     } catch {}
   }
 
@@ -3094,15 +3088,6 @@ var TLEBatchLibrary = (() => {
     const bgMode = state.panel?.querySelector('[data-tle-setting="compat-panel-bg-mode"]');
     if (bgMode) bgMode.value = compatibilityPanelBackgroundMode;
 
-    const homeAvatarPseudoInput = state.panel?.querySelector('[data-tle-setting="home-avatar-pseudo-disabled"]');
-    if (homeAvatarPseudoInput) homeAvatarPseudoInput.checked = homeAvatarPseudoDisabled;
-    const homeAvatarBorderImageInput = state.panel?.querySelector('[data-tle-setting="home-avatar-border-image-disabled"]');
-    if (homeAvatarBorderImageInput) homeAvatarBorderImageInput.checked = homeAvatarBorderImageDisabled;
-    galleryHome?.setAvatarCompatibility?.({
-      disablePseudo: homeAvatarPseudoDisabled,
-      disableBorderImage: homeAvatarBorderImageDisabled,
-    });
-
     const colorInput = state.panel?.querySelector('[data-tle-setting="compat-panel-bg-color"]');
     if (colorInput) colorInput.value = compatibilityPanelBackgroundColor;
 
@@ -3134,16 +3119,6 @@ var TLEBatchLibrary = (() => {
     const color = String(value || '').trim().toLowerCase();
     if (!/^#[0-9a-f]{6}$/.test(color)) return;
     compatibilityNavTextColor = color;
-    applyCompatibilitySettings();
-  }
-
-  function setHomeAvatarPseudoDisabled(enabled) {
-    homeAvatarPseudoDisabled = Boolean(enabled);
-    applyCompatibilitySettings();
-  }
-
-  function setHomeAvatarBorderImageDisabled(enabled) {
-    homeAvatarBorderImageDisabled = Boolean(enabled);
     applyCompatibilitySettings();
   }
 
@@ -10710,7 +10685,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           </div>
           <div class="inline-drawer-content">
             <p class="tle-muted">仅在遇到主题修改 TLE / 酒馆原生层级、面板透明或侧边栏文字看不清时启用。默认全部关闭，正常主题不会受到这些修复规则影响。</p>
-            ${HOME_AVATAR_COMPATIBILITY_MARKUP}
             <label class="tle-row" style="justify-content:flex-start;gap:10px;margin-top:10px;">
               <input type="checkbox" data-tle-setting="compat-layer-repair">
               <span>恢复酒馆 / TLE 标准层级</span>
@@ -10770,8 +10744,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       </section>`;
   }
 
-  const HOME_FEATURE_SECTION_MARKUP = "      <section class=\"tle-section\" data-tle-home-settings>\n        <strong>首页功能</strong>\n        <label class=\"tle-row\" style=\"justify-content:flex-start;gap:10px;margin-top:10px;\">\n          <input type=\"checkbox\" data-tle-setting=\"record-preview-enabled\">\n          <span>首页 · 记录预览</span>\n        </label>\n        <p class=\"tle-muted\">默认开启。开启后首页显示「记录预览」；点击首页右上角的切换图标，可快速返回酒馆默认首页，再次点击即可切回「记录预览」。关闭后恢复酒馆原生首页。</p>\n      </section>\n";
-  const HOME_AVATAR_COMPATIBILITY_MARKUP = "            <strong>首页「记录预览」头像兼容</strong>\n            <p class=\"tle-muted\">仅作用于 TLE 首页记录预览中的角色头像，不影响酒馆原生最近聊天或角色管理页面。默认启用两项修复，避免 3:4 放大头像与第三方主题装饰贴图错位；可按主题实际效果分别关闭。</p>\n            <label class=\"tle-row\" style=\"justify-content:flex-start;gap:10px;margin-top:10px;\">\n              <input type=\"checkbox\" data-tle-setting=\"home-avatar-pseudo-disabled\">\n              <span>禁用头像伪元素装饰（::before / ::after）</span>\n            </label>\n            <label class=\"tle-row\" style=\"justify-content:flex-start;gap:10px;margin-top:10px;\">\n              <input type=\"checkbox\" data-tle-setting=\"home-avatar-border-image-disabled\">\n              <span>禁用头像边框贴图（border-image）</span>\n            </label>";
+  const HOME_FEATURE_SECTION_MARKUP = "      <section class=\"tle-section\" data-tle-home-settings>\n        <strong>首页功能</strong>\n        <label class=\"tle-row\" style=\"justify-content:flex-start;gap:10px;margin-top:10px;\">\n          <input type=\"checkbox\" data-tle-setting=\"record-preview-enabled\">\n          <span>首页 · 记录预览</span>\n        </label>\n        <p class=\"tle-muted\">默认开启。开启后首页显示「记录预览」；点击首页右上角的切换图标，可快速返回酒馆默认首页，再次点击即可切回「记录预览」。关闭后恢复酒馆原生首页。记录预览头像由 TLE 独立控制：统一 2:3 比例、12px 圆角、无边框和无阴影，不影响酒馆原生头像。</p>\n      </section>\n";
+
 
   function ensureHomeFeatureSection(panel) {
     if (!panel || panel.querySelector('[data-tle-setting="record-preview-enabled"]')) return;
@@ -10785,8 +10759,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const existing = panel.querySelector('#' + ID.compatibilitySection);
     if (existing) {
       const content = existing.querySelector('.inline-drawer-content');
-      if (content && !content.querySelector('[data-tle-setting="home-avatar-pseudo-disabled"]')) {
-        content.insertAdjacentHTML('afterbegin', HOME_AVATAR_COMPATIBILITY_MARKUP);
+      if (content) {
+        content.querySelectorAll('[data-tle-setting="home-avatar-pseudo-disabled"], [data-tle-setting="home-avatar-border-image-disabled"]').forEach(input => {
+          const label = input.closest('label');
+          if (label) label.remove();
+          else input.remove();
+        });
+        const legacyHeading = [...content.querySelectorAll('strong')].find(node =>
+          node.textContent.trim() === '首页「记录预览」头像兼容');
+        if (legacyHeading) {
+          const description = legacyHeading.nextElementSibling;
+          if (description?.tagName === 'P') description.remove();
+          legacyHeading.remove();
+        }
       }
       return;
     }
@@ -11395,14 +11380,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.279 · 记录预览操作栏紧凑布局</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.283 · 记录预览头像与渐变边界同步</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.279</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.283</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -18041,7 +18026,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.279';
+    const VERSION = '0.3.283';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -18068,7 +18053,6 @@ function createTLEGalleryHome(window, document) {
     const state = {
         started: false,
         enabled: true,
-        avatarCompatibility: { disablePseudo: true, disableBorderImage: true },
         panel: null,
         welcomeRecent: null,
         nativeList: null,
@@ -18117,14 +18101,14 @@ function createTLEGalleryHome(window, document) {
 
     const CSS = [
         "#chat .welcomePanel." + ACTIVE_CLASS + " .welcomeRecent > .recentChatList:not(." + GRID_CLASS + ") { display: none !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: 16px; border-radius: var(--freesia-gallery-card-radius) !important; overflow: hidden; cursor: default; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; border-radius: inherit !important; cursor: pointer; outline-offset: 3px; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0; min-height: 0; margin: 0; overflow: hidden; box-sizing: border-box; border-radius: inherit !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: inherit !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::before, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::after { content: none !important; display: none !important; background: none !important; border: 0 !important; box-shadow: none !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar img { border-image: none !important; border-image-source: none !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay { position: absolute; inset: auto 0 0; z-index: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; gap: 2px; width: 100%; min-width: 0; min-height: 48%; height: auto; max-height: 60%; padding: 30px 5px 5px; box-sizing: border-box; overflow: hidden; --freesia-gallery-overlay-color: #fff; color: var(--freesia-gallery-overlay-color, #fff); background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.035) 14%, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.32) 46%, rgba(0, 0, 0, 0.56) 64%, rgba(0, 0, 0, 0.78) 82%, rgba(0, 0, 0, 0.92) 100%); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); pointer-events: none; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: auto; align-items: start; align-content: start; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; align-self: start; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: 12px; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: var(--freesia-gallery-card-radius) !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; overflow: hidden; cursor: default; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: inherit !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; cursor: pointer; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .freesia-gallery-avatar-frame { position: absolute; inset: 0; display: block; width: 100% !important; height: 100% !important; min-width: 0 !important; max-width: none !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 0 !important; overflow: hidden; box-sizing: border-box; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: inherit !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .freesia-gallery-avatar-frame > img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0 !important; max-width: none !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 0 !important; box-sizing: border-box; border: 0 !important; border-image: none !important; border-image-source: none !important; border-radius: inherit !important; box-shadow: none !important; filter: none !important; outline: 0 !important; background: transparent !important; object-fit: cover !important; object-position: center !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .freesia-gallery-avatar-frame::before, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .freesia-gallery-avatar-frame::after { content: none !important; display: none !important; border: 0 !important; border-image: none !important; box-shadow: none !important; filter: none !important; background: none !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay { position: absolute; inset: auto 0 0; z-index: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; gap: 2px; width: auto; min-width: 0; min-height: 48%; height: auto; max-height: 60%; padding: 30px 5px 5px; box-sizing: border-box; overflow: hidden; border-bottom-left-radius: var(--freesia-gallery-card-radius); border-bottom-right-radius: var(--freesia-gallery-card-radius); --freesia-gallery-overlay-color: #fff; color: var(--freesia-gallery-overlay-color, #fff); background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.035) 14%, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.32) 46%, rgba(0, 0, 0, 0.56) 64%, rgba(0, 0, 0, 0.78) 82%, rgba(0, 0, 0, 0.92) 100%); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); pointer-events: none; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay { position: absolute; inset: auto 0 0; z-index: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; gap: 2px; width: auto; min-width: 0; min-height: var(--freesia-gallery-overlay-min-height, 48%); height: auto; max-height: var(--freesia-gallery-overlay-max-height, 60%); padding: 30px 5px 5px; box-sizing: border-box; overflow: hidden; border-bottom-left-radius: var(--freesia-gallery-card-radius); border-bottom-right-radius: var(--freesia-gallery-card-radius); --freesia-gallery-overlay-color: #fff; color: var(--freesia-gallery-overlay-color, #fff); background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.035) 14%, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.32) 46%, rgba(0, 0, 0, 0.56) 64%, rgba(0, 0, 0, 0.78) 82%, rgba(0, 0, 0, 0.92) 100%); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); pointer-events: none; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; cursor: pointer; outline-offset: 3px; pointer-events: auto; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .chatName { display: block; flex: 1 1 auto; width: auto; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .characterName { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left !important; font-size: 0.94em; font-weight: 600; line-height: 1.25; }",
@@ -18541,31 +18525,24 @@ function createTLEGalleryHome(window, document) {
     }
 
     function createAvatar(avatarKey, thumbnail, name, nativeRow) {
-        const nativeAvatar = nativeRow && nativeRow.querySelector('.avatar');
-        if (nativeAvatar) {
-            const clone = nativeAvatar.cloneNode(true);
-            clone.classList.add('freesia-gallery-avatar');
-            clone.removeAttribute('id');
-            clone.setAttribute('aria-hidden', 'true');
-            clone.title = name;
-            const clonedImage = clone.querySelector('img');
-            if (clonedImage) {
-                clonedImage.loading = 'lazy';
-                clonedImage.decoding = 'async';
-            }
-            return clone;
-        }
-
-        const avatar = createElement('div', 'avatar freesia-gallery-avatar');
+        const nativeImage = nativeRow && nativeRow.querySelector('.avatar img');
+        const avatar = createElement('div', 'freesia-gallery-avatar-frame');
         avatar.title = name;
-        const image = createElement('img');
-        const context = getContext();
-        image.src = thumbnail || (avatarKey === 'none' ? 'img/ai4.png' : (context && typeof context.getThumbnailUrl === 'function'
-            ? context.getThumbnailUrl('avatar', avatarKey)
-            : ''));
+        avatar.setAttribute('aria-hidden', 'true');
+
+        const image = nativeImage ? nativeImage.cloneNode(false) : createElement('img');
+        ['id', 'class', 'style', 'width', 'height', 'border'].forEach(attribute => image.removeAttribute(attribute));
         image.alt = name;
         image.loading = 'lazy';
         image.decoding = 'async';
+
+        if (!image.getAttribute('src') && !image.getAttribute('srcset')) {
+            const context = getContext();
+            image.src = thumbnail || (avatarKey === 'none' ? 'img/ai4.png' : (context && typeof context.getThumbnailUrl === 'function'
+                ? context.getThumbnailUrl('avatar', avatarKey)
+                : ''));
+        }
+
         avatar.append(image);
         return avatar;
     }
@@ -18719,133 +18696,6 @@ function createTLEGalleryHome(window, document) {
         overlay.append(heading, dateRow, messageContainer, stats);
         card.append(identity, overlay);
         return card;
-    }
-
-    async function fetchChatCount(avatar) {
-        if (state.countCache.has(avatar)) return state.countCache.get(avatar);
-        if (state.countRequests.has(avatar)) return state.countRequests.get(avatar);
-        const context = getContext();
-        if (!context || typeof context.getRequestHeaders !== 'function') return null;
-
-        const request = window.fetch(API_CHARACTER_CHATS, {
-            method: 'POST',
-            headers: context.getRequestHeaders(),
-            body: JSON.stringify({ avatar_url: avatar, simple: true }),
-            cache: 'no-cache',
-        }).then(async response => {
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const data = await response.json();
-            if (!Array.isArray(data)) throw new Error('聊天文件列表格式不正确。');
-            state.countCache.set(avatar, data.length);
-            return data.length;
-        }).catch(error => {
-            console.warn('[Freesia Gallery] Could not read total chat count for', avatar, error);
-            return null;
-        }).finally(() => state.countRequests.delete(avatar));
-
-        state.countRequests.set(avatar, request);
-        return request;
-    }
-
-    async function updateCardCount(card) {
-        if (!card || !card.isConnected || card.dataset.countRequested === 'true') return;
-        card.dataset.countRequested = 'true';
-        const avatar = card.dataset.galleryAvatar;
-        const count = await fetchChatCount(avatar);
-        if (count === null || !card.isConnected) return;
-        const label = card.querySelector('.freesia-gallery-chat-count');
-        if (label) label.textContent = count + ' 个聊天';
-    }
-
-    function observeCardCounts() {
-        if (state.countObserver) state.countObserver.disconnect();
-        state.countObserver = null;
-        if (!state.grid) return;
-
-        const cards = Array.from(state.grid.querySelectorAll('.freesia-gallery-card:not(.freesia-gallery-collapsed)'));
-        if (typeof window.IntersectionObserver === 'function') {
-            state.countObserver = new window.IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (!entry.isIntersecting) return;
-                    state.countObserver.unobserve(entry.target);
-                    void updateCardCount(entry.target);
-                });
-            }, { root: document.getElementById('chat'), rootMargin: '120px' });
-            cards.forEach(card => state.countObserver.observe(card));
-        } else {
-            cards.slice(0, 12).forEach(card => { void updateCardCount(card); });
-        }
-    }
-
-    function renderPagination(total) {
-        if (!state.paginationRoot) return;
-        const pageSize = getGalleryPageSize();
-        const pageCount = Math.max(1, Math.ceil(total / pageSize));
-        state.galleryPage = Math.min(Math.max(0, state.galleryPage), pageCount - 1);
-        state.paginationRoot.replaceChildren();
-        state.paginationRoot.hidden = state.page !== 'gallery' || pageCount <= 1;
-
-        if (pageCount <= 1) return;
-        const previous = createElement('button', 'menu_button menu_button_icon');
-        previous.type = 'button';
-        previous.textContent = '‹ 上一页';
-        previous.disabled = state.galleryPage <= 0;
-        previous.addEventListener('click', function () {
-            if (state.galleryPage <= 0) return;
-            state.galleryPage -= 1;
-            renderGallery(state.galleryGroups, state.source, state.lastError);
-        });
-
-        const pageLabel = createElement('small', '', '第 ' + (state.galleryPage + 1) + ' / ' + pageCount + ' 页');
-        const next = createElement('button', 'menu_button menu_button_icon');
-        next.type = 'button';
-        next.textContent = '下一页 ›';
-        next.disabled = state.galleryPage >= pageCount - 1;
-        next.addEventListener('click', function () {
-            if (state.galleryPage >= pageCount - 1) return;
-            state.galleryPage += 1;
-            renderGallery(state.galleryGroups, state.source, state.lastError);
-        });
-        state.paginationRoot.append(previous, pageLabel, next);
-    }
-
-    function renderGallery(groups, source, error) {
-        if (!state.grid || !state.panel) return;
-        state.source = source;
-        state.lastError = error || null;
-        state.galleryGroups = orderPinnedCharacters(groups);
-
-        const pageSize = getGalleryPageSize();
-        const pageCount = Math.max(1, Math.ceil(state.galleryGroups.length / pageSize));
-        state.galleryPage = Math.min(Math.max(0, state.galleryPage), pageCount - 1);
-        syncResponsiveLayoutControls();
-
-        const start = state.galleryPage * pageSize;
-        const visibleGroups = state.galleryGroups.slice(start, start + pageSize);
-        const fragment = document.createDocumentFragment();
-        visibleGroups.forEach(function (group, index) {
-            const card = createGalleryCard(group);
-            card.dataset.galleryIndex = String(start + index);
-            fragment.append(card);
-        });
-
-        if (!state.galleryGroups.length) {
-            fragment.append(createElement('div', 'freesia-gallery-empty', source === 'api'
-                ? '还没有可展示的角色。'
-                : '无法从原生角色列表中读取角色。'));
-        }
-
-        state.grid.replaceChildren(fragment);
-        renderPagination(state.galleryGroups.length);
-
-        if (state.summary) {
-            state.summary.textContent = state.galleryGroups.length + ' 位角色'
-                + (pageCount > 1 ? ' · 第 ' + (state.galleryPage + 1) + ' / ' + pageCount + ' 页' : '');
-            state.summary.title = state.layoutSettings.displayMode === 'all'
-                ? '显示全部角色；有聊天记录的角色按最近聊天时间优先排列，未聊过的角色排在后面。每页显示 ' + pageSize + ' 位角色。'
-                : '只显示有聊天记录的角色，按最近聊天时间排序。每页显示 ' + pageSize + ' 位角色。';
-        }
-        observeCardCounts();
     }
 
     async function fetchRecentChats(context, signal) {
@@ -19704,12 +19554,6 @@ function createTLEGalleryHome(window, document) {
         }, Number.isFinite(delay) ? delay : 180);
     }
 
-    function syncAvatarCompatibility() {
-        if (!state.panel) return;
-        state.panel.classList.toggle('freesia-gallery-disable-avatar-pseudo', state.avatarCompatibility.disablePseudo);
-        state.panel.classList.toggle('freesia-gallery-disable-avatar-border-image', state.avatarCompatibility.disableBorderImage);
-    }
-
     function mountPanel(panel) {
         const welcomeRecent = panel.querySelector('.welcomeRecent');
         if (!welcomeRecent) return;
@@ -19798,8 +19642,7 @@ function createTLEGalleryHome(window, document) {
         if (state.summary) state.summary.remove();
         if (state.titleGroup) state.titleGroup.remove();
         if (state.panel) {
-            state.panel.classList.remove(ACTIVE_CLASS, NATIVE_CLASS, ...PAGE_CLASSES,
-                'freesia-gallery-disable-avatar-pseudo', 'freesia-gallery-disable-avatar-border-image');
+            state.panel.classList.remove(ACTIVE_CLASS, NATIVE_CLASS, ...PAGE_CLASSES);
         }
 
         state.panel = null;
@@ -19939,13 +19782,6 @@ function createTLEGalleryHome(window, document) {
             else start();
             return next;
         },
-        setAvatarCompatibility: function (settings) {
-            if (!settings || typeof settings !== 'object') return false;
-            if (settings.disablePseudo !== undefined) state.avatarCompatibility.disablePseudo = Boolean(settings.disablePseudo);
-            if (settings.disableBorderImage !== undefined) state.avatarCompatibility.disableBorderImage = Boolean(settings.disableBorderImage);
-            syncAvatarCompatibility();
-            return Object.assign({}, state.avatarCompatibility);
-        },
         openDetail: openDetail,
         openFiles: function () { setPage('files'); renderFiles(); },
         getSettings: function () { return Object.assign({}, state.settings); },
@@ -20080,7 +19916,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.279',
+    version: '0.3.283',
     ready: false,
     destroy,
     state,
@@ -20180,11 +20016,6 @@ function createTLEGalleryHome(window, document) {
 
     const recordPreviewSetting = event.target.closest?.('[data-tle-setting="record-preview-enabled"]');
     if (recordPreviewSetting) setRecordPreviewEnabled(recordPreviewSetting.checked);
-
-    const homeAvatarPseudoSetting = event.target.closest?.('[data-tle-setting="home-avatar-pseudo-disabled"]');
-    if (homeAvatarPseudoSetting) setHomeAvatarPseudoDisabled(homeAvatarPseudoSetting.checked);
-    const homeAvatarBorderImageSetting = event.target.closest?.('[data-tle-setting="home-avatar-border-image-disabled"]');
-    if (homeAvatarBorderImageSetting) setHomeAvatarBorderImageDisabled(homeAvatarBorderImageSetting.checked);
 
     const chatShortcutDestinationSetting = event.target.closest?.('[data-tle-setting="chat-shortcut-destination"]');
     if (chatShortcutDestinationSetting) setChatShortcutDestination(chatShortcutDestinationSetting.value);
@@ -20336,10 +20167,6 @@ function createTLEGalleryHome(window, document) {
   hdAvatarEngine = createTLEHDAvatarEngine(SCRIPT_WIN, HOST_WIN, HOST_DOC);
   galleryHome = createTLEGalleryHome(HOST_WIN, HOST_DOC);
   galleryHome.setEnabled(recordPreviewEnabled);
-  galleryHome.setAvatarCompatibility({
-    disablePseudo: homeAvatarPseudoDisabled,
-    disableBorderImage: homeAvatarBorderImageDisabled,
-  });
   galleryHome.start();
   createStyle();
   createPanel();
@@ -20547,5 +20374,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.279 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.283 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
