@@ -137,8 +137,11 @@ assert.match(source, /if \(!maskHeroEnabled\) \{\s*maskHeroClearEffects\(\)/);
 assert.match(source, /TLEMaskHeroAssets/);
 assert.match(source, /new HOST_WIN\.MutationObserver\(\(\) => maskHeroScheduleProcess\(\)\)/);
 assert.match(source, /#chat \.mes \.name_text\[data-tle-mask-name\]/);
-assert.match(source, /#chat \.mes \.mes_text\[data-tle-mask-floor\]/);
+assert.match(source, /function maskHeroApplyFloorReplacement\(body, replacement\)/);
+assert.match(source, /body\.setAttribute\('data-tle-mask-floor', 'true'\)/);
+assert.match(source, /element\.replaceChildren\(\.\.\.before, record\.original, \.\.\.after\)/);
 assert.match(source, /message\.querySelectorAll\('\.mesAvatarWrapper img, \.avatar img'\)/);
+assert.match(source, /#chat \.mes_edit, #chat \.mes_edit_button, #chat \[data-mes-edit\]/);
 assert.match(source, /切换聊天会自动卸除/);
 
 const runtime = section(
