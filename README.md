@@ -1,3 +1,7 @@
+## 2026-11-27 · Core v0.3.276 · 桃mini高清头像引擎整合（测试分支）
+
+详见 [本版完整日志](releases/v0.3.276/CHANGELOG.md)。基于桃mini《哇！头像变清晰啦！》v4.5.13，在作者同意后将升级后的高清头像引擎整合进 TLE：ST 覆盖聊天头像、角色列表、角色预览、User 身份列表及记录预览；TT 使用原生高清头像。保留原图加载、缓存刷新、动态更新和失败回退，并处理 AvatarDeblur 直链与旧版 Div/Canvas 图层的冲突边界。自动化模拟通过，等待 ST/TT 实机验收。署名：桃mini（原始技术）· 小松鼠 & ChatGPT（TLE 整合）。
+
 # Tavern Layout Engine (TLE)
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
