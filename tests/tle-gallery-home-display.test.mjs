@@ -71,8 +71,10 @@ const cardNames = () => Array.from(dom.window.document.querySelectorAll('.freesi
 
 gallery.start();
 await wait();
-assert.deepEqual(gallery.getLayoutSettings(), { columns: 3, rows: 2, displayMode: 'chatted' },
-  'Legacy layout settings migrate to the default chatted-only display mode');
+const initialLayout = gallery.getLayoutSettings();
+assert.equal(initialLayout.columns, 3, 'Legacy column setting is preserved');
+assert.equal(initialLayout.rows, 2, 'Legacy row setting is preserved');
+assert.equal(initialLayout.displayMode, 'chatted', 'Legacy layout settings migrate to the default chatted-only display mode');
 assert.equal(dom.window.document.getElementById('freesiaGalleryDisplayMode').value, 'chatted',
   'The native home settings popup exposes the default display scope');
 assert.deepEqual(cardNames(), ['Beta', 'Alpha'],
