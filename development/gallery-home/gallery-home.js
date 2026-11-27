@@ -1591,7 +1591,6 @@ function createTLEGalleryHome(window, document) {
         }
 
         panel.classList.add(ACTIVE_CLASS);
-        syncAvatarCompatibility();
         state.page = 'gallery';
         setPage('gallery');
         void refresh();
