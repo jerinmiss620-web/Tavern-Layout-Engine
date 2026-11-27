@@ -15329,42 +15329,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const find = String(rule.find ?? '');
       if (!find) continue;
       const replacement = String(rule.replace ?? '');
+      let expression;
       if (rule.regex) {
         if (maskHeroIsUnsafeRegex(find)) continue;
-        let expression;
         try { expression = new RegExp(find, rule.caseInsensitive ? 'gi' : 'g'); }
         catch { continue; }
         if (expression.test('')) continue;
         expression.lastIndex = 0;
-        let match;
-        while ((match = expression.exec(original))) {
-          if (!match[0].length) {
-            expression.lastIndex += 1;
-            continue;
-          }
-          matches.push({ start: match.index, end: match.index + match[0].length, replacement, ruleIndex });
-        }
       } else {
-        const escaped = find.replace(/[.*+?^${}()|[\]\\]/g, '\\      } else {
-        let offset = 0;
-        while (offset <= original.length - find.length) {
-          const index = original.indexOf(find, offset);
-          if (index < 0) break;
-          matches.push({ start: index, end: index + find.length, replacement, ruleIndex });
-          offset = index + find.length;
-        }
-      }');
-        let expression;
+        const escaped = find.replace(/[.*+?^\x24{}()|[\]\\]/g, character => '\\' + character);
         try { expression = new RegExp(escaped, rule.caseInsensitive ? 'gi' : 'g'); }
         catch { continue; }
-        let match;
-        while ((match = expression.exec(original))) {
-          if (!match[0].length) {
-            expression.lastIndex += 1;
-            continue;
-          }
-          matches.push({ start: match.index, end: match.index + match[0].length, replacement, ruleIndex });
+      }
+      let match;
+      while ((match = expression.exec(original))) {
+        if (!match[0].length) {
+          expression.lastIndex += 1;
+          continue;
         }
+        matches.push({ start: match.index, end: match.index + match[0].length, replacement, ruleIndex });
       }
     }
     if (!matches.length) return original;
