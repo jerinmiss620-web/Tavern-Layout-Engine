@@ -123,7 +123,7 @@ async function boot({ empty = false, transient = null } = {}) {
   host.matchMedia = query => ({ matches: false, media: query, addEventListener() {}, removeEventListener() {} });
   host.CSS = { escape: s => s, supports: () => false };
   host.document.elementsFromPoint = () => [];
-  host.console = frame.console = { info() {}, warn() {}, error(...args) { errors.push(args.map(String).join(' ')); } };
+  host.console = frame.console = { debug() {}, log() {}, info() {}, warn() {}, error(...args) { errors.push(args.map(String).join(' ')); } };
   frame.confirm = () => { throw Error('Unexpected confirmation during automatic update'); };
   frame.TextEncoder = TextEncoder; frame.Blob = Blob;
   const blobs = new Map(); let blobID = 0;
