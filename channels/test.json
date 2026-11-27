@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.281",
+  "latest_version": "0.3.282",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.281",
-    "source_path": "releases/v0.3.281/TLE.js",
-    "source_commit": "ae5743fcab0d69f95b3604b125c99c73675c1232",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/ae5743fcab0d69f95b3604b125c99c73675c1232/releases/v0.3.281/TLE.js",
-    "changelog_path": "releases/v0.3.281/CHANGELOG.md",
-    "sha256": "645168f6784879f7284b7188b9057e057404e6ddb83dec7298fe0c097597f548",
-    "size_bytes": 985801
+    "version": "0.3.282",
+    "source_path": "releases/v0.3.282/TLE.js",
+    "source_commit": "16bfb77cd3717fe687bd34e07824a573478d9365",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/16bfb77cd3717fe687bd34e07824a573478d9365/releases/v0.3.282/TLE.js",
+    "changelog_path": "releases/v0.3.282/CHANGELOG.md",
+    "sha256": "99965249a308f2e749ac7bf2035e319967a0dde9ca7b525c66db35ffdeb846c0",
+    "size_bytes": 985841
   },
-  "status": "TEST v0.3.281：记录预览渐变层按头像图片实际显示边界定位，宽度、位置、高度和底部圆角同步；保留主题自定义非圆形圆角，圆形头像继续使用独立 16px 卡片圆角。仅测试分支，正式版不变。",
+  "status": "TEST v0.3.282：修复记录预览网格行拉伸导致的卡片比例失真，恢复严格 2:3；保留头像渐变边界同步与主题圆角兼容。仅测试分支，正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
