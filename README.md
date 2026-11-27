@@ -1,3 +1,7 @@
+## 2026-11-27 · Core v0.3.287 · 移动端记录详情间距微调（测试分支）
+
+详见 [本版完整日志](releases/v0.3.287/CHANGELOG.md)。将移动端记录详情右侧资料区内部间距从 0px 调整为 5px；保持 104px 头像列与 8px 列间距，不新增 CSS 覆盖规则。仅更新测试分支，正式版不变。
+
 ## 2026-11-27 · Core v0.3.279 · 记录预览独立圆角与显示范围（测试分支）
 
 详见 [本版完整日志](releases/v0.3.279/CHANGELOG.md)。记录预览卡片改为独立 16px 圆角，覆盖主题圆形头像裁切；首页原生设置弹窗新增显示范围：默认只显示有聊天记录的角色并按最近聊天时间排序，也可显示全部角色（有聊天记录者优先、未聊过者置后）。每页展示数量继续由网格列数 × 行数决定，保留分页。仅更新测试分支，正式版不变。
@@ -18,22 +22,17 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.270 · 记录预览头像圆角同步
+## 开发分支测试版 v0.3.287 · 移动端记录详情间距微调
 
-修正头像图片与底部渐变边缘不一致的问题：记录预览卡片现在使用酒馆头像设置对应的圆角，并由最外层统一裁切头像和渐变。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.287/TLE-0.3.287-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
 
-- **普通头像：** 跟随 `--avatar-base-border-radius-round`。
-- **big-avatars：** 跟随 `--avatar-base-border-radius` 与 `--big-avatar-border-factor` 的原生计算。
-- **动态适配：** 直接使用现有 CSS 变量和 `body.big-avatars` 状态类，不增加 JS 监听或轮询。
-- **保持不变：** 2:3 头像、渐变曲线、底部信息排列、两行概要和原生操作按钮。
-- **代码：** 圆角整合进原卡片 CSS 规则，不追加补丁；Core 与独立画廊源码保持一致。
+移动端记录详情页右侧资料区内部纵向间距为 5px；头像列宽 104px、列间距 8px 保持不变。此次只修改原有 CSS 自定义属性，不追加覆盖选择器。
 
-仅更新开发分支测试通道；正式 Stable Core、Loader Runtime 和 Bootstrap 不变。
+[本版日志](releases/v0.3.287/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[本版日志](releases/v0.3.270/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.259 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.264 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -57,7 +56,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 ## 当前开发分支（未发布）
 
-开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.269）；记录预览模块源码：`development/gallery-home/gallery-home.js`。
+开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.287）；记录预览模块源码：`development/gallery-home/gallery-home.js`。
 
 整理侠的资源管理现在直接位于自己的原生形态 `.drawer-content` 内，不再套用第二层 `.tle-search-surface`。抽屉图标、导航文字与全局搜索弹窗的跳转入口统一调用明确的开合控制器，直接维护 `openDrawer / closedDrawer`；打开时先关闭其他普通抽屉和 TLE 控制面板，移动端仍由原生导航生命周期收起侧栏。
 
