@@ -8,7 +8,7 @@ const manifest = JSON.parse(read('channels/test.json'));
 const moduleSource = read('development/avatar-engine/avatar-engine.js');
 const core = read(manifest.release.source_path);
 
-assert.equal(manifest.release.version, '0.3.278');
+assert.equal(manifest.release.version, '0.3.279');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained avatar engine byte-for-byte');
 assert.match(core, /hdAvatarEngine = createTLEHDAvatarEngine\(SCRIPT_WIN, HOST_WIN, HOST_DOC\)/);
 assert.match(core, /hdAvatarEngine\?\.stop\?\.\(\)/);

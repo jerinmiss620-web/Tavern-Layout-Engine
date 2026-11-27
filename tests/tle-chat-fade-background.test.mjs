@@ -6,9 +6,9 @@ const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8'
 const manifest = JSON.parse(read('channels/test.json'));
 const source = read(manifest.release.source_path);
 
-assert.equal(manifest.release.version, '0.3.278');
-assert.equal(manifest.latest_version, '0.3.278');
-assert.ok(source.includes("version: '0.3.278'"));
+assert.equal(manifest.release.version, '0.3.279');
+assert.equal(manifest.latest_version, '0.3.279');
+assert.ok(source.includes("version: '0.3.279'"));
 new vm.Script(source, { filename: 'TLE v' + manifest.release.version });
 
 function section(text, startMarker, endMarker) {

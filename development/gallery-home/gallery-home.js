@@ -2,7 +2,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.273';
+    const VERSION = '0.3.279';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -17,7 +17,9 @@ function createTLEGalleryHome(window, document) {
     const DETAIL_PINNED_CHATS_KEY = 'freesiaGalleryDetailPinnedChats';
     const DEFAULT_GALLERY_COLUMNS = 4;
     const DEFAULT_GALLERY_ROWS = 3;
+    const DEFAULT_DISPLAY_MODE = 'chatted';
     const MAX_GALLERY_ROWS = 15;
+    const MAX_GALLERY_RECENT_CHATS = 1000;
 
     const previous = window[GLOBAL_NAME];
     if (previous && typeof previous.stop === 'function') {
@@ -35,6 +37,7 @@ function createTLEGalleryHome(window, document) {
         paginationRoot: null,
         columnsSelect: null,
         rowsSelect: null,
+        displayModeSelect: null,
         settingsPopupObserver: null,
         settingsPopupDialog: null,
         settingsPopupClickHandler: null,
@@ -60,7 +63,7 @@ function createTLEGalleryHome(window, document) {
         galleryPage: 0,
         galleryGroups: [],
         galleryBaseOrder: new Map(),
-        layoutSettings: { columns: DEFAULT_GALLERY_COLUMNS, rows: DEFAULT_GALLERY_ROWS },
+        layoutSettings: { columns: DEFAULT_GALLERY_COLUMNS, rows: DEFAULT_GALLERY_ROWS, displayMode: DEFAULT_DISPLAY_MODE },
         selectedAvatar: '',
         detailCharacter: null,
         detailChats: [],
@@ -76,11 +79,10 @@ function createTLEGalleryHome(window, document) {
     const CSS = [
         "#chat .welcomePanel." + ACTIVE_CLASS + " .welcomeRecent > .recentChatList:not(." + GRID_CLASS + ") { display: none !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; margin: 0; padding: 0; box-sizing: border-box; border-radius: var(--avatar-base-border-radius-round, 0px); overflow: hidden; cursor: default; }",
-        "body.big-avatars #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { border-radius: calc(var(--avatar-base-border-radius, 0px) * var(--big-avatar-border-factor, 1)); }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; cursor: pointer; outline-offset: 3px; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0; min-height: 0; margin: 0; overflow: hidden; box-sizing: border-box; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: 16px; border-radius: var(--freesia-gallery-card-radius) !important; overflow: hidden; cursor: default; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; border-radius: inherit !important; cursor: pointer; outline-offset: 3px; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0; min-height: 0; margin: 0; overflow: hidden; box-sizing: border-box; border-radius: inherit !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: inherit !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::before, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::after { content: none !important; display: none !important; background: none !important; border: 0 !important; box-shadow: none !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar img { border-image: none !important; border-image-source: none !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay { position: absolute; inset: auto 0 0; z-index: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; gap: 2px; width: 100%; min-width: 0; min-height: 48%; height: auto; max-height: 60%; padding: 30px 5px 5px; box-sizing: border-box; overflow: hidden; --freesia-gallery-overlay-color: #fff; color: var(--freesia-gallery-overlay-color, #fff); background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.035) 14%, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.32) 46%, rgba(0, 0, 0, 0.56) 64%, rgba(0, 0, 0, 0.78) 82%, rgba(0, 0, 0, 0.92) 100%); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); pointer-events: none; }",
@@ -188,7 +190,7 @@ function createTLEGalleryHome(window, document) {
     }
 
     function readGallerySettings(context) {
-        const defaults = { columns: DEFAULT_GALLERY_COLUMNS, rows: DEFAULT_GALLERY_ROWS };
+        const defaults = { columns: DEFAULT_GALLERY_COLUMNS, rows: DEFAULT_GALLERY_ROWS, displayMode: DEFAULT_DISPLAY_MODE };
         try {
             const raw = context && context.accountStorage && context.accountStorage.getItem(GALLERY_SETTINGS_KEY);
             if (!raw) return defaults;
@@ -198,6 +200,7 @@ function createTLEGalleryHome(window, document) {
             return {
                 columns: [2, 3, 4].includes(columnsValue) ? columnsValue : defaults.columns,
                 rows: Math.min(MAX_GALLERY_ROWS, Math.max(1, Number.isFinite(rowsValue) ? rowsValue : defaults.rows)),
+                displayMode: parsed.displayMode === 'all' ? 'all' : DEFAULT_DISPLAY_MODE,
             };
         } catch (error) {
             console.warn('[Freesia Gallery] Could not read gallery layout settings.', error);
@@ -237,6 +240,7 @@ function createTLEGalleryHome(window, document) {
                 option.textContent = narrow ? value + ' 列（桌面）' : value + ' 列';
             });
         }
+        if (state.displayModeSelect) state.displayModeSelect.value = state.layoutSettings.displayMode;
         if (state.grid) state.grid.style.setProperty('--freesia-gallery-columns', String(getEffectiveGalleryColumns()));
     }
 
@@ -291,15 +295,18 @@ function createTLEGalleryHome(window, document) {
 
     function orderPinnedCharacters(groups) {
         const pinned = getPinnedCharacterState();
+        const showAllCharacters = state.layoutSettings.displayMode === 'all';
         return (Array.isArray(groups) ? groups : [])
             .map((group, index) => ({
                 group: group,
+                hasChats: Array.isArray(group.chats) && group.chats.length > 0,
                 index: state.galleryBaseOrder.has(String(group.avatar || ''))
                     ? state.galleryBaseOrder.get(String(group.avatar || ''))
                     : index,
                 pinnedAt: Number(pinned[String(group.avatar || '')] || 0),
             }))
             .sort((a, b) => {
+                if (showAllCharacters && a.hasChats !== b.hasChats) return a.hasChats ? -1 : 1;
                 if (!!a.pinnedAt !== !!b.pinnedAt) return a.pinnedAt ? -1 : 1;
                 if (a.pinnedAt && b.pinnedAt && a.pinnedAt !== b.pinnedAt) return b.pinnedAt - a.pinnedAt;
                 return a.index - b.index;
@@ -454,15 +461,20 @@ function createTLEGalleryHome(window, document) {
             });
         });
 
-        result.sort(function (a, b) {
+        const showAllCharacters = state.layoutSettings.displayMode === 'all';
+        const visibleResult = showAllCharacters ? result : result.filter(group => group.chats.length > 0);
+        visibleResult.sort(function (a, b) {
+            const aHasChats = a.chats.length > 0;
+            const bHasChats = b.chats.length > 0;
+            if (showAllCharacters && aHasChats !== bHasChats) return aHasChats ? -1 : 1;
             if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
             if (a.lastActive !== b.lastActive) return b.lastActive - a.lastActive;
             return a.name.localeCompare(b.name);
         });
-        result.forEach((group, index) => {
+        visibleResult.forEach((group, index) => {
             group.hidden = index >= state.settings.collapsedDisplayed;
         });
-        return result;
+        return visibleResult;
     }
 
     function groupFallbackChats() {
@@ -790,17 +802,19 @@ function createTLEGalleryHome(window, document) {
         if (state.summary) {
             state.summary.textContent = state.galleryGroups.length + ' 位角色'
                 + (pageCount > 1 ? ' · 第 ' + (state.galleryPage + 1) + ' / ' + pageCount + ' 页' : '');
-            state.summary.title = '使用原生最近聊天设置齿轮调整记录预览列数与每页行数；每页最多显示 ' + pageSize + ' 位角色';
+            state.summary.title = state.layoutSettings.displayMode === 'all'
+                ? '显示全部角色；有聊天记录的角色按最近聊天时间优先排列，未聊过的角色排在后面。每页显示 ' + pageSize + ' 位角色。'
+                : '只显示有聊天记录的角色，按最近聊天时间排序。每页显示 ' + pageSize + ' 位角色。';
         }
         observeCardCounts();
     }
 
-    async function fetchRecentChats(context, settings, signal) {
+    async function fetchRecentChats(context, signal) {
         if (!context || typeof context.getRequestHeaders !== 'function') throw new Error('当前环境未提供酒馆请求上下文。');
         const response = await window.fetch(API_RECENT, {
             method: 'POST',
             headers: context.getRequestHeaders(),
-            body: JSON.stringify({ max: settings.maxDisplayed, pinned: getPinnedChats(context) }),
+            body: JSON.stringify({ max: MAX_GALLERY_RECENT_CHATS, pinned: getPinnedChats(context) }),
             cache: 'no-cache',
             signal: signal,
         });
@@ -827,7 +841,7 @@ function createTLEGalleryHome(window, document) {
         state.settings = readSettings(context);
         state.countCache.clear();
         try {
-            const records = await fetchRecentChats(context, state.settings, state.requestController ? state.requestController.signal : undefined);
+            const records = await fetchRecentChats(context, state.requestController ? state.requestController.signal : undefined);
             if (generation !== state.generation || !state.panel) return false;
             const groups = groupCharacterChats(records, context, getPinnedChats(context));
             state.galleryBaseOrder = new Map(groups.map((group, index) => [String(group.avatar || ''), index]));
@@ -927,13 +941,14 @@ function createTLEGalleryHome(window, document) {
         if (state.settingsPopupClickHandler) {
             target.removeEventListener('click', state.settingsPopupClickHandler, true);
         }
-        target.querySelectorAll('.freesia-gallery-popup-layout-title, .freesia-gallery-popup-layout-inputs').forEach(element => element.remove());
+        target.querySelectorAll('.freesia-gallery-popup-layout-title, .freesia-gallery-popup-layout-inputs, .freesia-gallery-popup-display-inputs, .freesia-gallery-popup-layout-note').forEach(element => element.remove());
         delete target.dataset.freesiaGalleryLayoutAttached;
         if (!dialog || state.settingsPopupDialog === target) {
             state.settingsPopupDialog = null;
             state.settingsPopupClickHandler = null;
             state.columnsSelect = null;
             state.rowsSelect = null;
+            state.displayModeSelect = null;
         }
     }
 
@@ -944,7 +959,25 @@ function createTLEGalleryHome(window, document) {
         const popupBody = dialog.querySelector('.popup-body');
         if (!nativeInputs || !popupBody) return false;
 
-        const title = createElement('div', 'popup-content freesia-gallery-popup-layout-title', '记录预览布局');
+        const title = createElement('div', 'popup-content freesia-gallery-popup-layout-title', '记录预览设置');
+        const displayInputs = createElement('div', 'popup-inputs freesia-gallery-popup-display-inputs');
+        const displayModeLabel = createElement('label', 'text_label justifyCenter');
+        displayModeLabel.append(createElement('span', '', '显示范围'));
+        const displayMode = createElement('select', 'text_pole');
+        displayMode.id = 'freesiaGalleryDisplayMode';
+        displayMode.setAttribute('aria-label', '记录预览显示范围');
+        [
+            { value: 'chatted', label: '只显示有聊天记录的角色' },
+            { value: 'all', label: '显示全部角色' },
+        ].forEach(item => {
+            const option = createElement('option', '', item.label);
+            option.value = item.value;
+            displayMode.append(option);
+        });
+        displayMode.value = state.layoutSettings.displayMode;
+        displayModeLabel.append(displayMode);
+        displayInputs.append(displayModeLabel);
+
         const galleryInputs = createElement('div', 'popup-inputs freesia-gallery-popup-layout-inputs');
 
         const columnsLabel = createElement('label', 'text_label justifyCenter');
@@ -974,14 +1007,18 @@ function createTLEGalleryHome(window, document) {
         rowsLabel.append(rows);
 
         galleryInputs.append(columnsLabel, rowsLabel);
+        const note = createElement('small', 'freesia-gallery-popup-layout-note', '每页显示数量由列数 × 行数决定；其他角色可通过分页查看。');
         const popupControls = popupBody.querySelector('.popup-controls');
         const insertBefore = popupControls || null;
         popupBody.insertBefore(title, insertBefore);
+        popupBody.insertBefore(displayInputs, insertBefore);
         popupBody.insertBefore(galleryInputs, insertBefore);
+        popupBody.insertBefore(note, insertBefore);
 
         state.settingsPopupDialog = dialog;
         state.columnsSelect = columns;
         state.rowsSelect = rows;
+        state.displayModeSelect = displayMode;
         dialog.dataset.freesiaGalleryLayoutAttached = 'true';
 
         state.settingsPopupClickHandler = function (event) {
@@ -992,17 +1029,20 @@ function createTLEGalleryHome(window, document) {
 
             const nextColumns = parseInt(columns.value, 10);
             const nextRows = parseInt(rows.value, 10);
+            const nextDisplayMode = displayMode.value;
             if (![2, 3, 4].includes(nextColumns) || !Number.isInteger(nextRows)
-                || nextRows < 1 || nextRows > MAX_GALLERY_ROWS) {
-                reportError('记录预览布局设置无效，请检查列数和行数。');
+                || nextRows < 1 || nextRows > MAX_GALLERY_ROWS || !['chatted', 'all'].includes(nextDisplayMode)) {
+                reportError('记录预览设置无效，请检查显示范围、列数和行数。');
                 return;
             }
 
-            state.layoutSettings = { columns: nextColumns, rows: nextRows };
+            const displayModeChanged = nextDisplayMode !== state.layoutSettings.displayMode;
+            state.layoutSettings = { columns: nextColumns, rows: nextRows, displayMode: nextDisplayMode };
             state.galleryPage = 0;
             saveGallerySettings();
             syncResponsiveLayoutControls();
-            renderGallery(state.galleryGroups, state.source, state.lastError);
+            if (displayModeChanged) void refresh();
+            else renderGallery(state.galleryGroups, state.source, state.lastError);
         };
         dialog.addEventListener('click', state.settingsPopupClickHandler, true);
 
@@ -1875,23 +1915,30 @@ function createTLEGalleryHome(window, document) {
             if (!settings || typeof settings !== 'object') return false;
             const columns = parseInt(settings.columns, 10);
             const rows = parseInt(settings.rows, 10);
+            const displayMode = settings.displayMode;
             if (settings.columns !== undefined && ![2, 3, 4].includes(columns)) return false;
             if (settings.rows !== undefined && (!Number.isInteger(rows) || rows < 1 || rows > MAX_GALLERY_ROWS)) return false;
+            if (settings.displayMode !== undefined && !['chatted', 'all'].includes(displayMode)) return false;
+            const displayModeChanged = settings.displayMode !== undefined && displayMode !== state.layoutSettings.displayMode;
             state.layoutSettings = {
                 columns: settings.columns === undefined ? state.layoutSettings.columns : columns,
                 rows: settings.rows === undefined ? state.layoutSettings.rows : rows,
+                displayMode: settings.displayMode === undefined ? state.layoutSettings.displayMode : displayMode,
             };
             syncResponsiveLayoutControls();
             if (state.columnsSelect) state.columnsSelect.value = String(state.layoutSettings.columns);
             if (state.rowsSelect) state.rowsSelect.value = String(state.layoutSettings.rows);
+            if (state.displayModeSelect) state.displayModeSelect.value = state.layoutSettings.displayMode;
             state.galleryPage = 0;
             saveGallerySettings();
-            renderGallery(state.galleryGroups, state.source, state.lastError);
+            if (displayModeChanged && state.panel) void refresh();
+            else renderGallery(state.galleryGroups, state.source, state.lastError);
             return Object.assign({}, state.layoutSettings);
         },
         getPage: function () { return state.page; },
         _groupCharacterChats: groupCharacterChats,
         _groupFallbackChats: groupFallbackChats,
+        _orderPinnedCharacters: orderPinnedCharacters,
     };
 
     window[GLOBAL_NAME] = api;

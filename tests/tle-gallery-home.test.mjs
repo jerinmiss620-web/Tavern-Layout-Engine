@@ -9,10 +9,10 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.278');
+assert.equal(version, '0.3.279');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.273'/);
+assert.match(moduleSource, /const VERSION = '0.3.279'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
@@ -30,12 +30,28 @@ for (const line of moduleSource.slice(cssStart, cssEnd).split('\n')) {
 }
 assert.equal(new Set(selectors).size, selectors.length, 'No duplicate CSS selector override layers');
 assert.match(moduleSource, /--freesia-gallery-detail-main-gap: 0px/);
-assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*border-radius: var\(--avatar-base-border-radius-round, 0px\);[^}]*overflow: hidden;/, "The card clips the gradient to the normal avatar corner-radius setting");
-assert.ok(moduleSource.includes('body.big-avatars #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { border-radius: calc(var(--avatar-base-border-radius, 0px) * var(--big-avatar-border-factor, 1)); }'), "Big-avatar cards use the same radius calculation as the native big avatar image");
+assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*--freesia-gallery-card-radius: 16px;[^}]*border-radius: var\(--freesia-gallery-card-radius\) !important;[^}]*overflow: hidden;/, "The record-preview card owns a fixed independent radius");
+assert.match(moduleSource, /\.freesia-gallery-card-identity \{[^}]*border-radius: inherit !important;/, "The identity layer inherits the card radius");
+assert.match(moduleSource, /\.freesia-gallery-card-identity > \.avatar \{[^}]*border-radius: inherit !important;/, "The cloned theme avatar wrapper cannot keep a circular crop");
+assert.match(moduleSource, /\.freesia-gallery-card-identity > \.avatar img \{[^}]*border-radius: inherit !important;/, "The avatar image follows the record-preview card radius");
+assert.doesNotMatch(moduleSource, /body\.big-avatars #chat \.welcomePanel\.[^\n]*\.freesia-gallery-card \{/, "Big-avatar mode cannot replace the record-preview card radius");
+assert.doesNotMatch(moduleSource, /var\(--avatar-base-border-radius-round/, "Record preview no longer inherits the theme avatar radius");
 assert.match(moduleSource, /--freesia-gallery-detail-columns: 104px minmax\(0, 1fr\)/);
 assert.match(moduleSource, /align-self: stretch/);
 assert.match(moduleSource, /freesia-gallery-description \{[^}]*flex: 1 1 0/);
 assert.match(moduleSource, /Math\.min\(2, state\.layoutSettings\.columns\)/);
+
+assert.match(moduleSource, /const DEFAULT_DISPLAY_MODE = 'chatted'/);
+assert.match(moduleSource, /const MAX_GALLERY_RECENT_CHATS = 1000/);
+assert.match(moduleSource, /displayMode: parsed\.displayMode === 'all' \? 'all' : DEFAULT_DISPLAY_MODE/);
+assert.match(moduleSource, /id = 'freesiaGalleryDisplayMode'/);
+assert.match(moduleSource, /只显示有聊天记录的角色/);
+assert.match(moduleSource, /显示全部角色/);
+assert.match(moduleSource, /body: JSON\.stringify\(\{ max: MAX_GALLERY_RECENT_CHATS/);
+assert.match(moduleSource, /const showAllCharacters = state\.layoutSettings\.displayMode === 'all'/);
+assert.match(moduleSource, /if \(showAllCharacters && aHasChats !== bHasChats\)/);
+assert.match(moduleSource, /if \(displayModeChanged\) void refresh\(\)/);
+
 assert.match(moduleSource, /setEnabled: function \(enabled\)/);
 assert.match(moduleSource, /if \(state\.started \|\| !state\.enabled \|\| typeof document === 'undefined'\)/);
 assert.match(moduleSource, /if \(!next\) stop\(\);\s*else start\(\);/);
@@ -106,4 +122,4 @@ assert.match(core, /home-avatar-pseudo-disabled/);
 assert.match(core, /home-avatar-border-image-disabled/);
 new vm.Script(moduleSource, { filename: 'development/gallery-home/gallery-home.js' });
 new vm.Script(core, { filename: corePath });
-console.log('TLE gallery integration, bottom-anchored 2:3 avatar cards, two-line preview, native action behavior, navigation and CSS consolidation checks passed.');
+console.log('TLE gallery integration, independent 2:3 card radius, display-scope filtering, recency ordering, pagination settings and native action behavior checks passed.');
