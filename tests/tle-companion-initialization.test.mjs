@@ -47,9 +47,17 @@ assert.equal(
 const currentApply = section(source, '  async function companionApply(', '  function companionOnChatChanged(');
 const previousApply = section(previous, '  async function companionApply(', '  function companionOnChatChanged(');
 const comparableApply = developmentMode
-  ? currentApply
-    .replace(/^\s*const resetResult = await companionPromptResetOverlay\(\);\n\s*if \(resetResult\.issue\) \{[\s\S]*?^\s*}\n\s*if \(resetResult\.changed\) finished\+\+;\n/m, '')
-    .replace(/^\s*if \(field\.id === 'promptEntries'\) \{[\s\S]*?^\s*}\n/m, '')
+  ? (() => {
+      let comparable = currentApply
+        .replace(/^\s*const resetResult = await companionPromptResetOverlay\(\);\n\s*if \(resetResult\.issue\) \{[\s\S]*?^\s*}\n\s*if \(resetResult\.changed\) finished\+\+;\n/m, '')
+        .replace(/^\s*const promptPreflight = await companionPromptPreflight\(plan, role\);\n/m, '')
+        .replace(/^\s*if \(error\?\.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED'\) throw error;\n/m, '');
+      const promptStart = comparable.indexOf("          if (field.id === 'promptEntries') {");
+      const promptEnd = comparable.indexOf("          if (field.id === 'worldInfo') {", promptStart);
+      assert.ok(promptStart >= 0 && promptEnd > promptStart,
+        'prompt-entry integration block must remain isolated in the application loop');
+      return comparable.slice(0, promptStart) + comparable.slice(promptEnd);
+    })()
   : currentApply;
 assert.equal(comparableApply, previousApply,
   'the existing per-item application engine and failure reporting must remain unchanged outside prompt-entry integration');
