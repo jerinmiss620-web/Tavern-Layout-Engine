@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.283",
+  "latest_version": "0.3.284",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.283",
-    "source_path": "releases/v0.3.283/TLE.js",
-    "source_commit": "93fe4e59ffb8916a6a68237437a23300646285d5",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/93fe4e59ffb8916a6a68237437a23300646285d5/releases/v0.3.283/TLE.js",
-    "changelog_path": "releases/v0.3.283/CHANGELOG.md",
-    "sha256": "8cd3fed4728bd8fd70299d90f0f0638eda8fea2475fdbb092e92add070697940",
-    "size_bytes": 978631
+    "version": "0.3.284",
+    "source_path": "releases/v0.3.284/TLE.js",
+    "source_commit": "1a4ee4010858a08bf4ffef9a730b359fd57e4560",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/1a4ee4010858a08bf4ffef9a730b359fd57e4560/releases/v0.3.284/TLE.js",
+    "changelog_path": "releases/v0.3.284/CHANGELOG.md",
+    "sha256": "5972bbbb8aa2e3cce926a38be59ec2156812f15e39e28b9e3c7dcce80971d067",
+    "size_bytes": 979176
   },
-  "status": "TEST v0.3.283：记录预览头像样式完全由 TLE 独立控制，固定 2:3、12px 圆角、无边框/边框贴图/阴影；仅保留原图 src/srcset，剥离主题头像外壳与图片样式。渐变固定贴合卡片，不再读取主题头像几何；移除旧头像兼容开关。仅测试分支，正式版不变。",
+  "status": "TEST v0.3.284：修复整理侠导航图标状态同步；关闭时使用 closedIcon、打开时使用 openIcon，并保留酒馆原生及主题的关闭态透明度。仅测试分支，正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
