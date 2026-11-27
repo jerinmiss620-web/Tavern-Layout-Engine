@@ -23,6 +23,10 @@ const removeWorldInfoExtraLinks = vm.runInNewContext(
   '(' + extractFunction('removeWorldInfoExtraLinks', '  // Match Theme Manager') + ')'
 );
 
+const syncOrganizerIconState = vm.runInNewContext(
+  '(' + extractFunction('syncOrganizerIconState', '  function setOrganizerDrawerOpen') + ')',
+);
+
 const organizerToggleSandbox = {
   state: {
     organizerPanel: {
@@ -37,13 +41,14 @@ const organizerToggleSandbox = {
       setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; },
     },
     organizerEntry: {
-      querySelector() { return organizerToggleSandbox.toggle; },
+      querySelector(selector) { return selector.includes('.drawer-icon') ? organizerToggleSandbox.icon : organizerToggleSandbox.toggle; },
     },
     globalSearchOpen: false,
     mobileNav: { open: false },
     destroyed: false,
   },
   toggle: { setAttribute(name, value) { this.attributes ||= {}; this.attributes[name] = value; } },
+  icon: { classList: { values: new Set(['closedIcon']), contains(name) { return this.values.has(name); }, toggle(name, force) { if (force) this.values.add(name); else this.values.delete(name); } } },
   quickPanel: null,
   managerOpens: 0,
   nativeDrawerCloses: 0,
@@ -58,7 +63,7 @@ const organizerToggleSandbox = {
 };
 const setOrganizerDrawerOpen = vm.runInNewContext(
   '(' + extractFunction('setOrganizerDrawerOpen', '  function toggleOrganizerDrawer') + ')',
-  organizerToggleSandbox,
+  { ...organizerToggleSandbox, syncOrganizerIconState },
 );
 const toggleOrganizerDrawer = vm.runInNewContext(
   '(' + extractFunction('toggleOrganizerDrawer', '  function setPanelOpen') + ')',
@@ -69,6 +74,8 @@ assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('ope
 assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('closedDrawer'), false);
 assert.equal(organizerToggleSandbox.state.organizerPanel.attributes['aria-hidden'], 'false');
 assert.equal(organizerToggleSandbox.toggle.attributes['aria-expanded'], 'true');
+assert.equal(organizerToggleSandbox.icon.classList.contains('openIcon'), true);
+assert.equal(organizerToggleSandbox.icon.classList.contains('closedIcon'), false);
 assert.equal(organizerToggleSandbox.managerOpens, 1);
 assert.equal(organizerToggleSandbox.nativeDrawerCloses, 1);
 toggleOrganizerDrawer();
@@ -76,6 +83,8 @@ assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('ope
 assert.equal(organizerToggleSandbox.state.organizerPanel.classList.contains('closedDrawer'), true);
 assert.equal(organizerToggleSandbox.state.organizerPanel.attributes['aria-hidden'], 'true');
 assert.equal(organizerToggleSandbox.toggle.attributes['aria-expanded'], 'false');
+assert.equal(organizerToggleSandbox.icon.classList.contains('openIcon'), false);
+assert.equal(organizerToggleSandbox.icon.classList.contains('closedIcon'), true);
 
 const organizerClosePanel = {
   classList: {
@@ -91,11 +100,12 @@ const organizerClosePanel = {
 const organizerCloseSandbox = {
   state: {
     organizerPanel: organizerClosePanel,
-    organizerEntry: { querySelector: () => ({ setAttribute() {} }) },
+    organizerEntry: { querySelector: selector => selector.includes('.drawer-icon') ? organizerCloseSandbox.icon : ({ setAttribute() {} }) },
     globalSearchOpen: false,
     mobileNav: { open: false },
     destroyed: false,
   },
+  icon: { classList: { values: new Set(['openIcon']), contains(name) { return this.values.has(name); }, toggle(name, force) { if (force) this.values.add(name); else this.values.delete(name); } } },
   quickPanel: { embedded: true, module: 'groups', node: organizerClosePanel },
   closeQuickPanel: () => { organizerCloseSandbox.quickPanel = null; organizerCloseSandbox.managerCloses++; },
   managerCloses: 0,
@@ -109,12 +119,14 @@ const organizerCloseSandbox = {
 };
 const closeOrganizerDrawer = vm.runInNewContext(
   '(' + extractFunction('setOrganizerDrawerOpen', '  function toggleOrganizerDrawer') + ')',
-  organizerCloseSandbox,
+  { ...organizerCloseSandbox, syncOrganizerIconState },
 );
 closeOrganizerDrawer(false);
 assert.equal(organizerClosePanel.classList.contains('openDrawer'), false);
 assert.equal(organizerClosePanel.classList.contains('closedDrawer'), true);
 assert.equal(organizerClosePanel.attributes['aria-hidden'], 'true');
+assert.equal(organizerCloseSandbox.icon.classList.contains('openIcon'), false);
+assert.equal(organizerCloseSandbox.icon.classList.contains('closedIcon'), true);
 assert.equal(organizerCloseSandbox.managerCloses, 1);
 
 const worldNames = ['Global', 'Primary', 'Extra', 'Orphan', 'Mixed', 'Unbound'];
@@ -233,7 +245,7 @@ assert.ok(source.includes("organizerPanel: 'tle-organizer-panel'"));
 assert.ok(source.includes('state.organizerEntry = organizerEntry'));
 assert.ok(source.includes("organizerEntry.className = 'drawer'"), 'Organizer must be the tenth native-shaped drawer');
 assert.ok(source.includes("organizerToggle.className = 'drawer-toggle interactable'"));
-assert.ok(source.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable'"));
+assert.ok(source.includes("organizerIcon.className = 'drawer-icon fa-solid fa-layer-group interactable closedIcon'"));
 assert.ok(source.includes("panel.className = 'drawer-content closedDrawer'"), 'Organizer must own its drawer-content');
 assert.ok(source.includes('state.organizerEntry?.appendChild(panel)'), 'Organizer owns its independent resource panel');
 assert.ok(source.includes('holder.insertBefore(state.organizerEntry, organizerPosition)'), 'Organizer must be positioned after the nine native drawers');
