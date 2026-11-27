@@ -6,13 +6,14 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const legacyFiles = {
+const readRaw = relative => readFileSync(path.join(root, relative), 'utf8');
+const manifest = JSON.parse(readRaw('channels/test.json'));
+const legacyFiles = manifest.release.version === '0.3.204' ? {
   'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.json': 'tests/fixtures/legacy/test-loader-v0.3.0.json',
-};
+} : {};
 const read = relative => readFileSync(path.join(root, legacyFiles[relative] || relative), 'utf8');
-const manifest = JSON.parse(read('channels/test.json'));
 
 assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
@@ -56,6 +57,34 @@ assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.ve
 
 const plan = JSON.parse(read('release-plan.json'));
 const tle = process.argv.includes('--current') ? read('releases/v' + plan.core + '/TLE.js') : pinnedTle;
+if (manifest.release.version === '0.3.246') {
+  const organizerSource = read('development/organizer/TLE.js');
+  assert.equal(organizerSource, pinnedTle, 'Development Organizer source and pinned test Core must match byte-for-byte');
+  assert.match(organizerSource, /this\.modeToggle = n\("input", "checkbox"\);/,
+    'The checkbox uses the host native checkbox class');
+  assert.match(organizerSource, /const categoryHeading = quickNode\('strong', 'tle-organizer-pane-title standoutHeader', '资源类型'\);/,
+    'Resource type heading inherits standoutHeader');
+  assert.match(organizerSource, /const groupHeading = quickNode\('strong', 'tle-organizer-pane-title standoutHeader', '分组目录'\);/,
+    'Group heading inherits standoutHeader');
+  assert.match(organizerSource, /const resourceHeader = quickNode\('div', 'tle-content-heading standoutHeader flex-container alignItemsCenter justifySpaceBetween'\);/,
+    'Resource heading and checkbox share standoutHeader');
+  assert.match(organizerSource, /workspace\.append\(categoryPane, groupPane, resourcePane\);/,
+    'Organizer panes are laid out without divider elements');
+  assert.doesNotMatch(organizerSource, /tle-organizer-divider|1px minmax\(168px/,
+    'No Organizer divider DOM or grid tracks remain');
+  assert.match(organizerSource, /this\.target = n\("label", "checkbox_label"\);/,
+    'The checkbox label must use SillyTavern native checkbox_label markup');
+  assert.match(organizerSource, /this\.modeToggle = n\("input", "checkbox"\);/,
+    'Organizer mode must use one native checkbox');
+  assert.match(organizerSource, /this\.modeToggle\.type = "checkbox";/,
+    'The native mode control must be a checkbox');
+  assert.match(organizerSource, /this\.modeToggle\.checked = this\.active;/,
+    'Checkbox state must follow the selected functional module');
+  assert.match(organizerSource, /this\.modeToggle\.checked \? "content" : "name"/,
+    'Checking the control enters content search; unchecking returns to resource management');
+  assert.doesNotMatch(organizerSource, /modeButtons|tle-content-mode-switch|tle-content-mode-button/,
+    'No dual-button selector or private mode styling hooks may remain');
+}
 const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
 const loader = verifyPinnedRelease(
@@ -65,10 +94,16 @@ const loader = verifyPinnedRelease(
 );
 assert.equal(loaderRelease.version, '0.3.0');
 assert.match(loader, /const LOADER_VERSION = '0\.3\.0'/);
+if (manifest.release.version === '0.3.222') {
+  assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
+  assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
+  assert.match(loader, /tle\.loader\.organizerBranchTest\.lastKnownGood\.v1/);
+}
 
 const installer = JSON.parse(read(loaderRelease.installer_path));
 assert.equal(installer.type, 'script');
-assert.equal(installer.id, '8f994fad-ea17-49f8-93af-ebe8ba4f6c67');
+assert.equal(installer.id, manifest.release.version === '0.3.204' ? '8f994fad-ea17-49f8-93af-ebe8ba4f6c67' : 'e1a1d9fa-8f4b-4c2a-9c45-6c8d3a2f7b10');
+assert.equal(installer.enabled, manifest.release.version === '0.3.204');
 assert.equal(installer.content, loader, 'Tavern Helper installer content is out of sync with Loader source');
 
 assert.match(tle, /if \(action === 'open-debugger'\) openMobileDebugger\(\);/);
