@@ -13,7 +13,7 @@ assert.ok(helperStart >= 0 && helperEnd > helperStart, 'Prompt-state pure helper
 
 const sandbox = vm.createContext({});
 const helperSource = source.slice(helperStart, helperEnd)
-  + '\nthis.promptStateHelpers = { companionPromptMergeStateMaps, companionPromptExtendStateMap, companionPromptUpdateKnownStateMap, companionPromptApplyStateMap };';
+  + '\nthis.promptStateHelpers = { companionPromptMergeStateMaps, companionPromptExtendStateMap, companionPromptUpdateKnownStateMap, companionPromptApplyStateMap, companionPromptBaselineRestoreIssue };';
 new vm.Script(helperSource, { filename: 'TLE companion prompt-state helpers' }).runInContext(sandbox);
 const helpers = sandbox.promptStateHelpers;
 const plain = value => JSON.parse(JSON.stringify(value));
@@ -75,7 +75,56 @@ const tests = [
         { identifier: 'second', enabled: true },
         { identifier: 'first', enabled: false },
         { identifier: 'new-entry', enabled: true },
-      ];
+        {
+    name: 'baseline restore blocks missing and mismatched locked entries before mutation',
+    run() {
+      const restoreStart = source.indexOf('function companionPromptRestoreBaseline');
+      const restoreEnd = source.indexOf('function companionPromptRoleStateExists', restoreStart);
+      const restoreSource = source.slice(restoreStart, restoreEnd);
+      const build = ({ baseline, order, prompts, canToggle }) => {
+        const sandbox = vm.createContext({});
+        sandbox.applyCalls = 0;
+        sandbox.companionRead = () => ({ promptBaselines: { SharedPreset: baseline } });
+        sandbox.companionPromptOrder = () => order;
+        sandbox.companionPromptCanToggle = (_manager, prompt) => canToggle(prompt);
+        sandbox.companionPromptApplyToManager = () => {
+          sandbox.applyCalls++;
+          return { applied: [], changed: [], missing: [], locked: [], newEntries: [] };
+        };
+        new vm.Script(helperSource + '\n' + restoreSource + '\nthis.restore = companionPromptRestoreBaseline;').runInContext(sandbox);
+        const manager = { serviceSettings: { prompts } };
+        return { sandbox, manager };
+      };
+      const locked = build({
+        baseline: { locked: false },
+        order: [{ identifier: 'locked', enabled: true }],
+        prompts: [{ identifier: 'locked', locked: true }],
+        canToggle: prompt => !prompt.locked,
+      });
+      assert.throws(() => locked.sandbox.restore(locked.manager, 'SharedPreset'),
+        error => error.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED');
+      assert.equal(locked.sandbox.applyCalls, 0, 'A locked mismatch must be detected before any preset mutation');
+      const missing = build({
+        baseline: { deleted: true },
+        order: [],
+        prompts: [],
+        canToggle: () => true,
+      });
+      assert.throws(() => missing.sandbox.restore(missing.manager, 'SharedPreset'),
+        error => error.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED');
+      assert.equal(missing.sandbox.applyCalls, 0, 'A missing baseline identifier must stop restoration before mutation');
+      const alreadyCorrect = build({
+        baseline: { locked: true },
+        order: [{ identifier: 'locked', enabled: true }],
+        prompts: [{ identifier: 'locked', locked: true }],
+        canToggle: prompt => !prompt.locked,
+      });
+      const result = alreadyCorrect.sandbox.restore(alreadyCorrect.manager, 'SharedPreset');
+      assert.equal(result.baseline.locked, true, 'A locked entry already matching the baseline is safe');
+      assert.equal(alreadyCorrect.sandbox.applyCalls, 1);
+    },
+  },
+];
       const orderBefore = order.map(entry => entry.identifier);
       const promptMap = new Map([
         ['first', { identifier: 'first', name: 'Renamed prompt', content: 'Edited body' }],
@@ -157,55 +206,7 @@ const tests = [
   },
 ];
 
-  {
-    name: 'baseline restore blocks missing and mismatched locked entries before mutation',
-    run() {
-      const restoreStart = source.indexOf('function companionPromptRestoreBaseline');
-      const restoreEnd = source.indexOf('function companionPromptRoleStateExists', restoreStart);
-      const restoreSource = source.slice(restoreStart, restoreEnd);
-      const build = ({ baseline, order, prompts, canToggle }) => {
-        const sandbox = vm.createContext({});
-        sandbox.applyCalls = 0;
-        sandbox.companionRead = () => ({ promptBaselines: { SharedPreset: baseline } });
-        sandbox.companionPromptOrder = () => order;
-        sandbox.companionPromptCanToggle = (_manager, prompt) => canToggle(prompt);
-        sandbox.companionPromptApplyToManager = () => {
-          sandbox.applyCalls++;
-          return { applied: [], changed: [], missing: [], locked: [], newEntries: [] };
-        };
-        new vm.Script(helperSource + '\n' + restoreSource + '\nthis.restore = companionPromptRestoreBaseline;').runInContext(sandbox);
-        const manager = { serviceSettings: { prompts } };
-        return { sandbox, manager };
-      };
-      const locked = build({
-        baseline: { locked: false },
-        order: [{ identifier: 'locked', enabled: true }],
-        prompts: [{ identifier: 'locked', locked: true }],
-        canToggle: prompt => !prompt.locked,
-      });
-      assert.throws(() => locked.sandbox.restore(locked.manager, 'SharedPreset'),
-        error => error.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED');
-      assert.equal(locked.sandbox.applyCalls, 0, 'A locked mismatch must be detected before any preset mutation');
-      const missing = build({
-        baseline: { deleted: true },
-        order: [],
-        prompts: [],
-        canToggle: () => true,
-      });
-      assert.throws(() => missing.sandbox.restore(missing.manager, 'SharedPreset'),
-        error => error.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED');
-      assert.equal(missing.sandbox.applyCalls, 0, 'A missing baseline identifier must stop restoration before mutation');
-      const alreadyCorrect = build({
-        baseline: { locked: true },
-        order: [{ identifier: 'locked', enabled: true }],
-        prompts: [{ identifier: 'locked', locked: true }],
-        canToggle: prompt => !prompt.locked,
-      });
-      const result = alreadyCorrect.sandbox.restore(alreadyCorrect.manager, 'SharedPreset');
-      assert.equal(result.baseline.locked, true, 'A locked entry already matching the baseline is safe');
-      assert.equal(alreadyCorrect.sandbox.applyCalls, 1);
-    },
-  },
+
 for (const test of tests) {
   test.run();
   console.log('✓ ' + test.name);
