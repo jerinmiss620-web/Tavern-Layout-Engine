@@ -9,16 +9,16 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.280');
+assert.equal(version, '0.3.281');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.280'/);
+assert.match(moduleSource, /const VERSION = '0.3.281'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.280'/);
+assert.match(core, /version: '0\.3\.281'/);
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
@@ -33,6 +33,8 @@ assert.match(moduleSource, /--freesia-gallery-detail-main-gap: 0px/);
 assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*--freesia-gallery-card-radius: 16px;[^}]*border-radius: var\(--freesia-gallery-card-radius\) !important;[^}]*overflow: hidden;/, "The record-preview card owns a fixed independent radius");
 assert.match(moduleSource, /\.freesia-gallery-card-identity \{[^}]*border-radius: inherit !important;/, "The identity layer inherits the card radius");
 assert.match(moduleSource, /\.freesia-gallery-card-identity > \.avatar \{[^}]*border-radius: var\(--freesia-gallery-avatar-radius, inherit\) !important;/, "The cloned avatar wrapper uses the original avatar radius within the card crop");
+assert.match(moduleSource, /const isCircularAvatar = nativeCornerRadii\.length === 4/, "Circular native avatars keep the gallery's independent card radius");
+assert.match(moduleSource, /nativeImageStyle && !isCircularAvatar/, "Only custom non-circular theme radii are copied into the gallery");
 assert.match(moduleSource, /\.freesia-gallery-card-identity > \.avatar img \{[^}]*border-radius: var\(--freesia-gallery-avatar-radius, inherit\) !important;/, "The avatar image keeps its computed theme radius");
 assert.doesNotMatch(moduleSource, /body\.big-avatars #chat \.welcomePanel\.[^\n]*\.freesia-gallery-card \{/, "Big-avatar mode cannot replace the record-preview card radius");
 assert.doesNotMatch(moduleSource, /var\(--avatar-base-border-radius-round/, "Record preview no longer inherits the theme avatar radius");

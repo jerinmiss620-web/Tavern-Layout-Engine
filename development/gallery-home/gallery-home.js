@@ -2,7 +2,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.280';
+    const VERSION = '0.3.281';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -508,7 +508,20 @@ function createTLEGalleryHome(window, document) {
             const nativeImageStyle = nativeImage && typeof window.getComputedStyle === 'function'
                 ? window.getComputedStyle(nativeImage)
                 : null;
-            const nativeRadius = nativeImageStyle
+            const nativeCornerRadii = nativeImageStyle ? [
+                nativeImageStyle.borderTopLeftRadius,
+                nativeImageStyle.borderTopRightRadius,
+                nativeImageStyle.borderBottomRightRadius,
+                nativeImageStyle.borderBottomLeftRadius,
+            ] : [];
+            const isCircularAvatar = nativeCornerRadii.length === 4 && nativeCornerRadii.every(function (value) {
+                const parts = String(value || '').trim().split(/\s+/).filter(Boolean);
+                return parts.length > 0 && parts.every(function (part) {
+                    const match = part.match(/^(-?(?:\d+|\d*\.\d+))%$/);
+                    return match && Number(match[1]) >= 50;
+                });
+            });
+            const nativeRadius = nativeImageStyle && !isCircularAvatar
                 ? (nativeImageStyle.borderRadius || nativeImageStyle.borderTopLeftRadius || '')
                 : '';
             const clone = nativeAvatar.cloneNode(true);
