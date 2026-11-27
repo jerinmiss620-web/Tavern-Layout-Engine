@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.283",
     "source_path": "releases/v0.3.283/TLE.js",
-    "source_commit": "40024f58f7d2bf3346c2188e2d318a8237ccfe47",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/40024f58f7d2bf3346c2188e2d318a8237ccfe47/releases/v0.3.283/TLE.js",
+    "source_commit": "bd2a3559060e99b83dcda17d36dbe04bb7c05af3",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/bd2a3559060e99b83dcda17d36dbe04bb7c05af3/releases/v0.3.283/TLE.js",
     "changelog_path": "releases/v0.3.283/CHANGELOG.md",
-    "sha256": "1a59606dc772cfd66830fc3fb3ef7525d4e08d38eeb2810a201101b6b4899249",
-    "size_bytes": 973526
+    "sha256": "584766dbf93163ac1caf0a6f338daabb1d8e51af58d0d1bfd422aaf9cb9baa3f",
+    "size_bytes": 973491
   },
-  "status": "TEST v0.3.283：记录预览头像样式完全由 TLE 独立控制，固定 2:3、12px 圆角、无边框/边框贴图/阴影；仅保留原图 src/srcset，剥离主题头像外壳与图片样式。渐变固定贴合卡片，不再读取主题头像几何。移除旧头像兼容开关。仅测试分支，正式版不变。",
+  "status": "TEST v0.3.283：记录预览头像样式完全由 TLE 独立控制，固定 2:3、12px 圆角、无边框/边框贴图/阴影；仅保留原图 src/srcset，剥离主题头像外壳与图片样式。渐变固定贴合卡片，不再读取主题头像几何；移除旧头像兼容开关。仅测试分支，正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
