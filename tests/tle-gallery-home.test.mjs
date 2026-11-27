@@ -9,10 +9,25 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.288');
+assert.equal(version, '0.3.289');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
+assert.match(core, /#\$\{ID\.nav\} > button \{\s*position: relative;\s*display: flex;/,
+  'nav button positioning must live in the base rule');
+assert.doesNotMatch(core, /#\$\{ID\.nav\} > button \{ position: relative; \}/,
+  'no late one-property nav override may remain');
+assert.match(core, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="plans"\] \{ height: min\(80dvh, 700px\); \}/,
+  'identical chat-tools page heights must share one rule');
+assert.match(core, /#\$\{ID\.presetSettings\}, #\$\{ID\.presetPrompts\} \{\s*display: block;\s*min-width: 0;/,
+  'preset display must be merged into its base rule');
+const characterListRuleStart = core.indexOf('body:not(.charListGrid) #right-nav-panel #rm_print_characters_block > .character_select {');
+const characterListRuleEnd = core.indexOf('\n  }', characterListRuleStart);
+const characterListRule = core.slice(characterListRuleStart, characterListRuleEnd);
+assert.ok(characterListRuleStart >= 0 && characterListRuleEnd > characterListRuleStart);
+assert.doesNotMatch(characterListRule, /min-width:\s*0;/,
+  'the repeated character-list min-width declaration must stay removed');
+
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.288'/);
+assert.match(moduleSource, /const VERSION = '0.3.289'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);/);
@@ -25,12 +40,57 @@ assert.match(core, /const SELECTOR = '[^']*\.freesia-gallery-avatar img, \.frees
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
 assert.ok(cssStart >= 0 && cssEnd > cssStart);
+function splitSelectorList(selector) {
+  const result = [];
+  let start = 0;
+  let parentheses = 0;
+  let brackets = 0;
+  let quote = '';
+  let escaped = false;
+  for (let index = 0; index < selector.length; index++) {
+    const character = selector[index];
+    if (quote) {
+      if (escaped) { escaped = false; continue; }
+      if (character === '\\') { escaped = true; continue; }
+      if (character === quote) quote = '';
+      continue;
+    }
+    if (character === '"' || character === "'") { quote = character; continue; }
+    if (character === '(') parentheses++;
+    else if (character === ')') parentheses--;
+    else if (character === '[') brackets++;
+    else if (character === ']') brackets--;
+    else if (character === ',' && parentheses === 0 && brackets === 0) {
+      result.push(selector.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  const last = selector.slice(start).trim();
+  if (last) result.push(last);
+  return result;
+}
 const selectors = [];
 for (const line of moduleSource.slice(cssStart, cssEnd).split('\n')) {
-  const match = line.match(/^\s*"(.*)"[,]?$/);
-  if (match && match[1].includes('{')) selectors.push(match[1].slice(0, match[1].indexOf('{')).trim());
+  const fragments = [...line.matchAll(/"(?:\\.|[^"\\])*"/g)].map(match => JSON.parse(match[0]));
+  if (!fragments.length) continue;
+  let rule = fragments.join('__TLE_DYNAMIC_SELECTOR__').trim();
+  let mediaContext = '';
+  if (rule.startsWith('@media')) {
+    const media = rule.match(/^(@media[^{}]+)\{\s*(.*?)\s*\}\s*$/);
+    assert.ok(media, 'Responsive CSS rules must have balanced media wrappers');
+    mediaContext = media[1].trim();
+    rule = media[2].trim();
+  }
+  const brace = rule.indexOf('{');
+  if (brace < 0) continue;
+  for (const selector of splitSelectorList(rule.slice(0, brace))) {
+    selectors.push(mediaContext + '|' + selector);
+  }
 }
-assert.equal(new Set(selectors).size, selectors.length, 'No duplicate CSS selector override layers');
+assert.equal(new Set(selectors).size, selectors.length,
+  'No duplicate CSS selectors within the same responsive context');
+assert.doesNotMatch(moduleSource, /\bexpandedAll\b/, 'Unused gallery expansion state must not remain');
+assert.doesNotMatch(moduleSource, /\bhdAvatarEngine\b/, 'Gallery module must not own the separate HD-avatar engine lifecycle');
 assert.match(moduleSource, /--freesia-gallery-detail-main-gap: 5px/);
 assert.match(moduleSource, /--freesia-gallery-avatar-radius: 12px;/, 'The preview and detail avatar surfaces share one radius token');
 assert.match(moduleSource, /\.freesia-gallery-detail-avatar \{[^}]*border-radius: var\(--freesia-gallery-avatar-radius, 12px\) !important;/, 'The detail avatar frame uses the shared outer avatar radius');
@@ -129,7 +189,7 @@ assert.match(core, /点击首页右上角的切换图标/);
 assert.match(core, /galleryHome\.setEnabled\(recordPreviewEnabled\)/);
 assert.match(core, /home-avatar-pseudo-disabled/);
 assert.match(core, /home-avatar-border-image-disabled/);
-assert.doesNotMatch(moduleSource, /syncAvatarCompatibility|avatarCompatibility|setAvatarCompatibility/, 'The fixed TLE avatar style has no legacy compatibility toggle runtime');
+assert.doesNotMatch(moduleSource, /syncAvatarCompatibility|avatarCompatibility|setAvatarCompatibility|hdAvatarEngine/, 'The fixed TLE avatar style has no retired compatibility toggle or HD-engine lifecycle runtime');
 assert.match(moduleSource, /function renderPagination\(total\)/, 'Gallery pagination remains part of the preview runtime');
 assert.match(moduleSource, /function renderGallery\(groups, source, error\)/, 'Gallery rendering remains part of the preview runtime');
 new vm.Script(moduleSource, { filename: 'development/gallery-home/gallery-home.js' });

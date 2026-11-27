@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.288
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.289
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3454,6 +3454,7 @@ body[data-tle-nav] #top-settings-holder#top-settings-holder > .drawer > .drawer-
   box-sizing: border-box;
 }
 #${ID.nav} > button {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3615,7 +3616,7 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   text-align: start;
 }
 #${ID.chatToolsPanel}[hidden] { display: none !important; }
-#${ID.chatToolsPanel}[data-page="recent"] { height: min(80dvh, 700px); }
+#${ID.chatToolsPanel}[data-page="recent"],
 #${ID.chatToolsPanel}[data-page="plans"] { height: min(80dvh, 700px); }
 #${ID.chatToolsPanel} [hidden] { display: none !important; }
 #${ID.chatToolsPanel} .tle-chat-tools-header {
@@ -4864,7 +4865,6 @@ body.tle-global-search-open { overflow: hidden !important; }
       #${ID.panel} .tle-version-meta { display: flex; flex-wrap: wrap; gap: 6px 9px; align-items: center; min-width: 0; margin-top: 3px; }
       #${ID.panel} .tle-version-meta [hidden] { display: none !important; }
       #${ID.panel} .tle-version-meta > button { white-space: nowrap; }
-      #${ID.nav} > button { position: relative; }
       #${ID.nav} .tle-engine-update-dot { position: absolute; top: 2px; right: 2px; width: 7px; height: 7px; border-radius: 50%; background: #63ae84; pointer-events: none; box-shadow: 0 0 0 1px var(--SmartThemeBlurTintColor, #282027); }
       #${ID.nav} .tle-engine-update-dot[hidden] { display: none !important; }
       #${ID.panel} .tle-section {
@@ -5227,7 +5227,6 @@ body.tle-global-search-open { overflow: hidden !important; }
     align-self: start;
     height: auto;
     min-height: 90px;
-    min-width: 0;
   }
 
   body:not(.charListGrid) #right-nav-panel #rm_print_characters_block > .character_select > .avatar {
@@ -5591,6 +5590,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           overflow: hidden;
         }
         #${ID.presetSettings}, #${ID.presetPrompts} {
+          display: block;
           min-width: 0;
           min-height: 0;
           width: 100%;
@@ -5600,10 +5600,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           overflow-y: auto;
           overscroll-behavior: contain;
           scrollbar-gutter: stable;
-        }
-        #${ID.presetSettings},
-        #${ID.presetPrompts} {
-          display: block;
         }
         #${ID.presetPrompts} > .range-block { width: 100%; min-width: 0; }
         #${ID.presetPrompts} #completion_prompt_manager { width: 100%; min-width: 0; }
@@ -11381,14 +11377,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.288 · 记录预览头像与渐变边界同步</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.289 · 记录预览头像与渐变边界同步</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.288</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.289</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -18037,7 +18033,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.288';
+    const VERSION = '0.3.289';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -18092,7 +18088,6 @@ function createTLEGalleryHome(window, document) {
         requestController: null,
         generation: 0,
         eventCleanups: [],
-        expandedAll: false,
         page: 'gallery',
         galleryPage: 0,
         galleryGroups: [],
@@ -20053,7 +20048,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.288',
+    version: '0.3.289',
     ready: false,
     destroy,
     state,
@@ -20511,5 +20506,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.288 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.289 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

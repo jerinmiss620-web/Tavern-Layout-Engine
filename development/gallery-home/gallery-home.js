@@ -2,7 +2,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.288';
+    const VERSION = '0.3.289';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -57,7 +57,6 @@ function createTLEGalleryHome(window, document) {
         requestController: null,
         generation: 0,
         eventCleanups: [],
-        expandedAll: false,
         page: 'gallery',
         galleryPage: 0,
         galleryGroups: [],
