@@ -5,19 +5,16 @@ import vm from 'node:vm';
 const plan = JSON.parse(readFileSync('release-plan.json', 'utf8'));
 const stableManifest = JSON.parse(readFileSync('latest.json', 'utf8'));
 const hasWorkingSource = existsSync('development/organizer/TLE.js');
-const testManifest = hasWorkingSource
-  ? JSON.parse(readFileSync('channels/test.json', 'utf8'))
-  : null;
 const sourcePath = hasWorkingSource
   ? 'development/organizer/TLE.js'
   : `releases/v${plan.core}/TLE.js`;
 const source = readFileSync(sourcePath, 'utf8');
 const readme = readFileSync('README.md', 'utf8');
 const actualVersion = source.match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
-const expectedVersion = hasWorkingSource ? testManifest.latest_version : plan.core;
+const expectedVersion = plan.core;
 
 assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
-assert.equal(actualVersion, expectedVersion, 'test/development source must match its channel version');
+assert.equal(actualVersion, expectedVersion, 'development source must match the stable release plan');
 new vm.Script(source, { filename: sourcePath });
 
 const managerStart = source.indexOf('function openQuickGroupManager(');

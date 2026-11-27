@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const manifest = JSON.parse(read('channels/test.json'));
+const manifest = JSON.parse(read('latest.json'));
 const source = read(manifest.release.source_path);
-const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
+const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
-assert.equal(installer.content, source, 'the test installer must match the current pinned test source');
+assert.equal(installer.content, source, 'the stable backup installer must match the current stable source');
 assert.ok(source.includes("const NAV_MODE_STORAGE_KEY = 'tle.navigationMode';"));
 assert.doesNotMatch(source, /INFO_ENABLED_KEY|getInfoEnabled|infoEnabled|saveInfoEnabled|info-enabled/,
   'the standalone information-station master switch must be removed');

@@ -4,12 +4,12 @@ import vm from 'node:vm';
 import { JSDOM } from 'jsdom';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const manifest = JSON.parse(read('channels/test.json'));
+const manifest = JSON.parse(read('latest.json'));
 const moduleSource = read('development/avatar-engine/avatar-engine.js');
 const core = read(manifest.release.source_path);
 
-assert.match(manifest.release.version, /^\d+\.\d+\.\d+$/, 'Test-channel Core version must be valid semantic versioning');
-assert.ok(core.includes(`version: '${manifest.release.version}',`), 'Core API version must match the test-channel manifest');
+assert.match(manifest.release.version, /^\d+\.\d+\.\d+$/, 'Stable Core version must be valid semantic versioning');
+assert.ok(core.includes(`version: '${manifest.release.version}',`), 'Core API version must match the stable manifest');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained avatar engine byte-for-byte');
 assert.match(core, /hdAvatarEngine = createTLEHDAvatarEngine\(SCRIPT_WIN, HOST_WIN, HOST_DOC\)/);
 assert.match(core, /hdAvatarEngine\?\.stop\?\.\(\)/);

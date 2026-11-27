@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const channel = JSON.parse(readFileSync('channels/test.json', 'utf8'));
-const source = readFileSync(channel.release.source_path, 'utf8');
+const manifest = JSON.parse(readFileSync('latest.json', 'utf8'));
+const source = readFileSync(manifest.release.source_path, 'utf8');
 
 const fieldCss = source.match(/input\.tle-search-field\[type="search"\]\s*\{([^}]*)\}/)?.[1];
 assert.equal(fieldCss, undefined, 'Search inputs inherit native sizing and appearance; do not force height, margin or box sizing');

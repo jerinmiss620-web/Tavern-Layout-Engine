@@ -3,11 +3,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const manifest = JSON.parse(read('channels/test.json'));
+const manifest = JSON.parse(read('latest.json'));
 const source = read(manifest.release.source_path);
-const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
+const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
-assert.equal(installer.content, source, 'the disabled test installer must match the pinned source');
+assert.equal(installer.content, source, 'the disabled stable backup installer must match the pinned source');
 new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
 
 assert.match(source, /const resourceTab = quickButton\('资源整理', \(\) => switchOrganizerView\('resources'\), 'menu_button tle-organizer-tab'\);/);

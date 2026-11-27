@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.264 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.289 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -23,13 +23,21 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.264/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.289/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：Core v0.3.264 的 Node 24 全量回归、正式清单/不可变源码远程核验及下载字节更新链重放均通过；配套侠全局世界书完整清单、宿主启动默认方案恢复、无横线紧凑预览和五个原生更新按钮均有独立回归覆盖。不同主题和宿主的完整实机视觉矩阵仍未全部覆盖。
+- [实际验证范围](VALIDATION.md)：Core v0.3.289 的 Node 24 全量回归、头像引擎、角色记录、整理侠、配套侠及 CSS 结构专项回归已通过；正式清单与不可变源码远端核验、下载字节更新链重放将在正式分支合并后记录。不同主题和宿主的完整实机视觉矩阵仍未全部覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
+
+### Core v0.3.289 · 记录预览与主样式历史补丁清理
+
+- 删除记录预览未使用的 `expandedAll` 状态，不改变分页、显示范围或聊天数量逻辑。
+- 合并等价 CSS 规则，清理导航按钮、聊天工具页、预设面板及角色列表中的历史覆盖声明。
+- 移动端记录详情资料区内部间距保持 5px；头像列宽 104px、列间距 8px。
+- 保留记录详情头像统一圆角、桃mini 4.5.14 高清头像引擎、配套侠完整方案与整理侠资源管理功能。
+- Node 24 全量回归及测试通道固定源码核验通过；Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
 
 ### Core v0.3.264 · 配套侠修复与紧凑预览、更新按钮原生化
 

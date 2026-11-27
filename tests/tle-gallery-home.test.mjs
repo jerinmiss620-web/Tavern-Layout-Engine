@@ -3,13 +3,13 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const manifest = JSON.parse(read('channels/test.json'));
+const manifest = JSON.parse(read('latest.json'));
 const version = manifest.release.version;
 const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.289');
+assert.match(version, /^\d+\.\d+\.\d+$/);
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(core, /#\$\{ID\.nav\} > button \{\s*position: relative;\s*display: flex;/,
   'nav button positioning must live in the base rule');
@@ -33,7 +33,7 @@ assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery sta
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.ok(core.includes(`version: '${version}',`), 'Core API version must match the test-channel manifest');
+assert.ok(core.includes(`version: '${version}',`), 'Core API version must match the stable manifest');
 assert.match(core, /const VERSION = '4\.5\.14'/, 'The integrated HD avatar engine is updated');
 assert.match(core, /const SELECTOR = '[^']*\.freesia-gallery-avatar img, \.freesia-gallery-avatar-frame img, \.freesia-gallery-detail-avatar img';/, 'The HD engine targets both the current isolated gallery avatar frame and the legacy wrapper');
 

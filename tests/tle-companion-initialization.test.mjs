@@ -3,14 +3,14 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const manifest = JSON.parse(read('channels/test.json'));
+const manifest = JSON.parse(read('latest.json'));
 const source = read('development/organizer/TLE.js');
-const previous = read('releases/v0.3.260/TLE.js');
+const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
 const release = read(manifest.release.source_path);
-const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-TEST-import.json`));
+const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
-assert.equal(release, source, 'the pinned test source must match the working source');
-assert.equal(installer.content, source, 'the disabled import package must contain the exact test source');
+assert.equal(release, source, 'the pinned stable source must match the working source');
+assert.equal(installer.content, source, 'the disabled stable backup package must contain the exact stable source');
 new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
 
 function section(text, startMarker, endMarker) {
