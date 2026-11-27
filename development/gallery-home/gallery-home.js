@@ -2,7 +2,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.281';
+    const VERSION = '0.3.282';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -78,8 +78,8 @@ function createTLEGalleryHome(window, document) {
 
     const CSS = [
         "#chat .welcomePanel." + ACTIVE_CLASS + " .welcomeRecent > .recentChatList:not(." + GRID_CLASS + ") { display: none !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: 16px; border-radius: var(--freesia-gallery-card-radius) !important; overflow: hidden; cursor: default; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: auto; align-items: start; align-content: start; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; align-self: start; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: 16px; border-radius: var(--freesia-gallery-card-radius) !important; overflow: hidden; cursor: default; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; border-radius: inherit !important; cursor: pointer; outline-offset: 3px; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0; min-height: 0; margin: 0; overflow: hidden; box-sizing: border-box; border-radius: var(--freesia-gallery-avatar-radius, inherit) !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: var(--freesia-gallery-avatar-radius, inherit) !important; }",

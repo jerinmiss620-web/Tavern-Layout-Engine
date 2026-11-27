@@ -9,16 +9,16 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.281');
+assert.equal(version, '0.3.282');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.281'/);
+assert.match(moduleSource, /const VERSION = '0.3.282'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.281'/);
+assert.match(core, /version: '0\.3\.282'/);
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
@@ -73,6 +73,9 @@ assert.ok(moduleSource.includes(".freesia-gallery-title-group > .welcomeHeaderVe
 assert.match(moduleSource, /createElement\('article', 'freesia-gallery-card'\)/, "Gallery cards use the TLE-owned outer card, not native recentChat styling");
 assert.doesNotMatch(moduleSource, /createElement\('article', 'recentChat freesia-gallery-card'\)/);
 assert.match(moduleSource, /aspect-ratio: 2 \/ 3/, "Record preview cards use a 2:3 portrait ratio");
+assert.match(moduleSource, /grid-auto-rows: auto; align-items: start; align-content: start;/, "Grid rows must size to card content instead of stretching to fill the grid container");
+assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*aspect-ratio: 2 \/ 3; align-self: start;/, "Each card keeps its 2:3 aspect ratio without grid-item stretching");
+assert.doesNotMatch(moduleSource, /grid-auto-rows: 1fr|align-items: stretch/, "Gallery grid must not force portrait cards into equal stretched row heights");
 assert.match(moduleSource, /const overlay = createElement\('div', 'freesia-gallery-card-overlay'\)/);
 assert.match(moduleSource, /function syncGalleryOverlayGeometry\(\)/, "The gradient geometry is synchronized from the rendered avatar image");
 assert.match(moduleSource, /imageRect\.left - cardRect\.left/);
