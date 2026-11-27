@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const manifest = JSON.parse(read('channels/mask-hero-test.json'));
@@ -23,6 +24,7 @@ assert.equal(sha256(core), manifest.release.sha256, 'the test Core SHA-256 must 
 assert.equal(Buffer.byteLength(core, 'utf8'), manifest.release.size_bytes, 'the test Core byte count must match its manifest');
 assert.match(manifest.release.source_url, new RegExp('/' + manifest.release.source_commit + '/releases/v0\\.3\\.295/TLE\\.js$'));
 assert.match(loader, /const CHANNEL = 'mask-hero-test';/);
+new vm.Script(loader, { filename: 'TLE Mask Hero Test Loader' });
 assert.match(manifest.loader_release.source_url, new RegExp('/' + manifest.loader_release.source_commit + '/loader/TLE-Mask-Hero-Test-Loader-0\\.3\\.0\\.js$'));
 assert.ok(loader.includes('channels/mask-hero-test.json'));
 assert.ok(loader.includes('tle.loader.maskHeroTest.lastKnownGood.v1'));
