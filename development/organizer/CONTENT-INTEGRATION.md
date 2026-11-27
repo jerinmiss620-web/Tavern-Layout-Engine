@@ -1,6 +1,8 @@
-# 整理侠内容处理整合 · v0.3.236 TEST
+# 整理侠内容处理整合 · 历史架构记录
 
-## 基线与结构
+> 本文保留 v0.3.236–v0.3.246 测试阶段的整合设计与兼容性记录，不是当前发布说明或开发基线。当前正式基线为 Core v0.3.289、Loader v0.3.6、Bootstrap v1.0.6；新开发从正式 `main` 分支开始。主分支 `channels/test.json` 是 v0.3.204 旧 Test Loader 兼容清单，不是当前测试入口。
+
+## 原始测试分支基线（历史记录）
 
 - TLE 开发分支：`feature/organizer-nav-worldbooks-20261125`；开始时远程 HEAD 为 `bb2dba27d06c39f28617af1ba386381aca1d58d5`，测试 Core v0.3.233。
 - Global Batch Replace v1.1.0：`6b4ab84`。保留 `batch-engine.js`、`batch-adapters.js` 和 `storage.js` 的原始内容；完整 TT 原生服务和 Node 服务端沿用原项目，在以下边界增补接口。
@@ -18,7 +20,7 @@
 
 ## 使用与安装
 
-测试通道使用 `channels/test.json`；手动备用安装包为 `releases/v0.3.246/TLE-0.3.246-TEST-import.json`（默认禁用）。只启用一条 TLE 加载链，避免独立 Core 与 Test Loader 重复执行。
+历史测试阶段曾使用分支内 `channels/test.json` 与 v0.3.246 手动备用导入包（默认禁用）。这些入口仅供历史复现；当前新开发须创建独立测试分支与独立 Test Loader。任何时候只启用一条 TLE 加载链，避免独立 Core 与 Loader 重复执行。
 
 PC SillyTavern：已安装且能运行的原版 Global Batch Replace v1.1.0 服务端可直接使用，更新 Core 即可查找、预览、替换、导出备份及整份恢复。v0.3.234 错误地要求原版没有返回的扫描指纹，导致结果被拦截；本版已修复，不必为了查找更换服务端。
 
