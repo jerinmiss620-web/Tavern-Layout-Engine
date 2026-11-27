@@ -3005,7 +3005,7 @@ var TLEBatchLibrary = (() => {
       maskHero: {
         observer: null, frame: 0, textNodes: new Map(), nameElements: new Set(),
         floorElements: new Map(), imageElements: new Map(), objectUrls: new Map(),
-        appliedConfig: null, appliedChatKey: '',
+        listeners: [], appliedConfig: null, appliedChatKey: '',
       },
     },
     floorZeroClearanceChat: null,
@@ -15899,10 +15899,34 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     });
   }
 
+  function maskHeroBindChatEvents() {
+    const runtime = state.chatTools.maskHero;
+    if (runtime.listeners.length) return;
+    const context = HOST_WIN.SillyTavern?.getContext?.();
+    const source = context?.eventSource;
+    const types = context?.eventTypes || context?.event_types;
+    if (!source || typeof source.on !== 'function' || !types) return;
+    for (const key of ['CHAT_CHANGED', 'CHAT_LOADED']) {
+      const type = types[key];
+      if (typeof type !== 'string' || !type) continue;
+      const handler = () => {
+        if (!runtime.appliedConfig) return;
+        const snapshot = getActiveChatActionContext();
+        if (!snapshot || snapshot.chatKey !== runtime.appliedChatKey) {
+          maskHeroClearEffects();
+          maskHeroSetStatus('聊天已切换，原聊天的打码效果已自动卸除。');
+        }
+      };
+      source.on(type, handler);
+      runtime.listeners.push({ source, type, handler });
+    }
+  }
+
   function maskHeroObserveChat() {
     const runtime = state.chatTools.maskHero;
     runtime.observer?.disconnect();
     runtime.observer = null;
+    maskHeroBindChatEvents();
     const chat = HOST_DOC.getElementById('chat');
     if (!chat) return;
     runtime.observer = new HOST_WIN.MutationObserver(() => maskHeroScheduleProcess());
@@ -15916,6 +15940,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const runtime = state.chatTools.maskHero;
     runtime.observer?.disconnect();
     runtime.observer = null;
+    for (const listener of runtime.listeners.splice(0)) {
+      try {
+        if (typeof listener.source.removeListener === 'function') listener.source.removeListener(listener.type, listener.handler);
+        else listener.source.off?.(listener.type, listener.handler);
+      } catch {}
+    }
     if (runtime.frame) HOST_WIN.cancelAnimationFrame(runtime.frame);
     runtime.frame = 0;
     for (const [node, record] of runtime.textNodes) {
