@@ -15665,6 +15665,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   function maskHeroLoadSelectedPlan(planId) {
+    maskHeroRuntime.applyGeneration += 1;
     maskHeroRuntime.selectedPlanId = String(planId || '');
     const plan = maskHeroRuntime.plans.find(item => item.id === maskHeroRuntime.selectedPlanId);
     if (plan) {
@@ -15760,6 +15761,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const file = input?.files?.[0];
     if (!['user', 'char'].includes(type) || !file) return;
     const selectedPlanId = maskHeroRuntime.selectedPlanId;
+    const draftGeneration = state.chatTools.maskHero.applyGeneration;
     maskHeroReadDraftFromUI();
     if (!/^image\/(png|jpeg|webp|gif|avif)$/i.test(file.type || '')) {
       maskHeroSetStatus('头像仅支持 PNG、JPEG、WebP、GIF 或 AVIF 图片。');
@@ -15774,7 +15776,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     try {
       const id = 'mask-' + (HOST_WIN.crypto?.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2)));
       await maskHeroStoreAsset({ id, blob: file.slice(0, file.size, file.type), type: file.type, name: file.name || 'avatar' });
-      if (!maskHeroEnabled || selectedPlanId !== maskHeroRuntime.selectedPlanId) {
+      if (!maskHeroEnabled || selectedPlanId !== maskHeroRuntime.selectedPlanId ||
+          draftGeneration !== state.chatTools.maskHero.applyGeneration) {
         await maskHeroDeleteAsset(id);
         return;
       }
@@ -16065,6 +16068,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   async function maskHeroDeleteSelectedPlan() {
+    maskHeroRuntime.applyGeneration += 1;
     const id = maskHeroRuntime.selectedPlanId;
     if (!id) throw new Error('请先选择要删除的方案。');
     const plan = maskHeroRuntime.plans.find(item => item.id === id);
@@ -16079,6 +16083,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   function maskHeroAddRule(type) {
+    maskHeroRuntime.applyGeneration += 1;
     maskHeroReadDraftFromUI();
     if (type === 'floor') maskHeroRuntime.draft.floorRules.push({ floor: '', replace: '' });
     if (type === 'text') maskHeroRuntime.draft.textRules.push({ find: '', replace: '', regex: false, caseInsensitive: false });
@@ -16086,6 +16091,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   }
 
   function maskHeroRemoveRule(type, index) {
+    maskHeroRuntime.applyGeneration += 1;
     maskHeroReadDraftFromUI();
     if (type === 'floor') maskHeroRuntime.draft.floorRules.splice(index, 1);
     if (type === 'text') maskHeroRuntime.draft.textRules.splice(index, 1);
