@@ -15,6 +15,8 @@ test('Companion plan preview is structured into labeled fields, not a prose summ
     assert.match(helper, /field\.id === 'worldInfo'/);
     assert.match(helper, /field\.id === 'promptEntries'/);
     assert.match(helper, /byRole\?\.\[role\?\.key\]/);
+    assert.match(helper, /field\.id === 'promptEntries'/);
+    assert.match(helper, /byRole\?\.\[role\?\.key\]/);
     assert.match(helper, /空方案/);
     assert.doesNotMatch(source, /companionPlanDetails\(/);
     assert.equal((source.match(/\.append\(companionPlanPreview\(plan\)\)/g) || []).length, 2,
