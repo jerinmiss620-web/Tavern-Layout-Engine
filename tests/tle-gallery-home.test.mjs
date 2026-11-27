@@ -18,7 +18,7 @@ assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery sta
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);\s*galleryHome\.setAvatarCompatibility/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.275'/);
+assert.match(core, /version: '0\.3\.278'/);
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
