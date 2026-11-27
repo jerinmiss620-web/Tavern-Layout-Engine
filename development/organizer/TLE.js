@@ -13798,7 +13798,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         manager.render?.(false);
         companionRuntime.promptOverlay = null;
         companionPromptClearActive(overlay);
-        if (companionPromptPersistCurrentSettings(manager, context)) return;
+        companionPromptPersistCurrentSettings(manager, context);
+        return;
       }
       let snapshot;
       try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
