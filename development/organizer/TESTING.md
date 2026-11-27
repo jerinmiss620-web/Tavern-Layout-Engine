@@ -1,0 +1,90 @@
+# Organizer branch test instructions
+
+Development branch: `feature/organizer-nav-worldbooks-20261125`
+
+Current test Core: `v0.3.263`
+
+## Import once
+
+Download the [Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json).
+
+The installer is disabled by default. It reads the test manifest from this development branch and uses a separate IndexedDB database and separate cache keys. It does not read or modify the stable `latest.json`, Bootstrap manifest, or stable Loader cache.
+
+## Switch from stable to test
+
+1. In Tavern Helper, disable the currently enabled **TLE Permanent Bootstrap 1.0.6**. Do not delete it.
+2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
+3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
+4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
+5. Confirm the native prompt to install **TLE Core v0.3.263**.
+6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.263**.
+
+Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
+
+## Test the current build
+
+### Companion plan startup restoration (v0.3.261)
+
+- In TT, enable the native **自动加载上次聊天** setting, fully exit and reopen TT, and let it restore the previous character chat without manually opening or switching characters.
+- Confirm the restored character's default companion plan is applied once, including the saved global World Info selection and UI theme.
+- Confirm a same-page TLE Core update/reload does **not** reapply the default or overwrite settings manually changed after startup.
+- Disable and re-enable TLE in the same host page; confirm it is not treated as a new host-page startup.
+- Switch to another character and confirm that character's default still applies; a character without a default must leave the current settings unchanged.
+- With day/night scheduling enabled, confirm the current time-slot plan takes priority on a fresh host-page startup, while an unexpired manual hold remains in control.
+- Repeat in ST and TT where available. Automated regression checks do not replace real-host acceptance.
+
+
+- Confirm the original **全局搜索** button is restored in the workspace header in every navigation mode. It opens its own centered modal and retains the original search index, search field, result navigation, and clear behavior.
+- Confirm the global-search modal contains a compact **整理侠** jump entry. Activating it closes the search modal and opens the Organizer drawer; it must not switch the search modal into a resource-management tab.
+- Confirm this candidate does not merge search and replacement workflows; that follow-up remains a separate Codex integration task.
+- Confirm **整理侠** is the tenth `.drawer` directly below **角色管理**, with its own `.drawer-toggle` and `.drawer-content`; it opens/closes like a native drawer, not a centered popup. Its resource filter input and manager state are independent from global search.
+- Confirm the Organizer's `.drawer-content` is the direct content root: the heading, resource filter and resource list are direct children; there is no nested `.tle-search-surface` wrapper.
+- Click the Organizer icon, then the navigation text label to open and close the native drawer. Each action must add/remove `openDrawer / closedDrawer` and update `aria-expanded` correctly; the Organizer heading has no duplicate X close button.
+- From the global-search modal, click **整理侠**. The search modal should close and the same Organizer `.drawer-content` should open; verify this works on both desktop and mobile.
+- Confirm the tenth icon participates in icon-only, icon+label, compact two-column, and mobile hamburger navigation modes. On mobile, the rail folds away while the opened drawer remains visible.
+- Open the Organizer's **世界书** category. Verify quick filters for **全部 / 已绑定 / 未绑定 / 疑似孤儿 / 全局启用** and their counts. Primary/extra character bindings define **已绑定**; global enablement is independent and may overlap either bound state.
+- Verify a globally enabled book with no character binding appears in both **未绑定** and **全局启用**. Verify stale extra-book references are marked **疑似孤儿** (or **含遗留关联** when the book also has a current character binding).
+- Use **扫描绑定** only when you want to load the remaining character-card metadata. It is opt-in and may increase session memory use.
+- Test grouping, searching, selection, and batch deletion only on disposable test resources first. Verify native Tavern behavior and the remaining bindings after each deletion.
+- On PC (viewport wider than 1000px), confirm the Organizer has three columns: **资源类型** at left, **分组目录** in the middle, and **资源列表** at right. Selecting a resource type refreshes the middle group list; selecting **未分组** or a named group filters only the right-hand list.
+- Confirm the resource search field is inside the right-hand resource column; worldbook status filters, target-group selection and batch actions remain in that column. The left category list, middle group list and right resource list must scroll independently without horizontal overflow.
+- At 1000px and narrower, confirm the three pane wrappers flatten back into the original single-column mobile flow; category/group navigation remains available and no desktop sidebars consume the resource list height.
+- On mobile, confirm the Organizer title and short description stay on one line; the description reads only **资源分组 · 批量管理**.
+- Confirm category tabs and group filters remain horizontally swipeable and show a persistent **3px** scroll indicator; no 15px native scrollbar is reserved.
+- Confirm the header has no redundant close X. The **同步 / 导入 / 导出** controls are always visible together at the right side of the title row, regardless of the currently selected resource category. All three are native `menu_button` controls: verify their background, border, radius, padding, font, text/icon color and hover/focus states come from the active SillyTavern theme, with no TLE-authored button surface.
+- Click **同步** from a non-theme category. Confirm it reads the existing Theme Manager groups, asks for confirmation, changes only TLE's UI theme groups/assignments, then switches to the UI theme category. Confirm preset, worldbook, character, and other group data are unchanged.
+- Confirm the target-group selector shares a row with **管理分组 / 自动分组**.
+- Confirm batch actions use a compact **three-column** layout; buttons are 30px high with no default margins or oversized row gaps, and the resource list expands into the remaining panel height.
+- On desktop, confirm the original three-column workspace remains unchanged and pane tint uses `rgb(from var(--SmartThemeQuoteColor) r g b / .12)`.
+- Check PC and mobile layouts separately, then repeat in ST and TT as applicable.
+
+### Organizer layout refinements (v0.3.263)
+
+- In the Companion Plans tab, confirm each plan's name and status badges remain on the left, with **设为默认 / 取消默认** and **应用** aligned on the right of the same title row.
+- Confirm the plan configuration summary is displayed below the title row; long names and badges must not overlap the action buttons.
+- In Organizer, confirm the header order is **整理侠 → 资源整理 / 查找替换 → 同步 / 导入 / 导出**.
+- Open **查找替换** at 320, 375, 402, and 768px widths. Confirm search and replacement inputs each have a clear row; scope and backup controls wrap only when necessary.
+- Confirm the controls area has no independent vertical scrollbar. The result list occupies the remaining height and owns its scrolling.
+- Confirm advanced rules remain collapsed initially and still expose combinations, extra rules, and JSON/YAML paths when expanded.
+- Repeat in ST and TT where available; source-level tests do not replace real-host visual acceptance.
+
+### Companion preview and native update buttons (v0.3.263)
+
+- Open the Companion Plans list. Confirm connection profile, API source, model, preset, reasoning format, UI theme and saved World Info are displayed as separate labeled fields, not one continuous prose paragraph.
+- Confirm the preview uses a compact two-column layout where space permits; long values wrap without horizontal overflow. The World Info item spans the full preview width.
+- Open **配套侠 · 方案管理** and confirm its plan previews use the same structured layout as the compact list.
+- Open TLE → **版本与更新**. Confirm all five update-related actions (Core install, Core check, Loader adoption, Loader check, Loader install) visibly inherit the host's native `menu_button` appearance.
+- Confirm hidden/disabled states, dynamic button labels and click handlers remain unchanged.
+- Repeat in ST and TT with the active themes; verify narrow mobile widths and both light/dark themes.
+
+## Return to stable
+
+1. Disable **TLE Organizer Branch Test Loader 0.3.0**.
+2. Re-enable the original **TLE Permanent Bootstrap 1.0.6**.
+3. Fully refresh the host page.
+
+The stable Bootstrap/Loader uses its own independent Last Known Good cache and should restore the stable Core (currently v0.3.239). Verify TLE → **版本与更新** reports the Stable channel and Core v0.3.259. Keep the test Loader imported but disabled as a backup; do not delete either script.
+
+## Updating the branch build
+
+The test Loader is imported only once. When the development Core changes, the branch maintainer publishes a new incremented test Core version and updates the branch's `channels/test.json`. Then open TLE → **版本与更新** → **检查更新** → install the offered Test build. The stable manifest and stable release remain unchanged.

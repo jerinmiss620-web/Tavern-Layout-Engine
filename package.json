@@ -8,7 +8,16 @@
     "verify:remote": "node scripts/release.mjs verify --remote"
   },
   "devDependencies": {
+    "archiver": "^7.0.1",
+    "crc": "^4.3.2",
+    "esbuild": "^0.27.0",
+    "express": "^4.22.1",
     "fake-indexeddb": "6.2.8",
-    "jsdom": "31.0.1"
+    "jsdom": "31.0.1",
+    "playwright-core": "1.65.1",
+    "png-chunk-text": "^1.0.0",
+    "png-chunks-extract": "^1.0.0",
+    "yaml": "^2.8.3",
+    "yauzl": "^3.2.1"
   }
 }

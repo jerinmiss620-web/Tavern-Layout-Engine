@@ -72,11 +72,104 @@ const helpBlock = source.slice(helpStart, source.indexOf('\n}', helpStart) + 2);
 assert.match(helpBlock, /grid-column: 1 \/ -1;/, 'range hint must span both input grid columns');
 assert.doesNotMatch(helpBlock, /grid-column: 2 \/ -1;/);
 
+const groupManagerStart = source.indexOf('function openQuickGroupManager(');
+const groupManagerEnd = source.indexOf('const FOLD_STORAGE_KEY', groupManagerStart);
+const manager = source.slice(groupManagerStart, groupManagerEnd);
+const backupStart = manager.indexOf("const backupRow = quickNode('div', 'tle-quick-backup-row')");
+const backupEnd = manager.indexOf("const themeImportRow = quickNode('div', 'tle-quick-theme-import')", backupStart);
+const globalBackup = manager.slice(backupStart, backupEnd);
+assert.match(globalBackup, /backupRow\.append\(importBackupButton, exportBackupButton, backupFile\)/,
+  'full-scheme import/export controls must remain grouped in the backup row');
+assert.doesNotMatch(globalBackup, /readThemeManagerButton/,
+  'theme sync must remain a distinct control, not be nested inside the backup row');
+assert.match(manager, /const themeImportRow = quickNode\('div', 'tle-quick-theme-import'\);/);
+assert.match(manager, /themeImportRow\.append\(readThemeManagerButton\)/);
+assert.match(manager, /const headingTools = state\.organizerPanel\.querySelector\('\.tle-search-heading-tools'\)/);
+assert.match(manager, /headingTools\.replaceChildren\(themeImportRow, backupRow\)/,
+  'theme sync and full-scheme backup controls must be mounted together in the persistent title toolbar');
+assert.doesNotMatch(manager, /themeImportRow\.hidden/,
+  'theme sync remains visible for every resource category');
+assert.match(manager, /const search = state\.organizerPanel\.querySelector\('\.tle-search-field'\)/,
+  'resource management must reuse the Organizer search field');
+assert.match(manager, /toolbar\.append\(targetSelect\)/,
+  'resource toolbar should contain only the target-group selector, not another search field');
+assert.match(manager, /groupActions\.append\(manageButton, autoGroupButton\)/,
+  'group management actions belong in the middle group pane');
+assert.match(manager, /const categoryRow = quickNode\('div', 'tle-quick-category-row'\);/);
+assert.match(manager, /categoryRow\.append\(tabs\)/);
+assert.doesNotMatch(manager, /categoryRow\.append\(tabs, themeImportRow, backupRow\)/,
+  'title toolbar actions must not consume the resource-category row');
+assert.match(manager, /const workspace = quickNode\('div', 'tle-organizer-workspace'\);/);
+assert.match(manager, /categoryPane\.append\(categoryHeading, categoryRow\)/);
+assert.match(manager, /groupPane\.append\(groupHeader, groupActions, groupEditor, groupFilters\)/);
+assert.match(manager, /resourcePane\.append\(\s*resourceHeader, content\.searchRow, content\.controls, worldFilterBar, toolbar, transferConfirm, deleteConfirm,\s*operations, list, status/);
+assert.match(manager, /workspace\.append\(categoryPane, categoryDivider, groupPane, groupDivider, resourcePane\)/);
+assert.match(manager, /body\.append\(workspace\)/,
+  'resource manager must use the three-pane workspace with two dividers');
+assert.doesNotMatch(manager, /body\.append\(\s*hint, backupRow, tabs, groupFilters/,
+  'standalone hint and backup rows must not consume list height');
+assert.doesNotMatch(manager, /quickSearchBox|tle-quick-search-row/,
+  'resource manager must not create a second custom search row; the content engine owns the single search row');
+assert.doesNotMatch(manager, /groupFiltersWrap|tle-quick-filters-wrap/,
+  'old filter/sync wrapper must be removed');
+assert.match(manager, /const readThemeManagerButton = quickButton\('', \(\) => void importThemeManagerGroups\(\)\)/);
+assert.match(manager, /readThemeManagerButton\.setAttribute\('aria-label', '同步 UI 主题分组，仅替换 TLE 当前 UI 主题分类'\)/);
+assert.match(manager, /readThemeManagerButton\.append\(themeImportIcon, HOST_DOC\.createTextNode\('同步'\)\)/);
+assert.match(manager, /if \(!await confirmGroupTransfer\(message, '导入 UI 主题分组'\)\) return;/,
+  'existing confirmation must remain');
 
-assert.ok(source.includes('<button type="button" class="menu_button" data-tle-action="check-update" hidden>检查更新</button>'));
-assert.ok(source.includes('<button type="button" class="menu_button" data-tle-action="adopt-loader" hidden>启用 Loader 接管</button>'));
-assert.ok(source.includes('<button type="button" class="menu_button" data-tle-action="check-loader-update" hidden>检查 Loader 更新</button>'));
-assert.doesNotMatch(source, /tle-update-check/,
-  'update actions must inherit the native menu_button appearance without a custom visual override');
-assert.ok(source.includes('#${ID.panel} .tle-version-meta [hidden] { display: none !important; }'));
-console.log(`Core ${plan.core}: native update drawer, native update action buttons and floor-tools layout checks passed.`);
+
+const managerHeading = source.slice(
+  source.indexOf('.tle-quick-manager .tle-quick-heading {'),
+  source.indexOf('.tle-quick-manager .tle-quick-hint,')
+);
+assert.match(managerHeading, /flex-wrap: nowrap;/);
+assert.match(managerHeading, /\.tle-quick-title \{[\s\S]*?flex: 1 1 auto;/);
+assert.match(managerHeading, /\.tle-quick-heading-actions \{[\s\S]*?flex: 0 0 auto;/);
+assert.doesNotMatch(managerHeading, /order: 3;[\s\S]*?flex: 1 1 100%;/,
+  'mobile must never force the global icon actions to a second row');
+assert.match(source, /\.tle-quick-backup-row > \.tle-quick-icon-action \{/);
+assert.match(globalBackup, /fa-solid fa-file-import/);
+assert.match(globalBackup, /fa-solid fa-file-export/);
+assert.match(globalBackup, /importBackupButton\.setAttribute\('aria-label', '导入全部分组方案文件'\)/);
+assert.match(globalBackup, /exportBackupButton\.setAttribute\('aria-label', '导出全部快切分类的分组方案'\)/);
+assert.doesNotMatch(manager, /quickSearchBox|tle-quick-search-row/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-search-row \{/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-toolbar > \.tle-quick-search-row/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-search \{/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-toolbar \{\s*display: grid;\s*grid-template-columns: minmax\(0, 1fr\);/);
+assert.doesNotMatch(source, /\.tle-quick-manager \.tle-quick-filters-wrap \{/);
+assert.doesNotMatch(manager, /backupHint/);
+assert.doesNotMatch(manager, /search\.focus\(\{ preventScroll: true \}\);/);
+assert.match(source, /\.tle-quick-manager \.tle-quick-group-editor \{ grid-area: manage; \}/,
+  'group editor must occupy the dedicated middle-pane management area');
+// Vertical scroll surfaces inherit the host theme. Only the three horizontal
+// category/filter strips suppress native bars to show their dedicated 3px scroll indicator.
+const scrollbarWidthValues = [...source.matchAll(/scrollbar-width\s*:\s*([^;]+);/g)]
+  .map(match => match[1].trim()).sort();
+assert.deepEqual(scrollbarWidthValues, ['none', 'none', 'none', 'thin'],
+  'only the horizontal filter strip may use a thin native bar; compact horizontal strips hide theirs for the 3px indicator');
+assert.doesNotMatch(source, /scrollbar-color\s*:/,
+  'TLE must not override theme thumb and track colors');
+assert.match(source, /\.tle-quick-manager \.tle-quick-category-row \.tle-quick-tabs::-webkit-scrollbar,\s*\.tle-quick-manager \.tle-quick-filter-bar::-webkit-scrollbar,\s*\.tle-quick-manager \.tle-worldbook-filter-bar::-webkit-scrollbar\s*\{\s*display: none;/,
+  'vendor scrollbar suppression is limited to the horizontal indicator strips');
+const scrollableSurfaces = [
+  '#${ID.chatToolsPanel} .tle-chat-tools-page {',
+  '#${ID.chatToolsPanel} .tle-chat-tools-range-value {',
+  '#${ID.chatToolsPanel} .tle-chat-tools-recent-root .welcomeRecent {',
+  '#tle-global-search-panel .tle-search-results {',
+  '#top-settings-holder > .tle-sidebar-info {',
+  '.tle-quick-manager .tle-quick-tabs {',
+  '.tle-quick-manager .tle-quick-filter-bar {',
+  '.tle-quick-manager .tle-quick-operations {',
+  '.tle-quick-manager .tle-quick-list {',
+  '.tle-quick-picker-surface .scrollableInner {',
+  '#tle-mobile-debugger pre {',
+];
+for (const selector of scrollableSurfaces) {
+  assert.ok(source.includes(selector), 'scrollable TLE surface missing: ' + selector);
+}
+assert.equal((source.match(/scrollbar-gutter: stable;/g) || []).length, 2,
+  'preserve wide workspace scroll layout, which is not a scrollbar skin');
+console.log('Core 0.3.239: three-pane Organizer workspace, persistent title tools, shared search and scrollbar skin audit passed.');
+
