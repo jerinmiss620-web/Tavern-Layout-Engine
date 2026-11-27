@@ -14492,7 +14492,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (data.schedules?.[role.key]?.enabled && data.schedules[role.key].nightPlanId === plan.id)
           titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
         copy.append(titleRow);
-        copy.append(companionPlanPreview(plan));
+        copy.append(companionPlanPreview(plan, role));
         const actions = quickNode('div', 'tle-companion-actions');
         const defaultButton = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
           if (companionToggleDefault(plan.id, role)) render();

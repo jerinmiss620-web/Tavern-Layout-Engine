@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const source = readFileSync(new URL('../development/organizer/TLE.js', import.meta.url), 'utf8');
 
 test('Companion plan preview is structured into labeled fields, not a prose summary', () => {
-    const start = source.indexOf('  function companionPlanPreview(plan) {');
+    const start = source.indexOf('  function companionPlanPreview(plan, role) {');
     const end = source.indexOf('  function companionTextButton(', start);
     assert.ok(start >= 0 && end > start, 'structured preview renderer exists');
     const helper = source.slice(start, end);
