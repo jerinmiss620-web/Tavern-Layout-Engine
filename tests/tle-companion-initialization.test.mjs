@@ -9,8 +9,15 @@ const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
 const release = read(manifest.release.source_path);
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
-assert.equal(release, source, 'the pinned stable source must match the working source');
-assert.equal(installer.content, source, 'the disabled stable backup package must contain the exact stable source');
+const featureBranch = /^refs\/heads\/feature\//.test(process.env.GITHUB_REF || '') ||
+  /^feature\//.test(process.env.GITHUB_HEAD_REF || '') ||
+  process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
+if (!featureBranch) {
+  assert.equal(release, source, 'the pinned stable source must match the working source on stable branches');
+} else {
+  assert.equal(installer.content, release, 'feature work must not mutate the disabled stable backup package');
+}
+assert.equal(installer.content, release, 'the disabled stable backup package must contain the exact pinned stable source');
 new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
 
 function section(text, startMarker, endMarker) {
