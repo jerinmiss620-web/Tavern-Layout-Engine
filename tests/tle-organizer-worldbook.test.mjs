@@ -23,10 +23,6 @@ const removeWorldInfoExtraLinks = vm.runInNewContext(
   '(' + extractFunction('removeWorldInfoExtraLinks', '  // Match Theme Manager') + ')'
 );
 
-const syncOrganizerIconState = vm.runInNewContext(
-  '(' + extractFunction('syncOrganizerIconState', '  function setOrganizerDrawerOpen') + ')',
-);
-
 const organizerToggleSandbox = {
   state: {
     organizerPanel: {
@@ -61,9 +57,13 @@ const organizerToggleSandbox = {
   isMobileViewport() { return false; },
   setMobileNavOpen() {},
 };
+organizerToggleSandbox.syncOrganizerIconState = vm.runInNewContext(
+  '(' + extractFunction('syncOrganizerIconState', '  function setOrganizerDrawerOpen') + ')',
+  organizerToggleSandbox,
+);
 const setOrganizerDrawerOpen = vm.runInNewContext(
   '(' + extractFunction('setOrganizerDrawerOpen', '  function toggleOrganizerDrawer') + ')',
-  { ...organizerToggleSandbox, syncOrganizerIconState },
+  organizerToggleSandbox,
 );
 const toggleOrganizerDrawer = vm.runInNewContext(
   '(' + extractFunction('toggleOrganizerDrawer', '  function setPanelOpen') + ')',
@@ -117,9 +117,13 @@ const organizerCloseSandbox = {
   isMobileViewport() { return false; },
   setMobileNavOpen() {},
 };
+organizerCloseSandbox.syncOrganizerIconState = vm.runInNewContext(
+  '(' + extractFunction('syncOrganizerIconState', '  function setOrganizerDrawerOpen') + ')',
+  organizerCloseSandbox,
+);
 const closeOrganizerDrawer = vm.runInNewContext(
   '(' + extractFunction('setOrganizerDrawerOpen', '  function toggleOrganizerDrawer') + ')',
-  { ...organizerCloseSandbox, syncOrganizerIconState },
+  organizerCloseSandbox,
 );
 closeOrganizerDrawer(false);
 assert.equal(organizerClosePanel.classList.contains('openDrawer'), false);
