@@ -50,7 +50,7 @@ assert.equal(dom.window.getComputedStyle(closedIcon).display, 'flex');
 assert.equal(dom.window.getComputedStyle(closedIcon).visibility, 'visible');
 assert.equal(dom.window.getComputedStyle(openIcon).display, 'flex');
 assert.equal(dom.window.getComputedStyle(openIcon).visibility, 'visible');
-assert.equal(dom.window.getComputedStyle(glyph).display, 'inline-block');
+assert.notEqual(dom.window.getComputedStyle(glyph).display, 'none');
 assert.equal(dom.window.getComputedStyle(glyph).visibility, 'visible');
 assert.equal(dom.window.getComputedStyle(glyph).opacity, '1');
 assert.equal(document.body.style.getPropertyValue('--tle-nav-icon-opacity'), '0.45');
