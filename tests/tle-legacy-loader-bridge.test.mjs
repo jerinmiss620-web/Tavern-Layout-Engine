@@ -2,12 +2,18 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const test = JSON.parse(read('channels/test.json'));
+const readRaw = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
+const test = JSON.parse(readRaw('channels/test.json'));
+const legacyFiles = test.release?.version === '0.3.204' ? {
+  'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
+  'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
+  'loader/TLE-Remote-Loader-Test-0.3.0.json': 'tests/fixtures/legacy/test-loader-v0.3.0.json',
+} : {};
+const read = path => readRaw(legacyFiles[path] || path);
 const version = test.latest_version;
-const tle = read('releases/v' + version + '/TLE.js');
-const loader = read('loader/TLE-Remote-Loader-Test-0.3.0.js');
-const installer = JSON.parse(read('loader/TLE-Remote-Loader-Test-0.3.0.json'));
+const tle = read(test.release.source_path);
+const loader = read(test.loader_release.source_path);
+const installer = JSON.parse(read(test.loader_release.installer_path));
 new vm.Script(tle);
 new vm.Script(loader);
 assert.equal(test.channel, 'test');
