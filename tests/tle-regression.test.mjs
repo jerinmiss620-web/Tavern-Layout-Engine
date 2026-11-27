@@ -141,16 +141,19 @@ assert.match(tle, /quickActionsEnabled: chatQuickActionsEnabled/);
 assert.match(tle, /navigationRepairEnabled: compatibilityNavigationRepair/);
 assert.doesNotMatch(tle, /margin-inline: 15px !important;/);
 assert.ok(tle.includes('text-align: left !important;'));
-assert.ok(tle.includes('body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {'));
+assert.ok(tle.includes('body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle .drawer-icon {'));
 if (process.argv.includes('--current')) {
-  const navIconRule = tle.match(/body\[data-tle-nav\]\[data-tle-compat-nav-repair\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle > \.drawer-icon \{([\s\S]*?)\n\}/)?.[1] || '';
+  const navIconRule = tle.match(/body\[data-tle-nav\]\[data-tle-compat-nav-repair\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle \.drawer-icon \{([\s\S]*?)\n\}/)?.[1] || '';
   assert.match(navIconRule, /display: flex !important;/);
   assert.match(navIconRule, /align-items: center !important;/);
   assert.match(navIconRule, /justify-content: center !important;/);
+  assert.match(navIconRule, /visibility: visible !important;/);
+  assert.match(navIconRule, /opacity: var\(--tle-nav-icon-opacity, 0\.7\) !important;/);
   assert.doesNotMatch(navIconRule, /display: block/);
+  assert.doesNotMatch(navIconRule, /closedIcon/);
+  assert.doesNotMatch(tle, /drawer-icon:not\(\.closedIcon\)/);
   assert.equal(read('development/organizer/TLE.js'), read('releases/v' + plan.core + '/TLE.js'),
     'Development Core and current immutable release source must match byte-for-byte');
-
 }assert.ok(tle.includes('opacity: var(--tle-nav-icon-opacity, 0.7) !important;'));
 assert.doesNotMatch(tle, /body\[data-tle-nav\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle > \.drawer-icon \{\s*opacity:/);
 assert.ok(tle.includes("const wrap = state.panel?.querySelector('[data-tle-compat-nav-opacity]')"));

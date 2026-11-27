@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.290
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.291
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -4082,7 +4082,9 @@ body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings
   box-sizing: border-box !important;
   pointer-events: auto !important;
 }
-body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon {
+/* Repair every native icon state. closedIcon is the normal collapsed state,
+   not a hidden-state marker; opacity must apply while drawers are closed too. */
+body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle .drawer-icon {
   display: flex !important;
   position: relative !important;
   flex: 0 0 100% !important;
@@ -4099,9 +4101,13 @@ body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings
   box-sizing: border-box !important;
   pointer-events: auto !important;
   visibility: visible !important;
-}
-body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle > .drawer-icon:not(.closedIcon) {
   opacity: var(--tle-nav-icon-opacity, 0.7) !important;
+}
+body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle .drawer-icon > *,
+body[data-tle-nav][data-tle-compat-nav-repair] #top-settings-holder#top-settings-holder > .drawer > .drawer-toggle .drawer-icon::before {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 body[data-tle-nav][data-tle-compat-nav-repair]:not([data-tle-nav="icons"]) #top-settings-holder#top-settings-holder > .drawer > .tle-drawer-label {
   display: block !important;
@@ -11379,14 +11385,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.290 · 记录预览头像与渐变边界同步</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.291 · 导航图标可见性与透明度修复</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.290</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.291</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -20050,7 +20056,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.290',
+    version: '0.3.291',
     ready: false,
     destroy,
     state,
@@ -20508,5 +20514,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.290 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.291 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
