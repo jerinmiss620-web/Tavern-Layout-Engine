@@ -23,7 +23,7 @@ assert.equal(sha256(core), manifest.release.sha256, 'the test Core SHA-256 must 
 assert.equal(Buffer.byteLength(core, 'utf8'), manifest.release.size_bytes, 'the test Core byte count must match its manifest');
 assert.match(manifest.release.source_url, new RegExp('/' + manifest.release.source_commit + '/releases/v0\\.3\\.295/TLE\\.js$'));
 assert.match(loader, /const CHANNEL = 'mask-hero-test';/);
-assert.match(manifest.loader_release.source_url, new RegExp('/' + manifest.loader_release.source_commit + '/loader/TLE-Mask-Hero-Test-Loader-0\\.3\\.0\\.jsassert.ok(loader.includes('channels/mask-hero-test.json'));
+assert.match(manifest.loader_release.source_url, new RegExp('/' + manifest.loader_release.source_commit + '/loader/TLE-Mask-Hero-Test-Loader-0\\.3\\.0\\.js$'));
 assert.ok(loader.includes('tle.loader.maskHeroTest.lastKnownGood.v1'));
 assert.ok(loader.includes('TLE_Mask_Hero_Test_Cache'));
 assert.doesNotMatch(loader, /organizerBranchTest|feature\/organizer-nav-worldbooks-20261125/);
