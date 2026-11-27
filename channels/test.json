@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.276",
+  "latest_version": "0.3.277",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.276",
-    "source_path": "releases/v0.3.276/TLE.js",
-    "source_commit": "b2766a746a47e5cf97ddac185f84a42a835ff431",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/b2766a746a47e5cf97ddac185f84a42a835ff431/releases/v0.3.276/TLE.js",
-    "changelog_path": "releases/v0.3.276/CHANGELOG.md",
-    "sha256": "dfd0d05df562c4b6a6bb9d13374d6406cfd24fe2ec8cc477cec583b4cc0fbd95",
-    "size_bytes": 977717
+    "version": "0.3.277",
+    "source_path": "releases/v0.3.277/TLE.js",
+    "source_commit": "60480d6f9df110671129bfc3431dfc53da13cf38",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/60480d6f9df110671129bfc3431dfc53da13cf38/releases/v0.3.277/TLE.js",
+    "changelog_path": "releases/v0.3.277/CHANGELOG.md",
+    "sha256": "6383905f141b60ac99c2d53ca43527671242f8fe7df38904ebbf13c1dfb42f0f",
+    "size_bytes": 977735
   },
-  "status": "TEST v0.3.276：整合桃mini 4.5.13 升级版高清头像引擎。ST 自动处理聊天头像、角色列表、角色预览、User 身份列表及 TLE 记录预览；TT 使用原生高清头像。共享实例清理入口，兼容 AvatarDeblur 的原图直链，并在检测到旧版 Div/Canvas 图层时只避开其聊天头像。自动化模拟覆盖全部目标区域、动态加载、失败回退与卸载恢复；等待 ST/TT 实机验收。正式版不变。",
+  "status": "TEST v0.3.277：修正旧版 260402 Div/Canvas 图层的初始扫描隔离。TLE 只跳过已由旧脚本接管的聊天头像，角色列表、角色预览、User 身份列表与记录预览继续使用桃mini 4.5.13 引擎。增加全局样式标记与单图层标记回归测试；自动化验收待完成。正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
