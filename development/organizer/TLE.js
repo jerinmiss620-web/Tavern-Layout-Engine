@@ -13539,12 +13539,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return baseline;
   }
+  function companionPromptRoleStateExists(overlay) {
+    if (!overlay?.planId || !overlay.roleKey) return false;
+    const plan = companionRead().plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
+    return Boolean(plan?.fields?.promptEntries?.byRole?.[overlay.roleKey]);
+  }
   function companionPromptSaveRoleState(overlay, snapshot) {
     if (!overlay?.planId || !overlay.roleKey || !snapshot?.states) return false;
     const data = companionRead();
     const plan = data.plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
-    if (!plan) return false;
-    const field = plan.fields?.promptEntries || {};
+    if (!plan?.fields?.promptEntries?.byRole?.[overlay.roleKey]) return false;
+    const field = plan.fields.promptEntries;
     const byRole = { ...(field.byRole || {}) };
     const previous = byRole[overlay.roleKey];
     byRole[overlay.roleKey] = {
@@ -13596,6 +13601,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       catch { return original.apply(this, args); }
       const overlay = companionRuntime.promptOverlay;
       if (overlay && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+        if (!companionPromptRoleStateExists(overlay)) {
+          if (strategy === 'global') {
+            const baseline = companionRead().promptBaselines[presetName];
+            if (baseline) companionPromptApplyToManager(manager, baseline);
+          }
+          companionRuntime.promptOverlay = null;
+          companionPromptClearActive(overlay);
+          manager.render?.(false);
+          return original.apply(this, args);
+        }
         const saved = companionPromptSaveRoleState(overlay, snapshot);
         if (strategy !== 'global' || !saved) {
           if (!saved) companionNotice('warning', '角色条目状态未能写入配套方案；本次原生保存仍会继续。');
@@ -13714,7 +13729,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (role?.key !== overlay.roleKey || presetName !== overlay.presetName) return;
     const plan = companionRead().plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
     const saved = plan?.fields?.promptEntries?.byRole?.[overlay.roleKey];
-    if (!saved) return;
+    if (!saved) {
+      companionRuntime.promptOverlay = null;
+      companionPromptClearActive(overlay);
+      return;
+    }
     companionPromptApplyToManager(manager, saved.states || {});
     manager.render?.(false);
   }
@@ -13761,6 +13780,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const strategy = manager.configuration?.promptOrder?.strategy || 'global';
     const overlay = companionRuntime.promptOverlay;
     if (overlay && strategy !== 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+      if (!companionPromptRoleStateExists(overlay)) {
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+        return;
+      }
       try {
         const snapshot = companionPromptSnapshotFromManager(manager, presetName);
         companionPromptSaveRoleState(overlay, snapshot);
@@ -13768,6 +13792,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       return;
     }
     if (overlay && strategy === 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+      if (!companionPromptRoleStateExists(overlay)) {
+        const baseline = companionRead().promptBaselines[presetName];
+        if (baseline) companionPromptApplyToManager(manager, baseline);
+        manager.render?.(false);
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+        if (companionPromptPersistCurrentSettings(manager, context)) return;
+      }
       let snapshot;
       try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
       catch { return; }
@@ -14252,6 +14284,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const next = { id, name, roles: old?.roles || [role.key], fields: nextFields };
       fresh.plans = old ? fresh.plans.map(p => p.id === id ? next : p) : [...fresh.plans, next];
       if (!companionSave(fresh)) return;
+      if (companionRuntime.promptOverlay?.planId === id
+        && !nextFields.promptEntries?.byRole?.[role.key]) void companionPromptResetOverlay();
       closeQuickPanel(false);
       companionRefreshList();
       companionNotice('success', '方案已保存：' + name);
@@ -14738,7 +14772,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const active = initialData.promptActive?.[initialRole.key];
       const presetName = companionPromptCurrentPresetName(context, null);
       if (active?.planId && active.presetName && active.presetName === presetName
-        && initialData.plans.some(plan => plan.id === active.planId && plan.roles.includes(initialRole.key))) {
+        && initialData.plans.some(plan => plan.id === active.planId && plan.roles.includes(initialRole.key)
+          && plan.fields?.promptEntries?.byRole?.[initialRole.key])) {
         companionRuntime.promptOverlay = { roleKey: initialRole.key, planId: active.planId, presetName: active.presetName };
       }
     }
