@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.284",
+  "latest_version": "0.3.285",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.284",
-    "source_path": "releases/v0.3.284/TLE.js",
-    "source_commit": "1a4ee4010858a08bf4ffef9a730b359fd57e4560",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/1a4ee4010858a08bf4ffef9a730b359fd57e4560/releases/v0.3.284/TLE.js",
-    "changelog_path": "releases/v0.3.284/CHANGELOG.md",
-    "sha256": "5972bbbb8aa2e3cce926a38be59ec2156812f15e39e28b9e3c7dcce80971d067",
-    "size_bytes": 979176
+    "version": "0.3.285",
+    "source_path": "releases/v0.3.285/TLE.js",
+    "source_commit": "6c1b4b720febdcb6b3b32880df1a1268d4b36500",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/6c1b4b720febdcb6b3b32880df1a1268d4b36500/releases/v0.3.285/TLE.js",
+    "changelog_path": "releases/v0.3.285/CHANGELOG.md",
+    "sha256": "7cfa2d602da9b5c2fc01ee38287563a04f65b5de871516c66af0b3cd4dc8c675",
+    "size_bytes": 979247
   },
-  "status": "TEST v0.3.284：修复整理侠导航图标状态同步；关闭时使用 closedIcon、打开时使用 openIcon，并保留酒馆原生及主题的关闭态透明度。仅测试分支，正式版不变。",
+  "status": "TEST v0.3.285：修复记录预览与记录详情高清头像失效。TLE 内置高清头像引擎现在识别新的 .freesia-gallery-avatar-frame，同时保留旧结构兼容；并延续 v0.3.284 整理侠图标状态修复。仅测试分支，正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
