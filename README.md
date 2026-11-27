@@ -25,7 +25,7 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
 - [Core 变更日志](releases/v0.3.294/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：Core v0.3.294 以正式 main / Core v0.3.291 为基线，整合角色专属预设条目方案与全局世界书折叠式多选。自动化回归和远端发布链核验结果以本次发布验证记录为准；ST/TT 全主题视觉矩阵仍需实机覆盖。
+- [实际验证范围](VALIDATION.md)：Core v0.3.294 已通过 PR #28 合并至 main；候选 Node 24 Run #46048166362 与正式 main Run #46048318255 均通过。正式 main 全量 npm test、远端清单/不可变源码核验及下载发布字节后的 Bootstrap → Loader → Core 更新链重放全部通过。ST/TT 全主题视觉矩阵仍需实机覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 

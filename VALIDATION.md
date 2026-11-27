@@ -9,7 +9,13 @@
 - 基线：正式 main / Core v0.3.291；仅迁入已验收的配套侠预设条目状态和全局世界书选择器，不合并旧开发分支历史及测试 Loader。
 - 角色方案以稳定 identifier 保存每个角色的条目启用状态，不复制正文、名称或顺序；共享全局预设通过原始状态基线保护角色隔离。
 - 世界书控件保留原生多选数据源及方案保存结构；缺失世界书保留为已选禁用项。
-- 本次 PR 的 Node 24 全量回归与发布检查结果将在 GitHub Actions 完成后补录。自动化测试不替代 ST/TT 实机验收。
+- PR #28 已合并至 `main`，正式合并 Commit：`029e3e6e965e981dcdab29149628de7cb862ea5d`。
+- PR 候选 Node 24 Run #46048166362（Run #1232）通过全量 `npm test`；新增的预设条目标识/角色隔离、世界书下拉交互测试均通过。
+- 正式 main Node 24 Run #46048318255（Run #1233）通过全量 `npm test`、`npm run verify:remote` 和 `node tests/tle-update-chain.test.mjs --remote`。
+- 不可变 Core 源码 Commit：`648da321089e1f9534ccf859c901ab76fbb0f90f`；固定 Raw URL：`https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/648da321089e1f9534ccf859c901ab76fbb0f90f/releases/v0.3.294/TLE.js`。
+- SHA-256：`a14149c6525f8ab186d48b59db0183e42f9ae973c7379a541d1a46fb11071a63`；UTF-8 字节数：`1029725`。正式清单、发布计划、开发源码、正式源码、禁用状态备份包与不可变 Commit 固定源码逐字节一致。
+- 远端核验从 GitHub 下载固定 Commit 的源码，并完成 Bootstrap → Loader Runtime → Core 的完整更新链重放；Loader Runtime v0.3.6 与 Bootstrap v1.0.6 未修改。
+- ST/TT 全主题、设备实机视觉矩阵仍需继续覆盖；自动化测试不替代真实宿主验收。
 
 ## 2026-11-27 · Core v0.3.291 · 导航图标可见性与透明度完整修复
 
