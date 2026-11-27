@@ -27,7 +27,8 @@ assert.match(manifest.loader_release.source_url, new RegExp('/' + manifest.loade
 assert.ok(loader.includes('channels/mask-hero-test.json'));
 assert.ok(loader.includes('tle.loader.maskHeroTest.lastKnownGood.v1'));
 assert.ok(loader.includes('TLE_Mask_Hero_Test_Cache'));
-assert.doesNotMatch(loader, /organizerBranchTest|feature\\/organizer-nav-worldbooks-20261125/);
+assert.equal(loader.includes('organizerBranchTest'), false);
+assert.equal(loader.includes('feature/organizer-nav-worldbooks-20261125'), false);
 assert.equal(sha256(loader), manifest.loader_release.sha256, 'test Loader SHA-256 must match its manifest');
 assert.equal(Buffer.byteLength(loader, 'utf8'), manifest.loader_release.size_bytes, 'test Loader byte count must match its manifest');
 assert.equal(installer.content, loader, 'the disabled installer must embed the exact pinned test Loader');
