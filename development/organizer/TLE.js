@@ -3004,7 +3004,7 @@ var TLEBatchLibrary = (() => {
       },
       maskHero: {
         observer: null, frame: 0, textNodes: new Map(), nameElements: new Set(),
-        floorElements: new Set(), imageElements: new Map(), objectUrls: new Map(),
+        floorElements: new Map(), imageElements: new Map(), objectUrls: new Map(),
         appliedConfig: null, appliedChatKey: '',
       },
     },
@@ -4026,15 +4026,9 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   #${ID.chatToolsPanel} [data-chat-action-submit] { min-width: 2.9em; padding-inline: 5px; }
 }
 /* Mask Hero visual-only overlays; original message text remains in the DOM. */
-#chat .mes .name_text[data-tle-mask-name],
-#chat .mes .mes_text[data-tle-mask-floor] { visibility:hidden !important; }
+#chat .mes .name_text[data-tle-mask-name] { visibility:hidden !important; }
 #chat .mes .name_text[data-tle-mask-name]::after {
   content:attr(data-tle-mask-name); display:inline; visibility:visible; white-space:pre-wrap;
-}
-#chat .mes .mes_text[data-tle-mask-floor] { position:relative; }
-#chat .mes .mes_text[data-tle-mask-floor]::after {
-  content:attr(data-tle-mask-floor); display:block; position:absolute; inset:0;
-  visibility:visible; white-space:pre-wrap; pointer-events:none;
 }
 /* Diagnostic escape hatch:
    - fixed top-right only; never anchor critical controls in bottom corners.
@@ -15829,6 +15823,20 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     img.removeAttribute('srcset');
   }
 
+  function maskHeroApplyFloorReplacement(body, replacement) {
+    const records = state.chatTools.maskHero.floorElements;
+    const previous = records.get(body);
+    if (previous && body.childNodes.length === 1 && body.firstChild === previous.appliedNode) return;
+    // If the host replaced message contents while masked, the new DOM is authoritative.
+    if (previous) records.delete(body);
+    const original = HOST_DOC.createDocumentFragment();
+    while (body.firstChild) original.appendChild(body.firstChild);
+    const appliedNode = HOST_DOC.createTextNode(String(replacement ?? ''));
+    body.appendChild(appliedNode);
+    body.setAttribute('data-tle-mask-floor', 'true');
+    records.set(body, { original, appliedNode });
+  }
+
   function maskHeroProcessChat() {
     const runtime = state.chatTools.maskHero;
     const config = runtime.appliedConfig;
@@ -15855,8 +15863,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const floorRule = config.floorRules.find(rule => Number(rule.floor) === floor);
       const body = message.querySelector('.mes_text');
       if (body && floorRule) {
-        body.setAttribute('data-tle-mask-floor', String(floorRule.replace ?? ''));
-        runtime.floorElements.add(body);
+        maskHeroApplyFloorReplacement(body, floorRule.replace);
       } else if (body && config.textRules.length && !body.hasAttribute('data-tle-mask-floor')) {
         const walker = HOST_DOC.createTreeWalker(body, HOST_WIN.NodeFilter.SHOW_TEXT);
         let node;
@@ -15903,7 +15910,19 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     runtime.textNodes.clear();
     for (const element of runtime.nameElements) element?.removeAttribute?.('data-tle-mask-name');
     runtime.nameElements.clear();
-    for (const element of runtime.floorElements) element?.removeAttribute?.('data-tle-mask-floor');
+    for (const [element, record] of runtime.floorElements) {
+      if (element && record?.appliedNode && [...element.childNodes].includes(record.appliedNode)) {
+        const before = [];
+        const after = [];
+        let passed = false;
+        for (const child of [...element.childNodes]) {
+          if (child === record.appliedNode) { passed = true; continue; }
+          (passed ? after : before).push(child);
+        }
+        element.replaceChildren(...before, record.original, ...after);
+      }
+      element?.removeAttribute?.('data-tle-mask-floor');
+    }
     runtime.floorElements.clear();
     for (const [img, record] of runtime.imageElements) {
       if (!img?.isConnected || img.getAttribute('src') !== record.appliedSrc) continue;
@@ -16625,6 +16644,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.body.append(button, panel);
     state.chatTools.button = button;
     state.chatTools.panel = panel;
+    HOST_DOC.addEventListener('pointerdown', event => {
+      if (!state.chatTools.maskHero.appliedConfig) return;
+      if (event.target?.closest?.('#chat .mes_edit, #chat .mes_edit_button, #chat [data-mes-edit]')) {
+        maskHeroClearEffects();
+        maskHeroSetStatus('已进入酒馆原生编辑，打码效果已临时卸除。');
+      }
+    }, { capture: true, signal: state.abort.signal });
     maskHeroSyncTabVisibility();
     maskHeroRenderPage();
     panel.addEventListener('change', event => {
