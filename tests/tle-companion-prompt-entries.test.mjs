@@ -13,12 +13,23 @@ assert.ok(helperStart >= 0 && helperEnd > helperStart, 'Prompt-state pure helper
 
 const sandbox = vm.createContext({});
 const helperSource = source.slice(helperStart, helperEnd)
-  + '\nthis.promptStateHelpers = { companionPromptMergeStateMaps, companionPromptExtendStateMap, companionPromptApplyStateMap };';
+  + '\nthis.promptStateHelpers = { companionPromptMergeStateMaps, companionPromptExtendStateMap, companionPromptUpdateKnownStateMap, companionPromptApplyStateMap };';
 new vm.Script(helperSource, { filename: 'TLE companion prompt-state helpers' }).runInContext(sandbox);
 const helpers = sandbox.promptStateHelpers;
 const plain = value => JSON.parse(JSON.stringify(value));
 
 const tests = [
+  {
+    name: 'updates only previously recorded identifiers and leaves new entries native until explicit re-collection',
+    run() {
+      const updated = helpers.companionPromptUpdateKnownStateMap(
+        { keep: false, deleted: true },
+        { keep: true, added: false },
+      );
+      assert.deepEqual(plain(updated), { keep: true, deleted: true });
+    },
+  },
+
   {
     name: 'stores only identifier-to-enabled mappings and merges updates without losing stale identifiers',
     run() {
@@ -151,5 +162,56 @@ assert.match(source, /function companionInstallPromptSaveBridge/,
   'Native Prompt Manager saves must preserve the preset baseline');
 assert.match(source, /newEntries\.push\(id\)/,
   'New prompt entries must be detected and left to the current native state');
+
+
+// Saving one role's live overlay updates only identifiers already recorded for that role.
+const saveStart = source.indexOf('function companionPromptSaveRoleState');
+const saveEnd = source.indexOf('function companionPromptMarkActive', saveStart);
+assert.ok(saveStart >= 0 && saveEnd > saveStart, 'Role-state save function must exist');
+const roleSandbox = vm.createContext({});
+roleSandbox.roleStore = {
+  plans: [{
+    id: 'shared-plan',
+    roles: ['role-A', 'role-B'],
+    fields: { promptEntries: { byRole: {
+      'role-A': { presetName: 'Shared Preset', states: { keep: false, deleted: true } },
+      'role-B': { presetName: 'Shared Preset', states: { keep: true } },
+    } } },
+  }],
+};
+roleSandbox.companionRead = () => roleSandbox.roleStore;
+roleSandbox.companionSave = data => { roleSandbox.roleStore = JSON.parse(JSON.stringify(data)); return true; };
+roleSandbox.companionRefreshList = () => {};
+new vm.Script(
+  source.slice(helperStart, helperEnd)
+  + '\n' + source.slice(saveStart, saveEnd)
+  + '\nthis.saveRoleState = companionPromptSaveRoleState;',
+  { filename: 'TLE companion role-state persistence' },
+).runInContext(roleSandbox);
+assert.equal(roleSandbox.saveRoleState(
+  { planId: 'shared-plan', roleKey: 'role-A', presetName: 'Shared Preset' },
+  { states: { keep: true, added: false } },
+), true);
+const roleStates = roleSandbox.roleStore.plans[0].fields.promptEntries.byRole;
+assert.deepEqual(plain(roleStates['role-A'].states), { keep: true, deleted: true });
+assert.deepEqual(plain(roleStates['role-B'].states), { keep: true });
+
+const bridgeStart = source.indexOf('function companionInstallPromptSaveBridge');
+const bridgeEnd = source.indexOf('async function companionPromptManager', bridgeStart);
+const bridge = source.slice(bridgeStart, bridgeEnd);
+assert.match(bridge, /companionPromptRestoreBaseline/);
+assert.match(bridge, /persistBaseline\(true, baseline\)/);
+assert.doesNotMatch(bridge, /companionPromptApplyToManager\(manager, snapshot\.states\)/,
+  'Restoring an overlay must not reapply new identifiers that are not in the saved role map');
+
+const resetStart = source.indexOf('async function companionPromptResetOverlay');
+const resetEnd = source.indexOf('function companionPromptReapplyActiveOverlay', resetStart);
+const reset = source.slice(resetStart, resetEnd);
+assert.match(reset, /companionPromptRestoreBaseline/);
+const applyStart = source.indexOf('async function companionApply(');
+const applyEnd = source.indexOf('function companionOnChatChanged(', applyStart);
+const apply = source.slice(applyStart, applyEnd);
+assert.match(apply, /if \(resetResult\.issue\) \{[\s\S]*?throw new Error/,
+  'A failed previous-role reset must stop the new plan before it can capture the wrong baseline');
 
 console.log('✓ companion prompt-entry integration contract');

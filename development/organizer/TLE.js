@@ -13424,6 +13424,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return extended;
   }
+  function companionPromptUpdateKnownStateMap(existing, current) {
+    const updated = Object.create(null);
+    for (const [id, enabled] of Object.entries(existing || {})) {
+      if (!id) continue;
+      updated[id] = Object.prototype.hasOwnProperty.call(current || {}, id)
+        ? Boolean(current[id])
+        : Boolean(enabled);
+    }
+    return updated;
+  }
   function companionPromptApplyStateMap(order, states, promptMap, canToggle) {
     const entries = Array.isArray(order) ? order : [];
     const byId = new Map();
@@ -13539,6 +13549,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return baseline;
   }
+  function companionPromptRestoreBaseline(manager, presetName) {
+    const baseline = companionRead().promptBaselines[presetName];
+    if (!baseline || typeof baseline !== 'object' || !Object.keys(baseline).length) {
+      throw new Error('找不到预设「' + (presetName || '未知') + '」的原始条目状态。');
+    }
+    const result = companionPromptApplyToManager(manager, baseline);
+    return { baseline, result };
+  }
   function companionPromptRoleStateExists(overlay) {
     if (!overlay?.planId || !overlay.roleKey) return false;
     const plan = companionRead().plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
@@ -13554,7 +13572,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const previous = byRole[overlay.roleKey];
     byRole[overlay.roleKey] = {
       presetName: overlay.presetName,
-      states: companionPromptMergeStateMaps(previous?.states, snapshot.states),
+      states: companionPromptUpdateKnownStateMap(previous?.states, snapshot.states),
     };
     plan.fields.promptEntries = { byRole };
     const saved = companionSave(data);
@@ -13596,65 +13614,131 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const role = companionCurrentRole();
       const presetName = companionPromptCurrentPresetName(context, manager);
       const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+      const overlay = companionRuntime.promptOverlay;
+      const ownsOverlay = Boolean(overlay && role?.key === overlay.roleKey && presetName === overlay.presetName);
+      if (overlay && strategy === 'global' && !presetName) {
+        companionNotice('warning', '无法识别当前预设名称；已取消原生保存，以免角色专属条目开关污染预设。');
+        return Promise.reject(new Error('无法识别当前预设名称，已取消保存。'));
+      }
+      const restoreBaseline = () => {
+        const restored = companionPromptRestoreBaseline(manager, presetName);
+        manager.render?.(false);
+        return restored.baseline;
+      };
+      const restoreOverlayAfterSave = (fallbackBaseline = null) => {
+        if (state.destroyed || !overlay || companionRuntime.promptOverlay !== overlay) return;
+        const currentRole = companionCurrentRole();
+        const currentPreset = companionPromptCurrentPresetName(HOST_WIN.SillyTavern?.getContext?.() || {}, manager);
+        if (currentRole?.key !== overlay.roleKey || currentPreset !== overlay.presetName) {
+          if (strategy === 'global' && currentPreset === overlay.presetName) {
+            try {
+              const stored = companionRead().promptBaselines[overlay.presetName];
+              const baseline = stored && Object.keys(stored).length ? stored : fallbackBaseline;
+              if (baseline) companionPromptApplyToManager(manager, baseline);
+              manager.render?.(false);
+            } catch (error) {
+              console.warn('[配套侠] 保存后恢复原始预设条目状态失败', error);
+            }
+          }
+          companionRuntime.promptOverlay = null;
+          companionPromptClearActive(overlay);
+          return;
+        }
+        companionPromptReapplyActiveOverlay();
+      };
+      const persistBaseline = (reapply = true, fallbackBaseline = null) => {
+        companionRuntime.promptSuppressSettingsEvent = true;
+        let pending;
+        try {
+          pending = original.apply(this, args);
+        } catch (error) {
+          companionRuntime.promptSuppressSettingsEvent = false;
+          if (reapply) restoreOverlayAfterSave(fallbackBaseline);
+          throw error;
+        }
+        return Promise.resolve(pending).finally(() => {
+          if (companionRuntime.promptSuppressSettingsEvent) companionRuntime.promptSuppressSettingsEvent = false;
+          if (reapply) restoreOverlayAfterSave(fallbackBaseline);
+        });
+      };
       let snapshot;
       try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
-      catch { return original.apply(this, args); }
-      const overlay = companionRuntime.promptOverlay;
-      if (overlay && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+      catch (error) {
+        if (!ownsOverlay || strategy !== 'global') return original.apply(this, args);
+        let baseline;
+        try { baseline = restoreBaseline(); }
+        catch (restoreError) {
+          companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+          console.warn('[配套侠] 保存前恢复原始预设条目状态失败', restoreError);
+          return Promise.reject(restoreError);
+        }
+        companionNotice('warning', '当前条目列表暂不可读取；已恢复预设原始开关，本次保存保留上一次已记录的角色方案状态。');
+        return persistBaseline(true, baseline);
+      }
+      if (ownsOverlay) {
         if (!companionPromptRoleStateExists(overlay)) {
+          let baseline = null;
           if (strategy === 'global') {
-            const baseline = companionRead().promptBaselines[presetName];
-            if (baseline) companionPromptApplyToManager(manager, baseline);
+            try { baseline = restoreBaseline(); }
+            catch (error) {
+              companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+              return Promise.reject(error);
+            }
           }
           companionRuntime.promptOverlay = null;
           companionPromptClearActive(overlay);
           manager.render?.(false);
-          return original.apply(this, args);
+          return persistBaseline(false, baseline);
         }
         const saved = companionPromptSaveRoleState(overlay, snapshot);
-        if (strategy !== 'global' || !saved) {
-          if (!saved) companionNotice('warning', '角色条目状态未能写入配套方案；本次原生保存仍会继续。');
+        if (strategy !== 'global') {
+          if (!saved) companionNotice('warning', '角色专属条目状态未能写入配套方案；当前为角色独立策略，本次仍按酒馆原生保存规则继续。');
           return original.apply(this, args);
         }
-        const baseline = companionRead().promptBaselines[presetName];
-        if (!baseline) return original.apply(this, args);
-        companionPromptStoreBaseline(presetName, snapshot.states, true);
-        companionPromptApplyToManager(manager, companionRead().promptBaselines[presetName]);
-        const restore = () => {
-          if (state.destroyed) return;
-          if (companionRuntime.promptSuppressSettingsEvent) companionRuntime.promptSuppressSettingsEvent = false;
-          const currentRole = companionCurrentRole();
-          const currentPreset = companionPromptCurrentPresetName(HOST_WIN.SillyTavern?.getContext?.() || {}, manager);
-          if (currentRole?.key !== overlay.roleKey || currentPreset !== overlay.presetName) {
-            if (currentPreset === overlay.presetName) {
-              companionPromptApplyToManager(manager, companionRead().promptBaselines[overlay.presetName] || baseline);
-            }
-            companionRuntime.promptOverlay = null;
-            companionPromptClearActive(overlay);
-            manager.render?.(false);
-            return;
+        if (!saved) {
+          let baseline;
+          try { baseline = restoreBaseline(); }
+          catch (error) {
+            companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+            return Promise.reject(error);
           }
-          companionPromptApplyToManager(manager, snapshot.states);
-          manager.render?.(false);
-        };
-        let pending;
-        try {
-          companionRuntime.promptSuppressSettingsEvent = true;
-          pending = original.apply(this, args);
+          companionNotice('warning', '角色专属条目状态未能写入方案；已恢复预设原始开关，本次仅保存原始状态。');
+          return persistBaseline(true, baseline);
         }
-        catch (error) { restore(); throw error; }
-        return Promise.resolve(pending).finally(restore);
+        let baseline;
+        try { baseline = companionRead().promptBaselines[presetName]; }
+        catch (error) {}
+        if (!baseline || typeof baseline !== 'object' || !Object.keys(baseline).length) {
+          companionNotice('error', '找不到预设原始条目状态；为避免角色专属开关污染预设，本次原生保存已取消。');
+          return Promise.reject(new Error('找不到预设原始条目状态，已取消保存。'));
+        }
+        companionPromptStoreBaseline(presetName, snapshot.states, true);
+        try {
+          const nextBaseline = companionRead().promptBaselines[presetName] || baseline;
+          companionPromptApplyToManager(manager, nextBaseline);
+          manager.render?.(false);
+          return persistBaseline(true, nextBaseline);
+        } catch (error) {
+          companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+          return Promise.reject(error);
+        }
       }
       if (overlay) {
         const samePreset = presetName === overlay.presetName;
         if (strategy === 'global' && samePreset) {
-          const baseline = companionRead().promptBaselines[overlay.presetName];
-          if (baseline) companionPromptApplyToManager(manager, baseline);
+          let baseline;
+          try { baseline = restoreBaseline(); }
+          catch (error) {
+            companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+            return Promise.reject(error);
+          }
+          companionRuntime.promptOverlay = null;
+          companionPromptClearActive(overlay);
           manager.render?.(false);
+          return persistBaseline(false, baseline);
         }
         companionRuntime.promptOverlay = null;
         companionPromptClearActive(overlay);
-        if (strategy === 'global' && samePreset) return original.apply(this, args);
       }
       if (strategy === 'global' && presetName) companionPromptStoreBaseline(presetName, snapshot.states, false);
       return original.apply(this, args);
@@ -13707,9 +13791,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const strategy = manager.configuration?.promptOrder?.strategy || 'global';
       const overlay = companionRuntime.promptOverlay;
       let result = { changed: [] };
+      if (strategy === 'global' && !presetName) {
+        throw new Error('无法识别当前预设名称，不能安全恢复上一角色的原始条目状态。');
+      }
       if (strategy === 'global' && presetName === overlay.presetName) {
-        const baseline = companionRead().promptBaselines[overlay.presetName];
-        if (baseline) result = companionPromptApplyToManager(manager, baseline);
+        const restored = companionPromptRestoreBaseline(manager, overlay.presetName);
+        result = restored.result;
       }
       companionRuntime.promptOverlay = null;
       companionPromptClearActive(overlay);
@@ -13734,8 +13821,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       companionPromptClearActive(overlay);
       return;
     }
-    companionPromptApplyToManager(manager, saved.states || {});
-    manager.render?.(false);
+    try {
+      companionPromptApplyToManager(manager, saved.states || {});
+      manager.render?.(false);
+    } catch (error) {
+      console.warn('[配套侠] 无法重新应用角色专属条目状态', error);
+    }
   }
   function companionPromptPersistCurrentSettings(manager, context) {
     const save = typeof context?.saveSettingsDebounced === 'function'
@@ -14547,8 +14638,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     try {
       const skipped = [];
       const resetResult = await companionPromptResetOverlay();
-      if (resetResult.issue) skipped.push({ name: '预设条目开关', target: '上一角色', reason: resetResult.issue });
-      else if (resetResult.changed) finished++;
+      if (resetResult.issue) {
+        throw new Error('无法安全恢复上一角色的原始预设条目状态，已停止应用新方案，避免角色状态串用或污染原始预设。' + resetResult.issue);
+      }
+      if (resetResult.changed) finished++;
       for (const field of COMPANION_FIELDS) {
         const target = plan.fields[field.id];
         if (!target) continue;

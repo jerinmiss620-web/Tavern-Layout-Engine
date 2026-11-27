@@ -16,7 +16,12 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Full-source update simulation, compatibility and publication guards
-        run: npm test
+        run: |
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            npm test
+          else
+            npm test -- --development
+          fi
       - name: Verify Organizer branch test channel and pinned installer
         if: github.ref == 'refs/heads/feature/organizer-nav-worldbooks-20261125'
         run: node loader/verify-test-channel.mjs --remote
