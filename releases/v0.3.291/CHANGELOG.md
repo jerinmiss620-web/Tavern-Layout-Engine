@@ -5,5 +5,6 @@
 - 对图标内部 glyph 与 `::before` 贴图补充可见性、透明度恢复规则，避免只恢复外层容器、内部图形仍被主题隐藏。
 - 透明度变量仍由滑杆实时写入 `body` 的 `--tle-nav-icon-opacity`；兼容规则由宿主文档 `<head>` 中的 `#tle-core-style` 注入。
 - 新增 JSDOM 回归：模拟主题将 open/closed 图标及内部 glyph 隐藏，验证恢复显示、可见性、透明度与包装层 DOM。
+- 候选分支 Node 24 全量回归 Run #46032786958 通过；正式 main Run #46032950585 通过全量回归、远端不可变源码核验与下载发布源码后的更新链重放。
 - Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
 
