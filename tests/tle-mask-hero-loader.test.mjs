@@ -24,25 +24,10 @@ assert.equal(Buffer.byteLength(core, 'utf8'), manifest.release.size_bytes, 'the 
 assert.match(manifest.release.source_url, new RegExp('/' + manifest.release.source_commit + '/releases/v0\\.3\\.295/TLE\\.js$'));
 assert.match(loader, /const CHANNEL = 'mask-hero-test';/);
 assert.match(manifest.loader_release.source_url, new RegExp('/' + manifest.loader_release.source_commit + '/loader/TLE-Mask-Hero-Test-Loader-0\\.3\\.0\\.js$'));
-assert.ok(loader.includes('tle.loader.maskHeroTest.lastKnownGood.v1'));
-assert.ok(loader.includes('TLE_Mask_Hero_Test_Cache'));
-assert.doesNotMatch(loader, /organizerBranchTest|feature\/organizer-nav-worldbooks-20261125/);
-assert.equal(sha256(loader), manifest.loader_release.sha256, 'test Loader SHA-256 must match its manifest');
-assert.equal(Buffer.byteLength(loader, 'utf8'), manifest.loader_release.size_bytes, 'test Loader byte count must match its manifest');
-assert.equal(installer.content, loader, 'the disabled installer must embed the exact pinned test Loader');
-assert.equal(installer.enabled, false, 'the test Loader installer must be disabled by default');
-assert.equal(installer.id, '0f3a9e7c-4b2d-4a71-9c83-5d6f1a2b3c40');
-assert.equal(manifest.loader_release.source_commit, manifest.loader_release.installer_commit);
-assert.ok(manifest.loader_release.installer_url.includes(manifest.loader_release.installer_commit));
-assert.equal(stable.latest_version, '0.3.294', 'the stable channel must remain unchanged during test development');
-assert.equal(plan.core, '0.3.294', 'the stable release plan must remain unchanged during test development');
-
-console.log('TLE Mask Hero test channel passed: immutable Core/Loader hashes, dedicated channel, disabled installer and stable-channel isolation.');
-));
 assert.ok(loader.includes('channels/mask-hero-test.json'));
 assert.ok(loader.includes('tle.loader.maskHeroTest.lastKnownGood.v1'));
 assert.ok(loader.includes('TLE_Mask_Hero_Test_Cache'));
-assert.doesNotMatch(loader, /organizerBranchTest|feature\/organizer-nav-worldbooks-20261125/);
+assert.doesNotMatch(loader, /organizerBranchTest|feature\\/organizer-nav-worldbooks-20261125/);
 assert.equal(sha256(loader), manifest.loader_release.sha256, 'test Loader SHA-256 must match its manifest');
 assert.equal(Buffer.byteLength(loader, 'utf8'), manifest.loader_release.size_bytes, 'test Loader byte count must match its manifest');
 assert.equal(installer.content, loader, 'the disabled installer must embed the exact pinned test Loader');
