@@ -17,7 +17,7 @@ assert.match(innerRule, /visibility: visible !important;/);
 assert.match(innerRule, /opacity: 1 !important;/);
 assert.match(source, /style\.id = ID\.style;\s*HOST_DOC\.head\.appendChild\(style\);/);
 assert.match(source, /body\.style\.setProperty\('--tle-nav-icon-opacity', String\(navIconOpacity\)\)/);
-assert.match(source, /if \(event\.target\?\.id === 'tle-nav-icon-opacity'\) setNavIconOpacity\(event\.target\.value\)/);
+assert.match(source, /if \(event\.target\?\.id === 'tle-nav-icon-opacity'\) \{\s*setNavIconOpacity\(event\.target\.value\);/);
 
 const dom = new JSDOM(`<!doctype html><html><head>
 <style>
