@@ -1,8 +1,12 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.291 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
+目前正式版：**Core v0.3.294 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
+
+## 2026-11-28 · Core v0.3.294 · 角色专属预设条目方案与全局世界书多选（正式发布）
+
+详见 [本版完整日志](releases/v0.3.294/CHANGELOG.md)。新增角色专属预设条目开关方案，按稳定 identifier 保存并保护共享预设的原始状态；全局世界书改为折叠式独立复选下拉，保留缺失条目。Stable Loader Runtime v0.3.6 与 Bootstrap v1.0.6 不变。
 
 ## 2026-11-27 · Core v0.3.291 · 导航图标可见性与透明度完整修复（正式发布）
 
@@ -42,6 +46,7 @@ Node 24 全量回归、正式清单远端核验及下载发布字节后的更新
 
 ## Core 更新记录
 
+- [v0.3.294](releases/v0.3.294/CHANGELOG.md)
 - [v0.3.291](releases/v0.3.291/CHANGELOG.md)
 - [v0.3.290](releases/v0.3.290/CHANGELOG.md)
 - [v0.3.289](releases/v0.3.289/CHANGELOG.md)

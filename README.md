@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.291 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.294 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -23,13 +23,21 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.291/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.294/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：Core v0.3.291 已快进整合至 main；候选分支 Node 24 全量回归 Run #46032786958 通过；正式 main Run #46032950585 通过全量 npm test、npm run verify:remote 和下载发布源码后的完整更新链重放。开发源码、正式源码、禁用状态备份包与不可变 Commit 固定源码逐字节一致。ST/TT 全主题视觉矩阵仍需实机覆盖。
+- [实际验证范围](VALIDATION.md)：Core v0.3.294 以正式 main / Core v0.3.291 为基线，整合角色专属预设条目方案与全局世界书折叠式多选。自动化回归和远端发布链核验结果以本次发布验证记录为准；ST/TT 全主题视觉矩阵仍需实机覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
+
+### Core v0.3.294 · 角色专属预设条目方案与全局世界书多选
+
+- 配套侠为每个角色单独保存预设条目的稳定 identifier 与启用状态；预设改名、编辑正文或调整顺序不影响匹配。
+- 新增条目保持原生状态；删除、锁定或缺失条目会分别识别，可用条目继续独立应用。
+- 共享全局预设时，角色切换和原生保存前先恢复原始条目状态；无法安全恢复时阻止后续应用或保存，避免污染预设。
+- 全局世界书选择器改为折叠式下拉复选清单；缺失世界书仍保留为已选禁用项，不会因编辑方案而意外丢失。
+- Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
 
 ### Core v0.3.291 · 导航图标可见性与透明度完整修复
 
