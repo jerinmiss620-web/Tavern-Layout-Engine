@@ -107,7 +107,7 @@ if (manifest.release.version === '0.3.290') {
 
 const installer = JSON.parse(read(loaderRelease.installer_path));
 assert.equal(installer.type, 'script');
-assert.equal(installer.id, manifest.release.version === '0.3.204' ? '8f994fad-ea17-49f8-93af-ebe8ba4f6c67' : 'e1a1d9fa-8f4b-4c2a-9c45-6c8d3a2f7b10');
+assert.equal(installer.id, manifest.release.version === '0.3.204' ? '8f994fad-ea17-49f8-93af-ebe8ba4f6c67' : manifest.release.version === '0.3.290' ? 'f7a9c2e1-5b64-4d83-9a20-6c1e8f3b7d52' : 'e1a1d9fa-8f4b-4c2a-9c45-6c8d3a2f7b10');
 assert.equal(installer.enabled, manifest.release.version === '0.3.204');
 assert.equal(installer.content, loader, 'Tavern Helper installer content is out of sync with Loader source');
 
