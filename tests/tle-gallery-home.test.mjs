@@ -18,7 +18,7 @@ assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery sta
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.286'/);
+assert.match(core, /version: '0\.3\.287'/);
 assert.match(core, /const VERSION = '4\.5\.14'/, 'The integrated HD avatar engine is updated');
 assert.match(core, /const SELECTOR = '[^']*\.freesia-gallery-avatar img, \.freesia-gallery-avatar-frame img, \.freesia-gallery-detail-avatar img';/, 'The HD engine targets both the current isolated gallery avatar frame and the legacy wrapper');
 
