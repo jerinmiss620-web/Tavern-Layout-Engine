@@ -14,6 +14,8 @@
 - Native prompt-manager saves restore the preset baseline before persisting; unsafe saves are cancelled.
 - Baseline restoration is preflighted before other plan fields are applied; missing identifiers or locked state mismatches stop the plan.
 
+- 预设正文、名称和排序始终以酒馆原始预设为准；角色方案只保存稳定条目标识与启用状态。
+
 ## Validation
 
 - Focused regression coverage now checks identifier matching, missing baseline identifiers, locked-state mismatches, and initialization isolation.
