@@ -14,12 +14,10 @@ function section(text, startMarker, endMarker) {
 const helpers = section(
   source,
   '  function maskHeroIsUnsafeRegex(',
-  '  function maskHeroCreateEmptyDraft(',
+  '  function maskHeroValidateDraft(',
 );
 const sandbox = {};
-vm.runInNewContext(helpers + `
-globalThis.maskHeroHelpers = { maskHeroIsUnsafeRegex, maskHeroApplyTextRules, maskHeroValidateDraft };
-`, sandbox);
+vm.runInNewContext(helpers + '\nglobalThis.maskHeroHelpers = { maskHeroIsUnsafeRegex, maskHeroApplyTextRules, maskHeroValidateDraft };', sandbox);
 const api = sandbox.maskHeroHelpers;
 
 assert.equal(
@@ -59,27 +57,9 @@ assert.equal(
 
 assert.equal(
   api.maskHeroApplyTextRules('A.B A.B', [
-    { find: 'A.B', replace: 'assert.equal(
-  api.maskHeroApplyTextRules('A.B A.B', [
     { find: 'A.B', replace: '$&', regex: false },
   ]),
   '$& $&',
-  'literal matching treats regex punctuation and replacement tokens as ordinary text',
-);', regex: false },
-  ]),
-  'assert.equal(
-  api.maskHeroApplyTextRules('A.B A.B', [
-    { find: 'A.B', replace: '$&', regex: false },
-  ]),
-  '$& $&',
-  'literal matching treats regex punctuation and replacement tokens as ordinary text',
-); assert.equal(
-  api.maskHeroApplyTextRules('A.B A.B', [
-    { find: 'A.B', replace: '$&', regex: false },
-  ]),
-  '$& $&',
-  'literal matching treats regex punctuation and replacement tokens as ordinary text',
-);',
   'literal matching treats regex punctuation and replacement tokens as ordinary text',
 );
 
@@ -181,4 +161,4 @@ const runtime = section(
 assert.doesNotMatch(runtime, /saveChatConditional|saveChat\(|writeChat|POST\s*\(/i,
   'Mask Hero must not write to the host chat file or message API');
 
-console.log('TLE Mask Hero tests passed: one-pass replacement, regex safety, floor validation, optional setting, current-chat scope and display-only boundaries.');
+console.log('TLE Mask Hero tests passed: one-pass replacement, literal/regex matching, regex safety, floor validation, optional setting, current-chat scope and display-only boundaries.');
