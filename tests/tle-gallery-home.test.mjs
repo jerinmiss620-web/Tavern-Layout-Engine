@@ -9,7 +9,7 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.283');
+assert.equal(version, '0.3.285');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
 assert.match(moduleSource, /const VERSION = '0.3.283'/);
@@ -18,7 +18,9 @@ assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery sta
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.283'/);
+assert.match(core, /version: '0\.3\.285'/);
+assert.match(core, /const VERSION = '4\.5\.14'/, 'The integrated HD avatar engine is updated');
+assert.match(core, /const SELECTOR = '[^']*\.freesia-gallery-avatar img, \.freesia-gallery-avatar-frame img, \.freesia-gallery-detail-avatar img';/, 'The HD engine targets both the current isolated gallery avatar frame and the legacy wrapper');
 
 const cssStart = moduleSource.indexOf('    const CSS = [');
 const cssEnd = moduleSource.indexOf("    ].join('\\n');", cssStart);
