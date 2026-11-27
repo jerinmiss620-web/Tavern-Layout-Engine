@@ -7,13 +7,13 @@
   "release": {
     "version": "0.3.278",
     "source_path": "releases/v0.3.278/TLE.js",
-    "source_commit": "61124c4906584e476ff7397cac948ded9a22bcce",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/61124c4906584e476ff7397cac948ded9a22bcce/releases/v0.3.278/TLE.js",
+    "source_commit": "707be2e099ba18c5640b784884b029976a7f2b1e",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/707be2e099ba18c5640b784884b029976a7f2b1e/releases/v0.3.278/TLE.js",
     "changelog_path": "releases/v0.3.278/CHANGELOG.md",
-    "sha256": "1916ddc56cab1f9183ec8540121ec05b850f3c4df9ae62a4a61e41858cd54e3d",
+    "sha256": "82a39b15f8beb34b5f0c9d48fbe7c6a292cf307772a17c4ea0bb5ee27ac41b31",
     "size_bytes": 977716
   },
-  "status": "TEST v0.3.278：整合桃mini 4.5.13 升级版高清头像引擎，并精确识别旧版 260402 的单张头像图层所有权。仅在具体聊天头像存在 data-hd-fixed 或 Div/Canvas 图层时跳过；单独存在全局样式节点不会误跳过现有头像。AvatarDeblur 原图直链仍可由引擎接管。自动化回归待完成；正式版不变。",
+  "status": "TEST v0.3.278：桃mini 4.5.13 高清头像引擎整合；ST 覆盖聊天头像、角色列表、角色预览、User 身份列表及 TLE 记录预览；TT 使用原生高清头像。旧版 Div/Canvas 仅在单张聊天头像确有图层标记时局部避让；AvatarDeblur 原图直链可被幂等接管。已同步更新面板版本号，自动化回归进行中；正式版不变。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
