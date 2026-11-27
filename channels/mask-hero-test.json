@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "project": "Tavern Layout Engine",
+  "channel": "mask-hero-test",
+  "latest_version": "0.3.295",
+  "minimum_loader_version": "0.3.0",
+  "recommended_loader_version": "0.3.0",
+  "release": {
+    "version": "0.3.295",
+    "source_path": "releases/v0.3.295/TLE.js",
+    "source_commit": "9b62b05df207a4b18dbce54ba7e5c51582a1efdc",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/9b62b05df207a4b18dbce54ba7e5c51582a1efdc/releases/v0.3.295/TLE.js",
+    "changelog_path": "releases/v0.3.295/CHANGELOG.md",
+    "sha256": "e83f63c9a7ade5e55a2e49fb617cbf92c13d17a661e5b7f660c5ee05df3e564f",
+    "size_bytes": 1072040
+  },
+  "status": "TEST v0.3.295 · 打码侠首轮实现。请在 TLE 引擎面板手动启用打码侠后测试；不修改正式版 latest.json / release-plan.json。重点验证名称、楼层、正文精确/正则替换、头像覆盖、方案保存恢复、聊天切换与原生编辑安全。",
+  "loader_release": {
+    "version": "0.3.0",
+    "source_path": "loader/TLE-Mask-Hero-Test-Loader-0.3.0.js",
+    "source_commit": "11b9ca1bc3f99bc36e4a35aea6e847a1d51991af",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/11b9ca1bc3f99bc36e4a35aea6e847a1d51991af/loader/TLE-Mask-Hero-Test-Loader-0.3.0.js",
+    "sha256": "ca4d18b8ac4cf3f8c6b2179380974b38bfde6e48d1dc15b347acdf26d938780d",
+    "size_bytes": 39923,
+    "installer_path": "loader/TLE-Mask-Hero-Test-Loader-0.3.0.json",
+    "installer_commit": "11b9ca1bc3f99bc36e4a35aea6e847a1d51991af",
+    "installer_url": "https://github.com/jerinmiss620-web/Tavern-Layout-Engine/blob/11b9ca1bc3f99bc36e4a35aea6e847a1d51991af/loader/TLE-Mask-Hero-Test-Loader-0.3.0.json"
+  }
+}

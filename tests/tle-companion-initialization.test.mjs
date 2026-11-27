@@ -7,6 +7,10 @@ const manifest = JSON.parse(read('latest.json'));
 const source = read('development/organizer/TLE.js');
 const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
 const release = read(manifest.release.source_path);
+let developmentVersion = manifest.release.version;
+try {
+  developmentVersion = JSON.parse(read('channels/mask-hero-test.json')).release.version || developmentVersion;
+} catch {}
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
 const featureBranch = /^refs\/heads\/feature\//.test(process.env.GITHUB_REF || '') ||
@@ -18,7 +22,7 @@ if (!featureBranch) {
   assert.equal(installer.content, release, 'feature work must not mutate the disabled stable backup package');
 }
 assert.equal(installer.content, release, 'the disabled stable backup package must contain the exact pinned stable source');
-new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
+new vm.Script(source, { filename: `TLE v${developmentVersion}` });
 
 function section(text, startMarker, endMarker) {
   const start = text.indexOf(startMarker);
@@ -121,10 +125,10 @@ assert.match(source, /未能应用任何项目/);
 assert.match(source, /companionUnavailableReason\(field, target, error\)/);
 assert.match(source, /companionQueueGenerationRetry\(\)/);
 assert.match(source, /companionScheduleState\(data, role\)/);
-assert.ok(source.includes('Core v' + manifest.release.version));
-assert.ok(source.includes('Host Diagnostics 2.0 · v' + manifest.release.version));
-assert.ok(source.includes('data-tle-update-summary>v' + manifest.release.version));
-assert.ok(source.includes('data-tle-runtime-version>v' + manifest.release.version));
-assert.ok(source.includes("version: '" + manifest.release.version + "'"));
+assert.ok(source.includes('Core v' + developmentVersion));
+assert.ok(source.includes('Host Diagnostics 2.0 · v' + developmentVersion));
+assert.ok(source.includes('data-tle-update-summary>v' + developmentVersion));
+assert.ok(source.includes('data-tle-runtime-version>v' + developmentVersion));
+assert.ok(source.includes("version: '" + developmentVersion + "'"));
 
-console.log('TLE companion initialization and schedule-recovery checks passed: v' + manifest.release.version + '.');
+console.log('TLE companion initialization and schedule-recovery checks passed: development v' + developmentVersion + '.');
