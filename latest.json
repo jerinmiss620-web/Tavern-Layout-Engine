@@ -2,16 +2,16 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "stable",
-  "latest_version": "0.3.290",
+  "latest_version": "0.3.291",
   "minimum_loader_version": "0.3.4",
   "release": {
-    "version": "0.3.290",
-    "source_path": "releases/v0.3.290/TLE.js",
-    "source_commit": "04cbe3916337c7edc551c48208a166188fc44595",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/04cbe3916337c7edc551c48208a166188fc44595/releases/v0.3.290/TLE.js",
-    "changelog_path": "releases/v0.3.290/CHANGELOG.md",
-    "sha256": "94faed75baa26048da996b3ceecab14cc4f4f42aad4d7e99a8d8a48052ca14c3",
-    "size_bytes": 979174
+    "version": "0.3.291",
+    "source_path": "releases/v0.3.291/TLE.js",
+    "source_commit": "c1acb11dd8db9434dfe4c08848495b73261ef611",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c1acb11dd8db9434dfe4c08848495b73261ef611/releases/v0.3.291/TLE.js",
+    "changelog_path": "releases/v0.3.291/CHANGELOG.md",
+    "sha256": "acf29b28abeee1cb711879f377876f5965bcff999f9ee3df244766c691b51ca2",
+    "size_bytes": 979548
   },
-  "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
+  "notes": "Candidate release. CI and immutable-source verification are required before promotion. See VALIDATION.md."
 }
