@@ -9,10 +9,10 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.286');
+assert.equal(version, '0.3.287');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.286'/);
+assert.match(moduleSource, /const VERSION = '0.3.287'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);/);
@@ -31,7 +31,7 @@ for (const line of moduleSource.slice(cssStart, cssEnd).split('\n')) {
   if (match && match[1].includes('{')) selectors.push(match[1].slice(0, match[1].indexOf('{')).trim());
 }
 assert.equal(new Set(selectors).size, selectors.length, 'No duplicate CSS selector override layers');
-assert.match(moduleSource, /--freesia-gallery-detail-main-gap: 0px/);
+assert.match(moduleSource, /--freesia-gallery-detail-main-gap: 5px/);
 assert.match(moduleSource, /--freesia-gallery-avatar-radius: 12px;/, 'The preview and detail avatar surfaces share one radius token');
 assert.match(moduleSource, /\.freesia-gallery-detail-avatar \{[^}]*border-radius: var\(--freesia-gallery-avatar-radius, 12px\) !important;/, 'The detail avatar frame uses the shared outer avatar radius');
 assert.match(moduleSource, /\.freesia-gallery-detail-avatar img \{[^}]*border-radius: inherit !important;/, 'The detail avatar image inherits the frame radius');

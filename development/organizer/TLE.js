@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.286
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.287
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -11382,14 +11382,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.286 · 记录预览头像与渐变边界同步</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.287 · 记录预览头像与渐变边界同步</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.286</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.287</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -18038,7 +18038,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.286';
+    const VERSION = '0.3.287';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -18188,7 +18188,7 @@ function createTLEGalleryHome(window, document) {
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-empty { padding: 24px 12px; text-align: center; opacity: 0.7; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-date-row .chatDate:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatMessageContainer:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay > .chatStats:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-session-card:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-file-row:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-character-link:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-lorebook:focus-visible, #chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-detail-chat-count:focus-visible { outline: 2px solid var(--SmartThemeQuoteColor, currentColor); outline-offset: 3px; }",
         "@media screen and (min-width: 821px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-header-wrap: nowrap; --freesia-gallery-header-gap: 8px; --freesia-gallery-summary-gap: 2px; } }",
-        "@media screen and (max-width: 820px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-detail-columns: 104px minmax(0, 1fr); --freesia-gallery-detail-gap: 8px; --freesia-gallery-detail-main-gap: 0px; --freesia-gallery-detail-heading-wrap: nowrap; --freesia-gallery-detail-heading-gap: 4px; --freesia-gallery-detail-heading-overflow: hidden; --freesia-gallery-detail-name-flex: 0 1 auto; --freesia-gallery-detail-name-max: 100%; --freesia-gallery-detail-name-size: 1.05em; --freesia-gallery-detail-name-line: 1.2; --freesia-gallery-detail-name-white-space: nowrap; --freesia-gallery-detail-name-overflow: hidden; --freesia-gallery-detail-name-text-overflow: ellipsis; --freesia-gallery-detail-name-wrap: normal; --freesia-gallery-lorebook-white-space: nowrap; --freesia-gallery-lorebook-overflow: hidden; --freesia-gallery-lorebook-text-overflow: ellipsis; --freesia-gallery-description-margin: 0; --freesia-gallery-description-padding: 6px 8px; --freesia-gallery-description-size: 0.86em; --freesia-gallery-description-line: 1.3; --freesia-gallery-detail-chat-margin: 10px 0 10px;  } }",
+        "@media screen and (max-width: 820px) { #chat .welcomePanel." + ACTIVE_CLASS + " { --freesia-gallery-detail-columns: 104px minmax(0, 1fr); --freesia-gallery-detail-gap: 8px; --freesia-gallery-detail-main-gap: 5px; --freesia-gallery-detail-heading-wrap: nowrap; --freesia-gallery-detail-heading-gap: 4px; --freesia-gallery-detail-heading-overflow: hidden; --freesia-gallery-detail-name-flex: 0 1 auto; --freesia-gallery-detail-name-max: 100%; --freesia-gallery-detail-name-size: 1.05em; --freesia-gallery-detail-name-line: 1.2; --freesia-gallery-detail-name-white-space: nowrap; --freesia-gallery-detail-name-overflow: hidden; --freesia-gallery-detail-name-text-overflow: ellipsis; --freesia-gallery-detail-name-wrap: normal; --freesia-gallery-lorebook-white-space: nowrap; --freesia-gallery-lorebook-overflow: hidden; --freesia-gallery-lorebook-text-overflow: ellipsis; --freesia-gallery-description-margin: 0; --freesia-gallery-description-padding: 6px 8px; --freesia-gallery-description-size: 0.86em; --freesia-gallery-description-line: 1.3; --freesia-gallery-detail-chat-margin: 10px 0 10px;  } }",
     ].join('\n');
 
     function createElement(tagName, className, text) {
@@ -20054,7 +20054,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.286',
+    version: '0.3.287',
     ready: false,
     destroy,
     state,
@@ -20512,5 +20512,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.286 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.287 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
