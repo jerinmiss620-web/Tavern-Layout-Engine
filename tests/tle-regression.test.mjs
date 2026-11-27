@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readRaw = relative => readFileSync(path.join(root, relative), 'utf8');
 const manifest = JSON.parse(readRaw('channels/test.json'));
+const stableManifest = JSON.parse(readRaw('latest.json'));
 const legacyFiles = manifest.release.version === '0.3.204' ? {
   'releases/v0.3.204/TLE.js': 'tests/fixtures/legacy/core-v0.3.204.js',
   'loader/TLE-Remote-Loader-Test-0.3.0.js': 'tests/fixtures/legacy/test-loader-v0.3.0.js',
@@ -159,8 +160,8 @@ if (process.argv.includes('--current')) {
     assert.equal(read('development/organizer/TLE.js'), read('releases/v' + plan.core + '/TLE.js'),
       'Development Core and current immutable release source must match byte-for-byte on stable branches');
   } else {
-    assert.equal(read('releases/v' + plan.core + '/TLE.js'), read(manifest.release.source_path),
-      'feature work must leave the current immutable release artifact untouched');
+    assert.equal(read('releases/v' + plan.core + '/TLE.js'), read(stableManifest.release.source_path),
+      'feature work must leave the current stable immutable release artifact untouched');
   }
 }assert.ok(tle.includes('opacity: var(--tle-nav-icon-opacity, 0.7) !important;'));
 assert.doesNotMatch(tle, /body\[data-tle-nav\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle > \.drawer-icon \{\s*opacity:/);
