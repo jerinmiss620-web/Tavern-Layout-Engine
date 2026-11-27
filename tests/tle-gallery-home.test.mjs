@@ -9,7 +9,7 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.289');
+assert.equal(version, '0.3.293');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(core, /#\$\{ID\.nav\} > button \{\s*position: relative;\s*display: flex;/,
   'nav button positioning must live in the base rule');
