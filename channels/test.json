@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.292",
+  "latest_version": "0.3.293",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.292",
-    "source_path": "releases/v0.3.292/TLE.js",
-    "source_commit": "3eb97c7060f29a0256fd833c5c736820831fd169",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/3eb97c7060f29a0256fd833c5c736820831fd169/releases/v0.3.292/TLE.js",
-    "changelog_path": "releases/v0.3.292/CHANGELOG.md",
-    "sha256": "de48d70540bd4b03ffa0e1b75a9db2f516673bb05caeddff3907bc59bd61d18e",
-    "size_bytes": 1021050
+    "version": "0.3.293",
+    "source_path": "releases/v0.3.293/TLE.js",
+    "source_commit": "f7e2708796e3cea54a405c0e612f5b5653f10fcc",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/f7e2708796e3cea54a405c0e612f5b5653f10fcc/releases/v0.3.293/TLE.js",
+    "changelog_path": "releases/v0.3.293/CHANGELOG.md",
+    "sha256": "2ee00983c38d40f9920b77ffb6d14467c5bf565ab99670a9cc96d5e738ff0147",
+    "size_bytes": 1029728
   },
-  "status": "TEST v0.3.292：基于 main / Core v0.3.291，整合角色专属预设条目方案与导航图标可见性、透明度修复。现有 Organizer Branch Test Loader 0.3.0 可直接检测此更新，无需重新导入 Loader。正式版不变。",
+  "status": "TEST v0.3.293：在现有 Organizer 测试频道 v0.3.292 基线上修复配套侠的全局世界书选择器。改为收起式复选下拉，保留原生多选数据源、缺失项保护和方案应用数据结构；正式版不变。现有 Organizer Branch Test Loader 0.3.0 可直接检测更新，无需重新导入 Loader。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",
