@@ -86,6 +86,11 @@ checkPinnedUrl(loaderRelease.source_url, loaderRelease.source_commit, loaderRele
 const loaderBytes = checkLocalSource(loaderRelease.source_path, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
 const loaderSource = loaderBytes.toString('utf8');
 new Function(loaderSource);
+if (release.version === '0.3.290') {
+  assert.ok(loaderSource.includes('feature/companion-prompt-entry-states-20261127/channels/test.json'));
+  assert.ok(loaderSource.includes('TLE_Companion_Prompt_States_Branch_Test_Cache'));
+  assert.ok(loaderSource.includes('tle.loader.companionPromptStatesBranchTest.lastKnownGood.v1'));
+}
 
 // The importable Tavern Helper JSON must contain exactly the pinned loader source.
 const installer = JSON.parse(readText(loaderRelease.installer_path));

@@ -99,6 +99,11 @@ if (manifest.release.version === '0.3.222') {
   assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
   assert.match(loader, /tle\.loader\.organizerBranchTest\.lastKnownGood\.v1/);
 }
+if (manifest.release.version === '0.3.290') {
+  assert.match(loader, /feature\/companion-prompt-entry-states-20261127\/channels\/test\.json/);
+  assert.match(loader, /TLE_Companion_Prompt_States_Branch_Test_Cache/);
+  assert.match(loader, /tle\.loader\.companionPromptStatesBranchTest\.lastKnownGood\.v1/);
+}
 
 const installer = JSON.parse(read(loaderRelease.installer_path));
 assert.equal(installer.type, 'script');

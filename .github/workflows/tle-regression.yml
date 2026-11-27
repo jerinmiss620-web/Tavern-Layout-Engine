@@ -17,8 +17,8 @@ jobs:
       - run: npm ci
       - name: Full-source update simulation, compatibility and publication guards
         run: npm test
-      - name: Verify Organizer branch test channel and pinned installer
-        if: github.ref == 'refs/heads/feature/organizer-nav-worldbooks-20261125'
+      - name: Verify feature branch test channel and pinned installer
+        if: github.ref == 'refs/heads/feature/organizer-nav-worldbooks-20261125' || github.ref == 'refs/heads/feature/companion-prompt-entry-states-20261127'
         run: node loader/verify-test-channel.mjs --remote
       - name: Verify published manifests and immutable GitHub artifacts
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

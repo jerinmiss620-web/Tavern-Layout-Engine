@@ -3,14 +3,24 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const manifest = JSON.parse(read('latest.json'));
+const stableManifest = JSON.parse(read('latest.json'));
+const testManifest = JSON.parse(read('channels/test.json'));
 const source = read('development/organizer/TLE.js');
 const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
-const release = read(manifest.release.source_path);
-const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
-
-assert.equal(release, source, 'the pinned stable source must match the working source');
-assert.equal(installer.content, source, 'the disabled stable backup package must contain the exact stable source');
+let testCandidate = '';
+try { testCandidate = read(testManifest.release.source_path); } catch {}
+const usingTestCandidate = testCandidate === source;
+const manifest = usingTestCandidate ? testManifest : stableManifest;
+const release = usingTestCandidate ? testCandidate : read(stableManifest.release.source_path);
+assert.equal(release, source, 'the development source must match the active branch candidate or stable source');
+let installerText = '';
+try { installerText = read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`); } catch {}
+if (installerText) {
+  const installer = JSON.parse(installerText);
+  assert.equal(installer.content, source, 'the disabled backup package must contain the exact source');
+} else {
+  assert.ok(usingTestCandidate, 'a stable release must retain its disabled backup package');
+}
 new vm.Script(source, { filename: `TLE v${manifest.release.version}` });
 
 function section(text, startMarker, endMarker) {
@@ -20,8 +30,8 @@ function section(text, startMarker, endMarker) {
   return text.slice(start, end);
 }
 
-// The change is deliberately limited to initialization/dispatch and schedule-token bookkeeping.
-// The configuration catalog, schedule calculation, manual hold and application engine stay intact.
+// The existing configuration catalog, schedule calculation, manual hold and base per-item engine stay intact.
+// The role-specific Prompt Manager state restore is appended after the original fields are applied.
 assert.equal(
   section(source, '  const COMPANION_FIELDS = [', '  const companionRuntime = {'),
   section(previous, '  const COMPANION_FIELDS = [', '  const companionRuntime = {'),
@@ -37,11 +47,19 @@ assert.equal(
   section(previous, '  function companionManualHold(', '  function companionAutoTarget('),
   'manual override expiry must remain unchanged'
 );
-assert.equal(
-  section(source, '  async function companionApply(', '  function companionOnChatChanged('),
-  section(previous, '  async function companionApply(', '  function companionOnChatChanged('),
-  'the complete per-item application engine and failure reporting must remain unchanged'
-);
+const applySection = section(source, '  async function companionApply(', '  function companionOnChatChanged(');
+const previousApplySection = section(previous, '  async function companionApply(', '  function companionOnChatChanged(');
+for (const marker of [
+  'for (const field of COMPANION_FIELDS)',
+  'companionUnavailableReason(field, target, error)',
+  'if (finished > 0) companionRuntime.lastApplied.set(role.key, id);',
+]) {
+  assert.ok(applySection.includes(marker), 'the existing application engine lost: ' + marker);
+  assert.ok(previousApplySection.includes(marker), 'the legacy application engine fixture is incomplete: ' + marker);
+}
+assert.match(applySection, /await companionApplyPromptStates\(plan\.fields\.promptStates, plan, state\.abort\.signal\)/);
+assert.match(source, /function companionApplyPromptStates\(/);
+assert.match(source, /getPresetApplicationPromise/);
 
 // A real initialization now records the already-open role instead of simulating a role change.
 const bind = section(source, '  function companionBindEvents() {', '  function companionCleanup() {');

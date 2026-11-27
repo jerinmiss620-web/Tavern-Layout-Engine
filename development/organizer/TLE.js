@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.289
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.290
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3731,6 +3731,12 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 .tle-companion-field { display: grid; grid-template-columns: auto minmax(64px, .6fr) minmax(0, 2fr); align-items: center; gap: 7px; min-width: 0; }
 .tle-companion-field > .text_pole { width: 100%; min-width: 0; }
 .tle-companion-field-label { font-size: .88em; }
+.tle-companion-prompt-states { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; min-width:0; padding:4px 0; }
+.tle-companion-prompt-states-copy { display:flex; flex:1 1 180px; flex-direction:column; gap:3px; min-width:0; }
+.tle-companion-prompt-states-title { display:flex; align-items:center; gap:7px; min-width:0; }
+.tle-companion-prompt-states-title > input { flex:0 0 auto; }
+.tle-companion-prompt-states-status { font-size:.8em; line-height:1.4; opacity:.75; overflow-wrap:anywhere; }
+.tle-companion-prompt-states-action { display:flex; flex:0 0 auto; align-items:center; gap:6px; }
 .tle-companion-default { display: flex; flex-direction: row !important; align-items: center; gap: 8px; }
 .tle-companion-actions > .menu_button { white-space: nowrap; }
 .tle-companion-default-action {
@@ -8625,6 +8631,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       // supplied theme manager. Never dispatch input + change or trigger twice.
       select.dispatchEvent(new HOST_WIN.Event('change', { bubbles: true }));
     }
+    if (id === 'preset') {
+      const openai = await quickImport('/scripts/openai.js');
+      if (typeof openai.getPresetApplicationPromise !== 'function') throw new Error('当前宿主未提供预设应用完成信号，无法安全继续后续配置。');
+      await openai.getPresetApplicationPromise();
+    }
     queueInfoRefresh();
     if (id === 'persona') updateWorkspaceHeader();
   }
@@ -11377,14 +11388,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.289 · 记录预览头像与渐变边界同步</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.290 · 记录预览头像与渐变边界同步</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.289</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.290</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13434,10 +13445,156 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return fields;
   }
+
+  // Prompt Manager snapshots intentionally contain only stable identifiers and enabled flags.
+  // Prompt definitions, text, and display order remain owned by the selected preset.
+  function companionPromptStatesNormalize(snapshot) {
+    if (!snapshot || snapshot.schema !== 1 || !snapshot.preset || snapshot.preset.selectId !== 'settings_preset_openai'
+        || typeof snapshot.preset.value !== 'string' || !snapshot.preset.value || !Array.isArray(snapshot.entries)) return null;
+    const seen=new Set(),entries=[];
+    for(const entry of snapshot.entries){
+      if(!entry||typeof entry.identifier!=='string'||!entry.identifier||typeof entry.enabled!=='boolean'||seen.has(entry.identifier))continue;
+      seen.add(entry.identifier);entries.push({identifier:entry.identifier,enabled:entry.enabled});
+    }
+    if(!entries.length)return null;
+    entries.sort((a,b)=>a.identifier.localeCompare(b.identifier));
+    return {schema:1,preset:{selectId:'settings_preset_openai',value:snapshot.preset.value,label:String(snapshot.preset.label||snapshot.preset.value)},entries,capturedAt:Number.isFinite(snapshot.capturedAt)?snapshot.capturedAt:0};
+  }
+  function companionPromptStatesMatchesPreset(snapshot,currentPreset){
+    const saved=companionPromptStatesNormalize(snapshot);
+    return Boolean(saved&&currentPreset&&saved.preset.selectId===currentPreset.selectId&&saved.preset.value===String(currentPreset.value));
+  }
+  function companionPromptStatesReconcile(snapshot,currentEntries){
+    const saved=companionPromptStatesNormalize(snapshot);
+    if(!saved)return {matched:0,changes:[],skipped:[{identifier:'',reason:'条目状态快照无效'}],untracked:[]};
+    const current=new Map(),duplicates=new Set();
+    for(const entry of Array.isArray(currentEntries)?currentEntries:[]){
+      const identifier=String(entry?.identifier||'');if(!identifier||duplicates.has(identifier))continue;
+      if(current.has(identifier)){current.delete(identifier);duplicates.add(identifier);continue;}
+      current.set(identifier,{enabled:entry.enabled===true,toggleable:entry.toggleable===true});
+    }
+    const changes=[],skipped=[];let matched=0;
+    for(const entry of saved.entries){
+      if(duplicates.has(entry.identifier)){skipped.push({identifier:entry.identifier,reason:'当前预设存在重复条目标识，无法安全匹配'});continue;}
+      const item=current.get(entry.identifier);
+      if(!item){skipped.push({identifier:entry.identifier,reason:'条目已删除或当前预设中不存在'});continue;}
+      if(!item.toggleable){skipped.push({identifier:entry.identifier,reason:'该条目当前不可切换'});continue;}
+      matched++;if(item.enabled!==entry.enabled)changes.push({identifier:entry.identifier,enabled:entry.enabled});
+    }
+    const savedIds=new Set(saved.entries.map(entry=>entry.identifier));
+    const untracked=[...current.entries()].filter(([id,item])=>item.toggleable&&!savedIds.has(id)).map(([id])=>id);
+    return {matched,changes,skipped,untracked};
+  }
+  function companionPromptStatesSummary(snapshot){
+    const saved=companionPromptStatesNormalize(snapshot);if(!saved)return '未记录有效的条目状态';
+    const enabled=saved.entries.filter(entry=>entry.enabled).length;
+    return saved.preset.label+' · '+saved.entries.length+' 项（'+enabled+' 开 / '+(saved.entries.length-enabled)+' 关）';
+  }
+  function companionCurrentPreset(){
+    const select=quickSelect('settings_preset_openai');
+    const option=select?.selectedOptions?.[0]||(select&&select.selectedIndex>=0?select.options[select.selectedIndex]:null);
+    if(!select||!option||select.value==null||String(select.value)==='')return null;
+    return {selectId:select.id,value:String(select.value),label:String(option.textContent||select.value).trim()};
+  }
+  function companionPromptManagerList(){return HOST_DOC.getElementById('completion_prompt_manager_list');}
+  function companionWaitForPromptManagerReady(signal=state.abort.signal){
+    const readyList=()=>{const list=companionPromptManagerList();return list&&list.querySelector('.completion_prompt_manager_prompt[data-pm-identifier]')?list:null;};
+    const existing=readyList();if(existing)return Promise.resolve(existing);
+    return new Promise((resolve,reject)=>{
+      let timer=0,observer=null,settled=false;
+      const cleanup=()=>{if(timer)HOST_WIN.clearTimeout(timer);observer?.disconnect();signal?.removeEventListener('abort',onAbort);};
+      const finish=(list,error)=>{if(settled)return;settled=true;cleanup();if(error)reject(error);else resolve(list);};
+      const onAbort=()=>finish(null,new Error('等待提示词条目列表时操作已取消。'));
+      const check=()=>{if(state.destroyed||signal?.aborted)return onAbort();const list=readyList();if(list)finish(list);};
+      observer=new HOST_WIN.MutationObserver(check);observer.observe(HOST_DOC.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-pm-identifier']});
+      signal?.addEventListener('abort',onAbort,{once:true});
+      timer=HOST_WIN.setTimeout(()=>finish(null,new Error('未能读取原生提示词条目列表。请先打开酒馆的对话补全预设面板，等待条目加载后重试。')),3000);check();
+    });
+  }
+  async function companionWaitForPromptManagerStable(signal=state.abort.signal){
+    const openai=await quickImport('/scripts/openai.js');
+    if(typeof openai.getPresetApplicationPromise!=='function')throw new Error('当前宿主未提供预设应用完成信号，无法安全读取提示词条目。');
+    await openai.getPresetApplicationPromise();
+    const list=await companionWaitForPromptManagerReady(signal);
+    await new Promise((resolve,reject)=>{
+      let quietTimer=0,maxTimer=0,observer=null,settled=false;
+      const cleanup=()=>{if(quietTimer)HOST_WIN.clearTimeout(quietTimer);if(maxTimer)HOST_WIN.clearTimeout(maxTimer);observer?.disconnect();signal?.removeEventListener('abort',onAbort);};
+      const finish=(ok,error)=>{if(settled)return;settled=true;cleanup();if(error)reject(error);else if(ok)resolve();else reject(new Error('提示词条目列表未能稳定刷新，请稍后重试。'));};
+      const onAbort=()=>finish(false,new Error('等待提示词条目刷新时操作已取消。'));
+      const schedule=()=>{if(quietTimer)HOST_WIN.clearTimeout(quietTimer);quietTimer=HOST_WIN.setTimeout(()=>finish(true),500);};
+      observer=new HOST_WIN.MutationObserver(schedule);observer.observe(list,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-pm-identifier']});
+      signal?.addEventListener('abort',onAbort,{once:true});maxTimer=HOST_WIN.setTimeout(()=>finish(false),3000);schedule();
+    });
+    return list;
+  }
+  function companionReadPromptManagerEntries(list=companionPromptManagerList()){
+    if(!list)return [];
+    return [...list.querySelectorAll('.completion_prompt_manager_prompt[data-pm-identifier]')].map(row=>({
+      identifier:String(row.dataset.pmIdentifier||''),enabled:!row.classList.contains('completion_prompt_manager_prompt_disabled'),
+      toggleable:Boolean(row.querySelector('.prompt-manager-toggle-action')),
+    })).filter(entry=>entry.identifier);
+  }
+  async function companionCapturePromptStates(signal=state.abort.signal){
+    const preset=companionCurrentPreset();if(!preset)throw new Error('无法读取当前对话补全预设。请先打开原生预设面板。');
+    const list=await companionWaitForPromptManagerStable(signal),entries=companionReadPromptManagerEntries(list).filter(entry=>entry.toggleable);
+    if(!entries.length)throw new Error('当前预设没有可保存开关状态的提示词条目。');
+    const seen=new Set();for(const entry of entries){if(seen.has(entry.identifier))throw new Error('发现重复的提示词条目标识。为避免错套状态，本次没有保存。');seen.add(entry.identifier);}
+    return companionPromptStatesNormalize({schema:1,preset,entries:entries.map(entry=>({identifier:entry.identifier,enabled:entry.enabled})),capturedAt:Date.now()});
+  }
+  function companionWaitForPromptToggleState(identifier,enabled,signal=state.abort.signal){
+    const matches=()=>{const list=companionPromptManagerList();if(!list)return false;const rows=[...list.querySelectorAll('.completion_prompt_manager_prompt[data-pm-identifier]')].filter(row=>row.dataset.pmIdentifier===identifier);return rows.length===1&&(!rows[0].classList.contains('completion_prompt_manager_prompt_disabled'))===enabled;};
+    if(matches())return Promise.resolve(true);
+    return new Promise(resolve=>{
+      let timer=0,observer=null,settled=false;
+      const cleanup=()=>{if(timer)HOST_WIN.clearTimeout(timer);observer?.disconnect();signal?.removeEventListener('abort',onAbort);};
+      const finish=value=>{if(settled)return;settled=true;cleanup();resolve(Boolean(value));};
+      const onAbort=()=>finish(false),check=()=>{if(state.destroyed||signal?.aborted)return finish(false);if(matches())finish(true);};
+      observer=new HOST_WIN.MutationObserver(check);observer.observe(HOST_DOC.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+      signal?.addEventListener('abort',onAbort,{once:true});timer=HOST_WIN.setTimeout(()=>finish(matches()),1500);check();
+    });
+  }
+  function companionWatchSettingsUpdated(signal=state.abort.signal){
+    const context=HOST_WIN.SillyTavern?.getContext?.()||{},source=context.eventSource,types=context.eventTypes||context.event_types,eventName=types?.SETTINGS_UPDATED;
+    if(!source||!eventName||(typeof source.on!=='function'&&typeof source.once!=='function')){let timer=0;const promise=new Promise(resolve=>{timer=HOST_WIN.setTimeout(()=>resolve(true),350);});return {promise,cancel:()=>HOST_WIN.clearTimeout(timer)};}
+    let settled=false,timer=0,resolvePromise;const promise=new Promise(resolve=>{resolvePromise=resolve;});
+    const remove=source.removeListener||source.off;
+    const finish=saved=>{if(settled)return;settled=true;if(timer)HOST_WIN.clearTimeout(timer);if(typeof remove==='function')remove.call(source,eventName,onUpdated);signal?.removeEventListener('abort',onAbort);resolvePromise(Boolean(saved));};
+    const onUpdated=()=>finish(true),onAbort=()=>finish(false);
+    if(typeof source.once==='function')source.once(eventName,onUpdated);else source.on(eventName,onUpdated);
+    signal?.addEventListener('abort',onAbort,{once:true});timer=HOST_WIN.setTimeout(()=>finish(false),4000);
+    return {promise,cancel:()=>finish(false)};
+  }
+  async function companionApplyPromptStates(snapshot,plan,signal=state.abort.signal){
+    const saved=companionPromptStatesNormalize(snapshot);if(!saved)throw new Error('提示词条目状态快照无效或为空。');
+    const plannedPreset=plan?.fields?.preset;
+    if(plannedPreset&&(plannedPreset.selectId!==saved.preset.selectId||String(plannedPreset.value)!==saved.preset.value))throw new Error('配套方案指定的预设与条目状态绑定的预设不同。请重新采集条目状态，或调整预设配置。');
+    let activePreset=companionCurrentPreset();
+    if(!companionPromptStatesMatchesPreset(saved,activePreset)){
+      if(plannedPreset)throw new Error('方案预设尚未切换到条目状态所绑定的预设，已跳过条目状态恢复。');
+      const catalog=await quickCatalog('preset',true,signal),target=(Array.isArray(catalog)?catalog:[]).find(item=>item.selectId===saved.preset.selectId&&String(item.value)===saved.preset.value);
+      if(!target)throw new Error('找不到条目状态绑定的预设「'+saved.preset.label+'」，请检查预设是否已重命名或删除。');
+      await applyQuickChoice('preset',target,signal);activePreset=companionCurrentPreset();
+      if(!companionPromptStatesMatchesPreset(saved,activePreset))throw new Error('预设切换后未能确认当前预设，已停止恢复条目状态。');
+    }
+    const list=await companionWaitForPromptManagerStable(signal),reconciliation=companionPromptStatesReconcile(saved,companionReadPromptManagerEntries(list)),skipped=[...reconciliation.skipped];
+    let applied=0;const saveWatch=reconciliation.changes.length?companionWatchSettingsUpdated(signal):null;
+    for(const change of reconciliation.changes){
+      if(state.destroyed||signal?.aborted)throw new Error('提示词条目状态恢复已取消。');
+      if(isNativeGenerationVisible())throw new Error('生成期间不能切换提示词条目状态。');
+      const currentList=companionPromptManagerList(),rows=currentList?[...currentList.querySelectorAll('.completion_prompt_manager_prompt[data-pm-identifier]')].filter(row=>row.dataset.pmIdentifier===change.identifier):[];
+      const toggle=rows.length===1?rows[0].querySelector('.prompt-manager-toggle-action'):null;
+      if(!toggle){skipped.push({identifier:change.identifier,reason:'条目控件已变化或无法安全定位'});continue;}
+      toggle.click();if(await companionWaitForPromptToggleState(change.identifier,change.enabled,signal))applied++;else skipped.push({identifier:change.identifier,reason:'宿主未能确认开关状态已更新'});
+    }
+    if(saveWatch){if(applied>0){if(!await saveWatch.promise)skipped.push({identifier:'',reason:'宿主未确认条目开关状态已保存'});}else saveWatch.cancel();}
+    return {matched:reconciliation.matched,applied,skipped,untracked:reconciliation.untracked};
+  }
+
   function companionPlanPreview(plan) {
     const preview = quickNode('div', 'tle-companion-preview');
     const fields = COMPANION_FIELDS.filter(field => plan.fields?.[field.id]);
-    if (!fields.length) {
+    const hasPromptStates = Boolean(plan.fields?.promptStates);
+    if (!fields.length && !hasPromptStates) {
       preview.append(quickNode('small', 'tle-companion-preview-empty', '空方案'));
       return preview;
     }
@@ -13452,6 +13609,12 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         : rawValue == null || rawValue === '' ? '—' : String(rawValue);
       const value = quickNode('span', 'tle-companion-preview-value', valueText);
       item.append(label, value);
+      preview.append(item);
+    }
+    if (hasPromptStates) {
+      const item = quickNode('div', 'tle-companion-preview-item');
+      item.append(quickNode('span','tle-companion-preview-label','提示词条目状态'),
+        quickNode('span','tle-companion-preview-value',companionPromptStatesSummary(plan.fields.promptStates)));
       preview.append(item);
     }
     return preview;
@@ -13675,6 +13838,40 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       : '该旧方案尚未记录全局世界书；勾选左侧并保存，即可记录当前已选书目';
     return { line, toggle, select, choices, saved };
   }
+  function companionPromptStatesEditorRow(saved,presetRow,signal) {
+    const line=quickNode('div','tle-companion-prompt-states'),copy=quickNode('div','tle-companion-prompt-states-copy');
+    const label=quickNode('label','tle-companion-prompt-states-title'),toggle=quickNode('input');
+    toggle.type='checkbox';let snapshot=companionPromptStatesNormalize(saved);toggle.checked=Boolean(saved);
+    label.append(toggle,quickNode('strong','','提示词条目状态'));
+    const description=quickNode('small','tle-muted','只保存条目标识与开启 / 关闭状态，不复制预设正文、条目内容或排列顺序。');
+    const status=quickNode('small','tle-companion-prompt-states-status',snapshot?companionPromptStatesSummary(snapshot):'未记录。勾选后采集当前预设的条目开关。');
+    copy.append(label,description,status);
+    const actions=quickNode('div','tle-companion-prompt-states-action');
+    const capture=companionTextButton(snapshot?'重新采集当前状态':'采集当前状态',async()=>{
+      if(!toggle.checked)return;
+      try{
+        let targetPreset=null;
+        if(presetRow?.toggle?.checked){
+          let signature;try{signature=JSON.parse(presetRow.select?.value||'');}catch{}
+          if(!signature||signature[0]!=='settings_preset_openai'||signature[1]==null)throw new Error('方案中的预设选择无效，无法采集条目状态。');
+          targetPreset={selectId:signature[0],value:String(signature[1])};
+        }
+        const activePreset=companionCurrentPreset();
+        if(!activePreset)throw new Error('无法读取当前预设。请先打开原生对话补全预设面板。');
+        if(targetPreset&&(targetPreset.selectId!==activePreset.selectId||targetPreset.value!==activePreset.value))throw new Error('当前加载的预设与方案选择的预设不同。请先在原生预设面板切换到方案指定的预设，再采集。');
+        const captured=await companionCapturePromptStates(signal);
+        if(signal?.aborted||state.destroyed)return;
+        if(targetPreset&&!companionPromptStatesMatchesPreset(captured,targetPreset))throw new Error('采集到的条目状态与方案预设不一致。');
+        snapshot=captured;toggle.checked=true;status.textContent=companionPromptStatesSummary(snapshot);capture.textContent='重新采集当前状态';
+        companionNotice('success','已采集 '+snapshot.entries.length+' 个提示词条目的开关状态。');
+      }catch(error){if(signal?.aborted||state.destroyed)return;status.textContent=error?.message||'采集失败。';companionNotice('warning',status.textContent);}
+    });
+    capture.disabled=!toggle.checked;
+    toggle.addEventListener('change',()=>{capture.disabled=!toggle.checked;status.textContent=!toggle.checked?'保存方案时将移除这份条目状态记录。':snapshot?companionPromptStatesSummary(snapshot):'已启用；请采集当前状态后再保存。';});
+    actions.append(capture);line.append(copy,actions);
+    return {line,toggle,get snapshot(){return snapshot;}};
+  }
+
   async function companionOpenEditor(planId = '', duplicate = false, replaceCurrent = false) {
     const role = companionCurrentRole();
     if (!role) { companionNotice('warning', '请先进入单角色聊天。'); return; }
@@ -13690,6 +13887,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (quickPanel !== shell || state.destroyed) return;
     pending.remove();
     const fields = source && !replaceCurrent ? source.fields : companionSnapshot(catalogs);
+    if (source && replaceCurrent && source.fields?.promptStates
+        && companionPromptStatesMatchesPreset(source.fields.promptStates, companionCurrentPreset())) {
+      fields.promptStates = source.fields.promptStates;
+    }
     const form = quickNode('div', 'tle-companion-editor');
     const nameLabel = quickNode('label', '', '方案名称');
     const nameInput = quickNode('input', 'text_pole');
@@ -13702,6 +13903,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       form.append(item.line);
       return { field, ...item };
     });
+    const promptStatesRow = companionPromptStatesEditorRow(fields.promptStates, rows.find(row => row.field.id === 'preset'), shell.abort.signal);
+    form.append(promptStatesRow.line);
     const actions = quickNode('div', 'tle-companion-actions');
     const saveButton = companionTextButton('保存方案', () => {
       const name = nameInput.value.trim();
@@ -13730,6 +13933,18 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           selectId: signature[0], value: signature[1],
           label: selected?.label || (row.saved?.label || String(signature[1])),
         };
+      }
+      if (promptStatesRow.toggle.checked) {
+        const snapshot = promptStatesRow.snapshot;
+        if (!snapshot) { companionNotice('warning', '已启用提示词条目状态，但尚未采集。请先点击「采集当前状态」。'); return; }
+        const presetRow = rows.find(row => row.field.id === 'preset');
+        if (presetRow?.toggle.checked) {
+          let signature; try { signature = JSON.parse(presetRow.select?.value || ''); } catch {}
+          if (!signature || !companionPromptStatesMatchesPreset(snapshot, { selectId: signature[0], value: String(signature[1]) })) {
+            companionNotice('warning', '方案选择的预设与条目状态快照不一致。请切换到目标预设重新采集，或关闭条目状态配置。'); return;
+          }
+        }
+        nextFields.promptStates = snapshot;
       }
       if (!Object.keys(nextFields).length) { companionNotice('warning', '没有可保存的配置项。'); return; }
       const fresh = companionRead();
@@ -13994,6 +14209,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let finished = 0;
     try {
       const skipped = [];
+      const notes = [];
       for (const field of COMPANION_FIELDS) {
         const target = plan.fields[field.id];
         if (!target) continue;
@@ -14034,6 +14250,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           console.warn('[配套侠] 跳过不可用项目：' + field.name, error);
         }
       }
+      if (plan.fields?.promptStates) {
+        try {
+          const promptResult = await companionApplyPromptStates(plan.fields.promptStates, plan, state.abort.signal);
+          if (promptResult.matched > 0) finished++;
+          if (promptResult.skipped.length) {
+            const details = promptResult.skipped.map(item => (item.identifier ? item.identifier.slice(0, 12) + '：' : '') + item.reason).join('；');
+            skipped.push({ name:'提示词条目状态', target:promptResult.matched+' 个已匹配条目',
+              reason:'已恢复 '+promptResult.applied+' 项，跳过 '+promptResult.skipped.length+' 项：'+details });
+          }
+          if (promptResult.untracked.length) notes.push(promptResult.untracked.length+' 个新增条目未纳入快照，保留预设当前状态');
+        } catch (error) {
+          skipped.push({ name:'提示词条目状态', target:'当前对话补全预设', reason:error?.message||'无法读取或恢复提示词条目状态' });
+          console.warn('[配套侠] 提示词条目状态恢复失败',error);
+        }
+      }
       if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
       if (finished > 0) companionRuntime.lastApplied.set(role.key, id);
       if (!automatic && finished > 0) {
@@ -14047,9 +14278,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (skipped.length) {
         const details = skipped.map(item => item.name + '「' + item.target + '」：' + item.reason).join('；');
         const status = finished > 0 ? '部分应用完成' : '未能应用任何项目';
-        companionNotice('warning', '「' + plan.name + '」' + status + '：成功 ' + finished + ' 项，跳过 ' + skipped.length + ' 项。未应用项目：' + details);
+        companionNotice('warning', '「' + plan.name + '」' + status + '：成功 ' + finished + ' 项，跳过 ' + skipped.length + ' 项。未应用项目：' + details
+          + (notes.length ? '；提示：' + notes.join('；') : ''));
       } else if (finished > 0) {
-        companionNotice('success', '已应用「' + plan.name + '」；绑定壁纸跟随 UI 主题。');
+        companionNotice(notes.length ? 'info' : 'success',
+          '已应用「' + plan.name + '」；' + (notes.length ? notes.join('；') + '；' : '') + '绑定壁纸跟随 UI 主题。');
       } else {
         companionNotice('warning', '该方案没有可应用的配置项。');
       }
@@ -18033,7 +18266,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.289';
+    const VERSION = '0.3.290';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -20048,7 +20281,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.289',
+    version: '0.3.290',
     ready: false,
     destroy,
     state,
@@ -20506,5 +20739,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.289 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.290 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
