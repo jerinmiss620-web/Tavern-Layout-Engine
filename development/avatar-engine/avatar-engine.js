@@ -115,7 +115,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
   }
 
   function apply(img) {
-    if (state.cleaned || temporary(img)) return;
+    if (state.cleaned || temporary(img) || !isAvatar(img)) return;
     let rec = state.records.get(img);
     const current = img.getAttribute('src');
     if (!rec || (current !== rec.applied && current !== rec.source)) {

@@ -8,7 +8,7 @@ const manifest = JSON.parse(read('channels/test.json'));
 const moduleSource = read('development/avatar-engine/avatar-engine.js');
 const core = read(manifest.release.source_path);
 
-assert.equal(manifest.release.version, '0.3.276');
+assert.equal(manifest.release.version, '0.3.277');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained avatar engine byte-for-byte');
 assert.match(core, /hdAvatarEngine = createTLEHDAvatarEngine\(SCRIPT_WIN, HOST_WIN, HOST_DOC\)/);
 assert.match(core, /hdAvatarEngine\?\.stop\?\.\(\)/);
@@ -161,6 +161,19 @@ const pathOf = img => new URL(img.getAttribute('src'), 'https://tavern.test/').p
   assert.equal(stopped, 1);
   assert.equal(engine.owner, 'TLE');
   assert.equal(typeof dom.window.__hdAvatar459Cleanup, 'function');
+  engine.stop();
+  dom.window.close();
+}
+
+{
+  // The layer markers alone also protect a chat avatar if the style node was removed.
+  const { dom, create } = makeDom(
+    '<div class="mesAvatarWrapper"><img id="legacy-layer" src="' + thumb('avatar', 'legacy-layer.png') + '" data-hd-fixed="true"><div class="hd-avatar-layer-canvas"></div></div>' +
+    '<div class="freesia-gallery-avatar"><img id="layer-gallery" src="' + thumb('avatar', 'layer-gallery.png') + '"></div>'
+  );
+  const engine = create();
+  assert.equal(pathOf(dom.window.document.getElementById('legacy-layer')), '/thumbnail');
+  assert.equal(pathOf(dom.window.document.getElementById('layer-gallery')), '/characters/layer-gallery.png');
   engine.stop();
   dom.window.close();
 }

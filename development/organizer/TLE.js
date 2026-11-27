@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.276
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.277
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -17857,7 +17857,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
   }
 
   function apply(img) {
-    if (state.cleaned || temporary(img)) return;
+    if (state.cleaned || temporary(img) || !isAvatar(img)) return;
     let rec = state.records.get(img);
     const current = img.getAttribute('src');
     if (!rec || (current !== rec.applied && current !== rec.source)) {
@@ -20035,7 +20035,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.276',
+    version: '0.3.277',
     ready: false,
     destroy,
     state,
