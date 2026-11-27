@@ -9,16 +9,16 @@ const corePath = manifest.release.source_path;
 const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
-assert.equal(version, '0.3.285');
+assert.equal(version, '0.3.286');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
 assert.match(moduleSource, /function createTLEGalleryHome\(window, document\)/);
-assert.match(moduleSource, /const VERSION = '0.3.283'/);
+assert.match(moduleSource, /const VERSION = '0.3.286'/);
 assert.match(moduleSource, /window\[GLOBAL_NAME\] = api;\s*return api;/);
 assert.doesNotMatch(moduleSource, /DOMContentLoaded/, 'TLE Core owns gallery startup; the module does not auto-start itself');
 assert.match(core, /galleryHome = createTLEGalleryHome\(HOST_WIN, HOST_DOC\);\s*galleryHome\.setEnabled\(recordPreviewEnabled\);/);
 assert.match(core, /galleryHome\.start\(\)/);
 assert.match(core, /try \{ galleryHome\?\.stop\(\); \}/, 'TLE destroy must stop the gallery');
-assert.match(core, /version: '0\.3\.285'/);
+assert.match(core, /version: '0\.3\.286'/);
 assert.match(core, /const VERSION = '4\.5\.14'/, 'The integrated HD avatar engine is updated');
 assert.match(core, /const SELECTOR = '[^']*\.freesia-gallery-avatar img, \.freesia-gallery-avatar-frame img, \.freesia-gallery-detail-avatar img';/, 'The HD engine targets both the current isolated gallery avatar frame and the legacy wrapper');
 
@@ -32,7 +32,10 @@ for (const line of moduleSource.slice(cssStart, cssEnd).split('\n')) {
 }
 assert.equal(new Set(selectors).size, selectors.length, 'No duplicate CSS selector override layers');
 assert.match(moduleSource, /--freesia-gallery-detail-main-gap: 0px/);
-assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*aspect-ratio: 2 \/ 3;[^}]*--freesia-gallery-card-radius: 12px;[^}]*border: 0 !important;[^}]*box-shadow: none !important;/, "The TLE card owns a fixed 2:3 frame with 12px radius and no border or shadow");
+assert.match(moduleSource, /--freesia-gallery-avatar-radius: 12px;/, 'The preview and detail avatar surfaces share one radius token');
+assert.match(moduleSource, /\.freesia-gallery-detail-avatar \{[^}]*border-radius: var\(--freesia-gallery-avatar-radius, 12px\) !important;/, 'The detail avatar frame uses the shared outer avatar radius');
+assert.match(moduleSource, /\.freesia-gallery-detail-avatar img \{[^}]*border-radius: inherit !important;/, 'The detail avatar image inherits the frame radius');
+assert.match(moduleSource, /\.freesia-gallery-card \{[^}]*aspect-ratio: 2 \/ 3;[^}]*--freesia-gallery-card-radius: var\(--freesia-gallery-avatar-radius, 12px\);[^}]*border: 0 !important;[^}]*box-shadow: none !important;/, "The TLE card owns a fixed 2:3 frame with 12px radius and no border or shadow");
 assert.match(moduleSource, /\.freesia-gallery-card-identity > \.freesia-gallery-avatar-frame \{[^}]*width: 100% !important;[^}]*height: 100% !important;[^}]*border: 0 !important;[^}]*box-shadow: none !important;/, "The dedicated avatar frame fills the TLE card and strips theme decoration");
 assert.match(moduleSource, /\.freesia-gallery-card-identity > \.freesia-gallery-avatar-frame > img \{[^}]*width: 100% !important;[^}]*height: 100% !important;[^}]*border: 0 !important;[^}]*box-shadow: none !important;[^}]*object-fit: cover !important;/, "The avatar image fills the frame using cover without borders or shadows");
 assert.match(moduleSource, /nativeImage\.cloneNode\(false\)/, "Only the native image node is copied to preserve its high-resolution source");
