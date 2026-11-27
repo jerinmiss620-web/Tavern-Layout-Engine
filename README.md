@@ -1,6 +1,6 @@
-## 2026-11-27 · Core v0.3.287 · 移动端记录详情间距微调（测试分支）
+## 2026-11-27 · Core v0.3.288 · 移动端记录详情间距微调（测试分支）
 
-详见 [本版完整日志](releases/v0.3.287/CHANGELOG.md)。将移动端记录详情右侧资料区内部间距从 0px 调整为 5px；保持 104px 头像列与 8px 列间距，不新增 CSS 覆盖规则。仅更新测试分支，正式版不变。
+详见 [本版完整日志](releases/v0.3.288/CHANGELOG.md)。回灌正式版 v0.3.264 的配套方案紧凑预览与原生更新按钮修复；将移动端记录详情右侧资料区内部间距从 0px 调整为 5px。保持 104px 头像列与 8px 列间距，不新增 CSS 覆盖规则。仅更新测试分支，正式版不变。
 
 ## 2026-11-27 · Core v0.3.279 · 记录预览独立圆角与显示范围（测试分支）
 
@@ -22,13 +22,13 @@
 
 酒馆布局引擎，支持 SillyTavern 与 TauriTavern。作者：小松鼠 & ChatGPT（小松7）。
 
-## 开发分支测试版 v0.3.287 · 移动端记录详情间距微调
+## 开发分支测试版 v0.3.288 · 移动端记录详情间距微调
 
-测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.287/TLE-0.3.287-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
+测试基线为 **feature/organizer-nav-worldbooks-20261125**，测试清单 [channels/test.json](channels/test.json)。[手动 Core 备用导入包](releases/v0.3.288/TLE-0.3.288-TEST-import.json) 默认禁用；不要与现有加载链重复启用。
 
 移动端记录详情页右侧资料区内部纵向间距为 5px；头像列宽 104px、列间距 8px 保持不变。此次只修改原有 CSS 自定义属性，不追加覆盖选择器。
 
-[本版日志](releases/v0.3.287/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
+[本版日志](releases/v0.3.288/CHANGELOG.md) · [安装和功能说明](development/organizer/CONTENT-INTEGRATION.md) · [测试与实机验收记录](development/organizer/TESTING.md)。
 
 ## 一次安装，后续自动更新
 
@@ -56,7 +56,7 @@ TLE 只为自己创建的界面定义必要的视觉样式，例如侧边导航�
 
 ## 当前开发分支（未发布）
 
-开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.287）；记录预览模块源码：`development/gallery-home/gallery-home.js`。
+开发分支：`feature/organizer-nav-worldbooks-20261125`；工作源码：`development/organizer/TLE.js`（Core 候选版本标记 0.3.288）；记录预览模块源码：`development/gallery-home/gallery-home.js`。
 
 整理侠的资源管理现在直接位于自己的原生形态 `.drawer-content` 内，不再套用第二层 `.tle-search-surface`。抽屉图标、导航文字与全局搜索弹窗的跳转入口统一调用明确的开合控制器，直接维护 `openDrawer / closedDrawer`；打开时先关闭其他普通抽屉和 TLE 控制面板，移动端仍由原生导航生命周期收起侧栏。
 
