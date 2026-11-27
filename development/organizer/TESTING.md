@@ -1,27 +1,37 @@
-# Organizer branch test instructions
+# TLE 开发与验收说明
 
-Development branch: `feature/organizer-nav-worldbooks-20261125`
+## 当前正式基线（2026-11-27）
 
-Current test Core: `v0.3.263`
+- **Stable Core：v0.3.289**
+- **Loader Runtime：v0.3.6**
+- **Permanent Bootstrap：v1.0.6**
+- **唯一开发基线：** 本 PR 合并后的 `main`；后续功能分支必须从该正式基线创建。
+- **可编辑 Core 源码：** `development/organizer/TLE.js`。它是完整 TLE Core 源码，不是单独的整理侠模块。
+- **不可变发布快照：** `releases/v0.3.289/TLE.js`。不得直接修改已发布快照；下一版从开发源码生成新版本目录。
+- `latest.json` 与 `release-plan.json` 是正式版本指针；正常 Core 发布沿用 Loader v0.3.6 和 Bootstrap v1.0.6。
 
-## Import once
+旧测试分支 `feature/organizer-nav-worldbooks-20261125` 及其 Test Loader 仅作历史回溯，不再作为新功能开发基线。主分支的 `channels/test.json` 刻意保留 v0.3.204 供旧 Test Loader 兼容，**不是当前测试入口，也不得据此回退 Core**。
 
-Download the [Organizer Branch Test Loader JSON](https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/08527064995cc13ce39d64f53528ffdc163a66a1/loader/TLE-Remote-Loader-Test-0.3.0.json).
+## 新功能开发流程
 
-The installer is disabled by default. It reads the test manifest from this development branch and uses a separate IndexedDB database and separate cache keys. It does not read or modify the stable `latest.json`, Bootstrap manifest, or stable Loader cache.
+1. 从当前 `main` 创建新的功能分支；不要从 v0.3.239、v0.3.259、v0.3.263、v0.3.264 或旧测试分支创建。
+2. 修改 `development/organizer/TLE.js` 及对应模块源码；`releases/v0.3.289/TLE.js` 只作为不可变发布快照。
+3. 修改 Organizer 内容引擎时，运行 `node scripts/build-organizer-content.mjs`，将控制器重新打包进 Core 标记区。
+4. 同步更新专项回归测试；运行 `npm ci`、`npm test`，再按需运行真实 ST/TT 验收。
+5. 测试版必须使用新功能分支自己的测试清单、独立 Test Loader 与独立缓存；不要修改主分支的旧兼容 `channels/test.json`。
+6. 正式发布只使用 `RELEASING.md` 规定的 `npm run release` 流程；不复用旧版手动 stage/package 脚本。
 
-## Switch from stable to test
+## v0.3.287–v0.3.289 当前功能验收
 
-1. In Tavern Helper, disable the currently enabled **TLE Permanent Bootstrap 1.0.6**. Do not delete it.
-2. Fully refresh the SillyTavern/TauriTavern host page once. This lets Bootstrap destroy the stable Loader and its managed Core before the test Loader starts.
-3. Import the downloaded test Loader JSON into Tavern Helper. It should appear disabled.
-4. Enable **TLE Organizer Branch Test Loader 0.3.0**.
-5. Confirm the native prompt to install **TLE Core v0.3.263**.
-6. Open TLE → **版本与更新**. The update channel should say **Test · Loader v0.3.0** and the current Core should be **v0.3.263**.
+- 首页画廊默认仅显示有聊天记录的角色；切换显示全部角色时，未聊天角色也能正常显示。检查最近聊天合并、折叠数量、排序和详情入口。
+- 角色记录详情头像保持 2:3 比例、统一 12px 圆角；高清头像引擎为 4.5.14。切换圆形、方形、圆角主题及 `big-avatars` 后，头像不得变窄、变形或与渐变层错位。
+- 记录详情移动端断点为 820px：头像列 104px、列间距 8px、资料区内部间距 5px。分别在 320、375、390、402、480、820px 检查；描述区高度应与头像对齐，不出现横向滚动。
+- 记录预览样式只作用于 TLE 首页记录展示；不得改写聊天消息头像、酒馆原生角色列表头像或原生头像预览区域。
+- 角色名、绑定世界书和聊天数量入口应分别跳转到角色编辑、绑定世界书管理和该角色聊天文件；保留酒馆原生角色管理功能。
+- 切换多个 UI 主题后，检查头像比例、圆角、渐变裁切、详情布局和原生按钮继承；PC 与移动端分别验收。
+- 运行 `npm test`；自动化通过不等于所有 ST/TT 主题组合均已实机验收。
 
-Do not enable the stable Bootstrap while the test Loader is enabled. Do not run an older Test Loader alongside this one.
-
-## Test the current build
+## 历史功能验收清单（v0.3.261–v0.3.263）
 
 ### Companion plan startup restoration (v0.3.261)
 
@@ -77,14 +87,17 @@ Do not enable the stable Bootstrap while the test Loader is enabled. Do not run 
 - Confirm hidden/disabled states, dynamic button labels and click handlers remain unchanged.
 - Repeat in ST and TT with the active themes; verify narrow mobile widths and both light/dark themes.
 
-## Return to stable
+## 回到当前正式版
 
-1. Disable **TLE Organizer Branch Test Loader 0.3.0**.
-2. Re-enable the original **TLE Permanent Bootstrap 1.0.6**.
-3. Fully refresh the host page.
+如果仍在使用旧 Organizer Branch Test Loader：
 
-The stable Bootstrap/Loader uses its own independent Last Known Good cache and should restore the stable Core (currently v0.3.239). Verify TLE → **版本与更新** reports the Stable channel and Core v0.3.259. Keep the test Loader imported but disabled as a backup; do not delete either script.
+1. 禁用 **TLE Organizer Branch Test Loader 0.3.0**。
+2. 重新启用 **TLE Permanent Bootstrap 1.0.6**。
+3. 完整刷新 ST/TT 宿主页面。
+4. 在 TLE → **版本与更新** 核对 Stable 通道、Core **v0.3.289**、Loader **v0.3.6**。
 
-## Updating the branch build
+不要再以旧测试 Loader 或旧 Stable Core 作为新开发入口。旧脚本只保留为禁用回滚备份。
 
-The test Loader is imported only once. When the development Core changes, the branch maintainer publishes a new incremented test Core version and updates the branch's `channels/test.json`. Then open TLE → **版本与更新** → **检查更新** → install the offered Test build. The stable manifest and stable release remain unchanged.
+## 旧测试分支说明
+
+旧分支 `feature/organizer-nav-worldbooks-20261125` 的测试清单与 Loader 缓存相互隔离。它可以用于追溯历史测试，但不代表当前正式版本，也不应继续承载新功能。需要新的测试环境时，从当前 `main` 创建独立测试分支，重新生成独立清单与 Test Loader；正式 `latest.json`、`loader/latest.json` 和 Bootstrap 不参与测试发布。
