@@ -674,6 +674,133 @@ function createTLEGalleryHome(window, document) {
         return card;
     }
 
+    async function fetchChatCount(avatar) {
+        if (state.countCache.has(avatar)) return state.countCache.get(avatar);
+        if (state.countRequests.has(avatar)) return state.countRequests.get(avatar);
+        const context = getContext();
+        if (!context || typeof context.getRequestHeaders !== 'function') return null;
+
+        const request = window.fetch(API_CHARACTER_CHATS, {
+            method: 'POST',
+            headers: context.getRequestHeaders(),
+            body: JSON.stringify({ avatar_url: avatar, simple: true }),
+            cache: 'no-cache',
+        }).then(async response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('聊天文件列表格式不正确。');
+            state.countCache.set(avatar, data.length);
+            return data.length;
+        }).catch(error => {
+            console.warn('[Freesia Gallery] Could not read total chat count for', avatar, error);
+            return null;
+        }).finally(() => state.countRequests.delete(avatar));
+
+        state.countRequests.set(avatar, request);
+        return request;
+    }
+
+    async function updateCardCount(card) {
+        if (!card || !card.isConnected || card.dataset.countRequested === 'true') return;
+        card.dataset.countRequested = 'true';
+        const avatar = card.dataset.galleryAvatar;
+        const count = await fetchChatCount(avatar);
+        if (count === null || !card.isConnected) return;
+        const label = card.querySelector('.freesia-gallery-chat-count');
+        if (label) label.textContent = count + ' 个聊天';
+    }
+
+    function observeCardCounts() {
+        if (state.countObserver) state.countObserver.disconnect();
+        state.countObserver = null;
+        if (!state.grid) return;
+
+        const cards = Array.from(state.grid.querySelectorAll('.freesia-gallery-card:not(.freesia-gallery-collapsed)'));
+        if (typeof window.IntersectionObserver === 'function') {
+            state.countObserver = new window.IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    state.countObserver.unobserve(entry.target);
+                    void updateCardCount(entry.target);
+                });
+            }, { root: document.getElementById('chat'), rootMargin: '120px' });
+            cards.forEach(card => state.countObserver.observe(card));
+        } else {
+            cards.slice(0, 12).forEach(card => { void updateCardCount(card); });
+        }
+    }
+
+    function renderPagination(total) {
+        if (!state.paginationRoot) return;
+        const pageSize = getGalleryPageSize();
+        const pageCount = Math.max(1, Math.ceil(total / pageSize));
+        state.galleryPage = Math.min(Math.max(0, state.galleryPage), pageCount - 1);
+        state.paginationRoot.replaceChildren();
+        state.paginationRoot.hidden = state.page !== 'gallery' || pageCount <= 1;
+
+        if (pageCount <= 1) return;
+        const previous = createElement('button', 'menu_button menu_button_icon');
+        previous.type = 'button';
+        previous.textContent = '‹ 上一页';
+        previous.disabled = state.galleryPage <= 0;
+        previous.addEventListener('click', function () {
+            if (state.galleryPage <= 0) return;
+            state.galleryPage -= 1;
+            renderGallery(state.galleryGroups, state.source, state.lastError);
+        });
+
+        const pageLabel = createElement('small', '', '第 ' + (state.galleryPage + 1) + ' / ' + pageCount + ' 页');
+        const next = createElement('button', 'menu_button menu_button_icon');
+        next.type = 'button';
+        next.textContent = '下一页 ›';
+        next.disabled = state.galleryPage >= pageCount - 1;
+        next.addEventListener('click', function () {
+            if (state.galleryPage >= pageCount - 1) return;
+            state.galleryPage += 1;
+            renderGallery(state.galleryGroups, state.source, state.lastError);
+        });
+        state.paginationRoot.append(previous, pageLabel, next);
+    }
+
+    function renderGallery(groups, source, error) {
+        if (!state.grid || !state.panel) return;
+        state.source = source;
+        state.lastError = error || null;
+        state.galleryGroups = orderPinnedCharacters(groups);
+
+        const pageSize = getGalleryPageSize();
+        const pageCount = Math.max(1, Math.ceil(state.galleryGroups.length / pageSize));
+        state.galleryPage = Math.min(Math.max(0, state.galleryPage), pageCount - 1);
+        syncResponsiveLayoutControls();
+
+        const start = state.galleryPage * pageSize;
+        const visibleGroups = state.galleryGroups.slice(start, start + pageSize);
+        const fragment = document.createDocumentFragment();
+        visibleGroups.forEach(function (group, index) {
+            const card = createGalleryCard(group);
+            card.dataset.galleryIndex = String(start + index);
+            fragment.append(card);
+        });
+
+        if (!state.galleryGroups.length) {
+            fragment.append(createElement('div', 'freesia-gallery-empty', source === 'api'
+                ? '还没有可展示的角色。'
+                : '无法从原生角色列表中读取角色。'));
+        }
+
+        state.grid.replaceChildren(fragment);
+        renderPagination(state.galleryGroups.length);
+
+        if (state.summary) {
+            state.summary.textContent = state.galleryGroups.length + ' 位角色'
+                + (pageCount > 1 ? ' · 第 ' + (state.galleryPage + 1) + ' / ' + pageCount + ' 页' : '');
+            state.summary.title = state.layoutSettings.displayMode === 'all'
+                ? '显示全部角色；有聊天记录的角色按最近聊天时间优先排列，未聊过的角色排在后面。每页显示 ' + pageSize + ' 位角色。'
+                : '只显示有聊天记录的角色，按最近聊天时间排序。每页显示 ' + pageSize + ' 位角色。';
+        }
+        observeCardCounts();
+    }
+
     async function fetchRecentChats(context, signal) {
         if (!context || typeof context.getRequestHeaders !== 'function') throw new Error('当前环境未提供酒馆请求上下文。');
         const response = await window.fetch(API_RECENT, {

@@ -126,6 +126,8 @@ assert.match(core, /galleryHome\.setEnabled\(recordPreviewEnabled\)/);
 assert.match(core, /home-avatar-pseudo-disabled/);
 assert.match(core, /home-avatar-border-image-disabled/);
 assert.doesNotMatch(moduleSource, /syncAvatarCompatibility|avatarCompatibility|setAvatarCompatibility/, 'The fixed TLE avatar style has no legacy compatibility toggle runtime');
+assert.match(moduleSource, /function renderPagination\(total\)/, 'Gallery pagination remains part of the preview runtime');
+assert.match(moduleSource, /function renderGallery\(groups, source, error\)/, 'Gallery rendering remains part of the preview runtime');
 new vm.Script(moduleSource, { filename: 'development/gallery-home/gallery-home.js' });
 new vm.Script(core, { filename: corePath });
 console.log('TLE gallery integration, independent 2:3 card radius, display-scope filtering, recency ordering, pagination settings and native action behavior checks passed.');
