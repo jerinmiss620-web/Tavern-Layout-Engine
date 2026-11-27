@@ -13,13 +13,15 @@ assert.ok(core.includes(`version: '${manifest.release.version}',`), 'Core API ve
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained avatar engine byte-for-byte');
 assert.match(core, /hdAvatarEngine = createTLEHDAvatarEngine\(SCRIPT_WIN, HOST_WIN, HOST_DOC\)/);
 assert.match(core, /hdAvatarEngine\?\.stop\?\.\(\)/);
-assert.match(moduleSource, /const VERSION = '4\.5\.13'/);
+assert.match(moduleSource, /const VERSION = '4\.5\.14'/);
 for (const selector of [
   '.mesAvatarWrapper img',
   '#right-nav-panel #avatar-and-name-block .expander #avatar_div img',
   '#right-nav-panel #rm_print_characters_block .character_select > .avatar img',
   '#user_avatar_block > .avatar-container > .avatar img',
   '.freesia-gallery-avatar img',
+  '.freesia-gallery-avatar-frame img',
+  '.freesia-gallery-detail-avatar img',
 ]) assert.ok(moduleSource.includes(selector), 'Missing supported avatar region: ' + selector);
 assert.doesNotMatch(moduleSource, /window\.fetch\s*=|createElement\(['"]canvas|setInterval\(/,
   'The integrated engine must not wrap fetch, create Canvas layers or poll');
@@ -52,7 +54,9 @@ const pathOf = img => new URL(img.getAttribute('src'), 'https://tavern.test/').p
     '<div id="right-nav-panel"><div id="avatar-and-name-block"><div class="expander"><div id="avatar_div"><img id="role-preview" src="' + thumb('avatar', 'preview.png') + '"></div></div></div>' +
     '<div id="rm_print_characters_block"><div class="character_select"><div class="avatar"><img id="char-list" src="' + thumb('avatar', 'list.png') + '"></div></div></div></div>' +
     '<div id="user_avatar_block"><div class="avatar-container"><div class="avatar"><img id="user-list" src="' + thumb('persona', 'persona.png') + '"></div></div></div>' +
-    '<div class="freesia-gallery-avatar"><img id="gallery" src="' + thumb('avatar', 'gallery.png') + '"></div>';
+    '<div class="freesia-gallery-avatar"><img id="gallery" src="' + thumb('avatar', 'gallery.png') + '"></div>' +
+    '<div class="freesia-gallery-avatar-frame"><img id="gallery-frame" src="' + thumb('avatar', 'gallery-frame.png') + '"></div>' +
+    '<div class="freesia-gallery-detail-avatar"><img id="gallery-detail" src="' + thumb('avatar', 'gallery-detail.png') + '"></div>';
   const { dom, create } = makeDom(html);
   let observerCount = 0;
   const NativeObserver = dom.window.MutationObserver;
@@ -73,6 +77,8 @@ const pathOf = img => new URL(img.getAttribute('src'), 'https://tavern.test/').p
     ['char-list', '/characters/list.png'],
     ['user-list', '/User%20Avatars/persona.png'],
     ['gallery', '/characters/gallery.png'],
+    ['gallery-frame', '/characters/gallery-frame.png'],
+    ['gallery-detail', '/characters/gallery-detail.png'],
   ];
   for (const [id, path] of expected) assert.equal(pathOf(dom.window.document.getElementById(id)), path, id + ' must load the original avatar');
   const chatChar = dom.window.document.getElementById('chat-char');
@@ -88,6 +94,19 @@ const pathOf = img => new URL(img.getAttribute('src'), 'https://tavern.test/').p
   await new Promise(resolve => setTimeout(resolve, 35));
   assert.equal(pathOf(dom.window.document.getElementById('dynamic-gallery')), '/characters/dynamic.png',
     'New gallery avatars must be upgraded without polling');
+
+  const addedFrame = dom.window.document.createElement('div');
+  addedFrame.className = 'freesia-gallery-avatar-frame';
+  addedFrame.innerHTML = '<img id="dynamic-gallery-frame" src="' + thumb('avatar', 'dynamic-frame.png') + '">';
+  const addedDetail = dom.window.document.createElement('div');
+  addedDetail.className = 'freesia-gallery-detail-avatar';
+  addedDetail.innerHTML = '<img id="dynamic-gallery-detail" src="' + thumb('avatar', 'dynamic-detail.png') + '">';
+  dom.window.document.body.append(addedFrame, addedDetail);
+  await new Promise(resolve => setTimeout(resolve, 35));
+  assert.equal(pathOf(dom.window.document.getElementById('dynamic-gallery-frame')), '/characters/dynamic-frame.png',
+    'New isolated gallery avatar frames must be upgraded without polling');
+  assert.equal(pathOf(dom.window.document.getElementById('dynamic-gallery-detail')), '/characters/dynamic-detail.png',
+    'New detail avatars must be upgraded without polling');
 
   engine.stop();
   assert.equal(chatChar.getAttribute('src'), thumb('avatar', 'char.png'), 'Cleanup restores the original thumbnail');
