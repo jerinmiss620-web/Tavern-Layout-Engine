@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.290",
+  "latest_version": "0.3.292",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.290",
-    "source_path": "releases/v0.3.290/TLE.js",
-    "source_commit": "24e36d8ee15171d6344f2591d8de04f69a6e3b70",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/24e36d8ee15171d6344f2591d8de04f69a6e3b70/releases/v0.3.290/TLE.js",
-    "changelog_path": "releases/v0.3.290/CHANGELOG.md",
-    "sha256": "148b0390f7c4f7f67bf08a566088827cbff7fd2c0b294a0270b97e4df3f905a3",
-    "size_bytes": 1020584
+    "version": "0.3.292",
+    "source_path": "releases/v0.3.292/TLE.js",
+    "source_commit": "f61e072739b6f595bbde7d512140bede1a567861",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/f61e072739b6f595bbde7d512140bede1a567861/releases/v0.3.292/TLE.js",
+    "changelog_path": "releases/v0.3.292/CHANGELOG.md",
+    "sha256": "de48d70540bd4b03ffa0e1b75a9db2f516673bb05caeddff3907bc59bd61d18e",
+    "size_bytes": 1021050
   },
-  "status": "TEST v0.3.290：基于 main / v0.3.289 的独立候选构建。配套侠新增角色专属预设条目开关；只保存稳定 identifier → enabled，不复制正文、名称或顺序。新增条目保留预设原生状态，只有显式重新读取并保存方案才纳入；切换角色前恢复原始预设，无法安全恢复时停止应用或取消原生保存。正式 latest.json 保持 v0.3.289。",
+  "status": "TEST v0.3.292：以 main / Core v0.3.291 为基线，整合角色专属预设条目方案与导航图标可见性、透明度修复。保留原生预设正文、名称与顺序；角色方案只记录 identifier → enabled。新条目保持原生状态，只有显式重新读取并保存方案才纳入；基线无法安全恢复时阻止继续应用。正式 latest.json 保持 v0.3.291。",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",

@@ -13,13 +13,13 @@ assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
 assert.equal(manifest.channel, 'test');
 assert.equal(manifest.latest_version, manifest.release.version);
-assert.equal(manifest.release.version, '0.3.290');
+assert.equal(manifest.release.version, '0.3.292');
 assert.equal(manifest.minimum_loader_version, '0.3.0');
 assert.equal(manifest.recommended_loader_version, '0.3.0');
 
 const release = manifest.release;
-assert.equal(release.source_path, 'releases/v0.3.290/TLE.js');
-assert.equal(release.changelog_path, 'releases/v0.3.290/CHANGELOG.md');
+assert.equal(release.source_path, 'releases/v0.3.292/TLE.js');
+assert.equal(release.changelog_path, 'releases/v0.3.292/CHANGELOG.md');
 assert.match(release.source_commit || '', /^[a-f0-9]{40}$/);
 assert.equal(
   release.source_url,
@@ -29,22 +29,20 @@ const releaseBytes = read(release.source_path);
 const releaseSource = releaseBytes.toString('utf8');
 assert.equal(releaseBytes.byteLength, release.size_bytes);
 assert.equal(sha256(releaseBytes), release.sha256);
-assert.match(releaseSource, /version: '0\.3\.290'/);
-assert.match(releaseSource, /const VERSION = '0\.3\.290'/);
+assert.match(releaseSource, /version: '0\.3\.292'/);
+assert.match(releaseSource, /const VERSION = '0\.3\.292'/);
 new Function(releaseSource);
 
 const developmentSource = readText('development/organizer/TLE.js');
-const expectedCandidate = developmentSource
-  .replaceAll('0.3.289', '0.3.290')
-  .replace('v0.3.290 · 记录预览头像与渐变边界同步', 'v0.3.290 · 角色专属预设条目方案');
+const expectedCandidate = developmentSource;
 assert.equal(releaseSource, expectedCandidate,
   'The test artifact must be an exact versioned copy of the current development Core.');
 
 const stable = JSON.parse(readText('latest.json'));
 assert.equal(stable.channel, 'stable');
-assert.equal(stable.latest_version, '0.3.289');
-assert.equal(stable.release.version, '0.3.289');
-assert.equal(stable.release.source_path, 'releases/v0.3.289/TLE.js');
+assert.equal(stable.latest_version, '0.3.291');
+assert.equal(stable.release.version, '0.3.291');
+assert.equal(stable.release.source_path, 'releases/v0.3.291/TLE.js');
 assert.notEqual(release.source_commit, stable.release.source_commit);
 
 const loader = manifest.loader_release;
@@ -86,6 +84,6 @@ assert.match(changelog, /identifier/);
 assert.match(changelog, /原始预设/);
 
 console.log('Companion prompt-state Test Loader verification passed.');
-console.log('TLE v0.3.290 TEST artifact: byte size and SHA-256 OK.');
+console.log('TLE v0.3.292 TEST artifact: byte size and SHA-256 OK.');
 console.log('Test Loader v0.3.0: byte size, SHA-256 and installer sync OK.');
-console.log('Stable latest.json remains v0.3.289.');
+console.log('Stable latest.json remains v0.3.291.');
