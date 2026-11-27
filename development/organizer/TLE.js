@@ -3005,7 +3005,7 @@ var TLEBatchLibrary = (() => {
       maskHero: {
         observer: null, frame: 0, textNodes: new Map(), nameElements: new Set(),
         floorElements: new Map(), imageElements: new Map(), objectUrls: new Map(),
-        listeners: [], appliedConfig: null, appliedChatKey: '',
+        listeners: [], applyGeneration: 0, appliedConfig: null, appliedChatKey: '',
       },
     },
     floorZeroClearanceChat: null,
@@ -15759,6 +15759,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const type = input?.dataset?.maskAvatarType;
     const file = input?.files?.[0];
     if (!['user', 'char'].includes(type) || !file) return;
+    const selectedPlanId = maskHeroRuntime.selectedPlanId;
     maskHeroReadDraftFromUI();
     if (!/^image\/(png|jpeg|webp|gif|avif)$/i.test(file.type || '')) {
       maskHeroSetStatus('头像仅支持 PNG、JPEG、WebP、GIF 或 AVIF 图片。');
@@ -15773,6 +15774,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     try {
       const id = 'mask-' + (HOST_WIN.crypto?.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2)));
       await maskHeroStoreAsset({ id, blob: file.slice(0, file.size, file.type), type: file.type, name: file.name || 'avatar' });
+      if (!maskHeroEnabled || selectedPlanId !== maskHeroRuntime.selectedPlanId) {
+        await maskHeroDeleteAsset(id);
+        return;
+      }
+      maskHeroReadDraftFromUI();
       maskHeroRuntime.draft.avatarAssets[type] = id;
       maskHeroRuntime.draft.avatarNames[type] = file.name || '本地图片';
       maskHeroSetStatus((type === 'user' ? 'User' : 'Char') + ' 头像已保存到本机；保存方案后会长期保留。');
@@ -15938,6 +15944,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
   function maskHeroClearEffects() {
     const runtime = state.chatTools.maskHero;
+    runtime.applyGeneration += 1;
     runtime.observer?.disconnect();
     runtime.observer = null;
     for (const listener of runtime.listeners.splice(0)) {
@@ -15993,14 +16000,23 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const chat = HOST_DOC.getElementById('chat');
     if (!context || !chat) throw new Error('请先进入一个角色或群聊，再应用打码方案。');
     maskHeroClearEffects();
+    const applyGeneration = state.chatTools.maskHero.applyGeneration;
     try {
       for (const type of ['user', 'char']) {
         const assetId = draft.avatarAssets?.[type];
         if (!assetId) continue;
         const asset = await maskHeroGetAsset(assetId);
+        if (!maskHeroEnabled || state.chatTools.maskHero.applyGeneration !== applyGeneration) {
+          throw new Error('打码侠状态已改变，已取消旧的应用操作。');
+        }
         if (!asset?.blob) throw new Error((type === 'user' ? 'User' : 'Char') + ' 头像文件不存在，请重新选择图片。');
         const url = HOST_WIN.URL.createObjectURL(asset.blob);
         state.chatTools.maskHero.objectUrls.set(type, url);
+      }
+      const latestContext = getActiveChatActionContext();
+      if (!maskHeroEnabled || state.chatTools.maskHero.applyGeneration !== applyGeneration ||
+          !latestContext || latestContext.chatKey !== context.chatKey) {
+        throw new Error('打码侠状态或当前聊天已改变，已取消旧的应用操作。');
       }
       state.chatTools.maskHero.appliedConfig = {
         ...draft,
