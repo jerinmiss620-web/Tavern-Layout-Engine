@@ -8580,7 +8580,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return catalog.entries;
   }
 
-  async function applyQuickChoice(id, item, signal = state.abort.signal) {
+  async function applyQuickChoice(id, item, signal = state.abort.signal, force = false) {
     if (state.destroyed || signal.aborted) return;
     const context = HOST_WIN.SillyTavern?.getContext?.() || {};
     if (id === 'character') {
@@ -8624,7 +8624,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!option || select.disabled || option.disabled || option.parentElement?.disabled) throw new Error('选项已变化或不可用，请刷新列表。');
       if (select.multiple) option.selected = !option.selected;
       else {
-        if (select.value === item.value) return;
+        if (select.value === item.value && !force) return;
         select.value = item.value;
       }
       // One native event reaches both DOM and jQuery listeners, as in the
@@ -13564,29 +13564,59 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     signal?.addEventListener('abort',onAbort,{once:true});timer=HOST_WIN.setTimeout(()=>finish(false),4000);
     return {promise,cancel:()=>finish(false)};
   }
-  async function companionApplyPromptStates(snapshot,plan,signal=state.abort.signal){
-    const saved=companionPromptStatesNormalize(snapshot);if(!saved)throw new Error('提示词条目状态快照无效或为空。');
+  async function companionEnsurePromptStatesPreset(snapshot,plan,signal=state.abort.signal) {
+    const saved=companionPromptStatesNormalize(snapshot);
+    if(!saved)throw new Error('提示词条目状态快照无效或为空。');
     const plannedPreset=plan?.fields?.preset;
-    if(plannedPreset&&(plannedPreset.selectId!==saved.preset.selectId||String(plannedPreset.value)!==saved.preset.value))throw new Error('配套方案指定的预设与条目状态绑定的预设不同。请重新采集条目状态，或调整预设配置。');
-    let activePreset=companionCurrentPreset();
-    if(!companionPromptStatesMatchesPreset(saved,activePreset)){
-      if(plannedPreset)throw new Error('方案预设尚未切换到条目状态所绑定的预设，已跳过条目状态恢复。');
-      const catalog=await quickCatalog('preset',true,signal),target=(Array.isArray(catalog)?catalog:[]).find(item=>item.selectId===saved.preset.selectId&&String(item.value)===saved.preset.value);
-      if(!target)throw new Error('找不到条目状态绑定的预设「'+saved.preset.label+'」，请检查预设是否已重命名或删除。');
-      await applyQuickChoice('preset',target,signal);activePreset=companionCurrentPreset();
-      if(!companionPromptStatesMatchesPreset(saved,activePreset))throw new Error('预设切换后未能确认当前预设，已停止恢复条目状态。');
+    if(plannedPreset&&(plannedPreset.selectId!==saved.preset.selectId||String(plannedPreset.value)!==saved.preset.value)) {
+      throw new Error('配套方案指定的预设与条目状态绑定的预设不同。');
     }
-    const list=await companionWaitForPromptManagerStable(signal),reconciliation=companionPromptStatesReconcile(saved,companionReadPromptManagerEntries(list)),skipped=[...reconciliation.skipped];
-    let applied=0;const saveWatch=reconciliation.changes.length?companionWatchSettingsUpdated(signal):null;
+    const targetValue=plannedPreset?String(plannedPreset.value):saved.preset.value;
+    const catalog=await quickCatalog('preset',true,signal);
+    const target=(Array.isArray(catalog)?catalog:[]).find(item=>item.selectId===saved.preset.selectId&&String(item.value)===targetValue);
+    if(!target)throw new Error('找不到条目状态绑定的预设「'+saved.preset.label+'」，请检查预设是否已重命名或删除。');
+    // Re-apply even when already selected: this resets newly added entries to the
+    // latest saved preset baseline before role-specific overrides are layered on.
+    await applyQuickChoice('preset',target,signal,true);
+    const active=companionCurrentPreset();
+    if(!companionPromptStatesMatchesPreset(saved,active))throw new Error('预设切换后未能确认当前预设，已停止恢复条目状态。');
+    return active;
+  }
+  async function companionApplyPromptStates(snapshot,plan,signal=state.abort.signal){
+    const saved=companionPromptStatesNormalize(snapshot);
+    if(!saved)throw new Error('提示词条目状态快照无效或为空。');
+    const plannedPreset=plan?.fields?.preset;
+    if(plannedPreset&&(plannedPreset.selectId!==saved.preset.selectId||String(plannedPreset.value)!==saved.preset.value)) {
+      throw new Error('配套方案指定的预设与条目状态绑定的预设不同。');
+    }
+    if(!companionPromptStatesMatchesPreset(saved,companionCurrentPreset())) {
+      throw new Error('当前预设与条目状态绑定的预设不一致，已停止恢复。');
+    }
+    const list=await companionWaitForPromptManagerStable(signal);
+    const reconciliation=companionPromptStatesReconcile(saved,companionReadPromptManagerEntries(list));
+    const skipped=[...reconciliation.skipped];
+    const validChanges=reconciliation.changes.filter(change=>{
+      const rows=[...list.querySelectorAll('.completion_prompt_manager_prompt[data-pm-identifier]')].filter(row=>row.dataset.pmIdentifier===change.identifier);
+      return rows.length===1&&Boolean(rows[0].querySelector('.prompt-manager-toggle-action'));
+    });
+    const lastValidId=validChanges.length?validChanges[validChanges.length-1].identifier:'';
+    let applied=0,saveWatch=null;
     for(const change of reconciliation.changes){
       if(state.destroyed||signal?.aborted)throw new Error('提示词条目状态恢复已取消。');
       if(isNativeGenerationVisible())throw new Error('生成期间不能切换提示词条目状态。');
-      const currentList=companionPromptManagerList(),rows=currentList?[...currentList.querySelectorAll('.completion_prompt_manager_prompt[data-pm-identifier]')].filter(row=>row.dataset.pmIdentifier===change.identifier):[];
+      const currentList=companionPromptManagerList();
+      const rows=currentList?[...currentList.querySelectorAll('.completion_prompt_manager_prompt[data-pm-identifier]')].filter(row=>row.dataset.pmIdentifier===change.identifier):[];
       const toggle=rows.length===1?rows[0].querySelector('.prompt-manager-toggle-action'):null;
       if(!toggle){skipped.push({identifier:change.identifier,reason:'条目控件已变化或无法安全定位'});continue;}
-      toggle.click();if(await companionWaitForPromptToggleState(change.identifier,change.enabled,signal))applied++;else skipped.push({identifier:change.identifier,reason:'宿主未能确认开关状态已更新'});
+      if(change.identifier===lastValidId)saveWatch=companionWatchSettingsUpdated(signal);
+      toggle.click();
+      if(await companionWaitForPromptToggleState(change.identifier,change.enabled,signal))applied++;
+      else skipped.push({identifier:change.identifier,reason:'宿主未能确认开关状态已更新'});
     }
-    if(saveWatch){if(applied>0){if(!await saveWatch.promise)skipped.push({identifier:'',reason:'宿主未确认条目开关状态已保存'});}else saveWatch.cancel();}
+    if(saveWatch){
+      if(applied>0){if(!await saveWatch.promise)skipped.push({identifier:'',reason:'宿主未确认条目开关状态已保存'});}
+      else saveWatch.cancel();
+    }
     return {matched:reconciliation.matched,applied,skipped,untracked:reconciliation.untracked};
   }
 
@@ -14210,7 +14240,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     try {
       const skipped = [];
       const notes = [];
+      let promptPresetReady = false;
+      let promptPresetError = null;
+      if (plan.fields?.promptStates) {
+        try {
+          await companionEnsurePromptStatesPreset(plan.fields.promptStates, plan, state.abort.signal);
+          if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
+          promptPresetReady = true;
+          finished++;
+        } catch (error) {
+          promptPresetError = error;
+          console.warn('[配套侠] 无法加载条目状态绑定的预设', error);
+        }
+      }
       for (const field of COMPANION_FIELDS) {
+        if (field.id === 'preset' && plan.fields?.promptStates) continue;
         const target = plan.fields[field.id];
         if (!target) continue;
         if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
@@ -14251,18 +14295,26 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         }
       }
       if (plan.fields?.promptStates) {
-        try {
-          const promptResult = await companionApplyPromptStates(plan.fields.promptStates, plan, state.abort.signal);
-          if (promptResult.matched > 0) finished++;
-          if (promptResult.skipped.length) {
-            const details = promptResult.skipped.map(item => (item.identifier ? item.identifier.slice(0, 12) + '：' : '') + item.reason).join('；');
-            skipped.push({ name:'提示词条目状态', target:promptResult.matched+' 个已匹配条目',
-              reason:'已恢复 '+promptResult.applied+' 项，跳过 '+promptResult.skipped.length+' 项：'+details });
+        if (!promptPresetReady) {
+          skipped.push({
+            name:'提示词条目状态',
+            target:plan.fields.promptStates?.preset?.label||'绑定预设',
+            reason:'预设未能加载，未执行条目状态恢复：'+(promptPresetError?.message||'未知原因'),
+          });
+        } else {
+          try {
+            const promptResult = await companionApplyPromptStates(plan.fields.promptStates, plan, state.abort.signal);
+            if (promptResult.matched > 0) finished++;
+            if (promptResult.skipped.length) {
+              const details = promptResult.skipped.map(item => (item.identifier ? item.identifier.slice(0, 12) + '：' : '') + item.reason).join('；');
+              skipped.push({ name:'提示词条目状态', target:promptResult.matched+' 个已匹配条目',
+                reason:'已恢复 '+promptResult.applied+' 项，跳过 '+promptResult.skipped.length+' 项：'+details });
+            }
+            if (promptResult.untracked.length) notes.push(promptResult.untracked.length+' 个新增条目未纳入快照，保留预设当前状态');
+          } catch (error) {
+            skipped.push({ name:'提示词条目状态', target:'当前对话补全预设', reason:error?.message||'无法读取或恢复提示词条目状态' });
+            console.warn('[配套侠] 提示词条目状态恢复失败',error);
           }
-          if (promptResult.untracked.length) notes.push(promptResult.untracked.length+' 个新增条目未纳入快照，保留预设当前状态');
-        } catch (error) {
-          skipped.push({ name:'提示词条目状态', target:'当前对话补全预设', reason:error?.message||'无法读取或恢复提示词条目状态' });
-          console.warn('[配套侠] 提示词条目状态恢复失败',error);
         }
       }
       if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');

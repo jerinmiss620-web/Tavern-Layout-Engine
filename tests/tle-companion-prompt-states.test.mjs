@@ -61,6 +61,10 @@ assert.ok(source.includes("row.querySelector('.prompt-manager-toggle-action')"))
 assert.ok(source.includes('toggle.click()'));
 assert.ok(source.includes('getPresetApplicationPromise'));
 assert.ok(source.includes('companionWaitForPromptManagerStable'));
+assert.ok(source.includes('function companionEnsurePromptStatesPreset'));
+assert.ok(source.includes('await companionEnsurePromptStatesPreset(plan.fields.promptStates, plan, state.abort.signal)'));
+assert.ok(source.includes('if (field.id === \'preset\' && plan.fields?.promptStates) continue;'));
+assert.ok(source.includes('await applyQuickChoice(\'preset\',target,signal,true)'));
 assert.ok(source.includes('await companionApplyPromptStates(plan.fields.promptStates, plan, state.abort.signal)'));
 assert.ok(source.includes('不复制预设正文、条目内容或排列顺序'));
 assert.ok(source.includes('新增条目未纳入快照'));
