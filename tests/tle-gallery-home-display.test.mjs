@@ -47,6 +47,25 @@ const records = [
   { avatar: 'alpha.png', file_name: 'alpha-chat.jsonl', char_name: 'Alpha', last_mes: '2026-11-25T10:00:00Z', mes: 'Alpha recent message' },
   { avatar: 'beta.png', file_name: 'beta-chat.jsonl', char_name: 'Beta', last_mes: '2026-11-26T10:00:00Z', mes: 'Beta recent message' },
 ];
+let avatarRectLeft = 112;
+const nativeGetBoundingClientRect = dom.window.Element.prototype.getBoundingClientRect;
+dom.window.Element.prototype.getBoundingClientRect = function () {
+  if (this.classList?.contains('freesia-gallery-card')) {
+    return { x: 100, y: 50, left: 100, top: 50, right: 300, bottom: 350, width: 200, height: 300, toJSON() {} };
+  }
+  if (this.matches?.('.freesia-gallery-card-identity > .avatar img')) {
+    return { x: avatarRectLeft, y: 60, left: avatarRectLeft, top: 60, right: avatarRectLeft + 176, bottom: 340, width: 176, height: 280, toJSON() {} };
+  }
+  return nativeGetBoundingClientRect.call(this);
+};
+const nativeGetComputedStyle = dom.window.getComputedStyle.bind(dom.window);
+dom.window.getComputedStyle = element => {
+  if (element.matches?.('.freesia-gallery-card-identity > .avatar img')) {
+    return { borderBottomLeftRadius: '12px', borderBottomRightRadius: '14px' };
+  }
+  return nativeGetComputedStyle(element);
+};
+
 dom.window.SillyTavern = { getContext: () => context };
 dom.window.IntersectionObserver = class {
   observe() {}
@@ -79,6 +98,23 @@ assert.equal(dom.window.document.getElementById('freesiaGalleryDisplayMode').val
   'The native home settings popup exposes the default display scope');
 assert.deepEqual(cardNames(), ['Beta', 'Alpha'],
   'Chatted-only mode excludes characters with no chat and sorts by latest chat first');
+
+const firstOverlay = dom.window.document.querySelector('.freesia-gallery-card-overlay');
+assert.equal(firstOverlay.style.left, '12px', 'The gradient starts at the avatar image left edge');
+assert.equal(firstOverlay.style.right, '12px', 'The gradient ends at the avatar image right edge');
+assert.equal(firstOverlay.style.bottom, '10px', 'The gradient bottom follows the avatar image bottom edge');
+assert.equal(firstOverlay.style.width, 'auto', 'The gradient stretches only between the measured avatar edges');
+assert.match(firstOverlay.style.borderBottomLeftRadius, /^12px(?: 12px)?$/, 'The gradient copies the avatar bottom-left radius');
+assert.match(firstOverlay.style.borderBottomRightRadius, /^14px(?: 14px)?$/, 'The gradient copies the avatar bottom-right radius');
+assert.ok(Math.abs(parseFloat(firstOverlay.style.getPropertyValue('--freesia-gallery-overlay-min-height')) - 134.4) < 0.01);
+assert.ok(Math.abs(parseFloat(firstOverlay.style.getPropertyValue('--freesia-gallery-overlay-max-height')) - 168) < 0.01);
+
+avatarRectLeft = 120;
+dom.window.dispatchEvent(new dom.window.Event('resize'));
+await wait();
+const resizedOverlay = dom.window.document.querySelector('.freesia-gallery-card-overlay');
+assert.equal(resizedOverlay.style.left, '20px', 'Responsive rerender recalculates the avatar-relative gradient position');
+assert.equal(resizedOverlay.style.right, '4px', 'Responsive rerender recalculates the avatar-relative gradient width');
 assert.equal(requests[0]?.body?.max, 1000,
   'The gallery reads a broad recent-chat window so its character filter is not limited by the native home preview count');
 

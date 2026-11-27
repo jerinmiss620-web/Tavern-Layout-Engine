@@ -2,7 +2,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.279';
+    const VERSION = '0.3.280';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -81,11 +81,11 @@ function createTLEGalleryHome(window, document) {
         "#chat .welcomePanel." + ACTIVE_CLASS + " ." + GRID_CLASS + " { display: grid; grid-template-columns: repeat(var(--freesia-gallery-columns, 4), minmax(0, 1fr)); grid-auto-rows: 1fr; align-items: stretch; justify-content: stretch; gap: clamp(5px, 0.7vw, 8px); width: 100%; min-width: 0; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card { position: relative; display: block; width: 100%; min-width: 0; height: auto; min-height: 0; aspect-ratio: 2 / 3; margin: 0; padding: 0; box-sizing: border-box; --freesia-gallery-card-radius: 16px; border-radius: var(--freesia-gallery-card-radius) !important; overflow: hidden; cursor: default; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity { position: absolute; inset: 0; display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; border-radius: inherit !important; cursor: pointer; outline-offset: 3px; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0; min-height: 0; margin: 0; overflow: hidden; box-sizing: border-box; border-radius: inherit !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: inherit !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-width: 0; min-height: 0; margin: 0; overflow: hidden; box-sizing: border-box; border-radius: var(--freesia-gallery-avatar-radius, inherit) !important; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-identity > .avatar img { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: var(--freesia-gallery-avatar-radius, inherit) !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::before, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-pseudo .freesia-gallery-avatar::after { content: none !important; display: none !important; background: none !important; border: 0 !important; box-shadow: none !important; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar, #chat .welcomePanel." + ACTIVE_CLASS + ".freesia-gallery-disable-avatar-border-image .freesia-gallery-avatar img { border-image: none !important; border-image-source: none !important; }",
-        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay { position: absolute; inset: auto 0 0; z-index: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; gap: 2px; width: 100%; min-width: 0; min-height: 48%; height: auto; max-height: 60%; padding: 30px 5px 5px; box-sizing: border-box; overflow: hidden; --freesia-gallery-overlay-color: #fff; color: var(--freesia-gallery-overlay-color, #fff); background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.035) 14%, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.32) 46%, rgba(0, 0, 0, 0.56) 64%, rgba(0, 0, 0, 0.78) 82%, rgba(0, 0, 0, 0.92) 100%); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); pointer-events: none; }",
+        "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-overlay { position: absolute; inset: auto 0 0; z-index: 2; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; gap: 2px; width: auto; min-width: 0; min-height: var(--freesia-gallery-overlay-min-height, 48%); height: auto; max-height: var(--freesia-gallery-overlay-max-height, 60%); padding: 30px 5px 5px; box-sizing: border-box; overflow: hidden; border-bottom-left-radius: var(--freesia-gallery-card-radius); border-bottom-right-radius: var(--freesia-gallery-card-radius); --freesia-gallery-overlay-color: #fff; color: var(--freesia-gallery-overlay-color, #fff); background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.035) 14%, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.32) 46%, rgba(0, 0, 0, 0.56) 64%, rgba(0, 0, 0, 0.78) 82%, rgba(0, 0, 0, 0.92) 100%); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); pointer-events: none; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; cursor: pointer; outline-offset: 3px; pointer-events: auto; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .chatName { display: block; flex: 1 1 auto; width: auto; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }",
         "#chat .welcomePanel." + ACTIVE_CLASS + " .freesia-gallery-card-heading .characterName { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left !important; font-size: 0.94em; font-weight: 600; line-height: 1.25; }",
@@ -504,7 +504,15 @@ function createTLEGalleryHome(window, document) {
     function createAvatar(avatarKey, thumbnail, name, nativeRow) {
         const nativeAvatar = nativeRow && nativeRow.querySelector('.avatar');
         if (nativeAvatar) {
+            const nativeImage = nativeAvatar.querySelector('img');
+            const nativeImageStyle = nativeImage && typeof window.getComputedStyle === 'function'
+                ? window.getComputedStyle(nativeImage)
+                : null;
+            const nativeRadius = nativeImageStyle
+                ? (nativeImageStyle.borderRadius || nativeImageStyle.borderTopLeftRadius || '')
+                : '';
             const clone = nativeAvatar.cloneNode(true);
+            if (nativeRadius) clone.style.setProperty('--freesia-gallery-avatar-radius', nativeRadius);
             clone.classList.add('freesia-gallery-avatar');
             clone.removeAttribute('id');
             clone.setAttribute('aria-hidden', 'true');
@@ -682,6 +690,55 @@ function createTLEGalleryHome(window, document) {
         return card;
     }
 
+    function syncGalleryOverlayGeometry() {
+        if (!state.grid) return;
+
+        const measurements = Array.from(state.grid.querySelectorAll('.freesia-gallery-card')).map(function (card) {
+            const image = card.querySelector('.freesia-gallery-card-identity > .avatar img');
+            const overlay = card.querySelector('.freesia-gallery-card-overlay');
+            if (!image || !overlay || typeof card.getBoundingClientRect !== 'function' || typeof image.getBoundingClientRect !== 'function') return null;
+
+            const cardRect = card.getBoundingClientRect();
+            const imageRect = image.getBoundingClientRect();
+            if (!(cardRect.width > 0 && cardRect.height > 0 && imageRect.width > 0 && imageRect.height > 0)) return null;
+
+            const computed = typeof window.getComputedStyle === 'function' ? window.getComputedStyle(image) : null;
+            const resolveRadius = function (value, width, height) {
+                const parts = String(value || '').trim().split(/\s+/).filter(Boolean);
+                if (!parts.length) return '';
+                const resolvePart = function (part, basis) {
+                    const match = part.match(/^(-?(?:\d+|\d*\.\d+))%$/);
+                    return match ? (Number(match[1]) * basis / 100) + 'px' : part;
+                };
+                return resolvePart(parts[0], width) + ' ' + resolvePart(parts[1] || parts[0], height);
+            };
+
+            return {
+                overlay: overlay,
+                left: imageRect.left - cardRect.left,
+                right: cardRect.right - imageRect.right,
+                bottom: cardRect.bottom - imageRect.bottom,
+                minHeight: imageRect.height * 0.48,
+                maxHeight: imageRect.height * 0.60,
+                borderBottomLeftRadius: computed ? resolveRadius(computed.borderBottomLeftRadius, imageRect.width, imageRect.height) : '',
+                borderBottomRightRadius: computed ? resolveRadius(computed.borderBottomRightRadius, imageRect.width, imageRect.height) : '',
+            };
+        });
+
+        measurements.forEach(function (measurement) {
+            if (!measurement) return;
+            const overlay = measurement.overlay;
+            overlay.style.left = measurement.left + 'px';
+            overlay.style.right = measurement.right + 'px';
+            overlay.style.bottom = measurement.bottom + 'px';
+            overlay.style.width = 'auto';
+            overlay.style.setProperty('--freesia-gallery-overlay-min-height', measurement.minHeight + 'px');
+            overlay.style.setProperty('--freesia-gallery-overlay-max-height', measurement.maxHeight + 'px');
+            if (measurement.borderBottomLeftRadius) overlay.style.borderBottomLeftRadius = measurement.borderBottomLeftRadius;
+            if (measurement.borderBottomRightRadius) overlay.style.borderBottomRightRadius = measurement.borderBottomRightRadius;
+        });
+    }
+
     async function fetchChatCount(avatar) {
         if (state.countCache.has(avatar)) return state.countCache.get(avatar);
         if (state.countRequests.has(avatar)) return state.countRequests.get(avatar);
@@ -797,6 +854,7 @@ function createTLEGalleryHome(window, document) {
         }
 
         state.grid.replaceChildren(fragment);
+        syncGalleryOverlayGeometry();
         renderPagination(state.galleryGroups.length);
 
         if (state.summary) {
