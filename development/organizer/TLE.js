@@ -15345,12 +15345,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           matches.push({ start: match.index, end: match.index + match[0].length, replacement, ruleIndex });
         }
       } else {
+        const escaped = find.replace(/[.*+?^${}()|[\]\\]/g, '\\      } else {
         let offset = 0;
         while (offset <= original.length - find.length) {
           const index = original.indexOf(find, offset);
           if (index < 0) break;
           matches.push({ start: index, end: index + find.length, replacement, ruleIndex });
           offset = index + find.length;
+        }
+      }');
+        let expression;
+        try { expression = new RegExp(escaped, rule.caseInsensitive ? 'gi' : 'g'); }
+        catch { continue; }
+        let match;
+        while ((match = expression.exec(original))) {
+          if (!match[0].length) {
+            expression.lastIndex += 1;
+            continue;
+          }
+          matches.push({ start: match.index, end: match.index + match[0].length, replacement, ruleIndex });
         }
       }
     }
