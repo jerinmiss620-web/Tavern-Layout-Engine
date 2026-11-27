@@ -10,7 +10,7 @@ const core = read(corePath);
 const moduleSource = read('development/gallery-home/gallery-home.js');
 
 assert.match(version, /^\d+\.\d+\.\d+$/);
-assert.ok(core.includes(moduleSource), 'Core must embed the maintained gallery module byte-for-byte');
+assert.ok(core.includes(moduleSource.replaceAll('0.3.289', version)), 'Core must embed the maintained gallery module byte-for-byte with its release version pinned');
 assert.match(core, /#\$\{ID\.nav\} > button \{\s*position: relative;\s*display: flex;/,
   'nav button positioning must live in the base rule');
 assert.doesNotMatch(core, /#\$\{ID\.nav\} > button \{ position: relative; \}/,

@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.291
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.294
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3731,6 +3731,38 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 .tle-companion-field { display: grid; grid-template-columns: auto minmax(64px, .6fr) minmax(0, 2fr); align-items: center; gap: 7px; min-width: 0; }
 .tle-companion-field > .text_pole { width: 100%; min-width: 0; }
 .tle-companion-field-label { font-size: .88em; }
+
+.tle-companion-field > .tle-companion-worldbook-picker { width: 100%; min-width: 0; }
+.tle-companion-worldbook-picker { position: relative; width: 100%; min-width: 0; }
+.tle-companion-worldbook-trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; min-width: 0; max-width: 100%; text-align: left; font: inherit;
+}
+.tle-companion-worldbook-trigger > .tle-companion-worldbook-trigger-label {
+  display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tle-companion-worldbook-trigger > i { flex: 0 0 auto; font-size: .8em; }
+.tle-companion-worldbook-menu {
+  display: none; position: absolute; inset-inline: 0; top: calc(100% + 4px); z-index: 10040;
+  flex-direction: column; gap: 2px; min-width: 0; max-height: min(300px, 45dvh);
+  overflow: auto; overscroll-behavior: contain; padding: 6px;
+  border: 1px solid var(--SmartThemeBorderColor, currentColor); border-radius: 6px;
+  background: var(--SmartThemeBlurTintColor, var(--SmartThemeChatTintColor, transparent));
+  color: var(--SmartThemeBodyColor, inherit); box-shadow: 0 4px 14px #0002;
+}
+.tle-companion-worldbook-menu.is-open { display: flex; }
+.tle-companion-worldbook-menu[popover] { position: fixed; inset: auto; margin: 0; }
+.tle-companion-worldbook-option {
+  display: flex; align-items: flex-start; gap: 8px; min-width: 0; margin: 0; padding: 5px 7px;
+  cursor: pointer;
+}
+.tle-companion-worldbook-option > input { flex: 0 0 auto; margin: 2px 0 0; }
+.tle-companion-worldbook-option > span { min-width: 0; overflow-wrap: anywhere; }
+.tle-companion-worldbook-option.is-disabled { opacity: .65; cursor: not-allowed; }
+.tle-companion-worldbook-picker > select[hidden] { display: none !important; }
+
+.tle-companion-prompt-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; min-width: 0; }
+.tle-companion-prompt-tools > small { min-width: 0; overflow-wrap: anywhere; }
 .tle-companion-default { display: flex; flex-direction: row !important; align-items: center; gap: 8px; }
 .tle-companion-actions > .menu_button { white-space: nowrap; }
 .tle-companion-default-action {
@@ -11385,14 +11417,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.291 · 导航图标可见性与透明度修复</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.294 · 角色专属预设条目方案与世界书多选</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.291</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.294</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13341,11 +13373,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 // 配套侠：角色方案与当前宿主快切控件共享同一套原生切换器。
   const COMPANION_KEY = 'tle.companion.v1';
   const COMPANION_PAGE_STARTUP_KEY = '__TLE_COMPANION_PAGE_STARTUP_V1__';
+  const COMPANION_PROMPT_BRIDGE_KEY = '__TLE_COMPANION_PROMPT_SAVE_BRIDGE_V1__';
   const COMPANION_FIELDS = [
     { id: 'profile', name: '连接配置', type: 'api' },
     { id: 'source', name: '接口来源', type: 'api' },
     { id: 'model', name: '模型', type: 'api' },
     { id: 'preset', name: '预设', type: 'preset' },
+    { id: 'promptEntries', name: '预设条目开关', type: 'promptEntries' },
     { id: 'reasoning', name: '推理格式', type: 'reasoning' },
     { id: 'worldInfo', name: '全局世界书', type: 'worldInfo' },
     { id: 'theme', name: 'UI 主题', type: 'theme' },
@@ -13355,6 +13389,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     pending: null, source: null, listeners: [], scheduleTimer: 0,
     generationRetryTimer: 0, lastScheduleToken: '',
     startupRestorePending: false, startupRetryTimer: 0,
+    promptOverlay: null, promptManager: null, promptBridge: null, promptResetPending: false, promptSuppressSettingsEvent: false,
   };
   function companionIsFreshHostStartup(previousInstance, pageAlreadyInitialized) {
     return !previousInstance && !pageAlreadyInitialized;
@@ -13379,13 +13414,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           schedules: raw.schedules && typeof raw.schedules === 'object' ? raw.schedules : {},
           manualHolds: raw.manualHolds && typeof raw.manualHolds === 'object' ? raw.manualHolds : {},
           scheduleTokens: raw.scheduleTokens && typeof raw.scheduleTokens === 'object' ? raw.scheduleTokens : {},
+          promptBaselines: raw.promptBaselines && typeof raw.promptBaselines === 'object' ? raw.promptBaselines : {},
+          promptActive: raw.promptActive && typeof raw.promptActive === 'object' ? raw.promptActive : {},
         };
       }
     } catch (error) { console.warn('[配套侠] 读取方案失败', error); }
-    return { schema: 1, plans: [], defaults: {}, schedules: {}, manualHolds: {}, scheduleTokens: {} };
+    return { schema: 1, plans: [], defaults: {}, schedules: {}, manualHolds: {}, scheduleTokens: {}, promptBaselines: {}, promptActive: {} };
   }
   function companionSave(data) {
     try {
+      data.promptBaselines = data.promptBaselines && typeof data.promptBaselines === 'object' ? data.promptBaselines : {};
+      data.promptActive = data.promptActive && typeof data.promptActive === 'object' ? data.promptActive : {};
       HOST_WIN.localStorage.setItem(COMPANION_KEY, JSON.stringify(data));
       return true;
     } catch (error) {
@@ -13410,6 +13449,634 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (field.id === 'model') return item.section === '模型';
     return true;
   }
+  function companionPromptMergeStateMaps(existing, current) {
+    const merged = Object.create(null);
+    for (const [id, enabled] of Object.entries(existing || {})) if (id) merged[id] = Boolean(enabled);
+    for (const [id, enabled] of Object.entries(current || {})) if (id) merged[id] = Boolean(enabled);
+    return merged;
+  }
+  function companionPromptExtendStateMap(existing, current) {
+    const extended = companionPromptMergeStateMaps(existing, {});
+    for (const [id, enabled] of Object.entries(current || {})) {
+      if (id && !Object.prototype.hasOwnProperty.call(extended, id)) extended[id] = Boolean(enabled);
+    }
+    return extended;
+  }
+  function companionPromptUpdateKnownStateMap(existing, current) {
+    const updated = Object.create(null);
+    for (const [id, enabled] of Object.entries(existing || {})) {
+      if (!id) continue;
+      updated[id] = Object.prototype.hasOwnProperty.call(current || {}, id)
+        ? Boolean(current[id])
+        : Boolean(enabled);
+    }
+    return updated;
+  }
+  function companionPromptApplyStateMap(order, states, promptMap, canToggle) {
+    const entries = Array.isArray(order) ? order : [];
+    const byId = new Map();
+    for (const entry of entries) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      if (!byId.has(id)) byId.set(id, entry);
+    }
+    const result = { applied: [], changed: [], missing: [], locked: [], newEntries: [] };
+    for (const [id, enabled] of Object.entries(states || {})) {
+      const entry = byId.get(id);
+      const prompt = promptMap.get(id);
+      if (!entry || !prompt) { result.missing.push(id); continue; }
+      if (!canToggle(prompt)) { result.locked.push(id); continue; }
+      result.applied.push(id);
+      const next = Boolean(enabled);
+      if (Boolean(entry.enabled) !== next) { entry.enabled = next; result.changed.push(id); }
+    }
+    for (const entry of entries) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      if (!Object.prototype.hasOwnProperty.call(states || {}, id) && promptMap.has(id) && canToggle(promptMap.get(id))) {
+        result.newEntries.push(id);
+      }
+    }
+    return result;
+  }
+  function companionPromptBaselineRestoreIssue(order, prompts, states, canToggle) {
+    const entries = Array.isArray(order) ? order : [];
+    const promptList = Array.isArray(prompts) ? prompts : [];
+    const byId = new Map();
+    for (const entry of entries) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      if (!byId.has(id)) byId.set(id, entry);
+    }
+    const promptMap = new Map(promptList.filter(prompt => prompt?.identifier != null)
+      .map(prompt => [String(prompt.identifier), prompt]));
+    const missing = [];
+    const locked = [];
+    for (const [id, enabled] of Object.entries(states || {})) {
+      const entry = byId.get(id);
+      const prompt = promptMap.get(id);
+      if (!entry || !prompt) {
+        missing.push(id);
+        continue;
+      }
+      if (!canToggle(prompt) && Boolean(entry.enabled) !== Boolean(enabled)) locked.push(id);
+    }
+    return { missing, locked };
+  }
+  function companionPromptCurrentPresetName(context, manager) {
+    try {
+      const presetManager = context?.getPresetManager?.('openai');
+      const selected = presetManager?.getSelectedPresetName?.();
+      if (typeof selected === 'string' && selected.trim()) return selected.trim();
+    } catch {}
+    const configured = context?.chatCompletionSettings?.preset_settings_openai
+      ?? manager?.serviceSettings?.preset_settings_openai;
+    if (typeof configured === 'string' && configured.trim()) return configured.trim();
+    const select = quickSelect('settings_preset_openai');
+    const option = select?.selectedOptions?.[0] || select?.options[select.selectedIndex];
+    const label = String(option?.textContent || '').trim();
+    return label && label !== '—' ? label : '';
+  }
+  function companionPromptOrder(manager) {
+    if (!manager) return null;
+    const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+    if (strategy === 'global') {
+      const dummyId = manager.configuration?.promptOrder?.dummyId;
+      const list = manager.serviceSettings?.prompt_order?.find(item =>
+        dummyId != null && String(item?.character_id) === String(dummyId));
+      if (Array.isArray(list?.order)) return list.order;
+    }
+    try {
+      const order = manager.getPromptOrderForCharacter?.(manager.activeCharacter);
+      if (Array.isArray(order)) return order;
+    } catch {}
+    return null;
+  }
+  function companionPromptCanToggle(manager, prompt) {
+    if (!prompt || !prompt.identifier) return false;
+    try {
+      if (typeof manager.isPromptToggleAllowed === 'function') return Boolean(manager.isPromptToggleAllowed(prompt));
+    } catch { return false; }
+    if (prompt.marker) return false;
+    return !(manager.configuration?.toggleDisabled || []).includes(prompt.identifier);
+  }
+  function companionPromptSnapshotFromManager(manager, presetName) {
+    const order = companionPromptOrder(manager);
+    const prompts = manager?.serviceSettings?.prompts;
+    if (!Array.isArray(order) || !Array.isArray(prompts) || !prompts.length) {
+      throw new Error('原生预设条目列表尚未就绪。请先在酒馆加载一个对话补全预设。');
+    }
+    const promptMap = new Map(prompts.filter(prompt => prompt?.identifier != null)
+      .map(prompt => [String(prompt.identifier), prompt]));
+    const states = Object.create(null);
+    for (const entry of order) {
+      if (entry?.identifier == null) continue;
+      const id = String(entry.identifier);
+      const prompt = promptMap.get(id);
+      if (!prompt || !companionPromptCanToggle(manager, prompt)) continue;
+      states[id] = Boolean(entry.enabled);
+    }
+    if (!Object.keys(states).length) throw new Error('当前预设没有可记录的可切换条目。');
+    return { presetName, states };
+  }
+  function companionPromptApplyToManager(manager, states) {
+    const order = companionPromptOrder(manager);
+    const prompts = manager?.serviceSettings?.prompts;
+    if (!Array.isArray(order) || !Array.isArray(prompts)) throw new Error('原生预设条目列表尚未就绪。');
+    const promptMap = new Map(prompts.filter(prompt => prompt?.identifier != null)
+      .map(prompt => [String(prompt.identifier), prompt]));
+    return companionPromptApplyStateMap(order, states, promptMap,
+      prompt => companionPromptCanToggle(manager, prompt));
+  }
+  function companionPromptStoreBaseline(presetName, states, extend = false) {
+    if (!presetName) return false;
+    const data = companionRead();
+    const next = extend
+      ? companionPromptExtendStateMap(data.promptBaselines[presetName], states)
+      : companionPromptMergeStateMaps({}, states);
+    if (JSON.stringify(data.promptBaselines[presetName] || {}) === JSON.stringify(next)) return true;
+    data.promptBaselines[presetName] = next;
+    return companionSave(data);
+  }
+  function companionPromptEnsureBaseline(manager, presetName) {
+    const current = companionPromptSnapshotFromManager(manager, presetName);
+    const data = companionRead();
+    const existing = data.promptBaselines[presetName];
+    const baseline = existing
+      ? companionPromptExtendStateMap(existing, current.states)
+      : companionPromptMergeStateMaps({}, current.states);
+    if (JSON.stringify(existing || {}) !== JSON.stringify(baseline)) {
+      data.promptBaselines[presetName] = baseline;
+      if (!companionSave(data)) throw new Error('无法保存预设原始条目状态，已停止覆盖。');
+    }
+    return baseline;
+  }
+  function companionPromptRestoreBaseline(manager, presetName, fallbackBaseline = null) {
+    const fail = message => {
+      const error = new Error(message);
+      error.code = 'TLE_PROMPT_BASELINE_RESTORE_FAILED';
+      return error;
+    };
+    let baseline = null;
+    try { baseline = companionRead().promptBaselines[presetName]; } catch {}
+    if (!baseline || typeof baseline !== 'object' || !Object.keys(baseline).length) baseline = fallbackBaseline;
+    if (!baseline || typeof baseline !== 'object' || !Object.keys(baseline).length) {
+      throw fail('找不到预设「' + (presetName || '未知') + '」的原始条目状态。');
+    }
+    const order = companionPromptOrder(manager);
+    const prompts = manager?.serviceSettings?.prompts;
+    if (!Array.isArray(order) || !Array.isArray(prompts)) {
+      throw fail('预设「' + (presetName || '未知') + '」的原始条目列表尚未就绪，无法安全恢复。');
+    }
+    const canToggle = prompt => companionPromptCanToggle(manager, prompt);
+    const issue = companionPromptBaselineRestoreIssue(order, prompts, baseline, canToggle);
+    if (issue.missing.length || issue.locked.length) {
+      const details = [];
+      if (issue.missing.length) details.push('找不到条目标识：' + issue.missing.slice(0, 8).join('、') + (issue.missing.length > 8 ? ' 等' : ''));
+      if (issue.locked.length) details.push('条目被锁定且当前状态与原始状态不同：' + issue.locked.slice(0, 8).join('、') + (issue.locked.length > 8 ? ' 等' : ''));
+      throw fail('预设「' + (presetName || '未知') + '」的原始条目状态无法完整恢复（' + details.join('；') + '）。为避免角色专属状态串用，已停止后续操作。');
+    }
+    const result = companionPromptApplyToManager(manager, baseline);
+    const verify = companionPromptBaselineRestoreIssue(
+      companionPromptOrder(manager),
+      manager?.serviceSettings?.prompts,
+      baseline,
+      canToggle,
+    );
+    if (verify.missing.length || verify.locked.length) {
+      const details = [];
+      if (verify.missing.length) details.push('找不到条目标识：' + verify.missing.join('、'));
+      if (verify.locked.length) details.push('无法恢复的锁定条目标识：' + verify.locked.join('、'));
+      throw fail('预设「' + (presetName || '未知') + '」恢复后核验失败（' + details.join('；') + '）。为避免角色专属状态串用，已停止后续操作。');
+    }
+    return { baseline, result };
+  }
+  function companionPromptRoleStateExists(overlay) {
+    if (!overlay?.planId || !overlay.roleKey) return false;
+    const plan = companionRead().plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
+    return Boolean(plan?.fields?.promptEntries?.byRole?.[overlay.roleKey]);
+  }
+  function companionPromptSaveRoleState(overlay, snapshot) {
+    if (!overlay?.planId || !overlay.roleKey || !snapshot?.states) return false;
+    const data = companionRead();
+    const plan = data.plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
+    if (!plan?.fields?.promptEntries?.byRole?.[overlay.roleKey]) return false;
+    const field = plan.fields.promptEntries;
+    const byRole = { ...(field.byRole || {}) };
+    const previous = byRole[overlay.roleKey];
+    byRole[overlay.roleKey] = {
+      presetName: overlay.presetName,
+      states: companionPromptUpdateKnownStateMap(previous?.states, snapshot.states),
+    };
+    plan.fields.promptEntries = { byRole };
+    const saved = companionSave(data);
+    if (saved) companionRefreshList();
+    return saved;
+  }
+  function companionPromptMarkActive(overlay) {
+    if (!overlay?.roleKey || !overlay.planId || !overlay.presetName) return;
+    const data = companionRead();
+    data.promptActive[overlay.roleKey] = { planId: overlay.planId, presetName: overlay.presetName };
+    companionSave(data);
+  }
+  function companionPromptClearActive(overlay) {
+    if (!overlay?.roleKey) return;
+    const data = companionRead();
+    const active = data.promptActive[overlay.roleKey];
+    if (!active || !overlay.planId || active.planId === overlay.planId) {
+      delete data.promptActive[overlay.roleKey];
+      companionSave(data);
+    }
+  }
+  function companionInstallPromptSaveBridge(manager) {
+    if (!manager || typeof manager.saveServiceSettings !== 'function') return;
+    const previous = manager[COMPANION_PROMPT_BRIDGE_KEY];
+    if (previous?.wrapper === manager.saveServiceSettings && previous.owner === state) {
+      companionRuntime.promptManager = manager;
+      companionRuntime.promptBridge = { manager, ...previous };
+      return;
+    }
+    if (previous?.wrapper === manager.saveServiceSettings && typeof previous.original === 'function') {
+      manager.saveServiceSettings = previous.original;
+    }
+    const original = manager.saveServiceSettings;
+    const wrapper = function (...args) {
+      if (state.destroyed || companionRuntime.applying || companionRuntime.promptInternalWrite || companionRuntime.promptSuppressSettingsEvent) {
+        return original.apply(this, args);
+      }
+      const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+      const role = companionCurrentRole();
+      const presetName = companionPromptCurrentPresetName(context, manager);
+      const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+      const overlay = companionRuntime.promptOverlay;
+      const ownsOverlay = Boolean(overlay && role?.key === overlay.roleKey && presetName === overlay.presetName);
+      if (overlay && strategy === 'global' && !presetName) {
+        companionNotice('warning', '无法识别当前预设名称；已取消原生保存，以免角色专属条目开关污染预设。');
+        return Promise.reject(new Error('无法识别当前预设名称，已取消保存。'));
+      }
+      const restoreBaseline = () => {
+        const restored = companionPromptRestoreBaseline(manager, presetName);
+        manager.render?.(false);
+        return restored.baseline;
+      };
+      const restoreOverlayAfterSave = (fallbackBaseline = null) => {
+        if (state.destroyed || !overlay || companionRuntime.promptOverlay !== overlay) return;
+        const currentRole = companionCurrentRole();
+        const currentPreset = companionPromptCurrentPresetName(HOST_WIN.SillyTavern?.getContext?.() || {}, manager);
+        if (currentRole?.key !== overlay.roleKey || currentPreset !== overlay.presetName) {
+          if (strategy === 'global' && currentPreset === overlay.presetName) {
+            try {
+              companionPromptRestoreBaseline(manager, overlay.presetName, fallbackBaseline);
+              manager.render?.(false);
+            } catch (error) {
+              companionNotice('error', '保存后无法完整恢复预设原始条目状态；已保留旧角色隔离标记，阻止后续角色方案继续应用。');
+              console.warn('[配套侠] 保存后恢复原始预设条目状态失败', error);
+              return;
+            }
+          }
+          companionRuntime.promptOverlay = null;
+          companionPromptClearActive(overlay);
+          return;
+        }
+        companionPromptReapplyActiveOverlay();
+      };
+      const persistBaseline = (reapply = true, fallbackBaseline = null) => {
+        companionRuntime.promptSuppressSettingsEvent = true;
+        let pending;
+        try {
+          pending = original.apply(this, args);
+        } catch (error) {
+          companionRuntime.promptSuppressSettingsEvent = false;
+          if (reapply) restoreOverlayAfterSave(fallbackBaseline);
+          throw error;
+        }
+        return Promise.resolve(pending).finally(() => {
+          if (companionRuntime.promptSuppressSettingsEvent) companionRuntime.promptSuppressSettingsEvent = false;
+          if (reapply) restoreOverlayAfterSave(fallbackBaseline);
+        });
+      };
+      let snapshot;
+      try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
+      catch (error) {
+        if (!ownsOverlay || strategy !== 'global') return original.apply(this, args);
+        let baseline;
+        try { baseline = restoreBaseline(); }
+        catch (restoreError) {
+          companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+          console.warn('[配套侠] 保存前恢复原始预设条目状态失败', restoreError);
+          return Promise.reject(restoreError);
+        }
+        companionNotice('warning', '当前条目列表暂不可读取；已恢复预设原始开关，本次保存保留上一次已记录的角色方案状态。');
+        return persistBaseline(true, baseline);
+      }
+      if (ownsOverlay) {
+        if (!companionPromptRoleStateExists(overlay)) {
+          let baseline = null;
+          if (strategy === 'global') {
+            try { baseline = restoreBaseline(); }
+            catch (error) {
+              companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+              return Promise.reject(error);
+            }
+          }
+          companionRuntime.promptOverlay = null;
+          companionPromptClearActive(overlay);
+          manager.render?.(false);
+          return persistBaseline(false, baseline);
+        }
+        const saved = companionPromptSaveRoleState(overlay, snapshot);
+        if (strategy !== 'global') {
+          if (!saved) companionNotice('warning', '角色专属条目状态未能写入配套方案；当前为角色独立策略，本次仍按酒馆原生保存规则继续。');
+          return original.apply(this, args);
+        }
+        if (!saved) {
+          let baseline;
+          try { baseline = restoreBaseline(); }
+          catch (error) {
+            companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+            return Promise.reject(error);
+          }
+          companionNotice('warning', '角色专属条目状态未能写入方案；已恢复预设原始开关，本次仅保存原始状态。');
+          return persistBaseline(true, baseline);
+        }
+        let baseline;
+        try { baseline = companionRead().promptBaselines[presetName]; }
+        catch (error) {}
+        if (!baseline || typeof baseline !== 'object' || !Object.keys(baseline).length) {
+          companionNotice('error', '找不到预设原始条目状态；为避免角色专属开关污染预设，本次原生保存已取消。');
+          return Promise.reject(new Error('找不到预设原始条目状态，已取消保存。'));
+        }
+        companionPromptStoreBaseline(presetName, snapshot.states, true);
+        try {
+          const nextBaseline = companionRead().promptBaselines[presetName] || baseline;
+          companionPromptRestoreBaseline(manager, presetName, nextBaseline);
+          manager.render?.(false);
+          return persistBaseline(true, nextBaseline);
+        } catch (error) {
+          companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+          return Promise.reject(error);
+        }
+      }
+      if (overlay) {
+        const samePreset = presetName === overlay.presetName;
+        if (strategy === 'global' && samePreset) {
+          let baseline;
+          try { baseline = restoreBaseline(); }
+          catch (error) {
+            companionNotice('error', '无法恢复预设原始条目状态，本次原生保存已取消，以免污染预设。');
+            return Promise.reject(error);
+          }
+          companionRuntime.promptOverlay = null;
+          companionPromptClearActive(overlay);
+          manager.render?.(false);
+          return persistBaseline(false, baseline);
+        }
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+      }
+      if (strategy === 'global' && presetName) companionPromptStoreBaseline(presetName, snapshot.states, false);
+      return original.apply(this, args);
+    };
+    const bridge = { owner: state, original, wrapper };
+    try {
+      manager[COMPANION_PROMPT_BRIDGE_KEY] = bridge;
+      manager.saveServiceSettings = wrapper;
+      companionRuntime.promptManager = manager;
+      companionRuntime.promptBridge = { manager, ...bridge };
+    } catch (error) {
+      console.warn('[配套侠] 无法接入原生提示词保存接口', error);
+    }
+  }
+  async function companionPromptManager(waitForReady = true) {
+    let module;
+    try { module = await quickImport('/scripts/openai.js'); }
+    catch (error) { throw new Error('无法读取酒馆原生对话补全管理器：' + (error?.message || error)); }
+    try { await module?.getPresetApplicationPromise?.(); }
+    catch (error) { throw new Error('预设切换尚未完成：' + (error?.message || error)); }
+    const attempts = waitForReady ? 20 : 1;
+    for (let i = 0; i < attempts && !state.destroyed; i++) {
+      const manager = module?.promptManager;
+      const order = companionPromptOrder(manager);
+      if (manager && Array.isArray(manager.serviceSettings?.prompts) && Array.isArray(order) && order.length) {
+        companionInstallPromptSaveBridge(manager);
+        const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+        return {
+          manager, context, order,
+          presetName: companionPromptCurrentPresetName(context, manager),
+          strategy: manager.configuration?.promptOrder?.strategy || 'global',
+        };
+      }
+      if (i + 1 < attempts) await new Promise(resolve => HOST_WIN.setTimeout(resolve, 50));
+    }
+    throw new Error('原生对话补全条目管理器尚未就绪。请先在酒馆加载对话补全预设，再重试。');
+  }
+  async function companionPromptReadCurrentState() {
+    const { manager, presetName } = await companionPromptManager(true);
+    if (!presetName) throw new Error('无法识别当前加载的对话补全预设名称。');
+    return companionPromptSnapshotFromManager(manager, presetName);
+  }
+  async function companionPromptResetOverlay() {
+    if (!companionRuntime.promptOverlay) return { changed: 0 };
+    try {
+      const manager = companionRuntime.promptManager || (await companionPromptManager(true)).manager;
+      companionRuntime.promptManager = manager;
+      const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+      const presetName = companionPromptCurrentPresetName(context, manager);
+      const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+      const overlay = companionRuntime.promptOverlay;
+      let result = { changed: [] };
+      if (strategy === 'global' && !presetName) {
+        throw new Error('无法识别当前预设名称，不能安全恢复上一角色的原始条目状态。');
+      }
+      if (strategy === 'global' && presetName === overlay.presetName) {
+        const restored = companionPromptRestoreBaseline(manager, overlay.presetName);
+        result = restored.result;
+      }
+      companionRuntime.promptOverlay = null;
+      companionPromptClearActive(overlay);
+      if (result.changed?.length) manager.render?.(false);
+      return { changed: result.changed?.length || 0 };
+    } catch (error) {
+      return { changed: 0, issue: error?.message || String(error) };
+    }
+  }
+  async function companionPromptPreflight(plan, role) {
+    const saved = plan?.fields?.promptEntries?.byRole?.[role.key];
+    if (!saved) return null;
+    try {
+      const { manager, presetName, strategy } = await companionPromptManager(true);
+      if (!saved.presetName || saved.presetName !== presetName) {
+        return { skippedReason: '方案记录的预设为「' + (saved.presetName || '未知') + '」，当前加载的是「' + (presetName || '未知') + '」。请先加载方案对应的预设，或重新读取当前条目状态。' };
+      }
+      if (strategy === 'global') {
+        companionPromptEnsureBaseline(manager, presetName);
+        companionPromptRestoreBaseline(manager, presetName);
+      }
+      return null;
+    } catch (error) {
+      if (error?.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED') throw error;
+      return { skippedReason: error?.message || '当前无法读取原生预设条目状态。' };
+    }
+  }
+  function companionPromptReapplyActiveOverlay() {
+    const overlay = companionRuntime.promptOverlay;
+    const manager = companionRuntime.promptManager;
+    if (!overlay || !manager) return;
+    const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+    const role = companionCurrentRole();
+    const presetName = companionPromptCurrentPresetName(context, manager);
+    if (role?.key !== overlay.roleKey || presetName !== overlay.presetName) return;
+    const plan = companionRead().plans.find(item => item.id === overlay.planId && item.roles.includes(overlay.roleKey));
+    const saved = plan?.fields?.promptEntries?.byRole?.[overlay.roleKey];
+    if (!saved) {
+      companionRuntime.promptOverlay = null;
+      companionPromptClearActive(overlay);
+      return;
+    }
+    try {
+      companionPromptApplyToManager(manager, saved.states || {});
+      manager.render?.(false);
+    } catch (error) {
+      console.warn('[配套侠] 无法重新应用角色专属条目状态', error);
+    }
+  }
+  function companionPromptPersistCurrentSettings(manager, context) {
+    const save = typeof context?.saveSettingsDebounced === 'function'
+      ? context.saveSettingsDebounced.bind(context)
+      : typeof manager?.saveServiceSettings === 'function'
+        ? manager.saveServiceSettings.bind(manager)
+        : null;
+    if (!save) return false;
+    companionRuntime.promptSuppressSettingsEvent = true;
+    try {
+      const result = save();
+      if (result && typeof result.catch === 'function') {
+        result.catch(error => {
+          companionRuntime.promptSuppressSettingsEvent = false;
+          console.warn('[配套侠] 保存预设基础条目状态失败', error);
+          companionPromptReapplyActiveOverlay();
+        });
+      }
+      return true;
+    } catch (error) {
+      companionRuntime.promptSuppressSettingsEvent = false;
+      console.warn('[配套侠] 保存预设基础条目状态失败', error);
+      return false;
+    }
+  }
+  function companionPromptOnSettingsUpdated() {
+    if (state.destroyed) return;
+    if (companionRuntime.promptSuppressSettingsEvent) {
+      companionRuntime.promptSuppressSettingsEvent = false;
+      companionPromptReapplyActiveOverlay();
+      return;
+    }
+    if (companionRuntime.applying) return;
+    const manager = companionRuntime.promptManager;
+    if (!manager) {
+      void companionPromptManager(false).catch(() => {});
+      return;
+    }
+    const context = HOST_WIN.SillyTavern?.getContext?.() || {};
+    const role = companionCurrentRole();
+    const presetName = companionPromptCurrentPresetName(context, manager);
+    const strategy = manager.configuration?.promptOrder?.strategy || 'global';
+    const overlay = companionRuntime.promptOverlay;
+    if (overlay && strategy !== 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+      if (!companionPromptRoleStateExists(overlay)) {
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+        return;
+      }
+      try {
+        const snapshot = companionPromptSnapshotFromManager(manager, presetName);
+        companionPromptSaveRoleState(overlay, snapshot);
+      } catch {}
+      return;
+    }
+    if (overlay && strategy === 'global' && role?.key === overlay.roleKey && presetName === overlay.presetName) {
+      if (!companionPromptRoleStateExists(overlay)) {
+        try { companionPromptRestoreBaseline(manager, presetName); }
+        catch (error) {
+          companionNotice('error', '无法完整恢复预设原始条目状态；已保留角色隔离标记，阻止原生保存。');
+          console.warn('[配套侠] 设置更新时恢复预设原始条目状态失败', error);
+          return;
+        }
+        manager.render?.(false);
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+        companionPromptPersistCurrentSettings(manager, context);
+        return;
+      }
+      let snapshot;
+      try { snapshot = companionPromptSnapshotFromManager(manager, presetName); }
+      catch { return; }
+      const baseline = companionRead().promptBaselines[presetName];
+      if (!baseline) return;
+      if (!companionPromptStoreBaseline(presetName, snapshot.states, true)) {
+        companionNotice('warning', '新增条目的原始状态未能记录；已保留当前角色方案，未执行原生保存。');
+        companionPromptReapplyActiveOverlay();
+        return;
+      }
+      try {
+        companionPromptRestoreBaseline(manager, presetName);
+        manager.render?.(false);
+        if (!companionPromptPersistCurrentSettings(manager, context)) companionPromptReapplyActiveOverlay();
+      } catch (error) {
+        companionNotice('error', '无法完整恢复预设原始条目状态；已保留当前角色隔离状态，并阻止原生保存。');
+        console.warn('[配套侠] 设置更新时恢复预设原始条目状态失败', error);
+        companionPromptReapplyActiveOverlay();
+      }
+      return;
+    }
+    if (overlay) {
+      const samePreset = presetName === overlay.presetName;
+      if (strategy === 'global' && samePreset) {
+        try { companionPromptRestoreBaseline(manager, overlay.presetName); }
+        catch (error) {
+          companionNotice('error', '无法完整恢复预设原始条目状态；已保留旧角色隔离标记，阻止后续角色方案继续应用。');
+          console.warn('[配套侠] 设置更新时恢复预设原始条目状态失败', error);
+          return;
+        }
+        manager.render?.(false);
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+        if (companionPromptPersistCurrentSettings(manager, context)) return;
+      } else {
+        companionRuntime.promptOverlay = null;
+        companionPromptClearActive(overlay);
+      }
+    }
+    if (strategy === 'global' && presetName) {
+      try {
+        const snapshot = companionPromptSnapshotFromManager(manager, presetName);
+        companionPromptStoreBaseline(presetName, snapshot.states, false);
+      } catch {}
+    }
+  }
+  async function companionApplyPromptEntries(target, role, planId) {
+    const saved = target?.byRole?.[role.key];
+    if (!saved) return { noRoleState: true, applied: [], changed: [], missing: [], locked: [], newEntries: [] };
+    const { manager, presetName, strategy } = await companionPromptManager(true);
+    if (!saved.presetName || saved.presetName !== presetName) {
+      throw new Error('方案记录的预设为「' + (saved.presetName || '未知') + '」，当前加载的是「' + (presetName || '未知') + '」。请先加载方案对应的预设，或重新读取当前条目状态。');
+    }
+    if (strategy === 'global') {
+      companionPromptEnsureBaseline(manager, presetName);
+      companionPromptRestoreBaseline(manager, presetName);
+    }
+    const result = companionPromptApplyToManager(manager, saved.states || {});
+    manager.render?.(false);
+    const overlay = { roleKey: role.key, planId, presetName };
+    if (result.applied.length) {
+      companionRuntime.promptOverlay = overlay;
+      companionPromptMarkActive(overlay);
+    }
+    if (strategy !== 'global' && result.changed.length && typeof manager.saveServiceSettings === 'function') {
+      await manager.saveServiceSettings();
+    }
+    return result;
+  }
   async function companionCatalogs() {
     const catalogs = {};
     for (const type of ['api', 'preset', 'reasoning', 'worldInfo', 'theme']) {
@@ -13421,11 +14088,26 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         console.warn('[配套侠] 无法读取 ' + type + ' 列表', error);
       }
     }
+    try { catalogs.promptEntries = await companionPromptReadCurrentState(); }
+    catch (error) {
+      catalogs.promptEntries = null;
+      catalogs.promptEntriesError = error?.message || String(error);
+      console.info('[配套侠] 当前无法读取原生预设条目状态：' + catalogs.promptEntriesError);
+    }
     return catalogs;
   }
-  function companionSnapshot(catalogs) {
+  function companionSnapshot(catalogs, role) {
     const fields = {};
     for (const field of COMPANION_FIELDS) {
+      if (field.id === 'promptEntries') {
+        if (role && catalogs.promptEntries) {
+          fields.promptEntries = { byRole: { [role.key]: {
+            presetName: catalogs.promptEntries.presetName,
+            states: companionPromptMergeStateMaps({}, catalogs.promptEntries.states),
+          } } };
+        }
+        continue;
+      }
       if (field.id === 'worldInfo') {
         const selected = (catalogs.worldInfo || []).filter(item => item.selected && !item.disabled && item.value != null && String(item.value) !== '');
         const items = selected.map(item => ({ value: String(item.value), label: item.label }));
@@ -13442,19 +14124,25 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     return fields;
   }
-  function companionPlanPreview(plan) {
+  function companionPlanPreview(plan, role) {
     const preview = quickNode('div', 'tle-companion-preview');
-    const fields = COMPANION_FIELDS.filter(field => plan.fields?.[field.id]);
+    const fields = COMPANION_FIELDS.filter(field => field.id === 'promptEntries'
+      ? Boolean(plan.fields?.promptEntries?.byRole?.[role?.key])
+      : Boolean(plan.fields?.[field.id]));
     if (!fields.length) {
       preview.append(quickNode('small', 'tle-companion-preview-empty', '空方案'));
       return preview;
     }
     for (const field of fields) {
-      const saved = plan.fields[field.id] || {};
+      const saved = field.id === 'promptEntries'
+        ? plan.fields.promptEntries.byRole[role.key]
+        : plan.fields[field.id] || {};
       const item = quickNode('div', 'tle-companion-preview-item'
         + (field.id === 'worldInfo' ? ' is-world-info' : ''));
       const label = quickNode('span', 'tle-companion-preview-label', field.name);
-      const rawValue = saved.label ?? saved.value;
+      const rawValue = field.id === 'promptEntries'
+        ? `${Object.keys(saved.states || {}).length} 项 · ${saved.presetName || '未知预设'}`
+        : saved.label ?? saved.value;
       const valueText = Array.isArray(rawValue)
         ? rawValue.map(value => String(value)).join('、')
         : rawValue == null || rawValue === '' ? '—' : String(rawValue);
@@ -13601,12 +14289,219 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       controls.append(setDefault, apply);
       headingRow.append(titleRow, controls);
       summary.append(headingRow);
-      summary.append(companionPlanPreview(plan));
+      summary.append(companionPlanPreview(plan, role));
       row.append(summary);
       list.append(row);
     }
   }
-  function companionEditorRow(field, catalogs, saved) {
+  function companionBuildWorldInfoPicker(select, toggle) {
+    const wrapper = quickNode('div', 'tle-companion-worldbook-picker');
+    const trigger = quickNode('button', 'text_pole tle-companion-worldbook-trigger');
+    trigger.type = 'button';
+    trigger.setAttribute('aria-label', '全局世界书');
+    trigger.setAttribute('aria-haspopup', 'true');
+    trigger.setAttribute('aria-expanded', 'false');
+    const triggerLabel = quickNode('span', 'tle-companion-worldbook-trigger-label');
+    const arrow = quickNode('i', 'fa-solid fa-chevron-down');
+    arrow.setAttribute('aria-hidden', 'true');
+    trigger.append(triggerLabel, arrow);
+
+    const menu = quickNode('div', 'tle-companion-worldbook-menu');
+    menu.setAttribute('role', 'group');
+    menu.setAttribute('aria-label', '全局世界书');
+    menu.id = 'tle-companion-worldbook-menu-' + (++quickSequence);
+    trigger.setAttribute('aria-controls', menu.id);
+    const supportsPopover = typeof menu.showPopover === 'function';
+    if (supportsPopover) menu.setAttribute('popover', 'auto');
+
+    // Keep the original multi-select as the data source. It remains the
+    // single source of truth for selectedOptions and the existing save path.
+    select.hidden = true;
+    select.tabIndex = -1;
+    select.setAttribute('aria-hidden', 'true');
+    const controls = [];
+    for (const option of [...select.options]) {
+      const row = quickNode('label', 'checkbox_label tle-companion-worldbook-option');
+      const checkbox = quickNode('input', 'checkbox');
+      checkbox.type = 'checkbox';
+      checkbox.checked = option.selected;
+      checkbox.disabled = option.disabled || !toggle.checked;
+      checkbox.setAttribute('aria-label', option.textContent || option.value);
+      const label = quickNode('span', '', option.textContent || option.value);
+      row.append(checkbox, label);
+      menu.append(row);
+      controls.push({ option, checkbox, row });
+      checkbox.addEventListener('change', () => {
+        if (option.disabled || !toggle.checked) {
+          checkbox.checked = option.selected;
+          return;
+        }
+        option.selected = checkbox.checked;
+        updateSummary();
+        select.dispatchEvent(new HOST_WIN.Event('change', { bubbles: true }));
+      });
+    }
+
+    function updateSummary() {
+      const selected = [...select.selectedOptions];
+      triggerLabel.textContent = selected.length
+        ? '已选 ' + selected.length + ' 本世界书'
+        : '选择世界书';
+      trigger.title = selected.length
+        ? selected.map(option => option.textContent.trim()).join('、')
+        : '点击选择全局世界书';
+    }
+
+    let open = false;
+    let nativePopoverOpen = false;
+    const removeOpenListeners = () => {
+      HOST_DOC.removeEventListener('pointerdown', handleOutsidePointer, true);
+      HOST_DOC.removeEventListener('keydown', handleEscape, true);
+      HOST_WIN.removeEventListener('resize', positionMenu);
+      HOST_DOC.removeEventListener('scroll', positionMenu, true);
+    };
+    const positionMenu = () => {
+      if (!nativePopoverOpen) return;
+      const rect = trigger.getBoundingClientRect();
+      const viewportWidth = Math.max(1, Number(HOST_WIN.innerWidth) || HOST_DOC.documentElement.clientWidth || rect.right);
+      const viewportHeight = Math.max(1, Number(HOST_WIN.innerHeight) || HOST_DOC.documentElement.clientHeight || rect.bottom);
+      const width = Math.max(160, Math.min(Math.max(rect.width, 220), viewportWidth - 16));
+      const left = Math.max(8, Math.min(rect.left, viewportWidth - width - 8));
+      const below = Math.max(0, viewportHeight - rect.bottom - 8);
+      const above = Math.max(0, rect.top - 8);
+      const openAbove = below < Math.min(220, above) && above > below;
+      const available = Math.max(100, Math.min(300, openAbove ? above : Math.max(below, above)));
+      const top = openAbove
+        ? Math.max(8, rect.top - available - 4)
+        : Math.min(Math.max(8, viewportHeight - available - 8), rect.bottom + 4);
+      menu.style.left = left + 'px';
+      menu.style.top = top + 'px';
+      menu.style.width = width + 'px';
+      menu.style.maxHeight = available + 'px';
+    };
+    const handleOutsidePointer = event => {
+      if (!wrapper.contains(event.target)) setOpen(false);
+    };
+    const handleEscape = event => {
+      if (event.key !== 'Escape' || !open) return;
+      event.preventDefault();
+      setOpen(false);
+      trigger.focus();
+    };
+    function setOpen(next) {
+      if (next === open) return;
+      open = next;
+      menu.classList.toggle('is-open', open);
+      trigger.setAttribute('aria-expanded', String(open));
+      if (open) {
+        if (supportsPopover) {
+          try {
+            menu.showPopover();
+            nativePopoverOpen = true;
+          } catch {
+            nativePopoverOpen = false;
+            menu.removeAttribute('popover');
+          }
+        }
+        if (nativePopoverOpen) {
+          positionMenu();
+          HOST_WIN.addEventListener('resize', positionMenu, { passive: true });
+          HOST_DOC.addEventListener('scroll', positionMenu, true);
+        } else {
+          HOST_DOC.addEventListener('pointerdown', handleOutsidePointer, true);
+          HOST_DOC.addEventListener('keydown', handleEscape, true);
+        }
+      } else {
+        if (nativePopoverOpen) {
+          try {
+            if (menu.matches(':popover-open')) menu.hidePopover();
+          } catch {
+            try { menu.hidePopover(); } catch {}
+          }
+        }
+        nativePopoverOpen = false;
+        removeOpenListeners();
+      }
+    }
+    menu.addEventListener('toggle', event => {
+      if (!supportsPopover) return;
+      const next = event.newState === 'open';
+      if (next === open) return;
+      open = next;
+      menu.classList.toggle('is-open', open);
+      trigger.setAttribute('aria-expanded', String(open));
+      if (open) {
+        positionMenu();
+        HOST_WIN.addEventListener('resize', positionMenu, { passive: true });
+        HOST_DOC.addEventListener('scroll', positionMenu, true);
+      } else {
+        nativePopoverOpen = false;
+        removeOpenListeners();
+      }
+    });
+    trigger.addEventListener('click', () => setOpen(!open));
+    wrapper.append(trigger, menu, select);
+    updateSummary();
+
+    const setEnabled = enabled => {
+      select.disabled = !enabled;
+      trigger.disabled = !enabled || !select.options.length;
+      for (const { option, checkbox, row } of controls) {
+        checkbox.disabled = !enabled || option.disabled;
+        row.classList.toggle('is-disabled', checkbox.disabled);
+      }
+      if (!enabled) setOpen(false);
+    };
+    toggle.addEventListener('change', () => setEnabled(toggle.checked));
+    setEnabled(toggle.checked);
+    return { node: wrapper, trigger, menu, setEnabled, updateSummary };
+  }
+
+  function companionEditorRow(field, catalogs, saved, role, capturePromptDefault = false) {
+    if (field.id === 'promptEntries') {
+      const line = quickNode('div', 'tle-companion-field');
+      const toggle = quickNode('input');
+      toggle.type = 'checkbox';
+      const savedRole = saved?.byRole?.[role?.key] || null;
+      const initial = savedRole || (capturePromptDefault ? catalogs.promptEntries : null);
+      const promptState = { value: initial ? {
+        presetName: initial.presetName,
+        states: companionPromptMergeStateMaps({}, initial.states),
+      } : null };
+      toggle.checked = Boolean(promptState.value);
+      const name = quickNode('span', 'tle-companion-field-label', field.name);
+      const tools = quickNode('div', 'tle-companion-prompt-tools');
+      const status = quickNode('small', '', '');
+      const readButton = companionTextButton(promptState.value ? '重读' : '读取', async () => {
+        readButton.disabled = true;
+        status.textContent = '正在读取…';
+        try {
+          const snapshot = await companionPromptReadCurrentState();
+          promptState.value = snapshot;
+          toggle.checked = true;
+          status.textContent = `${Object.keys(snapshot.states).length} 项 · ${snapshot.presetName}`;
+          status.title = '只保存条目标识与启用状态；正文、名称和排序跟随原生预设';
+        } catch (error) {
+          status.textContent = '暂不可读取';
+          status.title = error?.message || String(error);
+          companionNotice('warning', status.title);
+        } finally { readButton.disabled = false; }
+      });
+      readButton.title = '从当前已加载的原生对话补全预设读取条目启用状态';
+      if (promptState.value) {
+        status.textContent = `${Object.keys(promptState.value.states || {}).length} 项 · ${promptState.value.presetName || '未知预设'}`;
+        status.title = '只保存条目标识与启用状态；正文、名称和排序跟随原生预设';
+      } else {
+        status.textContent = catalogs.promptEntriesError ? '原生条目未就绪' : '尚未记录';
+        status.title = catalogs.promptEntriesError || '点击读取，从当前原生预设记录条目启用状态';
+      }
+      toggle.addEventListener('change', () => {
+        if (toggle.checked && !promptState.value) status.textContent = '请先读取当前状态';
+      });
+      tools.append(status, readButton);
+      line.append(toggle, name, tools);
+      return { line, toggle, select: null, choices: [], saved, promptState };
+    }
     const line = quickNode('div', 'tle-companion-field');
     const toggle = quickNode('input');
     toggle.type = 'checkbox';
@@ -13622,7 +14517,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     if (isWorldInfo) {
       select.multiple = true;
-      select.size = Math.min(6, Math.max(3, choices.length));
       const savedValues = saved && Array.isArray(saved.value)
         ? new Set(saved.value.map(value => String(value)))
         : null;
@@ -13671,22 +14565,29 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (!select.options.length) {
       const missing = quickNode('option', '', '当前无法读取该项，请先打开原生设置');
       missing.value = '';
+      missing.disabled = true;
       select.append(missing);
       toggle.checked = false;
       toggle.disabled = true;
     }
-    select.disabled = !toggle.checked;
-    toggle.addEventListener('change', () => { select.disabled = !toggle.checked; });
-    line.append(toggle, name, select);
+    const picker = isWorldInfo ? companionBuildWorldInfoPicker(select, toggle) : null;
+    if (!isWorldInfo) {
+      select.disabled = !toggle.checked;
+      toggle.addEventListener('change', () => { select.disabled = !toggle.checked; });
+    }
+    line.append(toggle, name, picker?.node || select);
     if (isWorldInfo) line.title = saved
       ? '可多选；应用方案时会按此清单同步全局世界书'
       : '该旧方案尚未记录全局世界书；勾选左侧并保存，即可记录当前已选书目';
-    return { line, toggle, select, choices, saved };
+    return { line, toggle, select, choices, saved, picker };
   }
   async function companionOpenEditor(planId = '', duplicate = false, replaceCurrent = false) {
     const role = companionCurrentRole();
     if (!role) { companionNotice('warning', '请先进入单角色聊天。'); return; }
     if (companionRuntime.applying) return;
+    if (companionRuntime.promptOverlay && companionRuntime.promptOverlay.roleKey !== role.key) {
+      await companionPromptResetOverlay();
+    }
     closeChatTools(false);
     const savedData = companionRead();
     const source = savedData.plans.find(p => p.id === planId && p.roles.includes(role.key));
@@ -13697,16 +14598,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const catalogs = await companionCatalogs();
     if (quickPanel !== shell || state.destroyed) return;
     pending.remove();
-    const fields = source && !replaceCurrent ? source.fields : companionSnapshot(catalogs);
+    const fields = source && !replaceCurrent ? source.fields : companionSnapshot(catalogs, role);
     const form = quickNode('div', 'tle-companion-editor');
     const nameLabel = quickNode('label', '', '方案名称');
     const nameInput = quickNode('input', 'text_pole');
     nameInput.maxLength = 64;
     nameInput.value = source ? source.name + (duplicate ? ' · 副本' : '') : '新方案';
     nameLabel.append(nameInput);
-    form.append(nameLabel, quickNode('p', 'tle-muted', '未勾选的项目保持原样。全局世界书支持多选并按清单同步；壁纸自动跟随 UI 主题，不单独保存。'));
+    form.append(nameLabel, quickNode('p', 'tle-muted', '未勾选的项目保持原样。预设条目只记录标识与开关，正文、名称和排序跟随原生预设；请先在原生提示词管理器调整，再读取当前状态。全局世界书支持多选；壁纸自动跟随 UI 主题。'));
     const rows = COMPANION_FIELDS.map(field => {
-      const item = companionEditorRow(field, catalogs, fields[field.id]);
+      const item = companionEditorRow(field, catalogs, fields[field.id], role, !source || replaceCurrent);
       form.append(item.line);
       return { field, ...item };
     });
@@ -13716,6 +14617,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!name) { companionNotice('warning', '请填写方案名称。'); return; }
       const nextFields = {};
       for (const row of rows) {
+        if (row.field.id === 'promptEntries') {
+          const baseByRole = source && !duplicate
+            ? { ...(source.fields?.promptEntries?.byRole || {}) }
+            : {};
+          if (row.toggle.checked) {
+            const snapshot = row.promptState?.value;
+            if (!snapshot?.presetName || !snapshot.states || !Object.keys(snapshot.states).length) {
+              companionNotice('warning', '尚未读取有效的预设条目状态。请先加载目标预设，再点击读取。');
+              return;
+            }
+            const targetPreset = nextFields.preset?.label;
+            if (targetPreset && targetPreset !== snapshot.presetName) {
+              companionNotice('warning', '方案选择的预设为「' + targetPreset + '」，但读取状态来自「' + snapshot.presetName + '」。请先在酒馆加载目标预设，再重新读取条目状态。');
+              return;
+            }
+            baseByRole[role.key] = {
+              presetName: snapshot.presetName,
+              states: companionPromptMergeStateMaps({}, snapshot.states),
+            };
+          } else {
+            delete baseByRole[role.key];
+          }
+          if (Object.keys(baseByRole).length) nextFields.promptEntries = { byRole: baseByRole };
+          continue;
+        }
         if (!row.toggle.checked) continue;
         if (row.field.id === 'worldInfo') {
           const items = [...row.select.selectedOptions].map(option => ({
@@ -13746,6 +14672,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const next = { id, name, roles: old?.roles || [role.key], fields: nextFields };
       fresh.plans = old ? fresh.plans.map(p => p.id === id ? next : p) : [...fresh.plans, next];
       if (!companionSave(fresh)) return;
+      if (companionRuntime.promptOverlay?.planId === id
+        && !nextFields.promptEntries?.byRole?.[role.key]) void companionPromptResetOverlay();
       closeQuickPanel(false);
       companionRefreshList();
       companionNotice('success', '方案已保存：' + name);
@@ -13860,7 +14788,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (data.schedules?.[role.key]?.enabled && data.schedules[role.key].nightPlanId === plan.id)
           titleRow.append(quickNode('span', 'tle-companion-schedule-badge', '☾ 夜间'));
         copy.append(titleRow);
-        copy.append(companionPlanPreview(plan));
+        copy.append(companionPlanPreview(plan, role));
         const actions = quickNode('div', 'tle-companion-actions');
         const defaultButton = companionTextButton(isDefault ? '取消默认' : '设为默认', () => {
           if (companionToggleDefault(plan.id, role)) render();
@@ -13906,6 +14834,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (!select.multiple) return '当前全局世界书控件不是多选控件，无法安全同步整套清单';
       if (select.disabled) return '全局世界书控件当前不可用';
       return '方案中的部分全局世界书当前不存在或不可用';
+    }
+    if (field.id === 'promptEntries') {
+      return '原生对话补全条目管理器尚未就绪，或方案绑定的预设与当前预设不一致';
     }
     if (field.id === 'theme') {
       const select = withQuickThemeControl(control => control);
@@ -14002,11 +14933,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let finished = 0;
     try {
       const skipped = [];
+      const resetResult = await companionPromptResetOverlay();
+      if (resetResult.issue) {
+        throw new Error('无法安全恢复上一角色的原始预设条目状态，已停止应用新方案，避免角色状态串用或污染原始预设。' + resetResult.issue);
+      }
+      if (resetResult.changed) finished++;
+      const promptPreflight = await companionPromptPreflight(plan, role);
       for (const field of COMPANION_FIELDS) {
         const target = plan.fields[field.id];
         if (!target) continue;
         if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
         try {
+          if (field.id === 'promptEntries') {
+            if (promptPreflight?.skippedReason) {
+              skipped.push({ name: field.name, target: '角色专属条目', reason: promptPreflight.skippedReason });
+              continue;
+            }
+            const result = await companionApplyPromptEntries(target, role, id);
+            if (result.noRoleState) continue;
+            if (result.applied.length) finished++;
+            const details = [];
+            if (result.missing.length) details.push('找不到 ' + result.missing.length + ' 个已记录条目标识（' + result.missing.slice(0, 5).join('、') + (result.missing.length > 5 ? ' 等' : '') + '）');
+            if (result.locked.length) details.push(result.locked.length + ' 个条目当前被原生管理器锁定');
+            if (details.length) skipped.push({ name: field.name, target: result.missing.length + result.locked.length + ' 项', reason: details.join('；') + '；其余匹配项已独立应用，新条目保持当前状态' });
+            continue;
+          }
           if (field.id === 'worldInfo') {
             await quickCatalog('worldInfo', false, state.abort.signal);
             if (state.destroyed || companionCurrentRole()?.key !== role.key) throw new Error('角色已切换，停止应用旧方案。');
@@ -14034,6 +14985,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         } catch (error) {
           // Role changes and teardown are cancellation, not a missing plan item.
           if (state.destroyed || companionCurrentRole()?.key !== role.key) throw error;
+          if (error?.code === 'TLE_PROMPT_BASELINE_RESTORE_FAILED') throw error;
           skipped.push({
             name: field.name,
             target: String(target.label || target.value || '未命名项目'),
@@ -14098,6 +15050,10 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const choice = companionAutoTarget(data, role);
       companionArmSchedule(choice?.slot);
       if (!key) {
+        if (changed || companionRuntime.promptResetPending) {
+          if (isNativeGenerationVisible()) companionRuntime.promptResetPending = true;
+          else { companionRuntime.promptResetPending = false; void companionPromptResetOverlay(); }
+        }
         companionRuntime.lastScheduleToken = '';
         const context = HOST_WIN.SillyTavern?.getContext?.();
         if (context?.groupId != null) {
@@ -14126,7 +15082,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         companionSave(data);
       }
       const manualHold = Boolean(choice?.slot && companionManualHold(data, role, choice.slot));
-      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold, startupRestore })) return;
+      if (!companionShouldAutoApply({ choice, force, changed, boundaryChanged, manualHold, startupRestore })) {
+        if (changed || companionRuntime.promptResetPending) {
+          if (isNativeGenerationVisible()) companionRuntime.promptResetPending = true;
+          else { companionRuntime.promptResetPending = false; void companionPromptResetOverlay(); }
+        }
+        return;
+      }
       console.info('[配套侠] 自动应用角色「' + role.name + '」方案：' + choice.plan.name);
       void companionApply(choice.id, true);
     }, 350);
@@ -14176,9 +15138,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       for (const key of ['GENERATION_ENDED', 'GENERATION_STOPPED']) {
         if (typeof types[key] !== 'string' || !types[key]) continue;
         if (companionRuntime.listeners.some(l => l.type === types[key])) continue;
-        const handler = () => { if (companionRuntime.pending) companionOnChatChanged(true); };
+        const handler = () => { if (companionRuntime.pending || companionRuntime.promptResetPending) companionOnChatChanged(true); };
         source.on(types[key], handler);
         companionRuntime.listeners.push({ type: types[key], handler });
+      }
+      if (typeof types.SETTINGS_UPDATED === 'string' && types.SETTINGS_UPDATED
+        && !companionRuntime.listeners.some(l => l.type === types.SETTINGS_UPDATED)) {
+        const handler = () => companionPromptOnSettingsUpdated();
+        source.on(types.SETTINGS_UPDATED, handler);
+        companionRuntime.listeners.push({ type: types.SETTINGS_UPDATED, handler });
       }
       companionRuntime.source = source;
     }
@@ -14193,6 +15161,18 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     // Day/night tokens and manual holds still govern scheduled-plan precedence.
     const initialRole = companionCurrentRole();
     const initialData = companionRead();
+    if (freshHostStartup && Object.keys(initialData.promptActive || {}).length) {
+      initialData.promptActive = {};
+      companionSave(initialData);
+    } else if (!freshHostStartup && initialRole) {
+      const active = initialData.promptActive?.[initialRole.key];
+      const presetName = companionPromptCurrentPresetName(context, null);
+      if (active?.planId && active.presetName && active.presetName === presetName
+        && initialData.plans.some(plan => plan.id === active.planId && plan.roles.includes(initialRole.key)
+          && plan.fields?.promptEntries?.byRole?.[initialRole.key])) {
+        companionRuntime.promptOverlay = { roleKey: initialRole.key, planId: active.planId, presetName: active.presetName };
+      }
+    }
     const initialChoice = companionAutoTarget(initialData, initialRole);
     const savedScheduleToken = initialRole
       ? (initialData.scheduleTokens?.[initialRole.key] || '')
@@ -14206,6 +15186,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     companionRuntime.lastRole = initialRole?.key || '';
     companionRuntime.lastScheduleToken = savedScheduleToken || initialChoice?.slot?.token || '';
     companionOnChatChanged();
+    void companionPromptManager(true).catch(() => {});
     if (freshHostStartup && !initialRole) companionQueueStartupRestore();
   }
   function companionCleanup() {
@@ -14218,6 +15199,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     companionRuntime.startupRetryTimer = 0;
     companionRuntime.startupRestorePending = false;
     companionRuntime.pending = null;
+    const bridge = companionRuntime.promptBridge;
+    if (bridge?.manager) {
+      try {
+        if (bridge.manager.saveServiceSettings === bridge.wrapper) bridge.manager.saveServiceSettings = bridge.original;
+        if (bridge.manager[COMPANION_PROMPT_BRIDGE_KEY]?.wrapper === bridge.wrapper) delete bridge.manager[COMPANION_PROMPT_BRIDGE_KEY];
+      } catch {}
+    }
+    companionRuntime.promptBridge = null;
+    companionRuntime.promptManager = null;
     if (companionRuntime.source) {
       const remove = companionRuntime.source.removeListener || companionRuntime.source.off;
       if (typeof remove === 'function') {
@@ -18041,7 +19031,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.289';
+    const VERSION = '0.3.294';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -20056,7 +21046,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.291',
+    version: '0.3.294',
     ready: false,
     destroy,
     state,
@@ -20514,5 +21504,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.291 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.294 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
