@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.289 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.290 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
