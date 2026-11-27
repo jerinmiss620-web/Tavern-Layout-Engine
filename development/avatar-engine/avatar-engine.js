@@ -37,8 +37,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
     const wrapper = img.closest('.mesAvatarWrapper');
     // The 260402 Div/Canvas script owns chat avatars when these markers exist.
     // Keep it isolated to chat avatars; TLE still enhances every other target.
-    return Boolean(DOC.getElementById('hd-avatar-styles') ||
-      img.dataset.hdFixed === 'true' ||
+    return Boolean(img.dataset.hdFixed === 'true' ||
       wrapper?.querySelector('.hd-avatar-layer-div, .hd-avatar-layer-canvas'));
   }
   const isAvatar = img => img?.matches?.(SELECTOR) && !isLegacyChatOverlay(img);
@@ -286,8 +285,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
         host: 'st',
         active: !state.cleaned,
         observerActive: Boolean(state.observer && !state.cleaned),
-        legacyChatOverlayDetected: Boolean(DOC.getElementById('hd-avatar-styles') ||
-          DOC.querySelector('.hd-avatar-layer-div, .hd-avatar-layer-canvas')),
+        legacyChatOverlayDetected: Boolean(DOC.querySelector('.mesAvatarWrapper img[data-hd-fixed="true"], .mesAvatarWrapper .hd-avatar-layer-div, .mesAvatarWrapper .hd-avatar-layer-canvas')),
       };
     },
   };

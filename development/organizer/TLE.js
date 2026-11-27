@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.277
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.278
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -17779,8 +17779,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
     const wrapper = img.closest('.mesAvatarWrapper');
     // The 260402 Div/Canvas script owns chat avatars when these markers exist.
     // Keep it isolated to chat avatars; TLE still enhances every other target.
-    return Boolean(DOC.getElementById('hd-avatar-styles') ||
-      img.dataset.hdFixed === 'true' ||
+    return Boolean(img.dataset.hdFixed === 'true' ||
       wrapper?.querySelector('.hd-avatar-layer-div, .hd-avatar-layer-canvas'));
   }
   const isAvatar = img => img?.matches?.(SELECTOR) && !isLegacyChatOverlay(img);
@@ -18028,8 +18027,7 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
         host: 'st',
         active: !state.cleaned,
         observerActive: Boolean(state.observer && !state.cleaned),
-        legacyChatOverlayDetected: Boolean(DOC.getElementById('hd-avatar-styles') ||
-          DOC.querySelector('.hd-avatar-layer-div, .hd-avatar-layer-canvas')),
+        legacyChatOverlayDetected: Boolean(DOC.querySelector('.mesAvatarWrapper img[data-hd-fixed="true"], .mesAvatarWrapper .hd-avatar-layer-div, .mesAvatarWrapper .hd-avatar-layer-canvas')),
       };
     },
   };
@@ -20035,7 +20033,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.277',
+    version: '0.3.278',
     ready: false,
     destroy,
     state,

@@ -8,7 +8,7 @@ const manifest = JSON.parse(read('channels/test.json'));
 const moduleSource = read('development/avatar-engine/avatar-engine.js');
 const core = read(manifest.release.source_path);
 
-assert.equal(manifest.release.version, '0.3.277');
+assert.equal(manifest.release.version, '0.3.278');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained avatar engine byte-for-byte');
 assert.match(core, /hdAvatarEngine = createTLEHDAvatarEngine\(SCRIPT_WIN, HOST_WIN, HOST_DOC\)/);
 assert.match(core, /hdAvatarEngine\?\.stop\?\.\(\)/);
@@ -118,7 +118,7 @@ const pathOf = img => new URL(img.getAttribute('src'), 'https://tavern.test/').p
     '<style id="hd-avatar-styles"></style>'
   );
   const engine = create();
-  assert.equal(pathOf(dom.window.document.getElementById('legacy-chat')), '/thumbnail');
+  assert.equal(pathOf(dom.window.document.getElementById('legacy-chat')), '/characters/legacy.png', 'A style marker alone does not prove the legacy script owns this image');
   assert.equal(pathOf(dom.window.document.getElementById('legacy-gallery')), '/characters/gallery.png');
   engine.stop();
   dom.window.close();
