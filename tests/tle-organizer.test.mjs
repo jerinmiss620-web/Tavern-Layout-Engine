@@ -10,11 +10,15 @@ const sourcePath = hasWorkingSource
   : `releases/v${plan.core}/TLE.js`;
 const source = readFileSync(sourcePath, 'utf8');
 const readme = readFileSync('README.md', 'utf8');
+const testManifest = JSON.parse(readFileSync('channels/test.json', 'utf8'));
+const testSourcePath = testManifest.release.source_path;
+const testSource = existsSync(testSourcePath) ? readFileSync(testSourcePath, 'utf8') : '';
+const usingTestCandidate = hasWorkingSource && testSource === source;
 const actualVersion = source.match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
-const expectedVersion = plan.core;
+const expectedVersion = usingTestCandidate ? testManifest.latest_version : plan.core;
 
 assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
-assert.equal(actualVersion, expectedVersion, 'development source must match the stable release plan');
+assert.equal(actualVersion, expectedVersion, 'development source must match the active test candidate or stable release plan');
 new vm.Script(source, { filename: sourcePath });
 
 const managerStart = source.indexOf('function openQuickGroupManager(');
