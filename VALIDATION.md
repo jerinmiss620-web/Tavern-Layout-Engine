@@ -1,8 +1,19 @@
 # 自动更新验证记录 — 2026-11-27
 
-当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.289。
+当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.290。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
+
+## 2026-11-27 · Core v0.3.290 · 导航兼容修复图标居中
+
+- Core v0.3.290 从清理后的正式基线 v0.3.289 快进整合至 `main`；最终主分支 Commit：`a0b299a2bd02109b945b7691abfed47026701512`。
+- 候选分支 Node 24 全量回归 Run #46025419448 通过；正式 `main` Run #46025595786 通过全量 `npm test`、`npm run verify:remote` 及 `node tests/tle-update-chain.test.mjs --remote`。
+- 正式源码：`releases/v0.3.290/TLE.js`；不可变源码 Commit：`04cbe3916337c7edc551c48208a166188fc44595`。
+- SHA-256：`94faed75baa26048da996b3ceecab14cc4f4f42aad4d7e99a8d8a48052ca14c3`；UTF-8 字节数：`979174`。
+- 开发源码、正式源码、禁用状态导入包内源码与不可变 Commit 固定源码逐字节一致；`latest.json` 已指向 v0.3.290。
+- 导航兼容性修复中的 `.drawer-icon` 改用 `display: flex !important`，并明确 `align-items: center`、`justify-content: center`；原有尺寸、点击区域、可见性和透明度规则保持不变。回归测试新增对应断言。
+- Loader Runtime v0.3.6、Bootstrap v1.0.6 未修改。
+- 用户此前在本地临时 CSS 中验证该 Flex 显示方式可恢复图标居中；正式 Core 已包含同一修复。该次验证不扩大为所有主题与设备的实机通过结论，ST/TT 全主题视觉矩阵仍需持续覆盖。
 
 ## 2026-11-27 · Core v0.3.289 · 正式整合与历史补丁清理
 
