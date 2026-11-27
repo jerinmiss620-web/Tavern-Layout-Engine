@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  // Tavern Layout Engine · Headless Remote Loader TEST 0.3.0
+  // Tavern Layout Engine · Companion Prompt States Branch Test Loader 0.3.0
   // This test loader never updates silently. The production TLE script remains separate.
 
   const SCRIPT_WIN = window;
@@ -23,15 +23,15 @@
   const LOADER_VERSION = '0.3.0';
   const PROJECT = 'Tavern Layout Engine';
   const CHANNEL = 'test';
-  const MANIFEST_URL = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/main/channels/test.json';
+  const MANIFEST_URL = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/feature/companion-prompt-entry-states-20261127/channels/test.json';
   const INSTANCE_KEY = '__TAVERN_LAYOUT_ENGINE_V02__';
   const LOADER_KEY = '__TLE_REMOTE_LOADER_TEST_V1__';
-  const LKG_KEY = 'tle.loader.test.lastKnownGood.v1';
-  const PREVIOUS_KEY = 'tle.loader.test.previousKnownGood.v1';
-  const AUTO_RESTORE_KEY = 'tle.loader.test.autoRestore.v1';
+  const LKG_KEY = 'tle.loader.companionPromptStatesBranchTest.lastKnownGood.v1';
+  const PREVIOUS_KEY = 'tle.loader.companionPromptStatesBranchTest.previousKnownGood.v1';
+  const AUTO_RESTORE_KEY = 'tle.loader.companionPromptStatesBranchTest.autoRestore.v1';
   const AUTO_RESTORE_DELAY = 900;
   const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
-  const CACHE_DB_NAME = 'TLE_Remote_Loader_Test_Cache';
+  const CACHE_DB_NAME = 'TLE_Companion_Prompt_States_Branch_Test_Cache';
   const CACHE_DB_VERSION = 1;
   const CACHE_STORE_NAME = 'records';
   let cacheDbPromise = null;
