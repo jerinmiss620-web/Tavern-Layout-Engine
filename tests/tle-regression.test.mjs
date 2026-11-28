@@ -49,13 +49,16 @@ function verifyPinnedRelease(release, expectedPath, expectedUrlPattern) {
   return source;
 }
 
-const tlePath = 'releases/v' + manifest.release.version + '/TLE.js';
+const tlePath = 'test-releases/v' + manifest.release.version + '/TLE.js';
 const pinnedTle = verifyPinnedRelease(
   manifest.release,
   tlePath,
-  /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/releases\/v(\d+\.\d+\.\d+)\/TLE\.js$/
+  /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/test-releases\/v(\d+\.\d+\.\d+)\/TLE\.js$/
 );
-assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.version}',`), 'Runtime instance API version must match the release manifest');
+const coreApiStart = pinnedTle.indexOf('  const api = {');
+const coreApiEnd = pinnedTle.indexOf('\n  };', coreApiStart);
+assert.ok(coreApiStart >= 0 && coreApiEnd > coreApiStart, 'Runtime instance API object must exist');
+assert.ok(pinnedTle.slice(coreApiStart, coreApiEnd).includes(`version: '${manifest.release.version}'`), 'Runtime instance API version must match the release manifest');
 
 const plan = JSON.parse(read('release-plan.json'));
 // The pinned test channel is validated above; feature regressions target the current stable Core.
@@ -92,11 +95,12 @@ const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
 const loader = verifyPinnedRelease(
   loaderRelease,
-  'loader/TLE-Remote-Loader-Test-0.3.0.js',
+  'loader/TLE-Remote-Loader-Test-0.3.1.js',
   /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/loader\/TLE-Remote-Loader-Test-(\d+\.\d+\.\d+)\.js$/
 );
-assert.equal(loaderRelease.version, '0.3.0');
-assert.match(loader, /const LOADER_VERSION = '0\.3\.0'/);
+assert.equal(loaderRelease.version, '0.3.1');
+assert.match(loader, /const LOADER_VERSION = '0\.3\.1'/);
+assert.match(loader, /integration\\/phase2-unified-modules-20261129\\/channels\\/test\\.json/);
 if (manifest.release.version === '0.3.222') {
   assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
   assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
@@ -105,8 +109,8 @@ if (manifest.release.version === '0.3.222') {
 
 const installer = JSON.parse(read(loaderRelease.installer_path));
 assert.equal(installer.type, 'script');
-assert.equal(installer.id, manifest.release.version === '0.3.204' ? '8f994fad-ea17-49f8-93af-ebe8ba4f6c67' : 'e1a1d9fa-8f4b-4c2a-9c45-6c8d3a2f7b10');
-assert.equal(installer.enabled, manifest.release.version === '0.3.204');
+assert.equal(installer.id, 'a6bbd9ef-0c65-4f43-9c9b-f8f2a0d1c7e4');
+assert.equal(installer.enabled, false);
 assert.equal(installer.content, loader, 'Tavern Helper installer content is out of sync with Loader source');
 
 assert.match(tle, /if \(action === 'open-debugger'\) openMobileDebugger\(\);/);

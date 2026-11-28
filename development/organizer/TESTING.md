@@ -115,3 +115,12 @@
 - The current HD Avatar Engine remains a built-in fallback while the remote `avatar.hd` pilot is tested. TT keeps its native avatar handling.
 - Module errors are lifecycle-isolated, not sandbox-isolated. Permission declarations gate the Core Context API; they do not prevent trusted same-page JavaScript from accessing the host.
 - Do not migrate 会话侠, 楼层侠, 配套侠, 打码侠 or other existing modules until the HD Avatar pilot has passed the full device matrix.
+
+
+## Phase 2.3 · HD Avatar test candidate
+
+- Test Core: `test-releases/v0.3.305/TLE.js`; never reuse or overwrite `releases/v0.3.304/*`.
+- Test Loader: `loader/TLE-Remote-Loader-Test-0.3.1.js`; it reads only this integration branch's `channels/test.json`.
+- The Test Loader accepts only `test-releases/vX.Y.Z/TLE.js`, while Stable Loader and `latest.json` continue to use the stable release path.
+- Run `node loader/verify-test-channel.mjs` or `npm test` to verify the test manifest, immutable Core and Loader sources, hashes, byte sizes and disabled installer.
+- Do not promote the HD Avatar module to Stable until ST and TT real-device checks, offline recovery and failed-candidate rollback are completed.

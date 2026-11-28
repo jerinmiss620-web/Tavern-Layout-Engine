@@ -3,13 +3,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-const test = JSON.parse(read('channels/test.json'));
-const version = test.latest_version;
-const tle = read('tests/fixtures/legacy/core-v' + version + '.js');
+const version = '0.3.204';
+const tle = read('tests/fixtures/legacy/core-v0.3.204.js');
 const loader = read('tests/fixtures/legacy/test-loader-v0.3.0.js');
 new vm.Script(tle);
 new vm.Script(loader);
-assert.equal(test.channel, 'test');
 assert.match(loader, /const CHANNEL = 'test'/);
 assert.match(loader, /main\/channels\/test\.json/);
 assert.match(loader, /checkRemote: \(\) => checkRemote\(\{ promptUpdate: true \}\)/);

@@ -23,7 +23,7 @@ function checkInfo(info, label) {
 }
 
 function checkRelease(channel, version, installerFile) {
-  const dir = 'releases/v' + version + '/';
+  const dir = (channel === 'test' ? 'test-releases/v' : 'releases/v') + version + '/';
   const source = read(dir + 'TLE.js');
   const installer = json(dir + installerFile);
   assert.equal(installer.type, 'script', channel + ': wrong installer type');

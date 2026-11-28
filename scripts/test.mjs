@@ -8,3 +8,4 @@ for (const file of readdirSync('tests').filter(p => p.endsWith('.test.mjs'))) {
 execFileSync(process.execPath, ['tests/tle-regression.test.mjs','--current'], { stdio: 'inherit' });
 execFileSync(process.execPath, ['scripts/release.mjs','verify', ...(candidate ? ['--candidate'] : [])], { stdio: 'inherit' });
 if (!candidate) execFileSync(process.execPath, ['loader/verify-stable-release.mjs'], { stdio: 'inherit' });
+if (!candidate) execFileSync(process.execPath, ['loader/verify-test-channel.mjs'], { stdio: 'inherit' });
