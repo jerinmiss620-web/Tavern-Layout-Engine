@@ -16,6 +16,8 @@ const read = path => readFileSync(new URL('../' + (legacyFiles[path] || path), i
 const manifest = JSON.parse(read('channels/mask-hero-test.json'));
 const stable = JSON.parse(read('latest.json'));
 const plan = JSON.parse(read('release-plan.json'));
+const currentTest = JSON.parse(read('channels/test.json'));
+const testVersion = currentTest.release.version;
 const core = read(manifest.release.source_path);
 const development = read('development/organizer/TLE.js');
 const stableCore = read(stable.release.source_path);
@@ -30,7 +32,7 @@ assert.equal(manifest.latest_version, '0.3.302');
 assert.equal(manifest.release.version, manifest.latest_version);
 assert.equal(manifest.minimum_loader_version, '0.3.0');
 const developmentVersion = development.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
-assert.equal(developmentVersion, plan.core, 'development Core must match the current release plan');
+assert.equal(developmentVersion, testVersion, 'development Core must match the current Test channel candidate');
 if (plan.core === stable.latest_version) {
   if (!isNonMainBranch() && process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE !== '1') {
     assert.equal(normalizeCoreSource(development), normalizeCoreSource(stableCore),
