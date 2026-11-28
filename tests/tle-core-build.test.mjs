@@ -89,8 +89,8 @@ assert.match(releaseScript, /const authoritativeSourcePath = arg === 'core' \? '
 assert.match(releaseScript, /Staged Core must be generated from the authoritative development source/);
 assert.match(releaseScript, /build-core\.mjs', '--version', version/,
   'Core staging must use explicit version anchors rather than global string replacement');
-assert.doesNotMatch(releaseScript, /read\(authoritativeSourcePath\)\.replaceAll\(plan\[arg\], version\)/,
-  'Core staging must not rewrite unrelated pinned module URLs');
+assert.match(releaseScript, /const source = arg === 'core'\s*\?\s*read\(authoritativeSourcePath\)\s*:\s*read\(authoritativeSourcePath\)\.replaceAll\(plan\[arg\], version\)/,
+  'Only Loader staging may retain version replacement; Core staging must use explicit builder anchors');
 
 execFileSync(process.execPath, ['scripts/build-core.mjs', '--check'], { stdio: 'inherit' });
 
