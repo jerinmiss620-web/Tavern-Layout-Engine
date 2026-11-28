@@ -281,3 +281,10 @@ Kernel Context API 已升级到 v2：除 `signal`、权限化 host 引用、事�
 **首个应实施的代码任务是 Phase 3.1：Core service 契约与 Session Page Registry，而不是立即把 2,185 行配套侠或 1,167 行打码侠剪切到新文件。**
 
 先让父模块可以稳定挂载子页面、共享聊天上下文、注册原生设置、独立管理样式和清理资源，再迁移子模块。这样才能确保以后只更新指定模块时，不需要重新改动其他模块，也不会破坏现有 ST / TT 行为。
+
+
+## Phase 3.1 device smoke check
+
+- Test-only `core.services-smoke@1.0.0` is enabled by default in the Phase 3 Test manifest. It has no UI and does not mutate chat state.
+- A successful load logs `[TLE Core Services Smoke] PASS`, confirming the remote module can retrieve the permission-gated `chat-context` and `resource-catalog` services, read frozen snapshots and observe AbortSignal enforcement.
+- The smoke module is test scaffolding only; it must not be added to `modules/stable.json`.
