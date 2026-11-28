@@ -75,8 +75,8 @@ function ensureModuleMarkers(source) {
 }
 
 function moduleBundleBody(bundle, startMarker, endMarker, label) {
-  assert.ok(bundle.startsWith(startMarker + '\\n'), label + ': invalid bundle start marker');
-  assert.ok(bundle.endsWith('\\n' + endMarker), label + ': invalid bundle end marker');
+  assert.ok(bundle.startsWith(startMarker + '\n'), label + ': invalid bundle start marker');
+  assert.ok(bundle.endsWith('\n' + endMarker), label + ': invalid bundle end marker');
   return bundle.slice(startMarker.length + 1, bundle.length - endMarker.length - 1);
 }
 
