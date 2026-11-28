@@ -50,6 +50,7 @@ Node 24 全量回归、正式清单远端核验及下载发布字节后的更新
 
 ## Core 更新记录
 
+- [v0.3.303](releases/v0.3.303/CHANGELOG.md)
 - [v0.3.294](releases/v0.3.294/CHANGELOG.md)
 - [v0.3.291](releases/v0.3.291/CHANGELOG.md)
 - [v0.3.290](releases/v0.3.290/CHANGELOG.md)

@@ -7,10 +7,9 @@ const manifest = JSON.parse(read('latest.json'));
 const source = read('development/organizer/TLE.js');
 const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
 const release = read(manifest.release.source_path);
-let developmentVersion = manifest.release.version;
-try {
-  developmentVersion = JSON.parse(read('channels/mask-hero-test.json')).release.version || developmentVersion;
-} catch {}
+// The archived Mask Hero test manifest intentionally remains on v0.3.302;
+// the stable manifest is the source of truth for the promoted Core.
+const developmentVersion = manifest.release.version;
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
 const featureBranch = /^refs\/heads\/feature\//.test(process.env.GITHUB_REF || '') ||
