@@ -102,7 +102,8 @@ const verification = section(
   '  async function hiddenFloorGuardVerify(',
   '  function hiddenFloorGuardScheduleVerify(',
 );
-assert.doesNotMatch(verification, /executeTLESlashCommand|\\/hide /,
+assert.ok(!verification.includes('executeTLESlashCommand'));
+assert.ok(!verification.includes('/hide '),
   'verification may detect and report lost hidden state, but must never re-hide automatically');
 
 console.log('TLE Hidden Floor Guard tests passed: per-chat fingerprints, shifted-floor matching, ambiguous-match refusal, native recovery ranges and no automatic re-hide.');
