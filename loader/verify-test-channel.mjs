@@ -105,6 +105,13 @@ assert.equal(
 const moduleManifest = JSON.parse(readText('modules/test.json'));
 assert.equal(moduleManifest.core_api_version, 2, 'Test manifest must require Core API v2');
 assert.ok(moduleManifest.modules.some(module => module.id === 'avatar.hd' && module.api_version === 1));
+const servicesSmoke = moduleManifest.modules.find(module => module.id === 'core.services-smoke');
+assert.ok(servicesSmoke, 'Test manifest must include the Core Services smoke module');
+assert.equal(servicesSmoke.api_version, 2);
+assert.deepEqual(servicesSmoke.permissions, ['services:chat-context', 'services:resource-catalog']);
+const servicesSmokeSource = readText(servicesSmoke.source_path);
+assert.equal(createHash('sha256').update(servicesSmokeSource, 'utf8').digest('hex'), servicesSmoke.sha256);
+assert.equal(Buffer.byteLength(servicesSmokeSource, 'utf8'), servicesSmoke.size_bytes);
 assert.ok(tleBytes.toString('utf8').includes("const KERNEL_VERSION = '1.1.0';"));
 assert.ok(tleBytes.toString('utf8').includes('const API_VERSION = 2;'));
 assert.ok(tleBytes.toString('utf8').includes('const coreModuleServices = Object.freeze('));
@@ -169,6 +176,7 @@ assert.ok(tleSource.includes('buttonReceivesHit'));
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
+  await checkRemoteSource(servicesSmoke.source_url, servicesSmoke.sha256, servicesSmoke.size_bytes, 'Core Services Smoke module');
   const installerUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${loaderRelease.installer_commit}/${loaderRelease.installer_path}`;
   const response = await fetch(installerUrl, { redirect: 'error', cache: 'no-store' });
   assert.equal(response.status, 200, `Installer remote fetch failed (${response.status})`);
