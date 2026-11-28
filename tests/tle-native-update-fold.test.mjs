@@ -41,7 +41,7 @@ const recentStart = source.indexOf('#${ID.chatToolsPanel} [data-chat-tools-page=
 const recentRule = source.slice(recentStart, source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-actions {', recentStart));
 assert.match(recentRule, /flex: 1 1 auto;/);
 assert.match(recentRule, /overflow: hidden;/);
-assert.match(source, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="plans"\] \{ height: min\(80dvh, 700px\); \}/);
+assert.match(source, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="plans"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="mask"\] \{ height: min\(80dvh, 700px\); \}/);
 assert.match(source, /#\$\{ID\.chatToolsPanel\} \.tle-chat-tools-range-value \{ max-height: 22dvh; \}/);
 const floorGridStart = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-action {');
 const floorGridEnd = source.indexOf('#${ID.chatToolsPanel} .tle-chat-tools-control {', floorGridStart);
