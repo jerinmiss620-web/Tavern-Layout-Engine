@@ -17,7 +17,7 @@ const pureHelpers = section(
   '  function hiddenFloorGuardCreateRecord(',
 );
 const sandbox = {};
-vm.runInNewContext(pureHelpers + '\nglobalThis.hiddenGuardApi = { hiddenFloorGuardIsHidden, hiddenFloorGuardHash, hiddenFloorGuardCreateFingerprints, hiddenFloorGuardMatchFingerprint, hiddenFloorGuardAnalyze, hiddenFloorGuardGroupRanges };', sandbox);
+vm.runInNewContext(pureHelpers + '\nglobalThis.hiddenGuardApi = { hiddenFloorGuardIsHidden, hiddenFloorGuardHash, hiddenFloorGuardCreateFingerprints, hiddenFloorGuardMatchFingerprint, hiddenFloorGuardAnalyze, hiddenFloorGuardGroupRanges, hiddenFloorGuardSelectRecoveryBatch };', sandbox);
 const api = sandbox.hiddenGuardApi;
 
 const message = (id, index, hidden = false) => ({
@@ -158,6 +158,62 @@ assert.equal(exactPriority.stillHidden[0].record.recordId, 'exact-record',
   'a fallback record must not consume a candidate reserved for a stable generation ID');
 assert.equal(exactPriority.missing[0].recordId, 'fallback-record');
 
+const restoreBeforeChat = [
+  message('restore-0', 0, false),
+  message('restore-1', 1, true),
+  message('restore-2', 2, true),
+  message('restore-3', 3, false),
+];
+const restoreFingerprints = api.hiddenFloorGuardCreateFingerprints(restoreBeforeChat);
+const restoreRecords = [
+  { ...restoreFingerprints[1], recordId: 'restore-record-1' },
+  { ...restoreFingerprints[2], recordId: 'restore-record-2' },
+];
+const currentlyUnhidden = restoreBeforeChat.map(item => ({ ...item, is_system: false }));
+const shiftedRestoreChat = [message('restore-inserted-before', 9, false), ...currentlyUnhidden];
+const shiftedBatch = api.hiddenFloorGuardSelectRecoveryBatch(
+  restoreRecords, shiftedRestoreChat, ['restore-record-1', 'restore-record-2'],
+);
+assert.equal(shiftedBatch.ok, true);
+assert.deepEqual(shiftedBatch.range, { start: 2, end: 3 },
+  'recovery must calculate the current range from message identities after an insertion');
+assert.deepEqual(shiftedBatch.entries.map(item => item.recordId),
+  ['restore-record-1', 'restore-record-2']);
+
+const splitRestoreChat = [
+  currentlyUnhidden[0],
+  currentlyUnhidden[1],
+  message('unrelated-between-targets', 8, false),
+  currentlyUnhidden[2],
+  currentlyUnhidden[3],
+];
+const firstSplitBatch = api.hiddenFloorGuardSelectRecoveryBatch(
+  restoreRecords, splitRestoreChat, ['restore-record-1', 'restore-record-2'],
+);
+assert.equal(firstSplitBatch.ok, true);
+assert.deepEqual(firstSplitBatch.range, { start: 1, end: 1 },
+  'recovery must not span an unrelated message between target identities');
+assert.deepEqual(firstSplitBatch.entries.map(item => item.recordId), ['restore-record-1']);
+
+const afterFirstSplitRestore = splitRestoreChat.map(item =>
+  item.extra.gen_id === 'restore-1' ? { ...item, is_system: true } : item);
+const secondSplitBatch = api.hiddenFloorGuardSelectRecoveryBatch(
+  restoreRecords, afterFirstSplitRestore, ['restore-record-1', 'restore-record-2'],
+);
+assert.equal(secondSplitBatch.ok, true);
+assert.deepEqual(secondSplitBatch.completedIds, ['restore-record-1']);
+assert.deepEqual(secondSplitBatch.range, { start: 3, end: 3 });
+assert.deepEqual(secondSplitBatch.entries.map(item => item.recordId), ['restore-record-2']);
+
+const missingRestoreBatch = api.hiddenFloorGuardSelectRecoveryBatch(
+  restoreRecords,
+  splitRestoreChat.filter(item => item.extra.gen_id !== 'restore-2'),
+  ['restore-record-1', 'restore-record-2'],
+);
+assert.equal(missingRestoreBatch.ok, false);
+assert.deepEqual(missingRestoreBatch.missingIds, ['restore-record-2'],
+  'a target identity that cannot be located must stop recovery instead of reusing its old floor');
+
 const ambiguous = { ...fallbackFingerprint, genId: '', sendDate: '', prevHash: '', nextHash: '' };
 const ambiguousCandidates = [
   { ...ambiguous, index: 4 },
@@ -192,6 +248,17 @@ const runActionSection = section(source, '  async function runChatAction(', '  f
 assert.ok(runActionSection.includes('const hiddenGuardTargets = protectHiddenChange && actionRange'));
 assert.ok(runActionSection.includes('hiddenFloorGuardCreateFingerprints(snapshot.chat)'));
 assert.ok(source.includes("executeTLESlashCommand('/hide ' + range.start + '-' + range.end"));
+
+const restoreSection = section(
+  source,
+  '  async function hiddenFloorGuardRestorePending(',
+  '  async function hiddenFloorGuardAcceptPending(',
+);
+assert.ok(restoreSection.includes('hiddenFloorGuardSelectRecoveryBatch'));
+assert.ok(restoreSection.includes('const preflight = getActiveChatActionContext()'));
+assert.ok(restoreSection.includes('const afterBatch = hiddenFloorGuardSelectRecoveryBatch'));
+assert.ok(!restoreSection.includes('hiddenFloorGuardGroupRanges(recoverable.map(item => item.index))'),
+  'manual recovery must not reuse the initial numeric floor ranges');
 
 const verification = section(
   source,
