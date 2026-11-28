@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.303 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.304 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -23,13 +23,19 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.303/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.304/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：Core v0.3.303 将打码侠与隐藏楼层保护整合为正式功能；本次发布自动化验证结果记录于 VALIDATION.md。ST/TT 全主题视觉矩阵仍需实机覆盖。
+- [实际验证范围](VALIDATION.md)：Core v0.3.304 同步 Freesia 覆盖侠 v1.88.7 正式功能包快照；打码侠与隐藏楼层保护已在 v0.3.303 正式整合。ST/TT 全主题视觉矩阵仍需实机覆盖。
 
 右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单（含已归档的 Mask Hero Test）仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
+
+### Core v0.3.304 · Freesia 覆盖侠正式功能包同步
+
+- 更新 Freesia 覆盖侠 v1.88.7 的正式功能包名称、文件名和展示版本。
+- 同步固定可选功能包清单快照及其文件校验信息。
+- 不改动 TLE 其他功能模块；Loader Runtime v0.3.6 与 Bootstrap v1.0.6 保持不变。
 
 ### Core v0.3.303 · 打码侠与隐藏楼层保护正式整合
 
@@ -109,7 +115,7 @@ Bootstrap 启动即出现「TLE 正在努力加载中，请稍候…」，至少
 
 **配套侠**已经成为 TLE 内置功能，可在 TLE 控制面板保存、关联和管理角色配置，并自动联动预设、模型、推理格式及 UI 主题，无须另装脚本。
 
-两款独立可选脚本可以从「可选功能包」中按需安装：**Freesia 覆盖侠 v1.88.6**（实际入口：底栏扩展菜单／魔法棒）和 **主题绑定壁纸 v4.1**（实际入口：酒馆原生背景面板顶部工具栏）。功能包只负责脚本安装与管理，**实际操作不在 TLE 面板中**。详见 [可选功能包使用说明](optional-modules/README.md) 和 [统一展示规范](optional-modules/DISPLAY-STANDARD.md)。
+两款独立可选脚本可以从「可选功能包」中按需安装：**Freesia 覆盖侠 v1.88.7**（实际入口：底栏扩展菜单／魔法棒）和 **主题绑定壁纸 v4.1**（实际入口：酒馆原生背景面板顶部工具栏）。功能包只负责脚本安装与管理，**实际操作不在 TLE 面板中**。详见 [可选功能包使用说明](optional-modules/README.md) 和 [统一展示规范](optional-modules/DISPLAY-STANDARD.md)。
 
 ### Core v0.3.217 · TT 滑屏与原生手势同步修复
 

@@ -1,8 +1,17 @@
 # 自动更新验证记录 — 2026-11-28
 
-当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.303。
+当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.304。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
+
+## 2026-11-28 · Core v0.3.304 · Freesia 覆盖侠正式功能包同步
+
+- 本次 Core 发布同步 Freesia 覆盖侠 v1.88.7 的正式功能包名称、文件名、展示版本与固定清单快照；不改动 TLE 其他功能模块。
+- Loader Runtime v0.3.6 与固定 Bootstrap v1.0.6 未修改。
+- 不可变 Core 源码 Commit：`68c1a1aec4c2e29c9cb4f2fc0446df05ee4b13dd`；SHA-256：`e8b589a59f130b21583b1c9a2c388ce887f3ad17a73c7c315ff71d5a84dde873`；UTF-8 字节数：`1133611`。
+- Freesia 覆盖侠 v1.88.7 固定包 SHA-256：`42602b507ce4b7d789820576d310f1f817cec6605a48ae1a93fe69312c116554`；清单记录字节数：`234373`。
+- 正式 main Commit：`230de11e47ade3cb05004cffd1c4497545a72a6a`；GitHub Actions 发布回归 Run #46140775183 通过。
+- ST/TT 全主题与设备实机视觉矩阵仍需继续覆盖；自动化回归不替代真实宿主验收。
 
 ## 2026-11-28 · Core v0.3.303 · 打码侠与隐藏楼层保护正式整合
 

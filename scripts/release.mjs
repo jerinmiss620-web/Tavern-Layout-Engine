@@ -102,6 +102,15 @@ async function verify({ remote = false, candidate = false } = {}) {
       if (!versionRE.test(v)) continue;
       const isRelease = kind === 'loader' || existsSync(`${parent}/${name}/TLE-${v}-import.json`);
       if (isRelease) assert.ok(compare(v, plan[kind]) <= 0, `Unpublished release ${v}: update release-plan.json and the manifest together`);
+      const entries = readdirSync(`${parent}/${name}`).sort();
+      if (compare(v, plan[kind]) < 0) {
+        assert.deepEqual(entries, ['CHANGELOG.md'], `Historical ${kind} ${v} must retain only CHANGELOG.md`);
+      } else if (v === plan[kind]) {
+        const expected = kind === 'core'
+          ? ['CHANGELOG.md', `TLE-${v}-import.json`, 'TLE.js']
+          : ['CHANGELOG.md', 'TLE-Remote-Loader.js'];
+        assert.deepEqual(entries, expected.sort(), `Current ${kind} ${v} contains unexpected or missing release artifacts`);
+      }
     }
     if (remote) {
       const remoteManifest = JSON.parse(await fetchText(raw + 'main/' + manifestPath(kind) + '?_tle=' + Date.now()));
