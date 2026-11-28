@@ -96,3 +96,12 @@ permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript �
 - 实机通过只代表试点运行链验收完成，不自动构成正式推广决定。`modules/stable.json` 继续保持空，`avatar.hd@1.0.0` 暂留 `modules/test.json`；只有单独完成 Stable promotion 审查与正式发布后，才考虑加入 Stable Manifest。
 - Core 内置 HD Avatar Engine 4.5.14 fallback 继续保留，确保离线与模块加载失败时仍有可用头像处理。
 - Gallery Home、会话侠、楼层侠及其他模块暂不迁移；后续按模块边界单独规划、开发和验收。
+
+
+## Phase 3.1 Core Services Smoke
+
+- Test-only module: `core.services-smoke@1.0.0`.
+- Requires Core API v2 and declares `services:chat-context` plus `services:resource-catalog`.
+- Starts automatically in the Test channel, creates no UI, and does not mutate chat state.
+- Verifies immutable chat/role snapshots, generation-state access, service method availability and mandatory module AbortSignal enforcement.
+- Logs `[TLE Core Services Smoke] PASS` when the service contract is available. It must remain out of `modules/stable.json`.
