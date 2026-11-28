@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.295
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.296
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3003,8 +3003,9 @@ var TLEBatchLibrary = (() => {
         filterButton: null,
       },
       maskHero: {
-        observer: null, frame: 0, textNodes: new Map(), nameElements: new Set(),
+        observer: null, frame: 0, textNodes: new Map(), nameElements: new Map(),
         floorElements: new Map(), imageElements: new Map(), objectUrls: new Map(),
+        assetHistory: [], assetHistoryUrls: new Map(), assetHistoryRequest: 0,
         listeners: [], applyGeneration: 0, appliedConfig: null, appliedChatKey: '',
       },
     },
@@ -3683,7 +3684,6 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 #${ID.chatToolsPanel} .tle-mask-hero-root { display:flex; flex-direction:column; gap:12px; min-width:0; }
 #${ID.chatToolsPanel} .tle-mask-hero-toolbar,
 #${ID.chatToolsPanel} .tle-mask-hero-actions,
-#${ID.chatToolsPanel} .tle-mask-hero-rule-row,
 #${ID.chatToolsPanel} .tle-mask-hero-avatar-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; min-width:0; }
 #${ID.chatToolsPanel} .tle-mask-hero-toolbar > select,
 #${ID.chatToolsPanel} .tle-mask-hero-toolbar > input { flex:1 1 120px; min-width:0; }
@@ -3691,13 +3691,32 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 #${ID.chatToolsPanel} .tle-mask-hero-field { display:flex; flex:1 1 140px; flex-direction:column; gap:4px; min-width:0; }
 #${ID.chatToolsPanel} .tle-mask-hero-field > input,
 #${ID.chatToolsPanel} .tle-mask-hero-field > textarea,
-#${ID.chatToolsPanel} .tle-mask-hero-rule-row > input,
-#${ID.chatToolsPanel} .tle-mask-hero-rule-row > textarea { width:100%; min-width:0; box-sizing:border-box; }
-#${ID.chatToolsPanel} .tle-mask-hero-rule-row > .tle-mask-hero-rule-find,
-#${ID.chatToolsPanel} .tle-mask-hero-rule-row > .tle-mask-hero-rule-replace { flex:1 1 120px; }
-#${ID.chatToolsPanel} .tle-mask-hero-rule-options { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+#${ID.chatToolsPanel} .tle-mask-hero-floor-row > input,
+#${ID.chatToolsPanel} .tle-mask-hero-floor-row > textarea,
+#${ID.chatToolsPanel} .tle-mask-hero-text-row > input { width:100%; min-width:0; box-sizing:border-box; }
+#${ID.chatToolsPanel} .tle-mask-hero-floor-row { display:grid; grid-template-columns:minmax(76px,.28fr) minmax(0,1fr) auto; align-items:start; gap:6px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-text-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; grid-template-areas:'find replace remove' 'options options options'; align-items:center; gap:6px; min-width:0; padding:8px; border:1px solid var(--SmartThemeBorderColor,currentColor); border-radius:8px; }
+#${ID.chatToolsPanel} .tle-mask-hero-rule-find { grid-area:find; }
+#${ID.chatToolsPanel} .tle-mask-hero-rule-replace { grid-area:replace; }
+#${ID.chatToolsPanel} .tle-mask-hero-rule-remove { grid-area:remove; align-self:start; }
+#${ID.chatToolsPanel} .tle-mask-hero-rule-options { grid-area:options; display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-rule-options label { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+#${ID.chatToolsPanel} .tle-mask-hero-scope-row { display:grid; grid-template-columns:minmax(0,1fr); gap:6px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-scope-row [hidden] { display:none !important; }
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-history { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-card { display:flex; flex-direction:column; gap:5px; min-width:0; padding:6px; border:1px solid var(--SmartThemeBorderColor,currentColor); border-radius:8px; }
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-card > img { display:block; width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px; }
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-card-name { overflow-wrap:anywhere; font-size:.78em; line-height:1.3; }
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-card-actions { display:flex; gap:4px; }
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-card-actions > button { flex:1 1 0; min-width:0; padding-inline:5px; }
+#${ID.chatToolsPanel} .tle-mask-hero-file-input { position:absolute !important; width:1px !important; height:1px !important; opacity:0 !important; pointer-events:none !important; }
 #${ID.chatToolsPanel} .tle-mask-hero-status { min-height:1.3em; color:var(--SmartThemeQuoteColor,inherit); font-size:.85em; }
 #${ID.chatToolsPanel} .tle-mask-hero-note { font-size:.82em; line-height:1.45; opacity:.78; }
+@media (max-width:480px) {
+  #${ID.chatToolsPanel} .tle-mask-hero-text-row { grid-template-columns:minmax(0,1fr) auto; grid-template-areas:'find remove' 'replace replace' 'options options'; align-items:start; }
+  #${ID.chatToolsPanel} .tle-mask-hero-floor-row { grid-template-columns:minmax(64px,.32fr) minmax(0,1fr) auto; }
+  #${ID.chatToolsPanel} .tle-mask-hero-avatar-history { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
 
 #tle-chat-tools-panel [data-chat-tools-page="plans"] { flex: 1 1 auto; overflow-y: auto; }
 #tle-chat-tools-panel .tle-companion-toolbar,
@@ -4024,11 +4043,6 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
   #${ID.chatToolsPanel} .tle-chat-tools-control { gap: 4px; }
   #${ID.chatToolsPanel} .tle-chat-tools-submit-group { gap: 3px; }
   #${ID.chatToolsPanel} [data-chat-action-submit] { min-width: 2.9em; padding-inline: 5px; }
-}
-/* Mask Hero visual-only overlays; original message text remains in the DOM. */
-#chat .mes .name_text[data-tle-mask-name] { visibility:hidden !important; }
-#chat .mes .name_text[data-tle-mask-name]::after {
-  content:attr(data-tle-mask-name); display:inline; visibility:visible; white-space:pre-wrap;
 }
 /* Diagnostic escape hatch:
    - fixed top-right only; never anchor critical controls in bottom corners.
@@ -7032,6 +7046,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   let maskHeroRuntime = {
     plans: maskHeroLoadPlans(), draft: maskHeroCreateEmptyDraft(), selectedPlanId: '',
     status: '打码侠默认关闭。', dbPromise: null,
+    assetHistory: [], assetHistoryUrls: new Map(), assetHistoryRequest: 0,
   };
   let chatToolsEnabled = getStoredBool(CHAT_TOOLS_ENABLED_KEY, true);
   let chatQuickActionsEnabled = getStoredBool(CHAT_QUICK_ACTIONS_ENABLED_KEY, true);
@@ -11475,14 +11490,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.295 · 角色专属预设条目方案与世界书多选</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.296 · 角色专属预设条目方案与世界书多选</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.295</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.296</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -15364,6 +15379,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return output.join('');
   }
 
+  function maskHeroShouldReplaceBody(rule, message, index, total) {
+    const scope = String(rule?.scope || 'none');
+    if (scope === 'all') return true;
+    if (scope === 'latest') {
+      const count = Math.max(1, Number(rule?.count) || 5);
+      return index >= Math.max(0, total - count);
+    }
+    if (scope === 'range') {
+      const floor = Number(message?.getAttribute?.('mesid') ?? message?.dataset?.mesid);
+      const start = Number(rule?.start), end = Number(rule?.end);
+      return Number.isInteger(floor) && Number.isInteger(start) && Number.isInteger(end) && floor >= start && floor <= end;
+    }
+    return false;
+  }
+
   function maskHeroValidateDraft(draft) {
     if (!draft || typeof draft !== 'object') throw new Error('打码方案格式无效。');
     if (String(draft.userName || '').length > 100 || String(draft.charName || '').length > 100) {
@@ -15384,6 +15414,22 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       seenFloors.add(floor);
       if (String(rule?.replace ?? '').length > 5000) throw new Error('单条楼层替换内容最多 5000 个字符。');
     }
+    const bodyRule = draft.bodyRule && typeof draft.bodyRule === 'object' ? draft.bodyRule : {};
+    const bodyScope = String(bodyRule.scope || 'none');
+    if (!['none', 'all', 'latest', 'range'].includes(bodyScope)) throw new Error('正文整体替换范围无效。');
+    if (bodyScope === 'latest') {
+      const count = Number(bodyRule.count);
+      if (!Number.isInteger(count) || count < 1 || count > 100000) throw new Error('最新层数必须是 1–100000 的整数。');
+    }
+    if (bodyScope === 'range') {
+      if (bodyRule.start === '' || bodyRule.end === '' || bodyRule.start === null || bodyRule.end === null ||
+          bodyRule.start === undefined || bodyRule.end === undefined) throw new Error('请填写正文替换的起始和结束楼层。');
+      const start = Number(bodyRule.start), end = Number(bodyRule.end);
+      if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || end > 100000) {
+        throw new Error('正文替换范围必须是有效的楼层区间，且起始楼层不能大于结束楼层。');
+      }
+    }
+    if (String(bodyRule.replace ?? '').length > 5000) throw new Error('正文整体替换内容最多 5000 个字符。');
     for (const rule of rules) {
       const find = String(rule?.find ?? '');
       if (!find) continue;
@@ -15405,6 +15451,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       name: '',
       userName: '',
       charName: '',
+      bodyRule: { scope: 'none', count: 5, start: '', end: '', replace: '[正文已隐藏]' },
       floorRules: [],
       textRules: [],
       avatarAssets: { user: '', char: '' },
@@ -15420,6 +15467,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       name: String(raw.name || '').slice(0, 40),
       userName: String(raw.userName || '').slice(0, 100),
       charName: String(raw.charName || '').slice(0, 100),
+      bodyRule: {
+        scope: ['none', 'all', 'latest', 'range'].includes(raw.bodyRule?.scope) ? raw.bodyRule.scope : 'none',
+        count: String(raw.bodyRule?.count ?? 5),
+        start: String(raw.bodyRule?.start ?? ''),
+        end: String(raw.bodyRule?.end ?? ''),
+        replace: String(raw.bodyRule?.replace ?? '[正文已隐藏]').slice(0, 5000),
+      },
       floorRules: Array.isArray(raw.floorRules) ? raw.floorRules.slice(0, 30).map(rule => ({
         floor: String(rule?.floor ?? ''),
         replace: String(rule?.replace ?? '').slice(0, 5000),
@@ -15502,6 +15556,13 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       name: root.querySelector('[data-mask-field="planName"]')?.value || '',
       userName: root.querySelector('[data-mask-field="userName"]')?.value || '',
       charName: root.querySelector('[data-mask-field="charName"]')?.value || '',
+      bodyRule: {
+        scope: root.querySelector('[data-mask-body-field="scope"]')?.value || maskHeroRuntime.draft.bodyRule?.scope || 'none',
+        count: root.querySelector('[data-mask-body-field="count"]')?.value ?? maskHeroRuntime.draft.bodyRule?.count ?? 5,
+        start: root.querySelector('[data-mask-body-field="start"]')?.value ?? maskHeroRuntime.draft.bodyRule?.start ?? '',
+        end: root.querySelector('[data-mask-body-field="end"]')?.value ?? maskHeroRuntime.draft.bodyRule?.end ?? '',
+        replace: root.querySelector('[data-mask-body-field="replace"]')?.value ?? maskHeroRuntime.draft.bodyRule?.replace ?? '[正文已隐藏]',
+      },
       floorRules: [...root.querySelectorAll('[data-mask-floor-row]')].map(row => ({
         floor: row.querySelector('[data-mask-floor-field="floor"]')?.value ?? '',
         replace: row.querySelector('[data-mask-floor-field="replace"]')?.value ?? '',
@@ -15569,11 +15630,69 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     );
     nameSection.append(nameFields);
 
+    const bodyRule = draft.bodyRule || maskHeroCreateEmptyDraft().bodyRule;
+    const bodySection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    bodySection.append(maskHeroCreateNode('strong', '', '正文整体替换'));
+    const scopeRow = maskHeroCreateNode('div', 'tle-mask-hero-scope-row');
+    const scopeLabel = maskHeroCreateNode('label', 'tle-mask-hero-field');
+    scopeLabel.append(maskHeroCreateNode('span', '', '应用范围'));
+    const scopeSelect = HOST_DOC.createElement('select');
+    scopeSelect.className = 'text_pole';
+    scopeSelect.dataset.maskBodyField = 'scope';
+    for (const [value, label] of [
+      ['none', '不使用整体替换'],
+      ['all', '全部楼层'],
+      ['latest', '最新 N 层'],
+      ['range', '指定楼层范围'],
+    ]) {
+      const option = HOST_DOC.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      scopeSelect.append(option);
+    }
+    scopeSelect.value = bodyRule.scope || 'none';
+    scopeLabel.append(scopeSelect);
+    scopeRow.append(scopeLabel);
+
+    const createBodyField = (labelText, field, value, type = 'text') => {
+      const label = maskHeroCreateNode('label', 'tle-mask-hero-field');
+      label.append(maskHeroCreateNode('span', '', labelText));
+      const input = HOST_DOC.createElement(type === 'textarea' ? 'textarea' : 'input');
+      input.className = 'text_pole';
+      if (type === 'textarea') input.rows = 2;
+      else input.type = type;
+      input.dataset.maskBodyField = field;
+      input.value = String(value ?? '');
+      label.append(input);
+      return label;
+    };
+    const countField = createBodyField('最新 N 层', 'count', bodyRule.count ?? 5, 'number');
+    countField.dataset.maskBodyCountWrap = '';
+    countField.hidden = bodyRule.scope !== 'latest';
+    const countInput = countField.querySelector('input');
+    if (countInput) { countInput.min = '1'; countInput.max = '100000'; countInput.step = '1'; }
+    const rangeFields = maskHeroCreateNode('div', 'tle-mask-hero-scope-row');
+    rangeFields.dataset.maskBodyRangeWrap = '';
+    rangeFields.hidden = bodyRule.scope !== 'range';
+    rangeFields.append(
+      createBodyField('起始楼层（含）', 'start', bodyRule.start, 'number'),
+      createBodyField('结束楼层（含）', 'end', bodyRule.end, 'number')
+    );
+    for (const input of rangeFields.querySelectorAll('input')) {
+      input.min = '0';
+      input.max = '100000';
+      input.step = '1';
+    }
+    const replacementField = createBodyField('替换后显示', 'replace', bodyRule.replace, 'textarea');
+    const bodyHint = maskHeroCreateNode('small', 'tle-mask-hero-note',
+      '最新 N 层按当前聊天中 User / Char 消息的显示顺序计算，系统消息不计入；楼层范围按 mesid 起止值（含首尾）。单独楼层规则优先于这里的整体范围。');
+    bodySection.append(scopeRow, countField, rangeFields, replacementField, bodyHint);
+
     const floorSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
-    floorSection.append(maskHeroCreateNode('strong', '', '指定楼层正文整体替换'));
+    floorSection.append(maskHeroCreateNode('strong', '', '单独楼层例外（可选）'));
     const floorRows = maskHeroCreateNode('div');
     (draft.floorRules || []).forEach((rule, index) => {
-      const row = maskHeroCreateNode('div', 'tle-mask-hero-rule-row');
+      const row = maskHeroCreateNode('div', 'tle-mask-hero-floor-row');
       row.dataset.maskFloorRow = '';
       const floor = HOST_DOC.createElement('input');
       floor.className = 'text_pole';
@@ -15592,13 +15711,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       row.append(floor, replacement, maskHeroCreateButton('×', 'remove-floor', { title: '删除此楼层规则', index }));
       floorRows.append(row);
     });
-    floorSection.append(floorRows, maskHeroCreateButton('添加楼层规则', 'add-floor'));
+    floorSection.append(
+      maskHeroCreateNode('small', 'tle-mask-hero-note', '需要为不同楼层设置不同内容时再添加；这里的单独规则会覆盖上方批量范围。'),
+      floorRows,
+      maskHeroCreateButton('添加单独楼层规则', 'add-floor')
+    );
 
     const textSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
     textSection.append(maskHeroCreateNode('strong', '', '正文局部替换'));
     const textRows = maskHeroCreateNode('div');
     (draft.textRules || []).forEach((rule, index) => {
-      const row = maskHeroCreateNode('div', 'tle-mask-hero-rule-row');
+      const row = maskHeroCreateNode('div', 'tle-mask-hero-text-row');
       row.dataset.maskTextRow = '';
       const find = HOST_DOC.createElement('input');
       find.className = 'text_pole tle-mask-hero-rule-find';
@@ -15626,7 +15749,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       caseInsensitive.dataset.maskTextField = 'caseInsensitive';
       caseLabel.append(caseInsensitive, HOST_DOC.createTextNode('忽略大小写'));
       options.append(regexLabel, caseLabel);
-      row.append(find, replacement, options, maskHeroCreateButton('×', 'remove-text', { title: '删除此规则', index }));
+      const remove = maskHeroCreateButton('×', 'remove-text', { title: '删除此规则', index });
+      remove.classList.add('tle-mask-hero-rule-remove');
+      row.append(find, replacement, remove, options);
       textRows.append(row);
     });
     textSection.append(textRows, maskHeroCreateButton('添加替换规则', 'add-text'));
@@ -15639,20 +15764,35 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       label.append(maskHeroCreateNode('span', '', type === 'user' ? 'User 头像' : 'Char 头像'));
       const file = HOST_DOC.createElement('input');
       file.type = 'file';
+      file.className = 'tle-mask-hero-file-input';
       file.accept = 'image/png,image/jpeg,image/webp,image/gif,image/avif';
       file.dataset.maskAvatarType = type;
+      file.setAttribute('aria-label', (type === 'user' ? 'User' : 'Char') + ' 头像图片文件');
       label.append(file);
       row.append(label);
       const note = maskHeroCreateNode('small', 'tle-mask-hero-note',
-        draft.avatarAssets?.[type] ? ('已保存图片：' + (draft.avatarNames?.[type] || '本地图片')) : '未选择覆盖图片');
-      row.append(note, maskHeroCreateButton('清除', 'clear-avatar', { title: '清除头像覆盖' }));
-      row.lastChild.dataset.avatarType = type;
+        draft.avatarAssets?.[type] ? ('已选图片：' + (draft.avatarNames?.[type] || '本地图片')) : '尚未选择图片');
+      row.append(note);
+      const upload = maskHeroCreateButton('上传图片', 'upload-avatar', { title: '选择本地图片' });
+      upload.dataset.avatarType = type;
+      row.append(upload);
+      const clear = maskHeroCreateButton('清除', 'clear-avatar', { title: '清除头像覆盖' });
+      clear.dataset.avatarType = type;
+      row.append(clear);
       avatarSection.append(row);
     }
+    const historyHeading = maskHeroCreateNode('strong', '', '最近上传的图片（最多 6 张）');
+    const historyNote = maskHeroCreateNode('small', 'tle-mask-hero-note', '点击图片下方的 User / Char 按钮即可复用，不必重复上传。');
+    const history = maskHeroCreateNode('div', 'tle-mask-hero-avatar-history');
+    history.dataset.maskAvatarHistory = '';
+    history.textContent = '正在读取本机图片记录…';
+    avatarSection.append(historyHeading, historyNote, history);
 
     const note = maskHeroCreateNode('p', 'tle-mask-hero-note',
       '仅处理当前聊天的消息显示节点。原始聊天文件、角色卡和消息数据不会被写入；局部替换逐个文本节点执行，不跨富文本标签拼接；替换结果不会再次参与后续规则。头像文件保存在本机 IndexedDB。');
-    root.replaceChildren(toolbar, actions, status, nameSection, floorSection, textSection, avatarSection, note);
+    root.replaceChildren(toolbar, actions, status, nameSection, bodySection, floorSection, textSection, avatarSection, note);
+    void maskHeroRenderAssetHistory();    root.replaceChildren(toolbar, actions, status, nameSection, bodySection, floorSection, textSection, avatarSection, note);
+    void maskHeroRenderAssetHistory();
   }
 
   function maskHeroSyncTabVisibility() {
@@ -15668,6 +15808,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       maskHeroRuntime.draft = {
         ...maskHeroCreateEmptyDraft(),
         ...plan,
+        bodyRule: { ...(plan.bodyRule || maskHeroCreateEmptyDraft().bodyRule) },
         floorRules: plan.floorRules.map(rule => ({ ...rule })),
         textRules: plan.textRules.map(rule => ({ ...rule })),
         avatarAssets: { ...plan.avatarAssets },
@@ -15723,6 +15864,87 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     });
   }
 
+  async function maskHeroRenderAssetHistory() {
+    const container = state.chatTools.panel?.querySelector('[data-mask-avatar-history]');
+    if (!container) return;
+    const requestId = ++maskHeroRuntime.assetHistoryRequest;
+    try {
+      const db = await maskHeroOpenAssetDb();
+      const records = await new Promise((resolve, reject) => {
+        const request = db.transaction('assets', 'readonly').objectStore('assets').getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error || new Error('头像历史读取失败。'));
+      });
+      records.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0) || String(b.id).localeCompare(String(a.id)));
+      const recent = records.filter(record => record?.id && record.blob).slice(0, 6);
+      if (requestId !== maskHeroRuntime.assetHistoryRequest || !container.isConnected) return;
+      maskHeroRuntime.assetHistory = recent;
+      const activeIds = new Set(recent.map(record => record.id));
+      for (const [id, url] of maskHeroRuntime.assetHistoryUrls) {
+        if (activeIds.has(id)) continue;
+        try { HOST_WIN.URL.revokeObjectURL(url); } catch {}
+        maskHeroRuntime.assetHistoryUrls.delete(id);
+      }
+      if (!recent.length) {
+        container.replaceChildren(maskHeroCreateNode('small', 'tle-mask-hero-note', '暂无上传记录。上传的图片会自动保留最近 6 张。'));
+        return;
+      }
+      const fragment = HOST_DOC.createDocumentFragment();
+      for (const record of recent) {
+        let url = maskHeroRuntime.assetHistoryUrls.get(record.id);
+        if (!url) {
+          url = HOST_WIN.URL.createObjectURL(record.blob);
+          maskHeroRuntime.assetHistoryUrls.set(record.id, url);
+        }
+        const card = maskHeroCreateNode('div', 'tle-mask-hero-avatar-card');
+        const image = HOST_DOC.createElement('img');
+        image.src = url;
+        image.alt = record.name || '本地头像';
+        image.loading = 'lazy';
+        const name = maskHeroCreateNode('small', 'tle-mask-hero-avatar-card-name', record.name || '本地图片');
+        name.title = record.name || '本地图片';
+        const actions = maskHeroCreateNode('div', 'tle-mask-hero-avatar-card-actions');
+        for (const type of ['user', 'char']) {
+          const button = maskHeroCreateButton(type === 'user' ? 'User' : 'Char', 'use-avatar', {
+            title: '将此图片用于 ' + (type === 'user' ? 'User' : 'Char') + ' 头像',
+          });
+          button.dataset.assetId = record.id;
+          button.dataset.avatarType = type;
+          actions.append(button);
+        }
+        card.append(image, name, actions);
+        fragment.append(card);
+      }
+      container.replaceChildren(fragment);
+    } catch (error) {
+      if (requestId === maskHeroRuntime.assetHistoryRequest && container.isConnected) {
+        container.replaceChildren(maskHeroCreateNode('small', 'tle-mask-hero-note',
+          '暂时无法读取图片历史：' + (error?.message || '本地存储不可用。')));
+      }
+    }
+  }
+
+  async function maskHeroUseRecentAsset(id, type) {
+    if (!id || !['user', 'char'].includes(type)) return;
+    maskHeroReadDraftFromUI();
+    const record = maskHeroRuntime.assetHistory.find(item => item.id === id) || await maskHeroGetAsset(id);
+    if (!record?.blob) throw new Error('这张历史图片已不可用，请重新上传。');
+    maskHeroRuntime.applyGeneration += 1;
+    maskHeroRuntime.draft.avatarAssets[type] = id;
+    maskHeroRuntime.draft.avatarNames[type] = record.name || '本地图片';
+    maskHeroRenderPage();
+    maskHeroSetStatus('已将历史图片设为 ' + (type === 'user' ? 'User' : 'Char') + ' 头像；保存方案后可长期复用。');
+  }
+
+  function maskHeroClearAssetHistoryPreviews() {
+    maskHeroRuntime.assetHistoryRequest += 1;
+    for (const url of maskHeroRuntime.assetHistoryUrls.values()) {
+      try { HOST_WIN.URL.revokeObjectURL(url); } catch {}
+    }
+    maskHeroRuntime.assetHistoryUrls.clear();
+    maskHeroRuntime.assetHistory = [];
+  }
+
   async function maskHeroDeleteAsset(id) {
     if (!id) return;
     const db = await maskHeroOpenAssetDb();
@@ -15746,7 +15968,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         request.onsuccess = () => resolve(request.result || []);
         request.onerror = () => reject(request.error);
       });
-      for (const record of records) if (!used.has(record.id)) await maskHeroDeleteAsset(record.id);
+      const recentIds = new Set(records.slice().sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
+        .slice(0, 6).map(record => record.id));
+      for (const record of records) if (!used.has(record.id) && !recentIds.has(record.id)) await maskHeroDeleteAsset(record.id);
     } catch (error) {
       console.warn('[TLE Mask Hero] 头像资源清理失败', error);
     }
@@ -15771,7 +15995,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     try {
       const id = 'mask-' + (HOST_WIN.crypto?.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2)));
-      await maskHeroStoreAsset({ id, blob: file.slice(0, file.size, file.type), type: file.type, name: file.name || 'avatar' });
+      await maskHeroStoreAsset({ id, blob: file.slice(0, file.size, file.type), type: file.type, name: file.name || 'avatar', createdAt: Date.now() });
       if (!maskHeroEnabled || selectedPlanId !== maskHeroRuntime.selectedPlanId ||
           draftGeneration !== state.chatTools.maskHero.applyGeneration) {
         await maskHeroDeleteAsset(id);
@@ -15794,6 +16018,48 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (message.classList.contains('is_system') || message.getAttribute('is_system') === 'true') return '';
     if (message.classList.contains('is_user') || message.getAttribute('is_user') === 'true' || message.dataset.isUser === 'true') return 'user';
     return 'char';
+  }
+
+  function maskHeroApplyNameReplacement(element, replacement) {
+    if (!element) return;
+    const records = state.chatTools.maskHero.nameElements;
+    const previous = records.get(element);
+    const replacementText = String(replacement ?? '');
+    if (previous && element.contains(previous.appliedNode) && previous.appliedNode.nodeValue === replacementText) {
+      if (element.childNodes.length === 1) return;
+      const original = HOST_DOC.createDocumentFragment();
+      for (const child of [...element.childNodes]) {
+        if (child === previous.appliedNode) original.appendChild(previous.original);
+        else original.appendChild(child);
+      }
+      const appliedNode = HOST_DOC.createTextNode(replacementText);
+      element.replaceChildren(appliedNode);
+      records.set(element, { original, appliedNode });
+      return;
+    }
+    if (previous) records.delete(element);
+    const original = HOST_DOC.createDocumentFragment();
+    while (element.firstChild) original.appendChild(element.firstChild);
+    const appliedNode = HOST_DOC.createTextNode(replacementText);
+    element.appendChild(appliedNode);
+    records.set(element, { original, appliedNode });
+  }
+
+  function maskHeroRestoreNameReplacement(element) {
+    const records = state.chatTools.maskHero.nameElements;
+    const record = records.get(element);
+    if (!record) return;
+    if (element && record.appliedNode && [...element.childNodes].includes(record.appliedNode)) {
+      const before = [];
+      const after = [];
+      let passed = false;
+      for (const child of [...element.childNodes]) {
+        if (child === record.appliedNode) { passed = true; continue; }
+        (passed ? after : before).push(child);
+      }
+      element.replaceChildren(...before, record.original, ...after);
+    }
+    records.delete(element);
   }
 
   function maskHeroApplyTextNode(node, rules) {
@@ -15834,7 +16100,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const replacementText = String(replacement ?? '');
     if (previous && body.contains(previous.appliedNode) && previous.appliedNode.nodeValue === replacementText) {
       if (body.childNodes.length === 1) return;
-      // Preserve any host-added nodes while keeping the detached original fragment reversible.
       const original = HOST_DOC.createDocumentFragment();
       for (const child of [...body.childNodes]) {
         if (child === previous.appliedNode) original.appendChild(previous.original);
@@ -15846,7 +16111,6 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       records.set(body, { original, appliedNode });
       return;
     }
-    // If the host replaced the applied text node, its new DOM is authoritative.
     if (previous) records.delete(body);
     const original = HOST_DOC.createDocumentFragment();
     while (body.firstChild) original.appendChild(body.firstChild);
@@ -15854,6 +16118,27 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     body.appendChild(appliedNode);
     body.setAttribute('data-tle-mask-floor', 'true');
     records.set(body, { original, appliedNode });
+  }
+
+  function maskHeroRestoreFloorReplacement(body) {
+    const records = state.chatTools.maskHero.floorElements;
+    const record = records.get(body);
+    if (!record) {
+      body?.removeAttribute?.('data-tle-mask-floor');
+      return;
+    }
+    if (body && record.appliedNode && [...body.childNodes].includes(record.appliedNode)) {
+      const before = [];
+      const after = [];
+      let passed = false;
+      for (const child of [...body.childNodes]) {
+        if (child === record.appliedNode) { passed = true; continue; }
+        (passed ? after : before).push(child);
+      }
+      body.replaceChildren(...before, record.original, ...after);
+    }
+    body?.removeAttribute?.('data-tle-mask-floor');
+    records.delete(body);
   }
 
   function maskHeroProcessChat() {
@@ -15868,25 +16153,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     const chat = HOST_DOC.getElementById('chat');
     if (!chat) return;
-    for (const message of chat.querySelectorAll('.mes')) {
+    const messages = [...chat.querySelectorAll('.mes')].filter(message => maskHeroMessageKind(message));
+    const bodyRule = config.bodyRule || { scope: 'none' };
+    for (let messageIndex = 0; messageIndex < messages.length; messageIndex++) {
+      const message = messages[messageIndex];
       const kind = maskHeroMessageKind(message);
-      if (!kind) continue;
       const nameReplacement = kind === 'user' ? config.userName : config.charName;
       if (nameReplacement) {
-        for (const name of message.querySelectorAll('.name_text')) {
-          name.setAttribute('data-tle-mask-name', nameReplacement);
-          runtime.nameElements.add(name);
-        }
+        const name = message.querySelector('.mes_block > .ch_name > .name_text');
+        if (name) maskHeroApplyNameReplacement(name, nameReplacement);
       }
       const floor = Number(message.getAttribute('mesid') ?? message.dataset.mesid);
       const floorRule = config.floorRules.find(rule => Number(rule.floor) === floor);
+      const batchReplacement = maskHeroShouldReplaceBody(bodyRule, message, messageIndex, messages.length);
       const body = message.querySelector('.mes_text');
       if (body && floorRule) {
         maskHeroApplyFloorReplacement(body, floorRule.replace);
-      } else if (body && config.textRules.length && !body.hasAttribute('data-tle-mask-floor')) {
-        const walker = HOST_DOC.createTreeWalker(body, HOST_WIN.NodeFilter.SHOW_TEXT);
-        let node;
-        while ((node = walker.nextNode())) maskHeroApplyTextNode(node, config.textRules);
+      } else if (body && batchReplacement) {
+        maskHeroApplyFloorReplacement(body, bodyRule.replace);
+      } else if (body) {
+        if (body.hasAttribute('data-tle-mask-floor')) maskHeroRestoreFloorReplacement(body);
+        if (config.textRules.length) {
+          const walker = HOST_DOC.createTreeWalker(body, HOST_WIN.NodeFilter.SHOW_TEXT);
+          let node;
+          while ((node = walker.nextNode())) maskHeroApplyTextNode(node, config.textRules);
+        }
       }
       const avatarUrl = runtime.objectUrls.get(kind);
       if (avatarUrl) {
@@ -15958,21 +16249,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (node && node.nodeValue === record.applied) node.nodeValue = record.original;
     }
     runtime.textNodes.clear();
-    for (const element of runtime.nameElements) element?.removeAttribute?.('data-tle-mask-name');
+    for (const element of [...runtime.nameElements.keys()]) maskHeroRestoreNameReplacement(element);
     runtime.nameElements.clear();
-    for (const [element, record] of runtime.floorElements) {
-      if (element && record?.appliedNode && [...element.childNodes].includes(record.appliedNode)) {
-        const before = [];
-        const after = [];
-        let passed = false;
-        for (const child of [...element.childNodes]) {
-          if (child === record.appliedNode) { passed = true; continue; }
-          (passed ? after : before).push(child);
-        }
-        element.replaceChildren(...before, record.original, ...after);
-      }
-      element?.removeAttribute?.('data-tle-mask-floor');
-    }
+    for (const element of [...runtime.floorElements.keys()]) maskHeroRestoreFloorReplacement(element);
     runtime.floorElements.clear();
     for (const [img, record] of runtime.imageElements) {
       if (!img || img.getAttribute('src') !== record.appliedSrc) continue;
@@ -16019,6 +16298,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       state.chatTools.maskHero.appliedConfig = {
         ...draft,
+        bodyRule: { ...(draft.bodyRule || maskHeroCreateEmptyDraft().bodyRule) },
         floorRules: draft.floorRules.map(rule => ({ ...rule })),
         textRules: draft.textRules.map(rule => ({ ...rule })),
       };
@@ -16052,6 +16332,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     maskHeroRuntime.selectedPlanId = id;
     maskHeroRuntime.draft = {
       ...next,
+      bodyRule: { ...(next.bodyRule || maskHeroCreateEmptyDraft().bodyRule) },
       floorRules: next.floorRules.map(rule => ({ ...rule })),
       textRules: next.textRules.map(rule => ({ ...rule })),
       avatarAssets: { ...next.avatarAssets },
@@ -16722,7 +17003,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const avatarInput = target?.closest?.('[data-mask-avatar-type]');
       if (avatarInput) { void maskHeroHandleAvatarInput(avatarInput); return; }
       const planSelect = target?.closest?.('[data-mask-plan-select]');
-      if (planSelect) maskHeroLoadSelectedPlan(planSelect.value);
+      if (planSelect) { maskHeroLoadSelectedPlan(planSelect.value); return; }
+      const bodyScope = target?.closest?.('[data-mask-body-field="scope"]');
+      if (bodyScope) {
+        maskHeroReadDraftFromUI();
+        const root = panel.querySelector('[data-mask-hero-root]');
+        const countWrap = root?.querySelector('[data-mask-body-count-wrap]');
+        const rangeWrap = root?.querySelector('[data-mask-body-range-wrap]');
+        if (countWrap) countWrap.hidden = bodyScope.value !== 'latest';
+        if (rangeWrap) rangeWrap.hidden = bodyScope.value !== 'range';
+      }
     });
 
     HOST_DOC.addEventListener('pointerdown', event => {
@@ -18504,6 +18794,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         if (action === 'add-text') maskHeroAddRule('text');
         if (action === 'remove-floor') maskHeroRemoveRule('floor', index);
         if (action === 'remove-text') maskHeroRemoveRule('text', index);
+        if (action === 'upload-avatar') {
+          const type = maskAction.dataset.avatarType;
+          if (['user', 'char'].includes(type)) chatToolsPanel.querySelector(`[data-mask-avatar-type="${type}"]`)?.click();
+        }
+        if (action === 'use-avatar') {
+          void maskHeroUseRecentAsset(maskAction.dataset.assetId, maskAction.dataset.avatarType)
+            .catch(error => maskHeroSetStatus(error?.message || '复用历史头像失败。'));
+        }
         if (action === 'clear-avatar') {
           maskHeroReadDraftFromUI();
           const type = maskAction.dataset.avatarType;
@@ -19930,7 +20228,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.295';
+    const VERSION = '0.3.296';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -21866,6 +22164,7 @@ function createTLEGalleryHome(window, document) {
     clearFloorZeroClearance();
     closeQuickPanel(false);
     maskHeroClearEffects();
+    maskHeroClearAssetHistoryPreviews();
     closeChatTools(false);
     companionCleanup();
     optionalCleanup();
@@ -21946,7 +22245,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.295',
+    version: '0.3.296',
     ready: false,
     destroy,
     state,
@@ -22407,5 +22706,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.295 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.296 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

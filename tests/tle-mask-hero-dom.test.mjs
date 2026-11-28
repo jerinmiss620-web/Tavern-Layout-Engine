@@ -17,7 +17,7 @@ const runtime = {
   observer: null,
   frame: 0,
   textNodes: new Map(),
-  nameElements: new Set(),
+  nameElements: new Map(),
   floorElements: new Map(),
   imageElements: new Map(),
   objectUrls: new Map(),
@@ -42,7 +42,9 @@ const functions = [
 vm.runInNewContext(helpers + '\n' + functions + `
 globalThis.maskHeroDom = {
   maskHeroApplyTextRules,
+  maskHeroShouldReplaceBody,
   maskHeroMessageKind,
+  maskHeroApplyNameReplacement,
   maskHeroApplyTextNode,
   maskHeroApplyImage,
   maskHeroApplyFloorReplacement,
@@ -64,6 +66,19 @@ const systemMessage = window.document.createElement('div');
 systemMessage.className = 'mes';
 systemMessage.setAttribute('is_system', 'true');
 assert.equal(api.maskHeroMessageKind(systemMessage), '');
+
+// Name replacement edits the native .name_text node itself and restores its original child nodes.
+const nameElement = window.document.createElement('span');
+nameElement.className = 'name_text';
+const originalNameMarkup = window.document.createElement('strong');
+originalNameMarkup.textContent = 'Original name';
+nameElement.appendChild(originalNameMarkup);
+api.maskHeroApplyNameReplacement(nameElement, 'Masked name');
+assert.equal(nameElement.textContent, 'Masked name');
+assert.equal(nameElement.className, 'name_text');
+api.maskHeroClearEffects();
+assert.equal(nameElement.firstChild, originalNameMarkup, 'name replacement restores original markup, not just its text');
+assert.equal(nameElement.textContent, 'Original name');
 
 // Local replacements change only the rendered Text node and preserve its original value.
 const textNode = window.document.createTextNode('Contact secret@example.com');

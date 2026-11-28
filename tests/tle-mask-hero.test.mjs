@@ -17,7 +17,7 @@ const helpers = section(
   '  function maskHeroCreateEmptyDraft(',
 );
 const sandbox = {};
-vm.runInNewContext(helpers + '\nglobalThis.maskHeroHelpers = { maskHeroIsUnsafeRegex, maskHeroApplyTextRules, maskHeroValidateDraft };', sandbox);
+vm.runInNewContext(helpers + '\nglobalThis.maskHeroHelpers = { maskHeroIsUnsafeRegex, maskHeroApplyTextRules, maskHeroShouldReplaceBody, maskHeroValidateDraft };', sandbox);
 const api = sandbox.maskHeroHelpers;
 
 assert.equal(
@@ -83,6 +83,14 @@ assert.equal(api.maskHeroIsUnsafeRegex('(a+)+$'), true);
 assert.equal(api.maskHeroIsUnsafeRegex('\\\\1'), true);
 assert.equal(api.maskHeroIsUnsafeRegex('user@[^\\s]+'), false);
 
+const messageAt = floor => ({ getAttribute: name => name === 'mesid' ? String(floor) : null, dataset: {} });
+assert.equal(api.maskHeroShouldReplaceBody({ scope: 'all' }, messageAt(0), 0, 10), true);
+assert.equal(api.maskHeroShouldReplaceBody({ scope: 'latest', count: 5 }, messageAt(5), 5, 10), true);
+assert.equal(api.maskHeroShouldReplaceBody({ scope: 'latest', count: 5 }, messageAt(4), 4, 10), false);
+assert.equal(api.maskHeroShouldReplaceBody({ scope: 'range', start: 2, end: 4 }, messageAt(3), 3, 10), true);
+assert.equal(api.maskHeroShouldReplaceBody({ scope: 'range', start: 2, end: 4 }, messageAt(5), 5, 10), false);
+assert.equal(api.maskHeroShouldReplaceBody({ scope: 'none' }, messageAt(3), 3, 10), false);
+
 assert.throws(
   () => api.maskHeroValidateDraft({
     userName: '', charName: '',
@@ -106,11 +114,25 @@ assert.throws(
 assert.throws(
   () => api.maskHeroValidateDraft({
     userName: '', charName: '',
+    bodyRule: { scope: 'latest', count: 0, replace: '[hidden]' },
+    floorRules: [],
+    textRules: [],
+  }),
+  /最新层数/,
+  'latest body replacement requires a positive message count',
+);
+
+assert.throws(
+  () => api.maskHeroValidateDraft({ userName: '', charName: '', bodyRule: { scope: 'range', start: 8, end: 3 }, floorRules: [], textRules: [] }),
+  /楼层区间/,
+  'body range must be a valid inclusive floor interval',
+);
+
+assert.throws(
+  () => api.maskHeroValidateDraft({
+    userName: '', charName: '',
     floorRules: [],
     textRules: [{ find: '^', replace: 'x', regex: true }],
-  }),
-  /空字符串/,
-  'zero-width regex patterns are rejected',
 );
 
 assert.throws(
@@ -127,6 +149,7 @@ assert.equal(
   api.maskHeroValidateDraft({
     userName: '匿名用户',
     charName: '匿名角色',
+    bodyRule: { scope: 'latest', count: 5, start: '', end: '', replace: '[正文已隐藏]' },
     floorRules: [{ floor: 0, replace: '[首楼内容已隐藏]' }],
     textRules: [{ find: 'secret@example.com', replace: '[邮箱]', regex: false }],
   }),
@@ -142,7 +165,14 @@ assert.match(source, /data-chat-tools-page="mask"/);
 assert.match(source, /if \(!maskHeroEnabled\) \{\s*maskHeroClearEffects\(\)/);
 assert.match(source, /TLEMaskHeroAssets/);
 assert.match(source, /new HOST_WIN\.MutationObserver\(\(\) => maskHeroScheduleProcess\(\)\)/);
-assert.match(source, /#chat \.mes \.name_text\[data-tle-mask-name\]/);
+assert.match(source, /message\.querySelector\('\.mes_block > \.ch_name > \.name_text'\)/);
+assert.match(source, /function maskHeroApplyNameReplacement\(element, replacement\)/);
+assert.match(source, /function maskHeroShouldReplaceBody\(rule, message, index, total\)/);
+assert.doesNotMatch(source, /\.name_text\[data-tle-mask-name\].*visibility:hidden/);
+assert.match(source, /data-mask-avatar-history/);
+assert.match(source, /最近上传的图片（最多 6 张）/);
+assert.match(source, /data-mask-avatar-type/);
+assert.match(source, /data-mask-body-field="scope"/);
 assert.match(source, /function maskHeroApplyFloorReplacement\(body, replacement\)/);
 assert.match(source, /body\.setAttribute\('data-tle-mask-floor', 'true'\)/);
 assert.match(source, /element\.replaceChildren\(\.\.\.before, record\.original, \.\.\.after\)/);
