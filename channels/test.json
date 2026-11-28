@@ -13,7 +13,7 @@
     "sha256": "33bd97d21ec785242a47486fcc93ef792c60a2160bad5d44d8ef3ffc8f18807b",
     "size_bytes": 1209522
   },
-  "status": "TEST v0.3.305: Phase 3.1 Core Services API v2. Module Kernel 1.1.0 exposes permission-gated chat-context and resource-catalog services. HD Avatar Engine 1.0.0 remains Test-only. ST/TT real-device validation of this new candidate is pending; no Stable promotion is authorized.",
+  "status": "TEST v0.3.305: Phase 3.1 Core Services API v2. Module Kernel 1.1.0 exposes permission-gated chat-context and resource-catalog services. Test manifest includes an auto-starting, no-UI core.services-smoke module that verifies the service contract. HD Avatar Engine 1.0.0 remains Test-only. ST/TT real-device validation of this new candidate is pending; no Stable promotion is authorized.",
   "recommended_loader_version": "0.3.2",
   "loader_release": {
     "version": "0.3.2",
