@@ -236,4 +236,14 @@ const runtime = section(
 assert.doesNotMatch(runtime, /saveChatConditional|saveChat\(|writeChat|POST\s*\(/i,
   'Mask Hero must not write to the host chat file or message API');
 
+// Layout regression: a vertical textarea must not inherit the 140px flex basis
+// intended only for fields inside horizontal rows.
+const genericFieldRule = source.match(/#\\$\\{ID\\.chatToolsPanel\\} \\.tle-mask-hero-field \\{([^}]*)\\}/)?.[1] || '';
+assert.ok(genericFieldRule, 'Mask Hero field base rule must exist');
+assert.doesNotMatch(genericFieldRule, /flex\\s*:\\s*1\\s+1\\s+140px/,
+  'vertical fields must keep their natural height instead of reserving a 140px flex basis');
+const horizontalFieldRule = source.match(/#\\$\\{ID\\.chatToolsPanel\\} \\.tle-mask-hero-toolbar > \\.tle-mask-hero-field,\\s*#\\$\\{ID\\.chatToolsPanel\\} \\.tle-mask-hero-avatar-row > \\.tle-mask-hero-field \\{([^}]*)\\}/)?.[1] || '';
+assert.match(horizontalFieldRule, /flex\\s*:\\s*1\\s+1\\s+140px/,
+  'the 140px flex basis must remain limited to horizontal field rows');
+
 console.log('TLE Mask Hero tests passed: global scope validation and migration, one-pass replacement, literal/regex matching, regex safety, optional setting, current-chat scope and display-only boundaries.');

@@ -8,10 +8,14 @@
 
 请使用 [仓库首页](../../../README.md) 的当前 Bootstrap 安装方式。
 
-Bootstrap 1.0.2 的源码与安装包用于保留旧版忙碌重试回归；Bootstrap 1.0.3 的源码与安装包保留原字节，供历史诊断弹窗回归；当前安装版本为 1.0.4。
+Bootstrap 1.0.2 的源码与安装包用于保留旧版忙碌重试回归；Bootstrap 1.0.3 的源码与安装包保留原字节，供历史诊断弹窗回归；当前安装版本为 1.0.6。
 
 - `bootstrap-v1.0.4.js/json`：已发布 Bootstrap v1.0.4 原字节样本，验证旧版弹窗行为。
 - `loader-v0.3.4.js`：已发布 Loader Runtime v0.3.4 原字节样本，保留历史对照。
 
 - `bootstrap-v1.0.5.js/json`：多线路 Bootstrap v1.0.5 原始发布字节。
 - `loader-v0.3.5.js`：多线路 Loader v0.3.5 原始发布字节。
+
+- `core-v0.3.294.js/json`：已晋升为历史版本的 Core v0.3.294 原始发布源码与导入包。
+- `mask-hero-test-core-v0.3.302.js`：已归档的 Mask Hero 测试 Core；旧测试通道仍以不可变 Commit 提供下载。
+- `mask-hero-test-loader-v0.3.0.js/json`：Mask Hero 独立测试 Loader 与匹配安装包的原始字节，仅供通道兼容回归。

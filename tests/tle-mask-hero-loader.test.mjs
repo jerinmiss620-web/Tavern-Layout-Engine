@@ -3,12 +3,21 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
+const legacyFiles = {
+  [JSON.parse(readFileSync(new URL('../channels/mask-hero-test.json', import.meta.url), 'utf8')).release.source_path]:
+    'tests/fixtures/legacy/mask-hero-test-core-v0.3.302.js',
+  [JSON.parse(readFileSync(new URL('../channels/mask-hero-test.json', import.meta.url), 'utf8')).loader_release.source_path]:
+    'tests/fixtures/legacy/mask-hero-test-loader-v0.3.0.js',
+  [JSON.parse(readFileSync(new URL('../channels/mask-hero-test.json', import.meta.url), 'utf8')).loader_release.installer_path]:
+    'tests/fixtures/legacy/mask-hero-test-loader-v0.3.0.json',
+};
+const read = path => readFileSync(new URL('../' + (legacyFiles[path] || path), import.meta.url), 'utf8');
 const manifest = JSON.parse(read('channels/mask-hero-test.json'));
 const stable = JSON.parse(read('latest.json'));
 const plan = JSON.parse(read('release-plan.json'));
 const core = read(manifest.release.source_path);
 const development = read('development/organizer/TLE.js');
+const stableCore = read(stable.release.source_path);
 const loader = read(manifest.loader_release.source_path);
 const installer = JSON.parse(read(manifest.loader_release.installer_path));
 const sha256 = value => createHash('sha256').update(value, 'utf8').digest('hex');
@@ -19,7 +28,8 @@ assert.equal(manifest.channel, 'mask-hero-test');
 assert.equal(manifest.latest_version, '0.3.302');
 assert.equal(manifest.release.version, manifest.latest_version);
 assert.equal(manifest.minimum_loader_version, '0.3.0');
-assert.equal(core, development, 'the test release artifact must match the development Core exactly');
+assert.equal(stableCore, development, 'the stable release artifact must match the development Core exactly');
+assert.notEqual(core, stableCore, 'the archived test channel must remain separate from the current stable release');
 assert.equal(sha256(core), manifest.release.sha256, 'the test Core SHA-256 must match its manifest');
 assert.equal(Buffer.byteLength(core, 'utf8'), manifest.release.size_bytes, 'the test Core byte count must match its manifest');
 assert.match(manifest.release.source_url, new RegExp('/' + manifest.release.source_commit + '/releases/v0\\.3\\.302/TLE\\.js$'));
@@ -38,7 +48,9 @@ assert.equal(installer.enabled, false, 'the test Loader installer must be disabl
 assert.equal(installer.id, '0f3a9e7c-4b2d-4a71-9c83-5d6f1a2b3c40');
 assert.equal(manifest.loader_release.source_commit, manifest.loader_release.installer_commit);
 assert.ok(manifest.loader_release.installer_url.includes(manifest.loader_release.installer_commit));
-assert.equal(stable.latest_version, '0.3.294', 'the stable channel must remain unchanged during test development');
-assert.equal(plan.core, '0.3.294', 'the stable release plan must remain unchanged during test development');
+assert.equal(stable.latest_version, '0.3.303', 'the stable channel must point to the promoted Mask Hero release');
+assert.equal(stable.release.source_path, 'releases/v0.3.303/TLE.js');
+assert.equal(plan.core, '0.3.303', 'the stable release plan must match the promoted Core');
+assert.ok(manifest.status.startsWith('ARCHIVED'), 'the old Mask Hero test channel must be explicitly archived');
 
 console.log('TLE Mask Hero test channel passed: immutable Core/Loader hashes, dedicated channel, disabled installer and stable-channel isolation.');

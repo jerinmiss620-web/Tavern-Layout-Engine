@@ -14,7 +14,7 @@
     "sha256": "393cd940957d9d5c20673b5198e44415eb21fc712bc7e8cc76058f19017808d5",
     "size_bytes": 1133247
   },
-  "status": "TEST v0.3.302 · 操作区按钮为「应用 / 卸除 / 保存方案 / 删除方案 / 应用范围」；应用范围默认折叠；楼层恢复按消息身份动态重定位。独立测试通道，不影响正式版 v0.3.294。",
+  "status": "ARCHIVED · 历史兼容测试通道，固定保留 v0.3.302，不再更新；打码侠与隐藏楼层保护已整合进正式 Core v0.3.303。",
   "loader_release": {
     "version": "0.3.0",
     "source_path": "loader/TLE-Mask-Hero-Test-Loader-0.3.0.js",

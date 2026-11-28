@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.300
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.303
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3700,7 +3700,9 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 #${ID.chatToolsPanel} .tle-chat-tools-protection-alert { margin:0; font-size:.82em; line-height:1.45; color:var(--SmartThemeQuoteColor,inherit); }
 #${ID.chatToolsPanel} .tle-chat-tools-protection-actions { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
 #${ID.chatToolsPanel} .tle-chat-tools-protection [hidden] { display:none !important; }
-#${ID.chatToolsPanel} .tle-mask-hero-field { display:flex; flex:1 1 140px; flex-direction:column; gap:4px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-field { display:flex; flex-direction:column; gap:4px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-toolbar > .tle-mask-hero-field,
+#${ID.chatToolsPanel} .tle-mask-hero-avatar-row > .tle-mask-hero-field { flex:1 1 140px; }
 #${ID.chatToolsPanel} .tle-mask-hero-toggle { display:inline-flex; align-items:center; gap:6px; width:fit-content; max-width:100%; }
 #${ID.chatToolsPanel} .tle-mask-hero-field > input,
 #${ID.chatToolsPanel} .tle-mask-hero-field > textarea,
@@ -11577,14 +11579,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.300 · 隐藏楼层身份匹配加固</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.303 · 打码侠与隐藏楼层保护</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.300</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.303</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13407,6 +13409,51 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return ranges;
   }
 
+  function hiddenFloorGuardSelectRecoveryBatch(records, chat, targetRecordIds) {
+    const ids = [...new Set((targetRecordIds || []).map(value => String(value || '')).filter(Boolean))];
+    const analysis = hiddenFloorGuardAnalyze(records, chat);
+    const stillHiddenById = new Map();
+    const lostById = new Map();
+    const duplicateIds = new Set();
+
+    for (const item of analysis.stillHidden) {
+      if (!item.recordId) continue;
+      if (stillHiddenById.has(item.recordId)) duplicateIds.add(item.recordId);
+      else stillHiddenById.set(item.recordId, item);
+    }
+    for (const item of analysis.lost) {
+      if (!item.recordId) continue;
+      if (lostById.has(item.recordId)) duplicateIds.add(item.recordId);
+      else lostById.set(item.recordId, item);
+    }
+
+    const missingIds = ids.filter(id =>
+      duplicateIds.has(id) || (stillHiddenById.has(id) && lostById.has(id))
+      || (!stillHiddenById.has(id) && !lostById.has(id)));
+    if (missingIds.length) {
+      return { ok: false, complete: false, missingIds, completedIds: [], range: null, entries: [] };
+    }
+
+    const completedIds = ids.filter(id => stillHiddenById.has(id));
+    const pendingEntries = ids
+      .map(id => lostById.get(id))
+      .filter(Boolean)
+      .sort((a, b) => a.index - b.index);
+
+    if (!pendingEntries.length) {
+      return { ok: true, complete: true, missingIds: [], completedIds: ids, range: null, entries: [] };
+    }
+
+    // Only return the first contiguous run. The caller must re-read the live
+    // chat and recompute after every native command; old floor numbers expire.
+    const range = hiddenFloorGuardGroupRanges(pendingEntries.map(item => item.index))[0];
+    const entries = pendingEntries.filter(item => item.index >= range.start && item.index <= range.end);
+    if (entries.length !== range.end - range.start + 1) {
+      return { ok: false, complete: false, missingIds: ids, completedIds: [], range: null, entries: [] };
+    }
+    return { ok: true, complete: false, missingIds: [], completedIds, range, entries };
+  }
+
   function hiddenFloorGuardCreateRecord(fingerprint) {
     const savedAt = Date.now();
     const entropy = String(savedAt) + ':' + String(Math.random());
@@ -13769,37 +13816,98 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     guard.busy = true;
     hiddenFloorGuardUpdateUI();
     let restored = 0;
+    let alreadyHidden = 0;
     try {
       const saved = await hiddenFloorGuardReadRecord(snapshot.chatKey);
       const records = Array.isArray(saved?.records) ? saved.records : [];
       const analysis = hiddenFloorGuardAnalyze(records, snapshot.chat);
       const recoverable = analysis.lost.filter(item => item.confidence === 'high' && item.recordId);
-      if (!recoverable.length) throw new Error('没有能够可靠定位的待恢复楼层；请核对后接受当前状态。');
-      const recordIds = new Set(recoverable.map(item => item.recordId));
-      const ranges = hiddenFloorGuardGroupRanges(recoverable.map(item => item.index));
-      guard.suppress = true;
-      for (const range of ranges) {
-        const latest = getActiveChatActionContext();
-        if (!latest || latest.chatKey !== snapshot.chatKey) throw new Error('聊天已切换，已取消恢复操作。');
-        const currentSaved = await hiddenFloorGuardReadRecord(latest.chatKey);
-        const currentRecords = Array.isArray(currentSaved?.records) ? currentSaved.records : [];
-        const currentAnalysis = hiddenFloorGuardAnalyze(currentRecords, latest.chat);
-        const currentRecoverable = currentAnalysis.lost.filter(item =>
-          item.confidence === 'high' && recordIds.has(item.recordId));
-        const expected = recoverable.filter(item => item.index >= range.start && item.index <= range.end);
-        const actual = currentRecoverable.filter(item => item.index >= range.start && item.index <= range.end);
-        if (actual.length !== expected.length || actual.length !== range.end - range.start + 1) {
-          throw new Error('消息位置或身份在恢复前发生变化；为避免隐藏错误楼层，已取消本次恢复。');
-        }
-        const result = await executeTLESlashCommand('/hide ' + range.start + '-' + range.end, latest.context);
-        if (result?.isError) throw new Error(result.errorMessage || '酒馆执行隐藏命令失败。');
-        if (result?.isAborted || result?.isQuietlyAborted) throw new Error(result.abortReason || '恢复操作已中止。');
-        restored += actual.length;
+      const targetRecordIds = [...new Set(recoverable.map(item => item.recordId))];
+      if (!targetRecordIds.length) {
+        throw new Error('没有能够可靠定位的待恢复楼层；请核对后接受当前状态。');
       }
+
+      guard.suppress = true;
+      const remainingIds = new Set(targetRecordIds);
+      while (remainingIds.size) {
+        const beforeRead = getActiveChatActionContext();
+        if (!beforeRead || beforeRead.chatKey !== snapshot.chatKey) {
+          throw new Error('聊天已切换，已取消恢复操作。');
+        }
+
+        const currentSaved = await hiddenFloorGuardReadRecord(beforeRead.chatKey);
+        const currentRecords = Array.isArray(currentSaved?.records) ? currentSaved.records : [];
+
+        // Re-read the host chat after the asynchronous database read. This is
+        // the floor map used by the next native command, not the initial map.
+        const latest = getActiveChatActionContext();
+        if (!latest || latest.chatKey !== snapshot.chatKey) {
+          throw new Error('聊天已切换，已取消恢复操作。');
+        }
+        const batch = hiddenFloorGuardSelectRecoveryBatch(currentRecords, latest.chat, [...remainingIds]);
+        if (!batch.ok) {
+          throw new Error('部分消息身份已变化或无法唯一匹配；为避免恢复错误楼层，本次操作已停止。');
+        }
+        for (const recordId of batch.completedIds) {
+          if (remainingIds.delete(recordId)) alreadyHidden++;
+        }
+        if (batch.complete) break;
+
+        const range = batch.range;
+        const batchRecordIds = batch.entries.map(item => item.recordId);
+        if (!range || !batchRecordIds.length
+          || batch.entries.length !== range.end - range.start + 1) {
+          throw new Error('恢复范围无法与目标消息身份一一对应，已停止操作。');
+        }
+
+        // No await occurs between this final snapshot and command dispatch.
+        const preflight = getActiveChatActionContext();
+        if (!preflight || preflight.chatKey !== snapshot.chatKey) {
+          throw new Error('聊天已切换，已取消恢复操作。');
+        }
+        const preflightBatch = hiddenFloorGuardSelectRecoveryBatch(
+          currentRecords, preflight.chat, batchRecordIds,
+        );
+        if (!preflightBatch.ok || preflightBatch.complete
+          || preflightBatch.range?.start !== range.start
+          || preflightBatch.range?.end !== range.end
+          || preflightBatch.entries.length !== batchRecordIds.length
+          || preflightBatch.entries.some((item, index) => item.recordId !== batchRecordIds[index])) {
+          throw new Error('执行前消息位置发生变化；为避免恢复错误楼层，已取消本次操作。');
+        }
+
+        const result = await executeTLESlashCommand(
+          '/hide ' + range.start + '-' + range.end,
+          preflight.context,
+        );
+        if (result?.isError) throw new Error(result.errorMessage || '酒馆执行隐藏命令失败。');
+        if (result?.isAborted || result?.isQuietlyAborted) {
+          throw new Error(result.abortReason || '恢复操作已中止。');
+        }
+
+        await hiddenFloorGuardAfterPaint();
+        const after = getActiveChatActionContext();
+        if (!after || after.chatKey !== snapshot.chatKey) {
+          throw new Error('恢复命令执行后聊天发生切换；请重新核验保护状态。');
+        }
+        const afterSaved = await hiddenFloorGuardReadRecord(after.chatKey);
+        const afterRecords = Array.isArray(afterSaved?.records) ? afterSaved.records : [];
+        const afterBatch = hiddenFloorGuardSelectRecoveryBatch(afterRecords, after.chat, batchRecordIds);
+        if (!afterBatch.ok || !afterBatch.complete) {
+          throw new Error('恢复命令已发送，但执行后身份核验未通过；请检查聊天后再继续。');
+        }
+
+        for (const recordId of batchRecordIds) remainingIds.delete(recordId);
+        restored += batchRecordIds.length;
+      }
+
       guard.suppress = false;
       await hiddenFloorGuardAfterPaint();
       await hiddenFloorGuardVerify(getActiveChatActionContext());
-      hiddenFloorGuardNotify('success', '已通过酒馆原生隐藏命令恢复 ' + restored + ' 条消息。');
+      hiddenFloorGuardNotify(
+        'success',
+        '恢复核验完成：本次恢复 ' + restored + ' 条，操作前已处于隐藏状态 ' + alreadyHidden + ' 条。',
+      );
     } catch (error) {
       guard.suppress = false;
       hiddenFloorGuardNotify('error', error?.message || '恢复隐藏楼层失败。');
@@ -16339,8 +16447,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     actions.append(
       maskHeroCreateButton('应用', 'apply'),
       maskHeroCreateButton('卸除', 'restore'),
-      maskHeroCreateButton('保存', 'save'),
-      maskHeroCreateButton('删除', 'delete'),
+      maskHeroCreateButton('保存方案', 'save'),
+      maskHeroCreateButton('删除方案', 'delete'),
       scopeToggle
     );
     const status = maskHeroCreateNode('div', 'tle-mask-hero-status', maskHeroRuntime.status);
@@ -23066,7 +23174,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.300',
+    version: '0.3.303',
     ready: false,
     destroy,
     state,
@@ -23531,5 +23639,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.300 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.303 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

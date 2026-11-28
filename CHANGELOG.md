@@ -1,8 +1,12 @@
 # TLE 更新日志
 
-目前正式版：**Core v0.3.294 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
+目前正式版：**Core v0.3.303 / Loader Runtime v0.3.6 / Bootstrap v1.0.6**。
 
 本索引只列已记录的发布版本。历史版本的源码及安装包已从展示目录清理；原始 Git 提交仍保留，回归测试必要的旧源码位于 `tests/fixtures/legacy/`。请从 [README](README.md) 进入最新安装流程，不要导入历史测试脚本。
+
+## 2026-11-28 · Core v0.3.303 · 打码侠与隐藏楼层保护正式整合
+
+详见 [本版完整日志](releases/v0.3.303/CHANGELOG.md)。正式整合打码侠、统一作用范围与隐藏楼层身份保护；新增正文替换字段高度回归修复。Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。自动化发布验证与实机验收边界见 VALIDATION.md。
 
 ## 2026-11-28 · Core v0.3.294 · 角色专属预设条目方案与全局世界书多选（正式发布）
 

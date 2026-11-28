@@ -4,7 +4,7 @@
 
 ## 一次安装，后续自动更新
 
-正式发布：**Core v0.3.294 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
+正式发布：**Core v0.3.303 / Loader Runtime v0.3.6 / 固定 Bootstrap v1.0.6**。
 
 1. 下载 [Bootstrap 安装包](loader/bootstrap/TLE-Permanent-Bootstrap-1.0.6.json)，在酒馆助手中导入一次。已安装旧 Bootstrap（包括 v1.0.3）的用户也需停用旧版并重新导入 v1.0.6 一次；以后 Core/Loader 依旧自动更新。
 2. 首次迁移时禁用旧独立 Stable/Test Loader、旧 Bootstrap 和独立 Core，保留为禁用备份；启用 v1.0.6 并完整刷新酒馆／重新打开 TT。已有缓存和设置会继续使用。
@@ -23,13 +23,23 @@ TLE 接管原版 SillyTavern 与 TauriTavern 的顶栏及侧边导航布局，�
 ## 发布与验证
 
 - [Core 正式清单](latest.json)、[Loader 正式清单](loader/latest.json)
-- [Core 变更日志](releases/v0.3.294/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
+- [Core 变更日志](releases/v0.3.303/CHANGELOG.md)、[Loader 变更日志](loader/runtime/v0.3.6/CHANGELOG.md)、[Bootstrap 变更日志](loader/bootstrap/CHANGELOG-1.0.6.md)
 - [统一发布流程](RELEASING.md)：生成安装包、运行测试、提交不可变源码、生成两份清单后，在一次推送中激活。
-- [实际验证范围](VALIDATION.md)：Core v0.3.294 已通过 PR #28 合并至 main；候选 Node 24 Run #46048166362 与正式 main Run #46048318255 均通过。正式 main 全量 npm test、远端清单/不可变源码核验及下载发布字节后的 Bootstrap → Loader → Core 更新链重放全部通过。ST/TT 全主题视觉矩阵仍需实机覆盖。
+- [实际验证范围](VALIDATION.md)：Core v0.3.303 将打码侠与隐藏楼层保护整合为正式功能；本次发布自动化验证结果记录于 VALIDATION.md。ST/TT 全主题视觉矩阵仍需实机覆盖。
 
-右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
+右上角诊断按钮、Top Layer、渐隐侠、楼层侠、会话侠和 TT ChatSurface 功能保留。旧 Test 通道清单（含已归档的 Mask Hero Test）仅为已安装的旧 Loader 提供兼容，不是安装入口。历史版本在发布目录中只保留更新日志；回归测试必要的旧源码隔离在 `tests/fixtures/legacy/`，正式运行只使用以上最新版本。历史提交仍可在 GitHub 中追溯。
 
 完整版本日志索引见 [CHANGELOG.md](CHANGELOG.md)。
+
+### Core v0.3.303 · 打码侠与隐藏楼层保护正式整合
+
+- 会话侠新增打码侠：支持 User / Char 名称替换、正文整体与局部替换、正则规则、头像覆盖及多套本地方案。
+- 统一作用范围控制名称、头像、正文和单独楼层规则；默认全部楼层，支持最新 N 层与指定范围。正文整体替换保留独立启用开关。
+- 隐藏楼层保护按聊天与消息身份保存本机备份；优先使用稳定 gen_id，身份冲突、重复或无法唯一定位时拒绝猜测。
+- 手动恢复前按当前消息身份动态重定位；非连续目标拆分执行，每段恢复后重新核验；不自动重新隐藏，不写回原始聊天文件。
+- 会话侠隐藏楼层范围支持从复制文本粘贴解析单段区间；多段不连续范围不会被错误合并。
+- 修复打码侠正文替换字段的异常高度：移除纵向字段通用的 140px flex 基准，仅在横向字段行保留该基准，textarea 恢复自然两行高度。
+- Loader Runtime v0.3.6、Bootstrap v1.0.6 不变。
 
 ### Core v0.3.294 · 角色专属预设条目方案与全局世界书多选
 
