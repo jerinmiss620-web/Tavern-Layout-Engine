@@ -57,7 +57,8 @@ const pinnedTle = verifyPinnedRelease(
 assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.version}',`), 'Runtime instance API version must match the release manifest');
 
 const plan = JSON.parse(read('release-plan.json'));
-const tle = process.argv.includes('--current') ? read('releases/v' + plan.core + '/TLE.js') : pinnedTle;
+// The pinned test channel is validated above; feature regressions target the current stable Core.
+const tle = read('releases/v' + plan.core + '/TLE.js');
 if (manifest.release.version === '0.3.246') {
   const organizerSource = read('development/organizer/TLE.js');
   assert.equal(organizerSource, pinnedTle, 'Development Organizer source and pinned test Core must match byte-for-byte');
