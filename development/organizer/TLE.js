@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.303
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.304
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -10986,9 +10986,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   const OPTIONAL_REPO = 'jerinmiss620-web/Tavern-Layout-Engine';
   const OPTIONAL_MANIFEST_URLS = [
     { label: 'GitHub Raw · 正式清单', url: 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/refs/heads/main/optional-modules/manifest.json' },
-    { label: 'GitHub Raw · 固定快照', url: 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/46fbe9010fdccd9911bccc35be25a588bf07740f/optional-modules/manifest.json' },
-    { label: 'jsDelivr · 固定快照', url: 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@46fbe9010fdccd9911bccc35be25a588bf07740f/optional-modules/manifest.json' },
-    { label: 'Fastly · 固定快照', url: 'https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@46fbe9010fdccd9911bccc35be25a588bf07740f/optional-modules/manifest.json' },
+    { label: 'GitHub Raw · 固定快照', url: 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/bcbb981fd097b67117b4206ae9dc9ad4a436b729/optional-modules/manifest.json' },
+    { label: 'jsDelivr · 固定快照', url: 'https://cdn.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@bcbb981fd097b67117b4206ae9dc9ad4a436b729/optional-modules/manifest.json' },
+    { label: 'Fastly · 固定快照', url: 'https://fastly.jsdelivr.net/gh/jerinmiss620-web/Tavern-Layout-Engine@bcbb981fd097b67117b4206ae9dc9ad4a436b729/optional-modules/manifest.json' },
   ];
   const OPTIONAL_RUNTIME = { busy: false, source: '', lastError: '', status: '', controller: null };
   function optionalUtf8(text) {
@@ -11137,8 +11137,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     },
     override: {
       name: '🔤 Freesia 覆盖侠',
-      summary: '气泡居中／自定义字体／行高与字间距／滚动条宽度／头像定位',
-      version: 'v1.88.6',
+      summary: '气泡居中／自定义字体／行高与字间距／滚动条宽度与 Gutter／头像定位',
+      version: 'v1.88.7',
       author: '小松鼠 & ChatGPT（小松7）',
       entry: '酒馆底栏 → 扩展菜单（魔法棒）→ Freesia 覆盖侠',
       intro: '独立的主题调校工具：可以边看聊天边调整布局和字体。不想修改主题 CSS，也能仅开启实时使用。',
@@ -11156,7 +11156,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           '字体比例直接联动酒馆「用户设置」里的原生数值，在 iPhone TT 已可调节；字体比例不写入主题 CSS。'
         ]},
         { title: '滚动条与头像定位', items: [
-          '调整聊天滚动条宽度、全局滚动条宽度和 scrollbar-gutter 的留位方式。',
+          '调整聊天与全局滚动条宽度及 scrollbar-gutter 留位方式；聊天宽度、聊天 Gutter 和全局 Gutter 适配 PC 与 Android，全局宽度仅适配 PC，避免移动端其他面板被挤压。',
           '分别调节 Char 与 User 头像的位置，便于适配不同主题排版。'
         ]},
         { title: '实时效果与 CSS 写入', items: [
@@ -11177,7 +11177,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         '覆盖侠是独立脚本，TLE 不提供它的调校界面；入口始终位于底栏扩展菜单。',
         '本地字体只在当前浏览器或 TT 的本地库中保存，PC、Android 和 iPhone 不会自动互相同步。',
         '停用/卸载不会主动清空已写入的主题 CSS 或已导入的字体文件。',
-        '部分字形数据异常的字体可能被浏览器拒绝解析；全局滚动条宽度/Gutter 可能影响其他可滚动面板。'
+        '部分字形数据异常的字体可能被浏览器拒绝解析；全局滚动条宽度仅作用于 PC，避免移动端内部面板被挤压；Android 的覆盖式滚动条不一定产生可见的 Gutter 留白。'
       ]
     }
   });
@@ -11441,7 +11441,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   // Optional package #2: Freesia Override; it remains an independently managed script.
   const OVERRIDE_PKG = {
     key:'freesia-override', id:'66c0243c-e963-48a3-a960-ed641bbb332e',
-    name:'Freesia 覆盖侠 v1.88.6', filename:'freesia-override-v1.88.6.json',
+    name:'Freesia 覆盖侠 v1.88.7', filename:'freesia-override-v1.88.7.json',
   };
   function overrideCard() { return state.panel?.querySelector('[data-tle-optional-override]'); }
   function overrideStatus(message) {
@@ -11579,14 +11579,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.303 · 打码侠与隐藏楼层保护</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.304 · 打码侠与隐藏楼层保护</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.303</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.304</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -21156,7 +21156,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.303';
+    const VERSION = '0.3.304';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -23174,7 +23174,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.303',
+    version: '0.3.304',
     ready: false,
     destroy,
     state,
@@ -23639,5 +23639,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.303 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.304 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

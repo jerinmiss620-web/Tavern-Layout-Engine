@@ -48,9 +48,9 @@ assert.equal(installer.enabled, false, 'the test Loader installer must be disabl
 assert.equal(installer.id, '0f3a9e7c-4b2d-4a71-9c83-5d6f1a2b3c40');
 assert.equal(manifest.loader_release.source_commit, manifest.loader_release.installer_commit);
 assert.ok(manifest.loader_release.installer_url.includes(manifest.loader_release.installer_commit));
-assert.equal(stable.latest_version, '0.3.303', 'the stable channel must point to the promoted Mask Hero release');
-assert.equal(stable.release.source_path, 'releases/v0.3.303/TLE.js');
-assert.equal(plan.core, '0.3.303', 'the stable release plan must match the promoted Core');
+assert.equal(stable.latest_version, '0.3.304', 'the stable channel must point to the promoted Mask Hero release');
+assert.equal(stable.release.source_path, 'releases/v0.3.304/TLE.js');
+assert.equal(plan.core, '0.3.304', 'the stable release plan must match the promoted Core');
 assert.ok(manifest.status.startsWith('ARCHIVED'), 'the old Mask Hero test channel must be explicitly archived');
 
 console.log('TLE Mask Hero test channel passed: immutable Core/Loader hashes, dedicated channel, disabled installer and stable-channel isolation.');
