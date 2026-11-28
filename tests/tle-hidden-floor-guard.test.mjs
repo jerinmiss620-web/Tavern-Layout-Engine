@@ -75,11 +75,6 @@ assert.equal(fallbackAnalysis.stillHidden.length, 1);
 assert.equal(fallbackAnalysis.stillHidden[0].index, 2,
   'date/name/sender/content and adjacent hashes provide a fallback when gen_id is absent');
 
-const fallbackAnalysis = api.hiddenFloorGuardAnalyze([fallbackRecord], fallbackWithInsertion);
-assert.equal(fallbackAnalysis.stillHidden.length, 1);
-assert.equal(fallbackAnalysis.stillHidden[0].index, 2,
-  'date/name/sender/content and adjacent hashes provide a fallback when gen_id is absent');
-
 const conflictingGeneration = {
   ...protectedRecord,
   genId: 'gen-original',
