@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.297
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.298
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -3689,6 +3689,7 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 #${ID.chatToolsPanel} .tle-mask-hero-toolbar > input { flex:1 1 120px; min-width:0; }
 #${ID.chatToolsPanel} .tle-mask-hero-section { display:flex; flex-direction:column; gap:7px; min-width:0; padding-top:8px; border-top:1px solid var(--SmartThemeBorderColor,currentColor); }
 #${ID.chatToolsPanel} .tle-mask-hero-field { display:flex; flex:1 1 140px; flex-direction:column; gap:4px; min-width:0; }
+#${ID.chatToolsPanel} .tle-mask-hero-toggle { display:inline-flex; align-items:center; gap:6px; width:fit-content; max-width:100%; }
 #${ID.chatToolsPanel} .tle-mask-hero-field > input,
 #${ID.chatToolsPanel} .tle-mask-hero-field > textarea,
 #${ID.chatToolsPanel} .tle-mask-hero-floor-row > input,
@@ -11540,14 +11541,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.297 · 隐藏范围智能粘贴</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.298 · 隐藏范围智能粘贴</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.297</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.298</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -15429,16 +15430,16 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     return output.join('');
   }
 
-  function maskHeroShouldReplaceBody(rule, message, index, total) {
-    const scope = String(rule?.scope || 'none');
-    if (scope === 'all') return true;
-    if (scope === 'latest') {
-      const count = Math.max(1, Number(rule?.count) || 5);
+  function maskHeroIsWithinScope(scopeConfig, message, index, total) {
+    const mode = String(scopeConfig?.mode || 'all');
+    if (mode === 'all') return true;
+    if (mode === 'latest') {
+      const count = Math.max(1, Number(scopeConfig?.count) || 5);
       return index >= Math.max(0, total - count);
     }
-    if (scope === 'range') {
+    if (mode === 'range') {
       const floor = Number(message?.getAttribute?.('mesid') ?? message?.dataset?.mesid);
-      const start = Number(rule?.start), end = Number(rule?.end);
+      const start = Number(scopeConfig?.start), end = Number(scopeConfig?.end);
       return Number.isInteger(floor) && Number.isInteger(start) && Number.isInteger(end) && floor >= start && floor <= end;
     }
     return false;
@@ -15464,21 +15465,23 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       seenFloors.add(floor);
       if (String(rule?.replace ?? '').length > 5000) throw new Error('单条楼层替换内容最多 5000 个字符。');
     }
-    const bodyRule = draft.bodyRule && typeof draft.bodyRule === 'object' ? draft.bodyRule : {};
-    const bodyScope = String(bodyRule.scope || 'none');
-    if (!['none', 'all', 'latest', 'range'].includes(bodyScope)) throw new Error('正文整体替换范围无效。');
-    if (bodyScope === 'latest') {
-      const count = Number(bodyRule.count);
+    const globalScope = draft.globalScope && typeof draft.globalScope === 'object' ? draft.globalScope : {};
+    const globalScopeMode = String(globalScope.mode || 'all');
+    if (!['all', 'latest', 'range'].includes(globalScopeMode)) throw new Error('统一作用范围无效。');
+    if (globalScopeMode === 'latest') {
+      const count = Number(globalScope.count);
       if (!Number.isInteger(count) || count < 1 || count > 100000) throw new Error('最新层数必须是 1–100000 的整数。');
     }
-    if (bodyScope === 'range') {
-      if (bodyRule.start === '' || bodyRule.end === '' || bodyRule.start === null || bodyRule.end === null ||
-          bodyRule.start === undefined || bodyRule.end === undefined) throw new Error('请填写正文替换的起始和结束楼层。');
-      const start = Number(bodyRule.start), end = Number(bodyRule.end);
+    if (globalScopeMode === 'range') {
+      if (globalScope.start === '' || globalScope.end === '' || globalScope.start === null || globalScope.end === null ||
+          globalScope.start === undefined || globalScope.end === undefined) throw new Error('请填写统一作用范围的起始和结束楼层。');
+      const start = Number(globalScope.start), end = Number(globalScope.end);
       if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || end > 100000) {
-        throw new Error('正文替换范围必须是有效的楼层区间，且起始楼层不能大于结束楼层。');
+        throw new Error('统一作用范围必须是有效的楼层区间，且起始楼层不能大于结束楼层。');
       }
     }
+    const bodyRule = draft.bodyRule && typeof draft.bodyRule === 'object' ? draft.bodyRule : {};
+    if (bodyRule.enabled !== undefined && typeof bodyRule.enabled !== 'boolean') throw new Error('正文整体替换开关无效。');
     if (String(bodyRule.replace ?? '').length > 5000) throw new Error('正文整体替换内容最多 5000 个字符。');
     for (const rule of rules) {
       const find = String(rule?.find ?? '');
@@ -15501,7 +15504,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       name: '',
       userName: '',
       charName: '',
-      bodyRule: { scope: 'none', count: 5, start: '', end: '', replace: '[正文已隐藏]' },
+      globalScope: { mode: 'all', count: 5, start: '', end: '' },
+      bodyRule: { enabled: false, replace: '[正文已隐藏]' },
       floorRules: [],
       textRules: [],
       avatarAssets: { user: '', char: '' },
@@ -15512,16 +15516,34 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function maskHeroNormalizePlan(raw) {
     if (!raw || typeof raw !== 'object') return null;
     const empty = maskHeroCreateEmptyDraft();
+    const legacyBodyScope = String(raw.bodyRule?.scope || 'none');
+    const legacyScope = ['all', 'latest', 'range'].includes(legacyBodyScope) ? legacyBodyScope : 'all';
+    const globalScopeSource = raw.globalScope && typeof raw.globalScope === 'object'
+      ? raw.globalScope
+      : {
+          mode: legacyScope,
+          count: raw.bodyRule?.count ?? empty.globalScope.count,
+          start: raw.bodyRule?.start ?? '',
+          end: raw.bodyRule?.end ?? '',
+        };
+    const globalScopeMode = ['all', 'latest', 'range'].includes(globalScopeSource.mode)
+      ? globalScopeSource.mode
+      : 'all';
     const draft = {
       id: String(raw.id || ''),
       name: String(raw.name || '').slice(0, 40),
       userName: String(raw.userName || '').slice(0, 100),
       charName: String(raw.charName || '').slice(0, 100),
+      globalScope: {
+        mode: globalScopeMode,
+        count: String(globalScopeSource.count ?? empty.globalScope.count),
+        start: String(globalScopeSource.start ?? ''),
+        end: String(globalScopeSource.end ?? ''),
+      },
       bodyRule: {
-        scope: ['none', 'all', 'latest', 'range'].includes(raw.bodyRule?.scope) ? raw.bodyRule.scope : 'none',
-        count: String(raw.bodyRule?.count ?? 5),
-        start: String(raw.bodyRule?.start ?? ''),
-        end: String(raw.bodyRule?.end ?? ''),
+        enabled: typeof raw.bodyRule?.enabled === 'boolean'
+          ? raw.bodyRule.enabled
+          : ['all', 'latest', 'range'].includes(legacyBodyScope),
         replace: String(raw.bodyRule?.replace ?? '[正文已隐藏]').slice(0, 5000),
       },
       floorRules: Array.isArray(raw.floorRules) ? raw.floorRules.slice(0, 30).map(rule => ({
@@ -15601,17 +15623,21 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   function maskHeroReadDraftFromUI() {
     const root = state.chatTools.panel?.querySelector('[data-mask-hero-root]');
     if (!root) return maskHeroRuntime.draft;
+    const current = maskHeroRuntime.draft || maskHeroCreateEmptyDraft();
     const draft = {
-      ...maskHeroRuntime.draft,
+      ...current,
       name: root.querySelector('[data-mask-field="planName"]')?.value || '',
       userName: root.querySelector('[data-mask-field="userName"]')?.value || '',
       charName: root.querySelector('[data-mask-field="charName"]')?.value || '',
+      globalScope: {
+        mode: root.querySelector('[data-mask-global-scope-field="mode"]')?.value || current.globalScope?.mode || 'all',
+        count: root.querySelector('[data-mask-global-scope-field="count"]')?.value ?? current.globalScope?.count ?? 5,
+        start: root.querySelector('[data-mask-global-scope-field="start"]')?.value ?? current.globalScope?.start ?? '',
+        end: root.querySelector('[data-mask-global-scope-field="end"]')?.value ?? current.globalScope?.end ?? '',
+      },
       bodyRule: {
-        scope: root.querySelector('[data-mask-body-field="scope"]')?.value || maskHeroRuntime.draft.bodyRule?.scope || 'none',
-        count: root.querySelector('[data-mask-body-field="count"]')?.value ?? maskHeroRuntime.draft.bodyRule?.count ?? 5,
-        start: root.querySelector('[data-mask-body-field="start"]')?.value ?? maskHeroRuntime.draft.bodyRule?.start ?? '',
-        end: root.querySelector('[data-mask-body-field="end"]')?.value ?? maskHeroRuntime.draft.bodyRule?.end ?? '',
-        replace: root.querySelector('[data-mask-body-field="replace"]')?.value ?? maskHeroRuntime.draft.bodyRule?.replace ?? '[正文已隐藏]',
+        enabled: Boolean(root.querySelector('[data-mask-body-field="enabled"]')?.checked ?? current.bodyRule?.enabled),
+        replace: root.querySelector('[data-mask-body-field="replace"]')?.value ?? current.bodyRule?.replace ?? '[正文已隐藏]',
       },
       floorRules: [...root.querySelectorAll('[data-mask-floor-row]')].map(row => ({
         floor: row.querySelector('[data-mask-floor-field="floor"]')?.value ?? '',
@@ -15671,26 +15697,30 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const status = maskHeroCreateNode('div', 'tle-mask-hero-status', maskHeroRuntime.status);
     status.dataset.maskHeroStatus = '';
 
-    const nameSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
-    nameSection.append(maskHeroCreateNode('strong', '', '名称替换'));
-    const nameFields = maskHeroCreateNode('div', 'tle-mask-hero-toolbar');
-    nameFields.append(
-      maskHeroCreateField('User 名称 →', 'userName', draft.userName),
-      maskHeroCreateField('Char 名称 →', 'charName', draft.charName)
-    );
-    nameSection.append(nameFields);
-
+    const globalScope = draft.globalScope || maskHeroCreateEmptyDraft().globalScope;
     const bodyRule = draft.bodyRule || maskHeroCreateEmptyDraft().bodyRule;
-    const bodySection = maskHeroCreateNode('section', 'tle-mask-hero-section');
-    bodySection.append(maskHeroCreateNode('strong', '', '正文整体替换'));
+    const createMaskInput = (labelText, field, value, type, dataKey) => {
+      const label = maskHeroCreateNode('label', 'tle-mask-hero-field');
+      label.append(maskHeroCreateNode('span', '', labelText));
+      const input = HOST_DOC.createElement(type === 'textarea' ? 'textarea' : 'input');
+      input.className = 'text_pole';
+      if (type === 'textarea') input.rows = 2;
+      else input.type = type;
+      input.dataset[dataKey] = field;
+      input.value = String(value ?? '');
+      label.append(input);
+      return label;
+    };
+
+    const scopeSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    scopeSection.append(maskHeroCreateNode('strong', '', '统一作用范围'));
     const scopeRow = maskHeroCreateNode('div', 'tle-mask-hero-scope-row');
     const scopeLabel = maskHeroCreateNode('label', 'tle-mask-hero-field');
-    scopeLabel.append(maskHeroCreateNode('span', '', '应用范围'));
+    scopeLabel.append(maskHeroCreateNode('span', '', '作用范围'));
     const scopeSelect = HOST_DOC.createElement('select');
     scopeSelect.className = 'text_pole';
-    scopeSelect.dataset.maskBodyField = 'scope';
+    scopeSelect.dataset.maskGlobalScopeField = 'mode';
     for (const [value, label] of [
-      ['none', '不使用整体替换'],
       ['all', '全部楼层'],
       ['latest', '最新 N 层'],
       ['range', '指定楼层范围'],
@@ -15700,46 +15730,61 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       option.textContent = label;
       scopeSelect.append(option);
     }
-    scopeSelect.value = bodyRule.scope || 'none';
+    scopeSelect.value = globalScope.mode || 'all';
     scopeLabel.append(scopeSelect);
     scopeRow.append(scopeLabel);
 
-    const createBodyField = (labelText, field, value, type = 'text') => {
-      const label = maskHeroCreateNode('label', 'tle-mask-hero-field');
-      label.append(maskHeroCreateNode('span', '', labelText));
-      const input = HOST_DOC.createElement(type === 'textarea' ? 'textarea' : 'input');
-      input.className = 'text_pole';
-      if (type === 'textarea') input.rows = 2;
-      else input.type = type;
-      input.dataset.maskBodyField = field;
-      input.value = String(value ?? '');
-      label.append(input);
-      return label;
-    };
-    const countField = createBodyField('最新 N 层', 'count', bodyRule.count ?? 5, 'number');
-    countField.dataset.maskBodyCountWrap = '';
-    countField.hidden = bodyRule.scope !== 'latest';
+    const countField = createMaskInput('最新 N 层', 'count', globalScope.count ?? 5, 'number', 'maskGlobalScopeField');
+    countField.dataset.maskGlobalScopeCountWrap = '';
+    countField.hidden = globalScope.mode !== 'latest';
     const countInput = countField.querySelector('input');
     if (countInput) { countInput.min = '1'; countInput.max = '100000'; countInput.step = '1'; }
     const rangeFields = maskHeroCreateNode('div', 'tle-mask-hero-scope-row');
-    rangeFields.dataset.maskBodyRangeWrap = '';
-    rangeFields.hidden = bodyRule.scope !== 'range';
+    rangeFields.dataset.maskGlobalScopeRangeWrap = '';
+    rangeFields.hidden = globalScope.mode !== 'range';
     rangeFields.append(
-      createBodyField('起始楼层（含）', 'start', bodyRule.start, 'number'),
-      createBodyField('结束楼层（含）', 'end', bodyRule.end, 'number')
+      createMaskInput('起始楼层（含）', 'start', globalScope.start, 'number', 'maskGlobalScopeField'),
+      createMaskInput('结束楼层（含）', 'end', globalScope.end, 'number', 'maskGlobalScopeField')
     );
     for (const input of rangeFields.querySelectorAll('input')) {
       input.min = '0';
       input.max = '100000';
       input.step = '1';
     }
-    const replacementField = createBodyField('替换后显示', 'replace', bodyRule.replace, 'textarea');
-    const bodyHint = maskHeroCreateNode('small', 'tle-mask-hero-note',
-      '最新 N 层按当前聊天中 User / Char 消息的显示顺序计算，系统消息不计入；楼层范围按 mesid 起止值（含首尾）。单独楼层规则优先于这里的整体范围。');
-    bodySection.append(scopeRow, countField, rangeFields, replacementField, bodyHint);
+    scopeSection.append(
+      scopeRow,
+      countField,
+      rangeFields,
+      maskHeroCreateNode('small', 'tle-mask-hero-note',
+        '此范围统一约束名称、头像、正文整体替换、正文局部替换及单独楼层规则；默认全部楼层。最新 N 层按当前聊天中的 User / Char 消息动态计算，系统消息不计入；指定楼层范围按 mesid 含首尾。选择范围不会自动开启任何打码功能。')
+    );
+
+    const nameSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    nameSection.append(maskHeroCreateNode('strong', '', '名称替换'));
+    const nameFields = maskHeroCreateNode('div', 'tle-mask-hero-toolbar');
+    nameFields.append(
+      maskHeroCreateField('User 名称 →', 'userName', draft.userName),
+      maskHeroCreateField('Char 名称 →', 'charName', draft.charName)
+    );
+    nameSection.append(nameFields);
+
+    const bodySection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    bodySection.append(maskHeroCreateNode('strong', '', '正文整体替换'));
+    const bodyEnabledLabel = maskHeroCreateNode('label', 'tle-mask-hero-toggle');
+    const bodyEnabled = HOST_DOC.createElement('input');
+    bodyEnabled.type = 'checkbox';
+    bodyEnabled.checked = Boolean(bodyRule.enabled);
+    bodyEnabled.dataset.maskBodyField = 'enabled';
+    bodyEnabledLabel.append(bodyEnabled, HOST_DOC.createTextNode('启用正文整体替换'));
+    const replacementField = createMaskInput('替换后显示', 'replace', bodyRule.replace, 'textarea', 'maskBodyField');
+    bodySection.append(
+      bodyEnabledLabel,
+      replacementField,
+      maskHeroCreateNode('small', 'tle-mask-hero-note', '只有勾选启用后才会替换正文；未启用时，名称、头像或正文局部规则仍可独立工作。')
+    );
 
     const floorSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
-    floorSection.append(maskHeroCreateNode('strong', '', '单独楼层例外（可选）'));
+    floorSection.append(maskHeroCreateNode('strong', '', '单独楼层替换（可选）'));
     const floorRows = maskHeroCreateNode('div');
     (draft.floorRules || []).forEach((rule, index) => {
       const row = maskHeroCreateNode('div', 'tle-mask-hero-floor-row');
@@ -15762,7 +15807,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       floorRows.append(row);
     });
     floorSection.append(
-      maskHeroCreateNode('small', 'tle-mask-hero-note', '需要为不同楼层设置不同内容时再添加；这里的单独规则会覆盖上方批量范围。'),
+      maskHeroCreateNode('small', 'tle-mask-hero-note', '单独楼层规则只在上方统一作用范围内生效；同一楼层命中时，使用这里的替换内容。'),
       floorRows,
       maskHeroCreateButton('添加单独楼层规则', 'add-floor')
     );
@@ -15840,8 +15885,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const note = maskHeroCreateNode('p', 'tle-mask-hero-note',
       '仅处理当前聊天的消息显示节点。原始聊天文件、角色卡和消息数据不会被写入；局部替换逐个文本节点执行，不跨富文本标签拼接；替换结果不会再次参与后续规则。头像文件保存在本机 IndexedDB。');
-    root.replaceChildren(toolbar, actions, status, nameSection, bodySection, floorSection, textSection, avatarSection, note);
-    void maskHeroRenderAssetHistory();    root.replaceChildren(toolbar, actions, status, nameSection, bodySection, floorSection, textSection, avatarSection, note);
+    root.replaceChildren(toolbar, actions, status, scopeSection, nameSection, bodySection, floorSection, textSection, avatarSection, note);
     void maskHeroRenderAssetHistory();
   }
 
@@ -15858,6 +15902,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       maskHeroRuntime.draft = {
         ...maskHeroCreateEmptyDraft(),
         ...plan,
+        globalScope: { ...(plan.globalScope || maskHeroCreateEmptyDraft().globalScope) },
         bodyRule: { ...(plan.bodyRule || maskHeroCreateEmptyDraft().bodyRule) },
         floorRules: plan.floorRules.map(rule => ({ ...rule })),
         textRules: plan.textRules.map(rule => ({ ...rule })),
@@ -16129,6 +16174,20 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
   }
 
+  function maskHeroRestoreTextNodes(body) {
+    if (!body) return;
+    const records = state.chatTools.maskHero.textNodes;
+    if (!records.size) return;
+    const walker = HOST_DOC.createTreeWalker(body, HOST_WIN.NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const record = records.get(node);
+      if (!record) continue;
+      if (node.nodeValue === record.applied) node.nodeValue = record.original;
+      records.delete(node);
+    }
+  }
+
   function maskHeroApplyImage(img, objectUrl) {
     const records = state.chatTools.maskHero.imageElements;
     const previous = records.get(img);
@@ -16142,6 +16201,20 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     records.set(img, { original: current, appliedSrc: objectUrl });
     img.setAttribute('src', objectUrl);
     img.removeAttribute('srcset');
+  }
+
+  function maskHeroRestoreImage(img) {
+    const records = state.chatTools.maskHero.imageElements;
+    const record = records.get(img);
+    if (!record) return;
+    if (img && img.getAttribute('src') === record.appliedSrc) {
+      for (const key of ['src', 'srcset', 'sizes', 'alt']) {
+        const value = record.original[key];
+        if (value === null || value === undefined) img.removeAttribute(key);
+        else img.setAttribute(key, value);
+      }
+    }
+    records.delete(img);
   }
 
   function maskHeroApplyFloorReplacement(body, replacement) {
@@ -16204,34 +16277,50 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     const chat = HOST_DOC.getElementById('chat');
     if (!chat) return;
     const messages = [...chat.querySelectorAll('.mes')].filter(message => maskHeroMessageKind(message));
-    const bodyRule = config.bodyRule || { scope: 'none' };
+    const globalScope = config.globalScope || { mode: 'all' };
+    const bodyRule = config.bodyRule || { enabled: false, replace: '[正文已隐藏]' };
+    const floorRules = Array.isArray(config.floorRules) ? config.floorRules : [];
+    const textRules = Array.isArray(config.textRules) ? config.textRules : [];
     for (let messageIndex = 0; messageIndex < messages.length; messageIndex++) {
       const message = messages[messageIndex];
       const kind = maskHeroMessageKind(message);
+      const inScope = maskHeroIsWithinScope(globalScope, message, messageIndex, messages.length);
       const nameReplacement = kind === 'user' ? config.userName : config.charName;
-      if (nameReplacement) {
-        const name = message.querySelector('.mes_block > .ch_name > .name_text');
-        if (name) maskHeroApplyNameReplacement(name, nameReplacement);
+      const name = message.querySelector('.mes_block > .ch_name .name_text');
+      if (name) {
+        if (inScope && nameReplacement) maskHeroApplyNameReplacement(name, nameReplacement);
+        else maskHeroRestoreNameReplacement(name);
       }
+
       const floor = Number(message.getAttribute('mesid') ?? message.dataset.mesid);
-      const floorRule = config.floorRules.find(rule => Number(rule.floor) === floor);
-      const batchReplacement = maskHeroShouldReplaceBody(bodyRule, message, messageIndex, messages.length);
+      const floorRule = floorRules.find(rule => Number(rule.floor) === floor);
       const body = message.querySelector('.mes_text');
-      if (body && floorRule) {
-        maskHeroApplyFloorReplacement(body, floorRule.replace);
-      } else if (body && batchReplacement) {
-        maskHeroApplyFloorReplacement(body, bodyRule.replace);
-      } else if (body) {
-        if (body.hasAttribute('data-tle-mask-floor')) maskHeroRestoreFloorReplacement(body);
-        if (config.textRules.length) {
-          const walker = HOST_DOC.createTreeWalker(body, HOST_WIN.NodeFilter.SHOW_TEXT);
-          let node;
-          while ((node = walker.nextNode())) maskHeroApplyTextNode(node, config.textRules);
+      if (body) {
+        if (!inScope) {
+          if (body.hasAttribute('data-tle-mask-floor')) maskHeroRestoreFloorReplacement(body);
+          maskHeroRestoreTextNodes(body);
+        } else if (floorRule) {
+          maskHeroApplyFloorReplacement(body, floorRule.replace);
+        } else if (bodyRule.enabled) {
+          maskHeroApplyFloorReplacement(body, bodyRule.replace);
+        } else {
+          if (body.hasAttribute('data-tle-mask-floor')) maskHeroRestoreFloorReplacement(body);
+          if (textRules.length) {
+            const walker = HOST_DOC.createTreeWalker(body, HOST_WIN.NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) maskHeroApplyTextNode(node, textRules);
+          } else {
+            maskHeroRestoreTextNodes(body);
+          }
         }
       }
-      const avatarUrl = runtime.objectUrls.get(kind);
+
+      const avatarUrl = inScope ? runtime.objectUrls.get(kind) : '';
+      const avatars = [...message.querySelectorAll('.mesAvatarWrapper img, .avatar img')];
       if (avatarUrl) {
-        for (const img of message.querySelectorAll('.mesAvatarWrapper img, .avatar img')) maskHeroApplyImage(img, avatarUrl);
+        for (const img of avatars) maskHeroApplyImage(img, avatarUrl);
+      } else {
+        for (const img of avatars) maskHeroRestoreImage(img);
       }
     }
   }
@@ -16303,14 +16392,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     runtime.nameElements.clear();
     for (const element of [...runtime.floorElements.keys()]) maskHeroRestoreFloorReplacement(element);
     runtime.floorElements.clear();
-    for (const [img, record] of runtime.imageElements) {
-      if (!img || img.getAttribute('src') !== record.appliedSrc) continue;
-      for (const key of ['src', 'srcset', 'sizes', 'alt']) {
-        const value = record.original[key];
-        if (value === null || value === undefined) img.removeAttribute(key);
-        else img.setAttribute(key, value);
-      }
-    }
+    for (const img of [...runtime.imageElements.keys()]) maskHeroRestoreImage(img);
     runtime.imageElements.clear();
     for (const url of runtime.objectUrls.values()) {
       try { HOST_WIN.URL.revokeObjectURL(url); } catch {}
@@ -16348,6 +16430,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       }
       state.chatTools.maskHero.appliedConfig = {
         ...draft,
+        globalScope: { ...(draft.globalScope || maskHeroCreateEmptyDraft().globalScope) },
         bodyRule: { ...(draft.bodyRule || maskHeroCreateEmptyDraft().bodyRule) },
         floorRules: draft.floorRules.map(rule => ({ ...rule })),
         textRules: draft.textRules.map(rule => ({ ...rule })),
@@ -16382,6 +16465,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     maskHeroRuntime.selectedPlanId = id;
     maskHeroRuntime.draft = {
       ...next,
+      globalScope: { ...(next.globalScope || maskHeroCreateEmptyDraft().globalScope) },
       bodyRule: { ...(next.bodyRule || maskHeroCreateEmptyDraft().bodyRule) },
       floorRules: next.floorRules.map(rule => ({ ...rule })),
       textRules: next.textRules.map(rule => ({ ...rule })),
@@ -17054,14 +17138,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (avatarInput) { void maskHeroHandleAvatarInput(avatarInput); return; }
       const planSelect = target?.closest?.('[data-mask-plan-select]');
       if (planSelect) { maskHeroLoadSelectedPlan(planSelect.value); return; }
-      const bodyScope = target?.closest?.('[data-mask-body-field="scope"]');
-      if (bodyScope) {
+      const globalScopeMode = target?.closest?.('[data-mask-global-scope-field="mode"]');
+      if (globalScopeMode) {
         maskHeroReadDraftFromUI();
         const root = panel.querySelector('[data-mask-hero-root]');
-        const countWrap = root?.querySelector('[data-mask-body-count-wrap]');
-        const rangeWrap = root?.querySelector('[data-mask-body-range-wrap]');
-        if (countWrap) countWrap.hidden = bodyScope.value !== 'latest';
-        if (rangeWrap) rangeWrap.hidden = bodyScope.value !== 'range';
+        const countWrap = root?.querySelector('[data-mask-global-scope-count-wrap]');
+        const rangeWrap = root?.querySelector('[data-mask-global-scope-range-wrap]');
+        if (countWrap) countWrap.hidden = globalScopeMode.value !== 'latest';
+        if (rangeWrap) rangeWrap.hidden = globalScopeMode.value !== 'range';
       }
     });
 
@@ -20278,7 +20362,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.297';
+    const VERSION = '0.3.298';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -22295,7 +22379,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.297',
+    version: '0.3.298',
     ready: false,
     destroy,
     state,
@@ -22756,5 +22840,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.297 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.298 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();

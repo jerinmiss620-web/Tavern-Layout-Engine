@@ -17,7 +17,7 @@ const helpers = section(
   '  function maskHeroCreateEmptyDraft(',
 );
 const sandbox = {};
-vm.runInNewContext(helpers + '\nglobalThis.maskHeroHelpers = { maskHeroIsUnsafeRegex, maskHeroApplyTextRules, maskHeroShouldReplaceBody, maskHeroValidateDraft };', sandbox);
+vm.runInNewContext(helpers + '\nglobalThis.maskHeroHelpers = { maskHeroIsUnsafeRegex, maskHeroApplyTextRules, maskHeroIsWithinScope, maskHeroValidateDraft };', sandbox);
 const api = sandbox.maskHeroHelpers;
 
 assert.equal(
@@ -84,12 +84,12 @@ assert.equal(api.maskHeroIsUnsafeRegex('\\\\1'), true);
 assert.equal(api.maskHeroIsUnsafeRegex('user@[^\\s]+'), false);
 
 const messageAt = floor => ({ getAttribute: name => name === 'mesid' ? String(floor) : null, dataset: {} });
-assert.equal(api.maskHeroShouldReplaceBody({ scope: 'all' }, messageAt(0), 0, 10), true);
-assert.equal(api.maskHeroShouldReplaceBody({ scope: 'latest', count: 5 }, messageAt(5), 5, 10), true);
-assert.equal(api.maskHeroShouldReplaceBody({ scope: 'latest', count: 5 }, messageAt(4), 4, 10), false);
-assert.equal(api.maskHeroShouldReplaceBody({ scope: 'range', start: 2, end: 4 }, messageAt(3), 3, 10), true);
-assert.equal(api.maskHeroShouldReplaceBody({ scope: 'range', start: 2, end: 4 }, messageAt(5), 5, 10), false);
-assert.equal(api.maskHeroShouldReplaceBody({ scope: 'none' }, messageAt(3), 3, 10), false);
+assert.equal(api.maskHeroIsWithinScope({ mode: 'all' }, messageAt(0), 0, 10), true);
+assert.equal(api.maskHeroIsWithinScope({ mode: 'latest', count: 5 }, messageAt(5), 5, 10), true);
+assert.equal(api.maskHeroIsWithinScope({ mode: 'latest', count: 5 }, messageAt(4), 4, 10), false);
+assert.equal(api.maskHeroIsWithinScope({ mode: 'range', start: 2, end: 4 }, messageAt(3), 3, 10), true);
+assert.equal(api.maskHeroIsWithinScope({ mode: 'range', start: 2, end: 4 }, messageAt(5), 5, 10), false);
+assert.equal(api.maskHeroIsWithinScope({ mode: 'unknown' }, messageAt(3), 3, 10), false);
 
 assert.throws(
   () => api.maskHeroValidateDraft({
@@ -114,7 +114,7 @@ assert.throws(
 assert.throws(
   () => api.maskHeroValidateDraft({
     userName: '', charName: '',
-    bodyRule: { scope: 'latest', count: 0, replace: '[hidden]' },
+    globalScope: { mode: 'latest', count: 0 }, bodyRule: { enabled: true, replace: '[hidden]' },
     floorRules: [],
     textRules: [],
   }),
@@ -123,7 +123,7 @@ assert.throws(
 );
 
 assert.throws(
-  () => api.maskHeroValidateDraft({ userName: '', charName: '', bodyRule: { scope: 'range', start: 8, end: 3 }, floorRules: [], textRules: [] }),
+  () => api.maskHeroValidateDraft({ userName: '', charName: '', globalScope: { mode: 'range', start: 8, end: 3 }, bodyRule: { enabled: false }, floorRules: [], textRules: [] }),
   /楼层区间/,
   'body range must be a valid inclusive floor interval',
 );
@@ -152,13 +152,44 @@ assert.equal(
   api.maskHeroValidateDraft({
     userName: '匿名用户',
     charName: '匿名角色',
-    bodyRule: { scope: 'latest', count: 5, start: '', end: '', replace: '[正文已隐藏]' },
+    globalScope: { mode: 'latest', count: 5, start: '', end: '' },
+    bodyRule: { enabled: true, replace: '[正文已隐藏]' },
     floorRules: [{ floor: 0, replace: '[首楼内容已隐藏]' }],
     textRules: [{ find: 'secret@example.com', replace: '[邮箱]', regex: false }],
   }),
   true,
   'a normal display-only mask plan validates',
 );
+
+
+// Empty plans default to all floors without enabling any masking operation.
+const planSection = section(
+  source,
+  '  function maskHeroCreateEmptyDraft(',
+  '  function maskHeroLoadPlans(',
+);
+const planSandbox = {};
+vm.runInNewContext(planSection + '\nglobalThis.maskHeroPlanHelpers = { maskHeroCreateEmptyDraft, maskHeroNormalizePlan };', planSandbox);
+const planApi = planSandbox.maskHeroPlanHelpers;
+const emptyPlan = JSON.parse(JSON.stringify(planApi.maskHeroCreateEmptyDraft()));
+assert.deepEqual(emptyPlan.globalScope, { mode: 'all', count: 5, start: '', end: '' });
+assert.equal(emptyPlan.bodyRule.enabled, false, 'default scope must not enable whole-body replacement');
+
+const legacyLatest = JSON.parse(JSON.stringify(planApi.maskHeroNormalizePlan({
+  id: 'legacy-latest', name: 'Legacy latest',
+  bodyRule: { scope: 'latest', count: 3, replace: '[old mask]' },
+  floorRules: [], textRules: [],
+})));
+assert.deepEqual(legacyLatest.globalScope, { mode: 'latest', count: '3', start: '', end: '' });
+assert.equal(legacyLatest.bodyRule.enabled, true, 'legacy body scope must migrate to global scope and preserve its previous whole-body behavior');
+
+const legacyNone = JSON.parse(JSON.stringify(planApi.maskHeroNormalizePlan({
+  id: 'legacy-none', name: 'Legacy none',
+  bodyRule: { scope: 'none', replace: '[old mask]' },
+  floorRules: [], textRules: [],
+})));
+assert.deepEqual(legacyNone.globalScope, { mode: 'all', count: '5', start: '', end: '' });
+assert.equal(legacyNone.bodyRule.enabled, false, 'legacy disabled whole-body replacement must stay disabled');
 
 // Integration guards: the module is optional, scoped to the active chat, and reversible.
 assert.match(source, /getStoredBool\(MASK_HERO_ENABLED_KEY, false\)/);
@@ -168,14 +199,16 @@ assert.match(source, /data-chat-tools-page="mask"/);
 assert.match(source, /if \(!maskHeroEnabled\) \{\s*maskHeroClearEffects\(\)/);
 assert.match(source, /TLEMaskHeroAssets/);
 assert.match(source, /new HOST_WIN\.MutationObserver\(\(\) => maskHeroScheduleProcess\(\)\)/);
-assert.match(source, /message\.querySelector\('\.mes_block > \.ch_name > \.name_text'\)/);
+assert.match(source, /message\.querySelector\('\.mes_block > \.ch_name \.name_text'\)/);
 assert.match(source, /function maskHeroApplyNameReplacement\(element, replacement\)/);
-assert.match(source, /function maskHeroShouldReplaceBody\(rule, message, index, total\)/);
+assert.match(source, /function maskHeroIsWithinScope\(scopeConfig, message, index, total\)/);
 assert.doesNotMatch(source, /\.name_text\[data-tle-mask-name\].*visibility:hidden/);
 assert.match(source, /data-mask-avatar-history/);
 assert.match(source, /最近上传的图片（最多 6 张）/);
 assert.match(source, /data-mask-avatar-type/);
-assert.match(source, /data-mask-body-field="scope"/);
+assert.match(source, /data-mask-global-scope-field="mode"/);
+assert.match(source, /data-mask-body-field="enabled"/);
+assert.doesNotMatch(source, /data-mask-body-field="scope"/);
 assert.match(source, /function maskHeroApplyFloorReplacement\(body, replacement\)/);
 assert.match(source, /body\.setAttribute\('data-tle-mask-floor', 'true'\)/);
 assert.match(source, /element\.replaceChildren\(\.\.\.before, record\.original, \.\.\.after\)/);
@@ -194,4 +227,4 @@ const runtime = section(
 assert.doesNotMatch(runtime, /saveChatConditional|saveChat\(|writeChat|POST\s*\(/i,
   'Mask Hero must not write to the host chat file or message API');
 
-console.log('TLE Mask Hero tests passed: one-pass replacement, literal/regex matching, regex safety, floor validation, optional setting, current-chat scope and display-only boundaries.');
+console.log('TLE Mask Hero tests passed: global scope validation and migration, one-pass replacement, literal/regex matching, regex safety, optional setting, current-chat scope and display-only boundaries.');
