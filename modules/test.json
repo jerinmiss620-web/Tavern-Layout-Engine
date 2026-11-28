@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "core_api_version": 1,
+  "core_api_version": 2,
   "modules": [
     {
       "id": "avatar.hd",
@@ -25,5 +25,5 @@
       "enabled_by_default": true
     }
   ],
-  "notes": "Test-only HD Avatar Engine pilot. Module version 1.0.0 packages the audited 桃mini engine 4.5.14. ST/TT real-device validation passed on 2026-11-29; keep Test-only until a separate Stable promotion is explicitly approved."
+  "notes": "Test-only Core API v2 candidate. The HD Avatar Engine 1.0.0 pilot remains Test-only; the permission-gated chat-context and resource-catalog services are available to modules declaring services:chat-context and services:resource-catalog. ST/TT validation of this v0.3.305 candidate is pending."
 }
