@@ -4,6 +4,7 @@ import vm from 'node:vm';
 
 const plan = JSON.parse(readFileSync('release-plan.json', 'utf8'));
 const stableManifest = JSON.parse(readFileSync('latest.json', 'utf8'));
+const testManifest = JSON.parse(readFileSync('channels/test.json', 'utf8'));
 const hasWorkingSource = existsSync('development/organizer/TLE.js');
 const sourcePath = hasWorkingSource
   ? 'development/organizer/TLE.js'
@@ -16,11 +17,13 @@ assert.ok(coreApiStart >= 0 && coreApiEnd > coreApiStart, 'Core API object must 
 assert.match(source.slice(coreApiStart, coreApiEnd), /moduleApiVersion: moduleKernel.apiVersion/);
 const actualVersion = source.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
 const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
-const developmentOrCandidate = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') || plan.core !== stableManifest.latest_version;
+const isFeatureBranch = Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main';
+const developmentOrCandidate = isFeatureBranch || plan.core !== stableManifest.latest_version;
+const expectedVersion = isFeatureBranch ? testManifest.release.version : plan.core;
 
 if (!developmentOrCandidate) assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree on main');
-assert.equal(actualVersion, plan.core,
-  'development Core version must match the current release plan');
+assert.equal(actualVersion, expectedVersion,
+  'development Core version must match the active Test candidate on feature branches or release-plan.json elsewhere');
 new vm.Script(source, { filename: sourcePath });
 
 const managerStart = source.indexOf('function openQuickGroupManager(');
