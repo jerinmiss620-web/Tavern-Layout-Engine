@@ -2158,8 +2158,8 @@ var TLEBatchLibrary = (() => {
       replaceLabel.append(n("span", "", "\u66FF\u6362\u4E3A"), this.replace);
       this.replaceRow.append(replaceLabel, this.previewButton);
       this.searchRow.append(this.findRow, this.replaceRow);
-      this.h.search.placeholder = "查找内容（普通文本）…";
-      this.h.search.setAttribute("aria-label", "查找内容");
+      this.h.search.placeholder = "\u67E5\u627E\u5185\u5BB9\uFF08\u666E\u901A\u6587\u672C\uFF09\u2026";
+      this.h.search.setAttribute("aria-label", "\u67E5\u627E\u5185\u5BB9");
       this.h.search.addEventListener("input", () => this.onInput());
       this.cancelButton = this.h.button("\u53D6\u6D88\u626B\u63CF", () => {
         this.cancelled = true;
@@ -2213,13 +2213,13 @@ var TLEBatchLibrary = (() => {
       this.paths = n("textarea", "text_pole tle-content-rule-paths");
       this.paths.rows = 2;
       this.paths.placeholder = '{"user/files/\u6587\u4EF6.json":[["content"]]}';
-      this.paths.setAttribute("aria-label", "\u6307\u5B9A JSON/YAML 文件允许修改的字段路径");
+      this.paths.setAttribute("aria-label", "\u6307\u5B9A JSON/YAML \u6587\u4EF6\u5141\u8BB8\u4FEE\u6539\u7684\u5B57\u6BB5\u8DEF\u5F84");
       this.paths.addEventListener("input", () => {
         this.invalidate();
         void this.persist().catch(() => {
         });
       });
-      this.ruleHelp = n("small", "tle-content-rule-help", "JSON/YAML 仅扫描明确指定路径；未知字段不会递归修改。普通文本规则区分大小写，重叠优先长匹配，同长度按规则顺序。");
+      this.ruleHelp = n("small", "tle-content-rule-help", "JSON/YAML \u4EC5\u626B\u63CF\u660E\u786E\u6307\u5B9A\u8DEF\u5F84\uFF1B\u672A\u77E5\u5B57\u6BB5\u4E0D\u4F1A\u9012\u5F52\u4FEE\u6539\u3002\u666E\u901A\u6587\u672C\u89C4\u5219\u533A\u5206\u5927\u5C0F\u5199\uFF0C\u91CD\u53E0\u4F18\u5148\u957F\u5339\u914D\uFF0C\u540C\u957F\u5EA6\u6309\u89C4\u5219\u987A\u5E8F\u3002");
       this.ruleDetails.append(this.comboCreateRow, this.ruleRows, this.comboManageRow, this.ruleHelp, this.paths);
       this.selectionTools = n("div", "tle-content-selection-tools flex-container flexWrap");
       this.selectionTools.append(this.button("\u5168\u9009\u5F53\u524D\u7ED3\u679C", () => this.selectAll(true)), this.button("\u53D6\u6D88\u5168\u9009", () => this.selectAll(false)));
@@ -2368,9 +2368,9 @@ var TLEBatchLibrary = (() => {
       this.h.lock(value);
       for (const el of [...this.searchRow.querySelectorAll("input,select,button"), ...this.controls.querySelectorAll("input,select,textarea,button")]) {
         if (value) {
-          if (el.dataset.contentDisabled === undefined) el.dataset.contentDisabled = String(el.disabled);
+          if (el.dataset.contentDisabled === void 0) el.dataset.contentDisabled = String(el.disabled);
           el.disabled = true;
-        } else if (el.dataset.contentDisabled !== undefined) {
+        } else if (el.dataset.contentDisabled !== void 0) {
           el.disabled = el.dataset.contentDisabled === "true";
           delete el.dataset.contentDisabled;
         }
