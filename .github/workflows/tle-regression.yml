@@ -17,6 +17,12 @@ jobs:
       - run: npm ci
       - name: Full-source update simulation, compatibility and publication guards
         run: npm test
+      - name: Verify main-branch baseline checks on pull requests
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
+        run: |
+          env -u GITHUB_HEAD_REF GITHUB_REF=refs/heads/main node tests/tle-regression.test.mjs --current
+          env -u GITHUB_HEAD_REF GITHUB_REF=refs/heads/main node tests/tle-companion-initialization.test.mjs
+          env -u GITHUB_HEAD_REF GITHUB_REF=refs/heads/main node tests/tle-mask-hero-loader.test.mjs
       - name: Capture assembled Core inputs when regression fails
         if: failure()
         run: |
