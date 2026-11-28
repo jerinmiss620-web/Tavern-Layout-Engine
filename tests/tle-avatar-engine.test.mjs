@@ -32,7 +32,8 @@ assert.doesNotMatch(moduleSource, /window\.fetch\s*=|createElement\(['"]canvas|s
 assert.match(moduleSource, /new WIN\.MutationObserver/);
 assert.match(moduleSource, /requestAnimationFrame/);
 new vm.Script(moduleSource, { filename: 'development/avatar-engine/avatar-engine.js' });
-new vm.Script(core, { filename: manifest.release.source_path });
+new vm.Script(stableCore, { filename: manifest.release.source_path });
+new vm.Script(developmentCore, { filename: 'development/organizer/TLE.js' });
 
 function makeDom(body, head = '') {
   const dom = new JSDOM('<!doctype html><html><head>' + head + '</head><body>' + body + '</body></html>', {
