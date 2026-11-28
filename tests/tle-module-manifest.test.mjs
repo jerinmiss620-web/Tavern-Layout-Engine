@@ -46,6 +46,6 @@ assert.equal(schema.$defs.module.required.includes('size_bytes'), true);
 assert.equal(schema.$defs.module.required.includes('dependencies'), true);
 assert.equal(schema.$defs.module.required.includes('parent_id'), true);
 assert.equal(schema.$defs.module.required.includes('permissions'), true);
-assert.equal(schema.$defs.module.properties.source_url.pattern.includes('raw\\\\.githubusercontent\\\\.com'), true);
+assert.equal(schema.$defs.module.properties.source_url.pattern.includes('raw\\.githubusercontent\\.com'), true);
 
 console.log('TLE module manifests passed: Stable remains empty; Test pilot source is pinned and hash/byte-count verified.');
