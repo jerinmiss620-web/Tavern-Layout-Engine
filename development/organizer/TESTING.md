@@ -129,3 +129,13 @@
 - IndexedDB 只把成功初始化的版本标记为 Last Known Good；下载成功不等于更新成功。
 - 候选模块 init 失败时，旧模块实例必须继续可用；独立模块的更新/停用/卸载不得影响无依赖关系的模块。
 - Core 内置 HD Avatar Engine fallback 必须保留，直到 ST/TT 实机验证通过并完成正式迁移验收。
+
+
+## Core Module Loader · Test Candidate v0.3.304
+
+1. 使用现有 Test Loader 0.3.0 的 Test 通道更新到 v0.3.304；Stable Loader 与正式 main 不参与本轮测试。
+2. Core 启动后应先启用内置 HD Avatar Engine fallback，再从 `modules/test.json` 校验并尝试加载 `avatar.hd@1.0.0`。
+3. 在模块状态中核对 `avatar.hd` 的 active version、Last Known Good、Test channel 与持久化缓存状态。
+4. 验证刷新/重进、角色切换、断网启动、错误源码回滚、模块停用/启用/卸载；独立模块不得影响无依赖关系的模块。
+5. TT 必须保持原生头像处理，不启动额外头像替换逻辑。
+6. 未完成 ST 与 TT 实机矩阵前，不合并 PR、不更新正式 main。

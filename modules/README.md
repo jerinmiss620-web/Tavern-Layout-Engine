@@ -78,6 +78,10 @@ permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript �
 - 回退：Core 内置 HD Avatar Engine 4.5.14 作为离线 fallback；远程候选失败时保留或恢复可用版本
 - 试点：avatar.hd，模块自身版本独立于引擎显示版本；TT 保留原生绕过
 
+## 隔离边界
+
+模块错误隔离指加载、初始化、替换、停止和依赖生命周期隔离，不是安全沙箱。模块以 Blob ESM 运行在 Core 所在的页面 JavaScript Realm；因此只加载仓库内固定 Commit 且通过摘要验证的可信模块。模块必须遵守 Kernel 的宿主能力接口，并在 destroy 中清理事件、观察器、计时器和 DOM 改动。不能把权限列表描述为对任意恶意代码的安全隔离。
+
 ## 后续验收门槛
 
 1. 在 ST 与 TT 实机验证 Manifest 获取、Blob 模块加载、头像区域、切换/卸载与错误恢复。

@@ -219,6 +219,9 @@ export function createModuleLoader(options = {}) {
     const ids = new Set();
     const entries = data.modules.map(item => {
       const entry = validateEntry(item, ids);
+      if (entry.apiVersion > data.core_api_version) {
+        throw new Error('模块 API 版本不能高于 Manifest 声明的 Core API 版本：' + entry.id);
+      }
       ids.add(entry.id);
       return entry;
     });
@@ -843,7 +846,8 @@ export function createModuleLoader(options = {}) {
         version: runtime?.version || entry?.version || fallbackDefinitions.get(id)?.version || null,
         availableVersion: entry?.version || null,
         status: state.installed === false ? 'uninstalled' : (state.disabled ? 'disabled' : (runtime?.status || 'not-loaded')),
-        installed: state.installed !== false,
+        installed: state.installed === true || Boolean(runtime) ||
+          (fallbackDefinitions.has(id) && state.installed !== false),
         enabled: !state.disabled && runtime?.status === 'active',
         lastKnownGoodVersion: state.lastKnownGoodVersion,
         previousVersion: state.previousVersion,

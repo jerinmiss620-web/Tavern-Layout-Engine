@@ -22,10 +22,10 @@ function checkInfo(info, label) {
   }
 }
 
-function checkRelease(channel, version, installerFile) {
+function checkRelease(channel, version, installerPath) {
   const dir = 'releases/v' + version + '/';
   const source = read(dir + 'TLE.js');
-  const installer = json(dir + installerFile);
+  const installer = json(installerPath);
   assert.equal(installer.type, 'script', channel + ': wrong installer type');
   assert.equal(installer.enabled, false, channel + ': importer should be disabled by default');
   assert.ok(installer.id && installer.name, channel + ': missing installer metadata');
@@ -40,8 +40,8 @@ const stable = json('latest.json');
 const test = json('channels/test.json');
 assert.equal(stable.channel, 'stable');
 assert.equal(test.channel, 'test');
-checkRelease('stable', stable.latest_version, 'TLE-' + stable.latest_version + '-import.json');
-checkRelease('test', test.latest_version, 'TLE-' + test.latest_version + '-TEST-import.json');
+checkRelease('stable', stable.latest_version, 'releases/v' + stable.latest_version + '/TLE-' + stable.latest_version + '-import.json');
+checkRelease('test', test.latest_version, 'test-releases/v' + test.latest_version + '/TLE-' + test.latest_version + '-TEST-import.json');
 
 const loaderSource = read('loader/TLE-Remote-Loader-Stable-0.3.1.js');
 const loader = json('loader/TLE-Remote-Loader-Stable-0.3.1.json');
