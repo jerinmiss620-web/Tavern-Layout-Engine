@@ -7,11 +7,11 @@
   "release": {
     "version": "0.3.304",
     "source_path": "test-releases/v0.3.304/TLE.js",
-    "source_commit": "4398f33053053c3c1d66ded99c01f807dc607a6e",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4398f33053053c3c1d66ded99c01f807dc607a6e/test-releases/v0.3.304/TLE.js",
+    "source_commit": "a6b89353016d66afe88731ad0650a170acf135ae",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a6b89353016d66afe88731ad0650a170acf135ae/test-releases/v0.3.304/TLE.js",
     "changelog_path": "test-releases/v0.3.304/CHANGELOG.md",
-    "sha256": "5c5a230ad8f096e6fff00a021403f24219d9932b2d9733a30352eff465ef8fa4",
-    "size_bytes": 1205450
+    "sha256": "055b94a76940782084e3ca25d859aac7ac80676f9b49146fededdca18800bb18",
+    "size_bytes": 1205451
   },
   "status": "TEST v0.3.304: unified Core Module Kernel/Loader build and HD Avatar Engine 1.0.0 pilot. Use Test Loader 0.3.1 from this integration branch. Stable v0.3.304 and latest.json remain unchanged; ST/TT real-device validation is pending.",
   "recommended_loader_version": "0.3.1",
