@@ -363,4 +363,55 @@ test('manual refresh discovers a new module release and updates only the selecte
   kernel.destroy();
 });
 
+
+test('nested parent modules cascade safely and re-enable previously active children', async () => {
+  const sourceParent = moduleSource('1.0.0');
+  const sourceChild = moduleSource('1.0.0');
+  const sourceIndependent = moduleSource('1.0.0');
+  const entryParent = makeEntry('group.parent', '1.0.0', sourceParent, 'b'.repeat(40), {
+    enabled_by_default: false,
+  });
+  const entryChild = makeEntry('module.child', '1.0.0', sourceChild, 'c'.repeat(40), {
+    parent_id: 'group.parent',
+  });
+  const entryIndependent = makeEntry('module.independent', '1.0.0', sourceIndependent, 'd'.repeat(40));
+  const entries = [entryChild, entryParent, entryIndependent];
+  const sources = new Map([
+    [entryParent.source_url, sourceParent],
+    [entryChild.source_url, sourceChild],
+    [entryIndependent.source_url, sourceIndependent],
+  ]);
+  const { kernel, loader } = createHarness({
+    manifest: makeManifest(entries),
+    entries,
+    sources,
+  });
+
+  await loader.start();
+  assert.equal(kernel.get('group.parent').status, 'active');
+  assert.equal(kernel.get('module.child').status, 'active');
+  assert.equal(kernel.get('module.independent').status, 'active');
+
+  await loader.disable('group.parent');
+  assert.equal(kernel.get('group.parent').status, 'registered');
+  assert.equal(kernel.get('module.child').status, 'registered');
+  assert.equal(kernel.get('module.independent').status, 'active');
+  const disabledRows = await loader.list();
+  assert.equal(disabledRows.find(item => item.id === 'group.parent').status, 'disabled');
+
+  await loader.enable('group.parent');
+  assert.equal(kernel.get('group.parent').status, 'active');
+  assert.equal(kernel.get('module.child').status, 'active');
+  assert.equal(kernel.get('module.independent').status, 'active');
+
+  await loader.disable('module.child');
+  assert.equal(kernel.get('group.parent').status, 'active');
+  assert.equal(kernel.get('module.child').status, 'registered');
+  assert.equal(kernel.get('module.independent').status, 'active');
+  await assert.rejects(loader.uninstall('group.parent'));
+
+  loader.destroy();
+  kernel.destroy();
+});
+
 console.log('TLE Module Loader: manifest validation, immutable source verification, IndexedDB LKG, independent lifecycle and rollback isolation passed.');

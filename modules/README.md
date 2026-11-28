@@ -72,6 +72,7 @@ permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript �
 - Manifest：modules/stable.json 与 modules/test.json 分通道管理
 - 缓存：IndexedDB，分别保存模块源码、Manifest 与模块安装状态
 - LKG：仅在模块成功初始化后推进；失败候选不会覆盖 Last Known Good
+- 依赖生命周期：按 parent/dependencies 拓扑加载；停用父模块会级联停用依赖模块，重新启用父模块会恢复此前处于启用状态的子模块
 - 模块源码：必须绑定完整 Commit SHA、仓库内路径、SHA-256 与 UTF-8 字节数；相同 SemVer 不允许更换源码摘要
 - 加载方式：只对校验后的源码创建 Blob ESM URL，不使用 eval / new Function；模块源码必须自包含，不允许静态 import
 - 回退：Core 内置 HD Avatar Engine 4.5.14 作为离线 fallback；远程候选失败时保留或恢复可用版本

@@ -3973,14 +3973,17 @@ var TLEBatchLibrary = (() => {
       if (current?.status === 'active') {
         await kernel.replace(definition);
       } else if (current) {
-        await kernel.unregister(entry.id);
-        kernel.register(definition);
+        await kernel.replace(definition);
         try {
           await kernel.start(entry.id);
         } catch (error) {
-          try { await kernel.unregister(entry.id); } catch {}
           if (previousDefinition) {
-            try { kernel.register(previousDefinition); } catch {}
+            try {
+              await kernel.replace(previousDefinition);
+              await kernel.start(entry.id);
+            } catch (rollbackError) {
+              report(rollbackError, { type: 'module-inactive-replace-rollback', id: entry.id });
+            }
           }
           throw error;
         }
@@ -4152,8 +4155,10 @@ var TLEBatchLibrary = (() => {
       const entry = currentManifest?.byId.get(String(id));
       if (!entry) throw new Error('当前 Manifest 中不存在模块：' + id);
       const state = await readState(entry.id);
-      if (state.installed === false) throw new Error('模块尚未安装，请先启用：' + id);
       const current = kernel.get(entry.id);
+      if (state.installed === false || (!entry.enabledByDefault && state.installed !== true && current?.status !== 'active')) {
+        throw new Error('模块尚未安装，请先启用：' + id);
+      }
       if (current?.status === 'active' && current.version === entry.version &&
           state.lastKnownGoodVersion === entry.version) return current;
       const record = await downloadModule(entry);
@@ -4164,34 +4169,77 @@ var TLEBatchLibrary = (() => {
       return activate(entry, record.source);
     }
   
-    async function enableInternal(id) {
+    async function enableInternal(id, stack = new Set(), isDependency = false, refreshManifest = true) {
       assertAlive();
-      try { await loadManifest(); } catch {}
+      if (refreshManifest || !currentManifest) {
+        try { await loadManifest(); } catch {}
+      }
       const normalizedId = String(id);
-      const state = await readState(normalizedId);
-      await writeState(normalizedId, { installed: true, disabled: false });
-      const current = kernel.get(normalizedId);
-      if (current?.status === 'active') return current;
-      const entry = currentManifest?.byId.get(normalizedId);
-      if (entry) {
-        try {
-          const record = await downloadModule(entry);
-          return await activate(entry, record.source);
-        } catch (error) {
-          report(error, { type: 'module-enable', id: normalizedId });
-          if (await activateLastKnownGood(normalizedId)) return kernel.get(normalizedId);
-          const fallback = fallbackDefinitions.get(normalizedId);
-          if (fallback) {
-            await activateFallback(fallback);
-            return kernel.get(normalizedId);
+      if (stack.has(normalizedId)) throw new Error('启用模块时检测到依赖环：' + normalizedId);
+      stack.add(normalizedId);
+      try {
+        const state = await readState(normalizedId);
+        if (isDependency && (state.disabled || state.installed === false)) {
+          throw new Error('模块依赖当前被停用或已卸载：' + normalizedId);
+        }
+        const entry = currentManifest?.byId.get(normalizedId);
+        if (entry) {
+          const references = [entry.parentId, ...entry.dependencies].filter(Boolean);
+          for (const dependencyId of references) {
+            await enableInternal(dependencyId, stack, true, false);
           }
-          throw error;
+        }
+        await writeState(normalizedId, { installed: true, disabled: false });
+        const current = kernel.get(normalizedId);
+        if (current?.status === 'active') return current;
+        if (entry) {
+          try {
+            const record = await downloadModule(entry);
+            return await activate(entry, record.source);
+          } catch (error) {
+            report(error, { type: 'module-enable', id: normalizedId });
+            if (await activateLastKnownGood(normalizedId)) return kernel.get(normalizedId);
+            const fallback = fallbackDefinitions.get(normalizedId);
+            if (fallback) {
+              await activateFallback(fallback);
+              return kernel.get(normalizedId);
+            }
+            throw error;
+          }
+        }
+        const fallback = fallbackDefinitions.get(normalizedId);
+        if (!fallback) throw new Error('找不到可启用的模块：' + normalizedId);
+        await activateFallback(fallback);
+        return kernel.get(normalizedId);
+      } finally {
+        stack.delete(normalizedId);
+      }
+    }
+  
+    function isDependentOn(id, targetId, visited = new Set()) {
+      if (id === targetId || visited.has(id)) return false;
+      visited.add(id);
+      const entry = currentManifest?.byId.get(id);
+      if (!entry) return false;
+      const references = [entry.parentId, ...entry.dependencies].filter(Boolean);
+      if (references.includes(targetId)) return true;
+      return references.some(reference => isDependentOn(reference, targetId, visited));
+    }
+  
+    async function restartPreviouslyActiveDependents(targetId) {
+      if (!currentManifest) return;
+      for (const entry of currentManifest.order) {
+        if (entry.id === targetId || !isDependentOn(entry.id, targetId)) continue;
+        const state = await readState(entry.id);
+        const runtime = kernel.get(entry.id);
+        if (state.installed !== true || state.disabled || !state.activeVersion ||
+            runtime?.status === 'active') continue;
+        try {
+          await enableInternal(entry.id, new Set(), false, false);
+        } catch (error) {
+          report(error, { type: 'module-dependent-restart', id: entry.id, dependency: targetId });
         }
       }
-      const fallback = fallbackDefinitions.get(normalizedId);
-      if (!fallback) throw new Error('找不到可启用的模块：' + normalizedId);
-      await activateFallback(fallback);
-      return kernel.get(normalizedId);
     }
   
     async function disableInternal(id) {
@@ -4229,10 +4277,10 @@ var TLEBatchLibrary = (() => {
     async function updateAllInternal() {
       assertAlive();
       await loadManifest();
+      const { desired } = await computeDesired(currentManifest);
       const results = [];
       for (const entry of currentManifest.order) {
-        const state = await readState(entry.id);
-        if (state.installed === false || state.disabled) continue;
+        if (!desired.has(entry.id)) continue;
         try { results.push({ id: entry.id, result: await updateInternal(entry.id, false) }); }
         catch (error) {
           report(error, { type: 'module-update-all', id: entry.id });
@@ -4257,7 +4305,7 @@ var TLEBatchLibrary = (() => {
           name: entry?.name || runtime?.name || fallbackDefinitions.get(id)?.name || id,
           version: runtime?.version || entry?.version || fallbackDefinitions.get(id)?.version || null,
           availableVersion: entry?.version || null,
-          status: runtime?.status || (state.installed === false ? 'uninstalled' : (state.disabled ? 'disabled' : 'not-loaded')),
+          status: state.installed === false ? 'uninstalled' : (state.disabled ? 'disabled' : (runtime?.status || 'not-loaded')),
           installed: state.installed !== false,
           enabled: !state.disabled && runtime?.status === 'active',
           lastKnownGoodVersion: state.lastKnownGoodVersion,
@@ -4307,7 +4355,11 @@ var TLEBatchLibrary = (() => {
     }
   
     function enable(id) {
-      return enqueue(() => enableInternal(id));
+      return enqueue(async () => {
+        const result = await enableInternal(id);
+        await restartPreviouslyActiveDependents(String(id));
+        return result;
+      });
     }
   
     function disable(id) {
