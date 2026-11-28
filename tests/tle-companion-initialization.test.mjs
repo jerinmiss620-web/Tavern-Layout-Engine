@@ -4,17 +4,19 @@ import vm from 'node:vm';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const manifest = JSON.parse(read('latest.json'));
+const plan = JSON.parse(read('release-plan.json'));
 const source = read('development/organizer/TLE.js');
 const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
 const release = read(manifest.release.source_path);
 // The archived Mask Hero test manifest intentionally remains on v0.3.302;
 // the stable manifest is the source of truth for the promoted Core.
-const developmentVersion = manifest.release.version;
+const developmentVersion = source.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
 const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
-const featureBranch = Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main' ||
-  process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
+const featureBranch = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') ||
+  plan.core !== manifest.latest_version || process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
+assert.equal(developmentVersion, plan.core, 'development Core header must match release-plan.json');
 if (!featureBranch) {
   assert.equal(release, source, 'the pinned stable source must match the working source on stable branches');
 } else {

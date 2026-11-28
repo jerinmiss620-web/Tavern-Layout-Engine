@@ -158,8 +158,10 @@ if (process.argv.includes('--current')) {
   assert.doesNotMatch(navIconRule, /closedIcon/);
   assert.doesNotMatch(tle, /drawer-icon:not\(\.closedIcon\)/);
   const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
-  const featureBranch = Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main' ||
-    process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
+  const featureBranch = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') ||
+    plan.core !== stableManifest.latest_version || process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
+  const developmentVersion = read('development/organizer/TLE.js').match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
+  assert.equal(developmentVersion, plan.core, 'Development Core header must match release-plan.json');
   if (!featureBranch) {
     assert.equal(read('development/organizer/TLE.js'), read('releases/v' + plan.core + '/TLE.js'),
       'Development Core and current immutable release source must match byte-for-byte on stable branches');

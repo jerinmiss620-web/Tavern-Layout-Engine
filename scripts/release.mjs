@@ -150,9 +150,10 @@ else if (command === 'stage') {
   const source = read(authoritativeSourcePath).replaceAll(plan[arg], version);
   mkdirSync(target.slice(0, target.lastIndexOf('/')), { recursive: true });
   writeFileSync(target, source);
+  if (arg === 'core') writeFileSync('development/organizer/TLE.js', source);
   writeFileSync(target.replace(/[^/]+$/, 'CHANGELOG.md'), `# v${version}\n\n${notes}\n`);
   plan[arg] = version; write('release-plan.json', plan); prepare();
-  console.log(`Staged ${arg} v${version}. Edit its source, then run npm run release in a dedicated main checkout.`);
+  console.log(`Staged ${arg} v${version}. Generated sources are immutable; review them, run npm test, then publish from a dedicated main checkout.`);
 } else if (command === 'publish') {
   assert.equal(git('branch','--show-current'), 'main', 'Publish from a dedicated main checkout');
   assert.equal(git('remote','get-url','origin').replace(/\.git$/, ''), `https://github.com/${repo}`);

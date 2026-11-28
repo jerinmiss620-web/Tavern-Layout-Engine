@@ -46,6 +46,8 @@ function checkDevelopmentCore(source, version) {
 }
 
 checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
+assert.equal(coreVersion(developmentCore, 'Development Core'), plan.core,
+  'Development Core header must match release-plan.json');
 assert.ok(stableCore.includes(avatar), 'Stable Core: HD Avatar Engine differs from its authoritative source');
 assert.ok(stableCore.includes(galleryForVersion(stable.release.version)),
   'Stable Core: Gallery Home differs from its authoritative source');
@@ -55,6 +57,13 @@ assert.equal(
   stable.release.version,
   'Stable Core header must match latest.json',
 );
+
+const releaseScript = read('scripts/release.mjs');
+assert.match(releaseScript, /if \(arg === 'core'\) writeFileSync\('development\/organizer\/TLE\.js', source\)/,
+  'Core staging must advance the authoritative development source to the candidate version');
+assert.match(releaseScript, /const authoritativeSourcePath = arg === 'core' \? 'development\/organizer\/TLE\.js' : sourcePath\(arg\)/,
+  'Core staging must originate from the development source');
+assert.match(releaseScript, /Staged Core must be generated from the authoritative development source/);
 
 execFileSync(process.execPath, ['scripts/build-core.mjs', '--check'], { stdio: 'inherit' });
 

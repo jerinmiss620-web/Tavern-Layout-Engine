@@ -5,7 +5,7 @@
 1. `npm ci`。
 2. **只修改权威开发源码**：完整 Core 位于 `development/organizer/TLE.js`；独立组件分别位于 `development/organizer/batch/`、`development/avatar-engine/avatar-engine.js`、`development/gallery-home/gallery-home.js`。不要直接编辑 `releases/v*/` 中的发布快照。
 3. 运行 `npm run build:core`。统一构建器会从 Batch、Avatar、Gallery 三份组件源码重新装配 Core，并保持可重复、幂等；`npm run build:core -- --check` 只检查、不写入。旧命令 `node scripts/build-organizer-content.mjs` 仅作为兼容别名，实际调用统一构建器。
-4. 准备变更日志文件，再运行 `node scripts/release.mjs stage core 0.3.305 notes.md` 或 `node scripts/release.mjs stage loader 0.3.7 notes.md`。版本号仅为示例，必须高于当前版本且目录不存在。Core stage 会再次运行统一构建器，从 `development/organizer/TLE.js` 生成新发布源码并更新 `release-plan.json`；**生成后不要再手工修改发布目录**。
+4. 准备变更日志文件，再运行 `node scripts/release.mjs stage core 0.3.305 notes.md` 或 `node scripts/release.mjs stage loader 0.3.7 notes.md`。版本号仅为示例，必须高于当前版本且目录不存在。Core stage 会再次运行统一构建器，从 `development/organizer/TLE.js` 生成新发布源码，并将开发 Core 与候选包的版本标记同步推进，再更新 `release-plan.json`；正式清单仍保持旧版本，直到最终发布。**生成后不要再手工修改发布目录**。
 5. 运行 `npm run release`。发布前会逐字节核对候选 Core 是否由当前权威开发源码生成，再生成匹配安装包、校验候选版本、运行全部测试、提交不可变产物、取得真实 Commit、计算两份清单中的真实 UTF-8 长度与 SHA-256、再次运行完整测试，最后将产物提交和清单提交在同一次 fast-forward push 中发布到 main。
 6. 发布命令随后核验 GitHub 两份远程清单、Commit 固定地址、安装包和源码，并用远程发布字节重放更新链模拟。远程核验失败时命令失败，不宣告发布成功.
 

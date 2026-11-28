@@ -29,10 +29,10 @@ assert.equal(manifest.latest_version, '0.3.302');
 assert.equal(manifest.release.version, manifest.latest_version);
 assert.equal(manifest.minimum_loader_version, '0.3.0');
 const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
-const nonMainBranch = Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main';
-if (!nonMainBranch) assert.equal(stableCore, development, 'the stable release artifact must match the development Core exactly');
-else assert.equal(development.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1], stable.latest_version,
-  'development Core may differ on a non-main branch but must retain the current stable version until staging');
+const developmentOrCandidate = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') || plan.core !== stable.latest_version;
+const developmentVersion = development.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
+assert.equal(developmentVersion, plan.core, 'development Core must match the current release plan');
+if (!developmentOrCandidate) assert.equal(stableCore, development, 'the stable release artifact must match the development Core exactly');
 assert.notEqual(core, stableCore, 'the archived test channel must remain separate from the current stable release');
 assert.equal(sha256(core), manifest.release.sha256, 'the test Core SHA-256 must match its manifest');
 assert.equal(Buffer.byteLength(core, 'utf8'), manifest.release.size_bytes, 'the test Core byte count must match its manifest');
