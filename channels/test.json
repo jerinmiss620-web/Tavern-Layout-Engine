@@ -13,7 +13,7 @@
     "sha256": "1197e5463df363582e1d55b46a99aa59f3d5b534285c02c93f6b269fb8c2c2b3",
     "size_bytes": 1205541
   },
-  "status": "TEST v0.3.304: unified Core Module Kernel/Loader build and HD Avatar Engine 1.0.0 pilot. Use Test Loader 0.3.1 from this integration branch. Stable v0.3.304 and latest.json remain unchanged; ST/TT real-device validation is pending.",
+  "status": "TEST v0.3.304: unified Core Module Kernel/Loader build and HD Avatar Engine 1.0.0 pilot. ST/TT real-device validation passed on 2026-11-29. Keep this candidate Test-only; Stable v0.3.304, latest.json and modules/stable.json remain unchanged pending separate Stable promotion.",
   "recommended_loader_version": "0.3.1",
   "loader_release": {
     "version": "0.3.1",
