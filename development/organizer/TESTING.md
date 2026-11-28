@@ -23,6 +23,19 @@
 5. 测试版必须使用新功能分支自己的测试清单、独立 Test Loader 与独立缓存；不要修改主分支的旧兼容 `channels/test.json`。
 6. 正式发布只使用 `RELEASING.md` 规定的 `npm run release` 流程；不复用旧版手动 stage/package 脚本。
 
+## Core 模块化开发（Phase 2）
+
+- 当前开发分支从正式 main v0.3.304 创建；Stable Core、Loader Runtime、Bootstrap 与正式清单不得随模块化测试改动。
+- Core Module API 当前为 1；Kernel 源码位于 development/core/module-kernel.js，通过 node scripts/build-module-kernel.mjs 嵌入 development/organizer/TLE.js。
+- Core 公开 api.modules；Core destroy 必须先同步销毁已启动模块，再恢复自身原生 DOM、样式和布局。
+- Stable 模块清单 modules/stable.json 当前必须保持空，直到第一个模块完成独立源码、固定 Commit、SHA-256/字节数、依赖和回滚验收。
+- 每个模块必须有稳定 ID、独立 SemVer、API 版本、父模块、技术依赖、权限声明和设置 Schema 版本。
+- init 可以异步，但必须监听 AbortSignal；destroy 与 init 返回的 cleanup 必须同步，不能把 Core 的 DOM 恢复挂在异步清理之后。
+- 必须验证父子级联、技术依赖级联、错误隔离、模块事件订阅自动清理、模块设置隔离、更新失败恢复旧版本。
+- permissions 只是 Core API 能力门槛，不是 JavaScript 沙箱；模块源码必须由 Loader 通过不可变 Commit、SHA-256、字节数和来源校验。
+- 本阶段不迁移现有导航、会话侠、楼层侠、整理侠、兼容修复、渐隐侠、画廊或头像引擎；先验证 Kernel，再决定低耦合试点模块。
+- 自动化通过不等于 ST/TT 实机验收；模块试点仍须覆盖 PC、移动端、ST、TT 及全局卸载。
+
 ## 记录预览功能历史验收清单（v0.3.287–v0.3.289）
 
 - 首页画廊默认仅显示有聊天记录的角色；切换显示全部角色时，未聊天角色也能正常显示。检查最近聊天合并、折叠数量、排序和详情入口。
@@ -96,7 +109,7 @@
 1. 禁用 **TLE Organizer Branch Test Loader 0.3.0**。
 2. 重新启用 **TLE Permanent Bootstrap 1.0.6**。
 3. 完整刷新 ST/TT 宿主页面。
-4. 在 TLE → **版本与更新** 核对 Stable 通道、Core **v0.3.289**、Loader **v0.3.6**。
+4. 在 TLE → **版本与更新** 核对 Stable 通道、Core **v0.3.304**、Loader **v0.3.6**。
 
 不要再以旧测试 Loader 或旧 Stable Core 作为新开发入口。旧脚本只保留为禁用回滚备份。
 
