@@ -205,7 +205,7 @@ organizer                       整理侠父模块 / 原生抽屉
 6. **Style Ownership**：模块专属样式由模块创建和清理；Core 样式保留在 Core。
 7. **Lifecycle Helpers**：Observer、事件、计时器、RAF、Object URL、DB 连接必须能由模块 AbortSignal / destroy 完整释放。
 
-Kernel Context 已提供 `signal`、权限化 host 引用、事件订阅和模块设置命名空间；但以上 UI / Host service 不是现成能力，必须在迁移时明确补齐，不能假设模块已经能安全访问它们。
+Kernel Context API 已升级到 v2：除 `signal`、权限化 host 引用、事件订阅和模块设置命名空间外，已增加权限门控的 `context.services.get(id)`。Core 当前提供 `chat-context` 与 `resource-catalog` 两项共享服务；Session Page Registry、Settings Registry、Navigation Registry 和模块样式注册仍待后续实现。
 
 ## 6. 建议迁移顺序
 
