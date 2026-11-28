@@ -4,7 +4,7 @@
 
 - 整合基线：正式 `main@46bbf0f` 与统一 Core 构建 PR #32 的 `6f41edb`；独立工作分支：`integration/phase-2-module-system-20261129`。
 - PR #31 的 Module Kernel、Module Loader、Manifest、HD Avatar Engine 1.0.0 试点已迁入统一构建入口；权威源码分别保留在 `development/core/`、`modules/src/`，由 `npm run build:core` 自动装配进单文件 Core。
-- Test Core 候选固定在 `test-releases/v0.3.304/TLE.js`；不可变 Commit：`2213092cae54df5b7057fc9465be893238b4cf71`；SHA-256：`f929c2c46596af3416a61048ac63459fded6da9e2c34c8034df81702dbf83a90`；UTF-8 字节数：`1205449`。Gallery 结束标记现在精确落在 Gallery factory 结束处，Module Kernel/Loader 初始化保持在独立区域，`build:core --check` 会验证这一边界。
+- Test Core 候选固定在 `test-releases/v0.3.304/TLE.js`；不可变 Commit：`acca26dc349ba96e259ec48209ad337d6d289b7f`；SHA-256：`4b27d963e0593c7e513c0ec383fe1dd2772c20e1112af63de0fec6e29e96fa7f`；UTF-8 字节数：`1205541`。Gallery 结束标记现在精确落在 Gallery factory 结束处，Module Kernel/Loader 初始化保持在独立区域，`build:core --check` 会验证这一边界。
 - Test Loader 0.3.1 固定在 Commit：`88b910120fae5701fd54de8743a5ce0d1e518279`；SHA-256：`639213318c4c6904c32068b3287f9a5b8f971825f5b216edaf3aa050df75d735`；UTF-8 字节数：`39875`。其 Test Manifest URL 固定指向本整合分支，不读取旧主分支测试清单。
 - 分支专用 `channels/test.json` 现在指向 `test-releases/v0.3.304/TLE.js`；模块清单中的 HD Avatar Engine 源码则固定到独立 Commit，并校验 SHA-256 与 UTF-8 字节数。Stable Manifest 仍为空。
 - 正式 `latest.json`、`release-plan.json`、`releases/v0.3.304/TLE.js`、Bootstrap 1.0.6、Stable Loader Runtime 0.3.6 均与 `main` 的 Git Blob 完全一致；本分支不推进正式版本、不改正式安装链。
