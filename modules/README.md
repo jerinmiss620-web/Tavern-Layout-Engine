@@ -84,10 +84,10 @@ permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript �
 
 模块错误隔离指加载、初始化、替换、停止和依赖生命周期隔离，不是安全沙箱。模块以 Blob ESM 运行在 Core 所在的页面 JavaScript Realm；因此只加载仓库内固定 Commit 且通过摘要验证的可信模块。模块必须遵守 Kernel 的宿主能力接口，并在 destroy 中清理事件、观察器、计时器和 DOM 改动。不能把权限列表描述为对任意恶意代码的安全隔离。
 
-## 后续验收门槛
+## Phase 2.2 实机验收结果与后续边界
 
-1. 在 ST 与 TT 实机验证 Manifest 获取、Blob 模块加载、头像区域、切换/卸载与错误恢复。
-2. 验证断网、超时、错误哈希、错误字节数、候选初始化失败、缓存损坏及 Core 卸载时的行为。
-3. 验证停用/卸载状态跨刷新保留，且不会影响其他独立模块。
-4. 只有实机测试通过后，才把 HD Avatar Engine 写入 Stable Manifest；在此之前 modules/stable.json 必须保持空。
-5. Gallery Home、会话侠、楼层侠及其他模块暂不迁移。
+- 2026-11-29，ST 与 TT 实机验收全部通过。验收覆盖 Manifest 获取、Blob ESM 模块加载、HD Avatar 显示与切换、Last Known Good、刷新/重进恢复、断网恢复、错误哈希/字节数/初始化失败回滚、模块独立停用/启用/卸载、TT 原生头像绕过，以及完整卸载 TLE 后的模块资源清理。
+- 本轮验收对象为 Test Core v0.3.304 与 Test Loader 0.3.1；固定源码 Commit、SHA-256 与字节数记录在 `VALIDATION.md`。
+- 实机通过只代表试点运行链验收完成，不自动构成正式推广决定。`modules/stable.json` 继续保持空，`avatar.hd@1.0.0` 暂留 `modules/test.json`；只有单独完成 Stable promotion 审查与正式发布后，才考虑加入 Stable Manifest。
+- Core 内置 HD Avatar Engine 4.5.14 fallback 继续保留，确保离线与模块加载失败时仍有可用头像处理。
+- Gallery Home、会话侠、楼层侠及其他模块暂不迁移；后续按模块边界单独规划、开发和验收。
