@@ -133,6 +133,9 @@ assert.throws(
     userName: '', charName: '',
     floorRules: [],
     textRules: [{ find: '^', replace: 'x', regex: true }],
+  }),
+  /空字符串/,
+  'zero-width regex patterns are rejected',
 );
 
 assert.throws(
