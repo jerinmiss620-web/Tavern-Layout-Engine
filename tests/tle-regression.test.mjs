@@ -163,9 +163,8 @@ if (process.argv.includes('--current')) {
   assert.doesNotMatch(navIconRule, /closedIcon/);
   assert.doesNotMatch(tle, /drawer-icon:not\(\.closedIcon\)/);
   const developmentSource = read('development/organizer/TLE.js');
-  const developmentSource = read('development/organizer/TLE.js');
   const stableCoreSource = read(stableManifest.release.source_path);
-  const developmentVersion = developmentSource.match(/\\/\\/ Tavern Layout Engine · Host Diagnostics 2\\.0 · v(\\d+\\.\\d+\\.\\d+)/)?.[1];
+  const developmentVersion = developmentSource.split('Host Diagnostics 2.0 · v')[1]?.split('\n')[0];
   assert.equal(developmentVersion, manifest.release.version, 'Development Core header must match the Test channel candidate version');
   assert.equal(stableCoreSource, read('releases/v' + stableManifest.latest_version + '/TLE.js'),
     'The Stable Core pointer must remain on its immutable source');
