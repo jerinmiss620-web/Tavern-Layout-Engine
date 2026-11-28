@@ -16,9 +16,16 @@ CI 对 main 和 PR 运行全部测试与清单守卫；main 还核验 GitHub 远
 
 ## 历史产物维护
 
-正式发布后，`releases/v*/` 下的历史版本仅保留 `CHANGELOG.md`；当前正式版本保留 `TLE.js` 和可导入 JSON。对自动化回归确有必要的旧源码，按原字节移至 `tests/fixtures/legacy/`，并同步修改测试引用。旧版本不可变 Commit URL 仍可用于检验与追溯，不要重写发布历史。Loader 和 Bootstrap 采用相同原则；兼容旧版的 Test 通道清单暂时保留，不再作为下载入口。
+正式发布后，`releases/v*/` 下的历史版本仅保留 `CHANGELOG.md`；当前正式版本保留 `TLE.js` 和可导入 JSON。对自动化回归确有必要的旧源码，按原字节移至 `tests/fixtures/legacy/`，并同步修改测试引用。旧版本不可变 Commit URL 仍可用于检验与追溯，不要重写发布历史。Loader 和 Bootstrap 采用相同原则；兼容旧版的 Test 通道清单暂时保留，不再作为下载入口。`npm test` / `release.mjs verify` 必须同时检查：所有低于当前版本的历史发布目录仅含 `CHANGELOG.md`；当前 Core 目录仅含 `TLE.js`、禁用状态导入 JSON 与 `CHANGELOG.md`；当前 Loader 目录仅含 Loader 源码与 `CHANGELOG.md`。
 
 清理之后必须运行 `npm test` 和远端发布校验，确保主清单、更新链和未来 `scripts/release.mjs` 的模板选取均保持正常。
+
+## 模块化前的源码边界
+
+- `development/organizer/TLE.js` 当前是完整 TLE Core 单体源码，不是 Organizer 单独模块；模块化前不得按目录名推断它只包含整理侠。
+- `development/organizer/batch/` 是整理侠批量处理引擎的独立源码，由 `scripts/build-organizer-content.mjs` 打包进 Core 标记区。
+- `development/avatar-engine/avatar-engine.js` 与 `development/gallery-home/gallery-home.js` 是已有的独立组件源码；各自版本号属于组件版本，不等同于 Core 版本。对应测试负责核验组件源码与 Core 内嵌代码的同步关系。
+- 后续模块化必须把源码构建、模块清单、版本与哈希校验纳入统一流程；不得手工维护两份互不校验的同名实现。
 
 ## 固定 Bootstrap 的紧急修复
 

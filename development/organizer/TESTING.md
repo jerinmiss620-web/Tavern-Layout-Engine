@@ -1,13 +1,15 @@
 # TLE 开发与验收说明
 
-## 当前正式基线（2026-11-27）
+## 当前正式基线（2026-11-28）
 
-- **Stable Core：v0.3.289**
+- **Stable Core：v0.3.304**
 - **Loader Runtime：v0.3.6**
 - **Permanent Bootstrap：v1.0.6**
 - **唯一开发基线：** 本 PR 合并后的 `main`；后续功能分支必须从该正式基线创建。
 - **可编辑 Core 源码：** `development/organizer/TLE.js`。它是完整 TLE Core 源码，不是单独的整理侠模块。
-- **不可变发布快照：** `releases/v0.3.289/TLE.js`。不得直接修改已发布快照；下一版从开发源码生成新版本目录。
+- **不可变发布快照：** `releases/v0.3.304/TLE.js`。不得直接修改已发布快照；下一版从开发源码生成新版本目录。
+- **源码边界：** `development/organizer/TLE.js` 目前仍是完整 TLE Core 单体源码，不是独立的整理侠模块。模块化完成前不得把该文件当作 Organizer 子模块随意拆分或改名。
+- **独立组件源码：** `development/gallery-home/gallery-home.js` 与 `development/avatar-engine/avatar-engine.js` 各自保留组件版本标记；对应回归会核对它们与 Core 内嵌实现的同步关系，不得仅因组件版本号低于 Core 版本就认定为漂移。
 - `latest.json` 与 `release-plan.json` 是正式版本指针；正常 Core 发布沿用 Loader v0.3.6 和 Bootstrap v1.0.6。
 
 旧测试分支 `feature/organizer-nav-worldbooks-20261125` 及其 Test Loader 仅作历史回溯，不再作为新功能开发基线。主分支的 `channels/test.json` 刻意保留 v0.3.204 供旧 Test Loader 兼容，**不是当前测试入口，也不得据此回退 Core**。
@@ -15,13 +17,13 @@
 ## 新功能开发流程
 
 1. 从当前 `main` 创建新的功能分支；不要从 v0.3.239、v0.3.259、v0.3.263、v0.3.264 或旧测试分支创建。
-2. 修改 `development/organizer/TLE.js` 及对应模块源码；`releases/v0.3.289/TLE.js` 只作为不可变发布快照。
+2. 修改完整 Core 开发源码及对应的独立组件源码；`development/organizer/TLE.js` 当前仍是完整 Core 单体文件，`releases/v0.3.304/TLE.js` 只作为不可变发布快照。
 3. 修改 Organizer 内容引擎时，运行 `node scripts/build-organizer-content.mjs`，将控制器重新打包进 Core 标记区。
 4. 同步更新专项回归测试；运行 `npm ci`、`npm test`，再按需运行真实 ST/TT 验收。
 5. 测试版必须使用新功能分支自己的测试清单、独立 Test Loader 与独立缓存；不要修改主分支的旧兼容 `channels/test.json`。
 6. 正式发布只使用 `RELEASING.md` 规定的 `npm run release` 流程；不复用旧版手动 stage/package 脚本。
 
-## v0.3.287–v0.3.289 当前功能验收
+## 记录预览功能历史验收清单（v0.3.287–v0.3.289）
 
 - 首页画廊默认仅显示有聊天记录的角色；切换显示全部角色时，未聊天角色也能正常显示。检查最近聊天合并、折叠数量、排序和详情入口。
 - 角色记录详情头像保持 2:3 比例、统一 12px 圆角；高清头像引擎为 4.5.14。切换圆形、方形、圆角主题及 `big-avatars` 后，头像不得变窄、变形或与渐变层错位。
