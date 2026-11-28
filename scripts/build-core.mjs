@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { build } from 'esbuild';
+import { buildModuleKernelBundle } from './build-module-kernel.mjs';
+import { buildModuleLoaderBundle } from './build-module-loader.mjs';
 
 const CORE_PATH = 'development/organizer/TLE.js';
 const read = path => readFileSync(path, 'utf8');
@@ -34,7 +36,7 @@ function ensureModuleMarkers(source) {
     );
     source = insertBefore(
       source,
-      '  function destroy() {',
+      '  function destroy() {\n    if (state.destroyed) return;',
       '/* TLE_GALLERY_HOME_END */\n',
       'Gallery end',
     );
@@ -63,6 +65,23 @@ assert.ok(!(checkOnly && outputIndex >= 0), '--check and --output cannot be comb
 let source = read(CORE_PATH);
 source = ensureModuleMarkers(source);
 
+const moduleMarkers = [
+  '  /* TLE_MODULE_KERNEL_START */',
+  '  /* TLE_MODULE_KERNEL_END */',
+  '  /* TLE_MODULE_LOADER_START */',
+  '  /* TLE_MODULE_LOADER_END */',
+];
+for (const marker of moduleMarkers) assert.equal(count(source, marker), 1, 'Core module marker must occur exactly once: ' + marker);
+function generatedBody(bundle, startMarker, endMarker) {
+  assert.ok(bundle.startsWith(startMarker + '\n'), 'Generated module bundle has an invalid start marker');
+  const end = bundle.lastIndexOf('\n' + endMarker);
+  assert.ok(end > startMarker.length, 'Generated module bundle has an invalid end marker');
+  return bundle.slice(startMarker.length + 1, end).trimEnd();
+}
+const kernelBundle = buildModuleKernelBundle(read('development/core/module-kernel.js'));
+source = replaceRegion(source, moduleMarkers[0], moduleMarkers[1], generatedBody(kernelBundle, moduleMarkers[0], moduleMarkers[1]));
+const loaderBundle = buildModuleLoaderBundle(read('development/core/module-loader.js'));
+source = replaceRegion(source, moduleMarkers[2], moduleMarkers[3], generatedBody(loaderBundle, moduleMarkers[2], moduleMarkers[3]));
 const batch = await build({
   entryPoints: ['development/organizer/batch/controller.js'],
   bundle: true,
@@ -110,7 +129,7 @@ source = replaceRegion(
 if (checkOnly) {
   assert.equal(source, read(outputPath),
     'Core source is not assembled from its authoritative modules. Run npm run build:core.');
-  console.log('TLE Core build check passed: Organizer Batch, HD Avatar Engine and Gallery Home are synchronized.');
+  console.log('TLE Core build check passed: Module Kernel, Module Loader, Organizer Batch, HD Avatar Engine and Gallery Home are synchronized.');
 } else if (outputIndex >= 0) {
   writeFileSync(outputPath, source);
   console.log('Generated assembled TLE Core at ' + outputPath + '.');
@@ -119,5 +138,5 @@ if (checkOnly) {
   if (source !== previous) writeFileSync(CORE_PATH, source);
   console.log(source === previous
     ? 'TLE Core is already synchronized; no file changes were necessary.'
-    : 'TLE Core rebuilt from Organizer Batch, HD Avatar Engine and Gallery Home.');
+    : 'TLE Core rebuilt from Module Kernel, Module Loader, Organizer Batch, HD Avatar Engine and Gallery Home.');
 }
