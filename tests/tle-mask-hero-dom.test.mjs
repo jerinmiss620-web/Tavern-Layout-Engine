@@ -30,6 +30,9 @@ const sandbox = {
   HOST_DOC: window.document,
   HOST_WIN: window,
   state: { chatTools: { maskHero: runtime } },
+  maskHeroEnabled: true,
+  getActiveChatActionContext: () => ({ chatKey: 'test-chat' }),
+  maskHeroSetStatus: () => {},
 };
 const helpers = section('  function maskHeroIsUnsafeRegex(', '  function maskHeroValidateDraft(');
 const functions = [
@@ -38,6 +41,7 @@ const functions = [
   section('  function maskHeroApplyImage(', '  function maskHeroApplyFloorReplacement('),
   section('  function maskHeroApplyFloorReplacement(', '  function maskHeroProcessChat('),
   section('  function maskHeroClearEffects(', '  async function maskHeroApplyDraft('),
+  section('  function maskHeroProcessChat(', '  function maskHeroScheduleProcess('),
 ].join('\n');
 vm.runInNewContext(helpers + '\n' + functions + `
 globalThis.maskHeroDom = {
@@ -48,6 +52,7 @@ globalThis.maskHeroDom = {
   maskHeroApplyTextNode,
   maskHeroApplyImage,
   maskHeroApplyFloorReplacement,
+  maskHeroProcessChat,
   maskHeroClearEffects,
 };
 `, sandbox);
@@ -135,4 +140,77 @@ assert.equal(avatar.getAttribute('srcset'), 'original@2x.png 2x');
 assert.equal(avatar.getAttribute('sizes'), '40px');
 assert.equal(avatar.getAttribute('alt'), 'original');
 
-console.log('TLE Mask Hero DOM tests passed: reversible text edits, whole-floor fragment restoration, host DOM updates and avatar attribute recovery.');
+// End-to-end DOM selection: latest N moves with the conversation, all/range overrides are reversible.
+const chat = window.document.getElementById('chat');
+chat.replaceChildren();
+function addChatMessage(id, text, kind = 'char') {
+  const message = window.document.createElement('div');
+  message.className = 'mes';
+  message.setAttribute('mesid', String(id));
+  if (kind === 'user') message.setAttribute('is_user', 'true');
+  if (kind === 'system') message.setAttribute('is_system', 'true');
+  const block = window.document.createElement('div');
+  block.className = 'mes_block';
+  const chName = window.document.createElement('div');
+  chName.className = 'ch_name';
+  const name = window.document.createElement('span');
+  name.className = 'name_text';
+  name.textContent = 'Original ' + id;
+  chName.appendChild(name);
+  block.appendChild(chName);
+  const messageBody = window.document.createElement('div');
+  messageBody.className = 'mes_text';
+  messageBody.textContent = text;
+  message.append(block, messageBody);
+  chat.appendChild(message);
+  return { message, name, body: messageBody };
+}
+const chatMessages = [
+  addChatMessage(0, 'body 0', 'user'),
+  addChatMessage(1, 'body 1', 'char'),
+  addChatMessage(2, 'body 2', 'user'),
+  addChatMessage(3, 'body 3', 'char'),
+];
+const systemMessageForBatch = addChatMessage(90, 'system body', 'system');
+runtime.appliedConfig = {
+  userName: '匿名用户',
+  charName: '匿名角色',
+  bodyRule: { scope: 'latest', count: 2, replace: '[最新两层]' },
+  floorRules: [],
+  textRules: [],
+};
+runtime.appliedChatKey = 'test-chat';
+api.maskHeroProcessChat();
+assert.deepEqual(chatMessages.map(item => item.body.textContent), ['body 0', 'body 1', '[最新两层]', '[最新两层]']);
+assert.equal(systemMessageForBatch.body.textContent, 'system body', 'system messages are excluded from batch masking');
+assert.equal(chatMessages[0].name.textContent, '匿名用户');
+assert.equal(chatMessages[1].name.textContent, '匿名角色');
+
+const fifthMessage = addChatMessage(4, 'body 4', 'user');
+api.maskHeroProcessChat();
+assert.equal(chatMessages[2].body.textContent, 'body 2', 'a message leaving the latest-N window is restored');
+assert.equal(chatMessages[3].body.textContent, '[最新两层]');
+assert.equal(fifthMessage.body.textContent, '[最新两层]');
+
+api.maskHeroClearEffects();
+runtime.appliedConfig = {
+  userName: '',
+  charName: '',
+  bodyRule: { scope: 'all', replace: '[全部楼层]' },
+  floorRules: [{ floor: '2', replace: '[指定楼层]' }],
+  textRules: [],
+};
+runtime.appliedChatKey = 'test-chat';
+api.maskHeroProcessChat();
+assert.equal(chatMessages[0].body.textContent, '[全部楼层]');
+assert.equal(chatMessages[2].body.textContent, '[指定楼层]', 'a single-floor exception takes priority over the bulk range');
+assert.equal(systemMessageForBatch.body.textContent, 'system body');
+api.maskHeroClearEffects();
+assert.deepEqual(
+  [...chat.querySelectorAll('.mes_text')].map(node => node.textContent),
+  ['body 0', 'body 1', 'body 2', 'body 3', 'system body', 'body 4'],
+  'all body overlays restore the original message DOM',
+);
+assert.equal(chatMessages[0].name.textContent, 'Original 0', 'native name node is restored with the original value');
+
+console.log('TLE Mask Hero DOM tests passed: reversible text edits, native name replacement, latest-N/all/range body scopes, single-floor precedence, system exclusion and avatar restoration.');
