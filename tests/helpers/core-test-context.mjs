@@ -77,6 +77,7 @@ export function normalizeCoreSource(source) {
   );
   normalized = normalized.replace(/(?<!\\)(?:\\\\)*\\u([0-9a-fA-F]{4})/g, (_match, hex) => String.fromCharCode(parseInt(hex, 16)));
   normalized = normalized.replace(/(Host Diagnostics 2[.]0 · v)[0-9]+[.][0-9]+[.][0-9]+/g, '$1<version>');
+  normalized = normalized.replace(/const VERSION = '[0-9]+[.][0-9]+[.][0-9]+'/g, "const VERSION = '<version>'");
   normalized = normalized.replace(/(data-tle-update-summary>v)[0-9]+[.][0-9]+[.][0-9]+/g, '$1<version>');
   normalized = normalized.replace(/(data-tle-runtime-version>v)[0-9]+[.][0-9]+[.][0-9]+/g, '$1<version>');
   normalized = normalized.replace(/Core v[0-9]+[.][0-9]+[.][0-9]+ · Host Diagnostics 2[.]0/g, 'Core v<version> · Host Diagnostics 2.0');
