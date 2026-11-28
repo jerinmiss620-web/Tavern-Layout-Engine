@@ -16,7 +16,7 @@ const sha256 = value => createHash('sha256').update(value, 'utf8').digest('hex')
 assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
 assert.equal(manifest.channel, 'mask-hero-test');
-assert.equal(manifest.latest_version, '0.3.298');
+assert.equal(manifest.latest_version, '0.3.299');
 assert.equal(manifest.release.version, manifest.latest_version);
 assert.equal(manifest.minimum_loader_version, '0.3.0');
 assert.equal(core, development, 'the test release artifact must match the development Core exactly');

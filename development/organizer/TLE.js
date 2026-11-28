@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.298
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.299
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2992,6 +2992,11 @@ var TLEBatchLibrary = (() => {
       observer: null,
       refreshFrame: 0,
       suppressObserver: false,
+      hiddenGuard: {
+        observer: null, observedChat: null, listeners: [], frame: 0, generation: 0,
+        suppress: false, dbPromise: null, db: null, currentChatKey: '',
+        status: 'idle', error: '', records: [], pending: null, lastNoticeKey: '', busy: false,
+      },
       recent: {
         list: null,
         search: null,
@@ -3688,6 +3693,13 @@ body[data-tle-nav] #${ID.chatShortcut}:not([hidden]) { display: grid; }
 #${ID.chatToolsPanel} .tle-mask-hero-toolbar > select,
 #${ID.chatToolsPanel} .tle-mask-hero-toolbar > input { flex:1 1 120px; min-width:0; }
 #${ID.chatToolsPanel} .tle-mask-hero-section { display:flex; flex-direction:column; gap:7px; min-width:0; padding-top:8px; border-top:1px solid var(--SmartThemeBorderColor,currentColor); }
+#${ID.chatToolsPanel} .tle-mask-hero-section[hidden] { display:none !important; }
+#${ID.chatToolsPanel} .tle-chat-tools-protection { display:flex; flex-direction:column; gap:5px; min-width:0; padding-top:8px; border-top:1px solid var(--SmartThemeBorderColor,currentColor); }
+#${ID.chatToolsPanel} .tle-chat-tools-protection-heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:3px 8px; min-width:0; }
+#${ID.chatToolsPanel} .tle-chat-tools-protection-heading small { font-size:.8em; opacity:.78; }
+#${ID.chatToolsPanel} .tle-chat-tools-protection-alert { margin:0; font-size:.82em; line-height:1.45; color:var(--SmartThemeQuoteColor,inherit); }
+#${ID.chatToolsPanel} .tle-chat-tools-protection-actions { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
+#${ID.chatToolsPanel} .tle-chat-tools-protection [hidden] { display:none !important; }
 #${ID.chatToolsPanel} .tle-mask-hero-field { display:flex; flex:1 1 140px; flex-direction:column; gap:4px; min-width:0; }
 #${ID.chatToolsPanel} .tle-mask-hero-toggle { display:inline-flex; align-items:center; gap:6px; width:fit-content; max-width:100%; }
 #${ID.chatToolsPanel} .tle-mask-hero-field > input,
@@ -7046,7 +7058,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   let maskHeroEnabled = getStoredBool(MASK_HERO_ENABLED_KEY, false);
   let maskHeroRuntime = {
     plans: maskHeroLoadPlans(), draft: maskHeroCreateEmptyDraft(), selectedPlanId: '',
-    status: '打码侠默认关闭。', dbPromise: null,
+    status: '打码侠默认关闭。', dbPromise: null, scopeExpanded: false,
     assetHistory: [], assetHistoryUrls: new Map(), assetHistoryRequest: 0,
   };
   let chatToolsEnabled = getStoredBool(CHAT_TOOLS_ENABLED_KEY, true);
@@ -7723,6 +7735,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     let command = '';
     let successMessage = '';
+    let actionRange = null;
     const row = input.closest('[data-chat-action-row]');
     if (actionId === 'jump') {
       const raw = input.value.trim();
@@ -7771,6 +7784,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
         return;
       }
       // Slash commands always receive x-y, including a single floor as 90-90.
+      actionRange = { start, end };
       command = `/${actionId} ${start}-${end}`;
       successMessage = actionId === 'hide'
         ? `已隐藏 ${start}–${end} 楼。`
@@ -7785,14 +7799,31 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     submitButtons.forEach(item => { item.disabled = true; });
     button.dataset.busy = 'true';
     state.chatTools.suppressObserver = true;
+    const hiddenGuard = state.chatTools.hiddenGuard;
+    const protectHiddenChange = actionId === 'hide' || actionId === 'unhide';
+    if (protectHiddenChange) hiddenGuard.suppress = true;
     try {
       const result = await executeTLESlashCommand(command, snapshot.context);
       if (result?.isError) throw new Error(result.errorMessage || '酒馆执行命令失败。');
       if (result?.isAborted || result?.isQuietlyAborted) throw new Error(result.abortReason || '命令已中止。');
+      if (protectHiddenChange) {
+        try {
+          await hiddenFloorGuardCommitNativeAction(actionId, actionRange, snapshot.chatKey);
+        } catch (backupError) {
+          hiddenGuard.status = 'error';
+          hiddenGuard.error = '原生楼层操作已完成，但保护备份未能同步：' + (backupError?.message || backupError);
+          hiddenFloorGuardUpdateUI();
+          hiddenFloorGuardNotify('error', hiddenGuard.error);
+        }
+      }
       chatActionNotify('success', successMessage);
     } catch (error) {
       chatActionNotify('error', error?.message || '命令执行失败。');
     } finally {
+      if (protectHiddenChange) {
+        hiddenGuard.suppress = false;
+        hiddenFloorGuardScheduleVerify();
+      }
       state.chatTools.suppressObserver = false;
       inputs.forEach(item => { item.disabled = false; });
       clearButtons.forEach(item => { item.disabled = false; });
@@ -11541,14 +11572,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.298 · 隐藏范围智能粘贴</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.299 · 打码侠范围折叠与隐藏楼层保护</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.298</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.299</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13201,6 +13232,540 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
     ranges.push(start === previous ? String(start) : `${start}–${previous}`);
     return { count: indices.length, text: ranges.join('，') };
+  }
+
+  function hiddenFloorGuardIsHidden(message) {
+    return message?.is_system === true || message?.is_system === 'true' || message?.is_system === 1;
+  }
+
+  function hiddenFloorGuardHash(value) {
+    const text = String(value ?? '');
+    let first = 2166136261;
+    let second = 0x9e3779b9;
+    for (let index = 0; index < text.length; index++) {
+      const code = text.charCodeAt(index);
+      first = Math.imul(first ^ code, 16777619);
+      second = Math.imul(second ^ code, 2246822519);
+    }
+    return (first >>> 0).toString(16).padStart(8, '0')
+      + (second >>> 0).toString(16).padStart(8, '0') + ':' + text.length;
+  }
+
+  function hiddenFloorGuardCreateFingerprints(chat) {
+    const messages = Array.isArray(chat) ? chat : [];
+    const base = messages.map((message, index) => {
+      const extra = message?.extra && typeof message.extra === 'object' ? message.extra : {};
+      const content = String(message?.mes ?? message?.message ?? '');
+      return {
+        index,
+        genId: String(extra.gen_id ?? message?.gen_id ?? ''),
+        sendDate: String(message?.send_date ?? message?.sendDate ?? extra.send_date ?? ''),
+        name: String(message?.name ?? message?.name2 ?? ''),
+        isUser: message?.is_user === true || message?.is_user === 'true' || message?.is_user === 1,
+        contentHash: hiddenFloorGuardHash(content),
+      };
+    });
+    return base.map((item, index) => ({
+      ...item,
+      prevHash: base[index - 1]?.contentHash || '',
+      nextHash: base[index + 1]?.contentHash || '',
+    }));
+  }
+
+  function hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices = new Set()) {
+    const scored = [];
+    for (const candidate of candidates || []) {
+      if (usedIndices.has(candidate.index)) continue;
+      if (record?.genId && candidate.genId && record.genId === candidate.genId) {
+        scored.push({ candidate, score: 100, exactGeneration: true });
+        continue;
+      }
+      let score = 0;
+      if (record?.contentHash && candidate.contentHash === record.contentHash) score += 4;
+      if (record?.sendDate && candidate.sendDate === record.sendDate) score += 3;
+      if (record?.name && candidate.name === record.name) score += 2;
+      if (typeof record?.isUser === 'boolean' && candidate.isUser === record.isUser) score += 2;
+      if (record?.prevHash && candidate.prevHash === record.prevHash) score += 1;
+      if (record?.nextHash && candidate.nextHash === record.nextHash) score += 1;
+      if (score >= 6) scored.push({ candidate, score, exactGeneration: false });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    if (!scored.length) return null;
+    const exact = scored.filter(item => item.exactGeneration);
+    if (exact.length) {
+      if (exact.length !== 1) return null;
+      return { index: exact[0].candidate.index, score: 100, confidence: 'high' };
+    }
+    const best = scored[0];
+    if (scored[1] && scored[1].score === best.score) return null;
+    return {
+      index: best.candidate.index,
+      score: best.score,
+      confidence: best.score >= 8 ? 'high' : 'medium',
+    };
+  }
+
+  function hiddenFloorGuardAnalyze(records, chat) {
+    const messages = Array.isArray(chat) ? chat : [];
+    const candidates = hiddenFloorGuardCreateFingerprints(messages);
+    const usedIndices = new Set();
+    const stillHidden = [];
+    const lost = [];
+    const missing = [];
+    for (const record of Array.isArray(records) ? records : []) {
+      const match = hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices);
+      if (!match) {
+        missing.push(record);
+        continue;
+      }
+      usedIndices.add(match.index);
+      const entry = {
+        record,
+        recordId: String(record?.recordId || ''),
+        index: match.index,
+        score: match.score,
+        confidence: match.confidence,
+      };
+      if (hiddenFloorGuardIsHidden(messages[match.index])) stillHidden.push(entry);
+      else lost.push(entry);
+    }
+    const newHidden = candidates.filter(candidate =>
+      hiddenFloorGuardIsHidden(messages[candidate.index]) && !usedIndices.has(candidate.index));
+    return { candidates, stillHidden, lost, missing, newHidden };
+  }
+
+  function hiddenFloorGuardGroupRanges(indices) {
+    const sorted = [...new Set((indices || []).map(Number).filter(Number.isSafeInteger))]
+      .sort((a, b) => a - b);
+    if (!sorted.length) return [];
+    const ranges = [];
+    let start = sorted[0];
+    let end = start;
+    for (let index = 1; index < sorted.length; index++) {
+      const current = sorted[index];
+      if (current === end + 1) {
+        end = current;
+        continue;
+      }
+      ranges.push({ start, end });
+      start = end = current;
+    }
+    ranges.push({ start, end });
+    return ranges;
+  }
+
+  function hiddenFloorGuardCreateRecord(fingerprint) {
+    const savedAt = Date.now();
+    const entropy = String(savedAt) + ':' + String(Math.random());
+    const identity = [
+      fingerprint.genId, fingerprint.sendDate, fingerprint.name,
+      fingerprint.isUser, fingerprint.contentHash, fingerprint.prevHash,
+      fingerprint.nextHash, fingerprint.index, entropy,
+    ].join('|');
+    return { ...fingerprint, recordId: 'hidden-' + hiddenFloorGuardHash(identity), savedAt };
+  }
+
+  const HIDDEN_FLOOR_GUARD_DB = 'TLEHiddenFloorGuard';
+  const HIDDEN_FLOOR_GUARD_STORE = 'chats';
+
+  function hiddenFloorGuardOpenDb() {
+    const guard = state.chatTools.hiddenGuard;
+    if (guard.db) return Promise.resolve(guard.db);
+    if (guard.dbPromise) return guard.dbPromise;
+    if (!HOST_WIN.indexedDB) throw new Error('当前浏览器不支持 IndexedDB，隐藏楼层保护无法启用。');
+    guard.dbPromise = new Promise((resolve, reject) => {
+      let request;
+      try { request = HOST_WIN.indexedDB.open(HIDDEN_FLOOR_GUARD_DB, 1); }
+      catch (error) { guard.dbPromise = null; reject(error); return; }
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(HIDDEN_FLOOR_GUARD_STORE)) {
+          db.createObjectStore(HIDDEN_FLOOR_GUARD_STORE, { keyPath: 'chatKey' });
+        }
+      };
+      request.onsuccess = () => {
+        const db = request.result;
+        db.onversionchange = () => {
+          try { db.close(); } catch {}
+          if (guard.db === db) { guard.db = null; guard.dbPromise = null; }
+        };
+        guard.db = db;
+        resolve(db);
+      };
+      request.onerror = () => {
+        guard.dbPromise = null;
+        reject(request.error || new Error('隐藏楼层保护数据库打开失败。'));
+      };
+      request.onblocked = () => {
+        guard.dbPromise = null;
+        reject(new Error('隐藏楼层保护数据库被其他页面占用，请关闭重复的酒馆页面后重试。'));
+      };
+    });
+    return guard.dbPromise;
+  }
+
+  async function hiddenFloorGuardReadRecord(chatKey) {
+    const db = await hiddenFloorGuardOpenDb();
+    return new Promise((resolve, reject) => {
+      let transaction;
+      try { transaction = db.transaction(HIDDEN_FLOOR_GUARD_STORE, 'readonly'); }
+      catch (error) { reject(error); return; }
+      const request = transaction.objectStore(HIDDEN_FLOOR_GUARD_STORE).get(chatKey);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('读取隐藏楼层备份失败。'));
+    });
+  }
+
+  async function hiddenFloorGuardWriteRecord(record) {
+    const db = await hiddenFloorGuardOpenDb();
+    return new Promise((resolve, reject) => {
+      let transaction;
+      try { transaction = db.transaction(HIDDEN_FLOOR_GUARD_STORE, 'readwrite'); }
+      catch (error) { reject(error); return; }
+      transaction.oncomplete = () => resolve(true);
+      transaction.onerror = () => reject(transaction.error || new Error('写入隐藏楼层备份失败。'));
+      transaction.onabort = () => reject(transaction.error || new Error('隐藏楼层备份事务已中止。'));
+      transaction.objectStore(HIDDEN_FLOOR_GUARD_STORE).put(record);
+    });
+  }
+
+  function hiddenFloorGuardNotify(type, message) {
+    try {
+      const toast = HOST_WIN.toastr?.[type] || HOST_WIN.toastr?.info;
+      if (typeof toast === 'function') toast.call(HOST_WIN.toastr, message, 'TLE 隐藏楼层保护');
+      else console.warn('[TLE Hidden Floor Guard] ' + message);
+    } catch (error) {
+      console.warn('[TLE Hidden Floor Guard] ' + message, error);
+    }
+  }
+
+  function hiddenFloorGuardUpdateUI() {
+    const root = state.chatTools.panel?.querySelector('[data-tle-hidden-protection]');
+    if (!root) return;
+    const guard = state.chatTools.hiddenGuard;
+    const status = root.querySelector('[data-tle-hidden-protection-status]');
+    const alert = root.querySelector('[data-tle-hidden-protection-alert]');
+    const actions = root.querySelector('[data-tle-hidden-protection-actions]');
+    const restore = root.querySelector('[data-hidden-guard-action="restore"]');
+    const accept = root.querySelector('[data-hidden-guard-action="accept"]');
+    if (guard.status === 'error') {
+      if (status) status.textContent = '保护存储不可用：' + (guard.error || 'IndexedDB 初始化失败。');
+      if (alert) alert.hidden = true;
+      if (actions) actions.hidden = true;
+      return;
+    }
+    const pending = guard.pending;
+    if (pending) {
+      const lost = pending.lost || [];
+      const missing = pending.missing || [];
+      const recoverable = lost.filter(item => item.confidence === 'high').length;
+      if (status) status.textContent = '自动备份与核验已开启 · 当前记录 ' + guard.records.length + ' 条';
+      const parts = [];
+      if (lost.length) parts.push(lost.length + ' 条原本隐藏的消息现在处于显示状态');
+      if (missing.length) parts.push(missing.length + ' 条旧记录无法可靠定位（可能已删除或内容已变化）');
+      if (alert) {
+        alert.textContent = parts.join('；') + '。TLE 不会自动重新隐藏。可可靠恢复 ' + recoverable + ' 条。';
+        alert.hidden = false;
+      }
+      if (actions) actions.hidden = false;
+      if (restore) restore.disabled = guard.busy || recoverable === 0;
+      if (accept) accept.disabled = guard.busy;
+      return;
+    }
+    if (status) {
+      status.textContent = guard.status === 'ready'
+        ? '自动备份与核验已开启 · 当前保护 ' + guard.records.length + ' 条隐藏消息'
+        : guard.status === 'loading' ? '正在核验当前聊天…' : '进入聊天后自动启用';
+    }
+    if (alert) alert.hidden = true;
+    if (actions) actions.hidden = true;
+  }
+
+  function hiddenFloorGuardAfterPaint() {
+    return new Promise(resolve => HOST_WIN.requestAnimationFrame(() => HOST_WIN.requestAnimationFrame(resolve)));
+  }
+
+  async function hiddenFloorGuardVerify(snapshot = getActiveChatActionContext()) {
+    const guard = state.chatTools.hiddenGuard;
+    if (state.destroyed || guard.suppress || !snapshot) return;
+    if (guard.currentChatKey !== snapshot.chatKey) {
+      guard.currentChatKey = snapshot.chatKey;
+      guard.records = [];
+      guard.pending = null;
+      guard.status = 'loading';
+      guard.error = '';
+      guard.lastNoticeKey = '';
+      hiddenFloorGuardUpdateUI();
+    }
+    const generation = ++guard.generation;
+    try {
+      const saved = await hiddenFloorGuardReadRecord(snapshot.chatKey);
+      if (state.destroyed || guard.generation !== generation) return;
+      const chat = Array.isArray(snapshot.chat) ? snapshot.chat : [];
+      const existing = Array.isArray(saved?.records) ? saved.records : [];
+      if (saved && existing.length && chat.length === 0) {
+        guard.records = existing;
+        guard.status = 'loading';
+        hiddenFloorGuardUpdateUI();
+        return;
+      }
+      if (!saved) {
+        const records = hiddenFloorGuardCreateFingerprints(chat)
+          .filter(item => hiddenFloorGuardIsHidden(chat[item.index]))
+          .map(hiddenFloorGuardCreateRecord);
+        await hiddenFloorGuardWriteRecord({
+          schemaVersion: 1, chatKey: snapshot.chatKey, records, updatedAt: Date.now(),
+        });
+        if (state.destroyed || guard.generation !== generation) return;
+        guard.records = records;
+        guard.pending = null;
+        guard.status = 'ready';
+        guard.error = '';
+        hiddenFloorGuardUpdateUI();
+        return;
+      }
+      const analysis = hiddenFloorGuardAnalyze(existing, chat);
+      const additions = analysis.newHidden.map(hiddenFloorGuardCreateRecord);
+      const merged = existing.concat(additions);
+      if (additions.length) {
+        await hiddenFloorGuardWriteRecord({
+          schemaVersion: 1, chatKey: snapshot.chatKey, records: merged, updatedAt: Date.now(),
+        });
+      }
+      if (state.destroyed || guard.generation !== generation) return;
+      guard.records = merged;
+      guard.pending = analysis.lost.length || analysis.missing.length
+        ? { lost: analysis.lost, missing: analysis.missing, checkedAt: Date.now() }
+        : null;
+      guard.status = 'ready';
+      guard.error = '';
+      hiddenFloorGuardUpdateUI();
+      if (analysis.lost.length) {
+        const signature = snapshot.chatKey + '|' + analysis.lost
+          .map(item => item.recordId || String(item.index)).sort().join(',');
+        if (signature !== guard.lastNoticeKey) {
+          hiddenFloorGuardNotify('warning',
+            '检测到 ' + analysis.lost.length + ' 条此前隐藏的消息现在处于显示状态。TLE 未自动重隐藏，请在会话侠中核对。');
+        }
+        guard.lastNoticeKey = signature;
+      } else if (!analysis.missing.length) {
+        guard.lastNoticeKey = '';
+      }
+    } catch (error) {
+      if (state.destroyed || guard.generation !== generation) return;
+      guard.status = 'error';
+      guard.error = error?.message || String(error);
+      hiddenFloorGuardUpdateUI();
+      hiddenFloorGuardNotify('error', '隐藏楼层保护初始化或核验失败：' + guard.error);
+    }
+  }
+
+  function hiddenFloorGuardScheduleVerify() {
+    const guard = state.chatTools.hiddenGuard;
+    if (state.destroyed || guard.suppress || guard.frame) return;
+    guard.frame = HOST_WIN.requestAnimationFrame(() => {
+      guard.frame = HOST_WIN.requestAnimationFrame(() => {
+        guard.frame = 0;
+        void hiddenFloorGuardVerify();
+      });
+    });
+  }
+
+  function hiddenFloorGuardAttachObserver() {
+    const guard = state.chatTools.hiddenGuard;
+    const chat = HOST_DOC.getElementById('chat');
+    if (guard.observedChat === chat && guard.observer) return;
+    guard.observer?.disconnect();
+    guard.observer = null;
+    guard.observedChat = chat;
+    if (!chat) return;
+    guard.observer = new HOST_WIN.MutationObserver(records => {
+      if (state.destroyed || guard.suppress) return;
+      const relevant = records.some(record => {
+        if (record.type === 'attributes' && record.attributeName === 'is_system') return true;
+        if (record.type !== 'childList') return false;
+        if (record.target === chat) return true;
+        return [...record.addedNodes, ...record.removedNodes].some(node =>
+          node.nodeType === 1 && (node.matches?.('.mes') || node.querySelector?.('.mes')));
+      });
+      if (relevant) hiddenFloorGuardScheduleVerify();
+    });
+    guard.observer.observe(chat, {
+      subtree: true, childList: true, attributes: true, attributeFilter: ['is_system'],
+    });
+  }
+
+  function hiddenFloorGuardBindEvents() {
+    const guard = state.chatTools.hiddenGuard;
+    if (guard.listeners.length) return;
+    const context = HOST_WIN.SillyTavern?.getContext?.();
+    const source = context?.eventSource;
+    const types = context?.eventTypes || context?.event_types;
+    if (!source || typeof source.on !== 'function' || !types) return;
+    const seen = new Set();
+    for (const key of ['CHAT_CHANGED', 'CHAT_LOADED']) {
+      const type = types[key];
+      if (typeof type !== 'string' || !type || seen.has(type)) continue;
+      seen.add(type);
+      const handler = () => {
+        hiddenFloorGuardAttachObserver();
+        hiddenFloorGuardScheduleVerify();
+      };
+      source.on(type, handler);
+      guard.listeners.push({ source, type, handler });
+    }
+  }
+
+  function hiddenFloorGuardStart() {
+    hiddenFloorGuardBindEvents();
+    hiddenFloorGuardAttachObserver();
+    hiddenFloorGuardScheduleVerify();
+  }
+
+  function hiddenFloorGuardStop() {
+    const guard = state.chatTools.hiddenGuard;
+    guard.generation += 1;
+    guard.observer?.disconnect();
+    guard.observer = null;
+    guard.observedChat = null;
+    if (guard.frame) HOST_WIN.cancelAnimationFrame(guard.frame);
+    guard.frame = 0;
+    for (const listener of guard.listeners.splice(0)) {
+      try {
+        if (typeof listener.source.removeListener === 'function') listener.source.removeListener(listener.type, listener.handler);
+        else listener.source.off?.(listener.type, listener.handler);
+      } catch {}
+    }
+    try { guard.db?.close?.(); } catch {}
+    guard.db = null;
+    guard.dbPromise = null;
+  }
+
+  async function hiddenFloorGuardCommitNativeAction(actionId, range, expectedChatKey) {
+    await hiddenFloorGuardAfterPaint();
+    const snapshot = getActiveChatActionContext();
+    if (!snapshot || snapshot.chatKey !== expectedChatKey) return;
+    const saved = await hiddenFloorGuardReadRecord(snapshot.chatKey);
+    let records = Array.isArray(saved?.records) ? saved.records : [];
+    if (actionId === 'unhide') {
+      const candidates = hiddenFloorGuardCreateFingerprints(snapshot.chat);
+      const removeIds = new Set();
+      const usedIndices = new Set();
+      for (const record of records) {
+        const match = hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices);
+        if (match && match.index >= range.start && match.index <= range.end && record.recordId) {
+          removeIds.add(record.recordId);
+          usedIndices.add(match.index);
+        }
+      }
+      records = records.filter(record => !removeIds.has(record.recordId));
+    } else if (actionId === 'hide') {
+      const analysis = hiddenFloorGuardAnalyze(records, snapshot.chat);
+      records = records.concat(analysis.newHidden.map(hiddenFloorGuardCreateRecord));
+    } else {
+      return;
+    }
+    await hiddenFloorGuardWriteRecord({
+      schemaVersion: 1, chatKey: snapshot.chatKey, records, updatedAt: Date.now(),
+    });
+    const guard = state.chatTools.hiddenGuard;
+    if (guard.currentChatKey === snapshot.chatKey) {
+      guard.records = records;
+      guard.pending = null;
+      guard.status = 'ready';
+      guard.error = '';
+      hiddenFloorGuardUpdateUI();
+    }
+  }
+
+  async function hiddenFloorGuardRestorePending() {
+    const guard = state.chatTools.hiddenGuard;
+    if (guard.busy) return;
+    const snapshot = getActiveChatActionContext();
+    if (!snapshot) {
+      hiddenFloorGuardNotify('error', '请先进入需要恢复隐藏楼层的聊天。');
+      return;
+    }
+    guard.busy = true;
+    hiddenFloorGuardUpdateUI();
+    let restored = 0;
+    try {
+      const saved = await hiddenFloorGuardReadRecord(snapshot.chatKey);
+      const records = Array.isArray(saved?.records) ? saved.records : [];
+      const analysis = hiddenFloorGuardAnalyze(records, snapshot.chat);
+      const recoverable = analysis.lost.filter(item => item.confidence === 'high' && item.recordId);
+      if (!recoverable.length) throw new Error('没有能够可靠定位的待恢复楼层；请核对后接受当前状态。');
+      const recordIds = new Set(recoverable.map(item => item.recordId));
+      const ranges = hiddenFloorGuardGroupRanges(recoverable.map(item => item.index));
+      guard.suppress = true;
+      for (const range of ranges) {
+        const latest = getActiveChatActionContext();
+        if (!latest || latest.chatKey !== snapshot.chatKey) throw new Error('聊天已切换，已取消恢复操作。');
+        const currentSaved = await hiddenFloorGuardReadRecord(latest.chatKey);
+        const currentRecords = Array.isArray(currentSaved?.records) ? currentSaved.records : [];
+        const currentAnalysis = hiddenFloorGuardAnalyze(currentRecords, latest.chat);
+        const currentRecoverable = currentAnalysis.lost.filter(item =>
+          item.confidence === 'high' && recordIds.has(item.recordId));
+        const expected = recoverable.filter(item => item.index >= range.start && item.index <= range.end);
+        const actual = currentRecoverable.filter(item => item.index >= range.start && item.index <= range.end);
+        if (actual.length !== expected.length || actual.length !== range.end - range.start + 1) {
+          throw new Error('消息位置或身份在恢复前发生变化；为避免隐藏错误楼层，已取消本次恢复。');
+        }
+        const result = await executeTLESlashCommand('/hide ' + range.start + '-' + range.end, latest.context);
+        if (result?.isError) throw new Error(result.errorMessage || '酒馆执行隐藏命令失败。');
+        if (result?.isAborted || result?.isQuietlyAborted) throw new Error(result.abortReason || '恢复操作已中止。');
+        restored += actual.length;
+      }
+      guard.suppress = false;
+      await hiddenFloorGuardAfterPaint();
+      await hiddenFloorGuardVerify(getActiveChatActionContext());
+      hiddenFloorGuardNotify('success', '已通过酒馆原生隐藏命令恢复 ' + restored + ' 条消息。');
+    } catch (error) {
+      guard.suppress = false;
+      hiddenFloorGuardNotify('error', error?.message || '恢复隐藏楼层失败。');
+      await hiddenFloorGuardVerify(getActiveChatActionContext());
+    } finally {
+      guard.suppress = false;
+      guard.busy = false;
+      hiddenFloorGuardUpdateUI();
+    }
+  }
+
+  async function hiddenFloorGuardAcceptPending() {
+    const guard = state.chatTools.hiddenGuard;
+    if (guard.busy) return;
+    const snapshot = getActiveChatActionContext();
+    if (!snapshot) return;
+    guard.busy = true;
+    hiddenFloorGuardUpdateUI();
+    try {
+      const saved = await hiddenFloorGuardReadRecord(snapshot.chatKey);
+      const records = Array.isArray(saved?.records) ? saved.records : [];
+      const analysis = hiddenFloorGuardAnalyze(records, snapshot.chat);
+      const discardIds = new Set([...analysis.lost, ...analysis.missing]
+        .map(item => item.recordId).filter(Boolean));
+      const kept = records.filter(record => !discardIds.has(record.recordId));
+      const next = kept.concat(analysis.newHidden.map(hiddenFloorGuardCreateRecord));
+      await hiddenFloorGuardWriteRecord({
+        schemaVersion: 1, chatKey: snapshot.chatKey, records: next, updatedAt: Date.now(),
+      });
+      guard.records = next;
+      guard.pending = null;
+      guard.status = 'ready';
+      guard.error = '';
+      guard.lastNoticeKey = '';
+      hiddenFloorGuardUpdateUI();
+      await hiddenFloorGuardVerify(snapshot);
+      hiddenFloorGuardNotify('success', '已接受当前聊天的隐藏状态；未更改任何楼层。');
+    } catch (error) {
+      guard.status = 'error';
+      guard.error = error?.message || String(error);
+      hiddenFloorGuardUpdateUI();
+      hiddenFloorGuardNotify('error', '更新隐藏楼层保护记录失败：' + guard.error);
+    } finally {
+      guard.busy = false;
+      hiddenFloorGuardUpdateUI();
+    }
   }
 
   function readRecentChatSettings(accountStorage) {
@@ -15688,11 +16253,15 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     toolbar.append(select, nameInput);
 
     const actions = maskHeroCreateNode('div', 'tle-mask-hero-actions');
+    const scopeToggle = maskHeroCreateButton('应用范围', 'toggle-scope', { title: '展开或收起统一作用范围设置' });
+    scopeToggle.setAttribute('aria-expanded', String(Boolean(maskHeroRuntime.scopeExpanded)));
+    scopeToggle.setAttribute('aria-controls', 'tle-mask-hero-scope-panel');
     actions.append(
       maskHeroCreateButton('应用', 'apply'),
-      maskHeroCreateButton('卸除效果', 'restore'),
-      maskHeroCreateButton('保存方案', 'save'),
-      maskHeroCreateButton('删除方案', 'delete')
+      maskHeroCreateButton('卸除', 'restore'),
+      maskHeroCreateButton('保存', 'save'),
+      maskHeroCreateButton('删除', 'delete'),
+      scopeToggle
     );
     const status = maskHeroCreateNode('div', 'tle-mask-hero-status', maskHeroRuntime.status);
     status.dataset.maskHeroStatus = '';
@@ -15713,6 +16282,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     };
 
     const scopeSection = maskHeroCreateNode('section', 'tle-mask-hero-section');
+    scopeSection.id = 'tle-mask-hero-scope-panel';
+    scopeSection.dataset.maskScopePanel = '';
+    scopeSection.hidden = !maskHeroRuntime.scopeExpanded;
     scopeSection.append(maskHeroCreateNode('strong', '', '统一作用范围'));
     const scopeRow = maskHeroCreateNode('div', 'tle-mask-hero-scope-row');
     const scopeLabel = maskHeroCreateNode('label', 'tle-mask-hero-field');
@@ -15885,7 +16457,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const note = maskHeroCreateNode('p', 'tle-mask-hero-note',
       '仅处理当前聊天的消息显示节点。原始聊天文件、角色卡和消息数据不会被写入；局部替换逐个文本节点执行，不跨富文本标签拼接；替换结果不会再次参与后续规则。头像文件保存在本机 IndexedDB。');
-    root.replaceChildren(toolbar, actions, status, scopeSection, nameSection, bodySection, floorSection, textSection, avatarSection, note);
+    root.replaceChildren(toolbar, actions, scopeSection, status, nameSection, bodySection, floorSection, textSection, avatarSection, note);
     void maskHeroRenderAssetHistory();
   }
 
@@ -15896,6 +16468,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
   function maskHeroLoadSelectedPlan(planId) {
     maskHeroRuntime.applyGeneration += 1;
+    maskHeroRuntime.scopeExpanded = false;
     maskHeroRuntime.selectedPlanId = String(planId || '');
     const plan = maskHeroRuntime.plans.find(item => item.id === maskHeroRuntime.selectedPlanId);
     if (plan) {
@@ -16487,6 +17060,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     maskHeroPersistPlans();
     if (state.chatTools.maskHero.appliedConfig && state.chatTools.maskHero.appliedConfig.id === id) maskHeroClearEffects();
     maskHeroRuntime.selectedPlanId = '';
+    maskHeroRuntime.scopeExpanded = false;
     maskHeroRuntime.draft = maskHeroCreateEmptyDraft();
     maskHeroRenderPage();
     maskHeroSetStatus('方案「' + (plan?.name || '') + '」已删除；其他方案不受影响。');
@@ -16614,6 +17188,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (meta) meta.textContent = summary.count ? `已隐藏 ${summary.count} 条消息` : '当前没有隐藏消息';
     if (copy) copy.disabled = summary.count === 0;
     panel.dataset.hiddenCount = String(summary.count);
+    hiddenFloorGuardUpdateUI();
   }
 
   function queueChatToolsRangeRefresh() {
@@ -16668,6 +17243,9 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     tools.button.setAttribute('aria-expanded', 'true');
     tools.button.setAttribute('aria-label', '关闭会话侠');
     observeChatToolsHiddenState();
+    hiddenFloorGuardBindEvents();
+    hiddenFloorGuardAttachObserver();
+    hiddenFloorGuardScheduleVerify();
     queueChatShortcutRefresh();
   }
 
@@ -17066,6 +17644,17 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="tle-chat-tools-range-value" data-tle-hidden-range aria-live="polite">读取中…</div>
           <div class="tle-chat-tools-chat-meta" data-tle-chat-tools-chat-meta></div>
         </section>
+        <section class="tle-chat-tools-protection" data-tle-hidden-protection>
+          <div class="tle-chat-tools-protection-heading">
+            <strong>隐藏楼层保护</strong>
+            <small data-tle-hidden-protection-status>正在连接本机保护存储…</small>
+          </div>
+          <p class="tle-chat-tools-protection-alert" data-tle-hidden-protection-alert role="status" hidden></p>
+          <div class="tle-chat-tools-protection-actions" data-tle-hidden-protection-actions hidden>
+            <button type="button" class="menu_button" data-hidden-guard-action="restore">恢复隐藏</button>
+            <button type="button" class="menu_button" data-hidden-guard-action="accept">接受当前状态</button>
+          </div>
+        </section>
       </section>
       <section class="tle-chat-tools-page" data-chat-tools-page="recent" hidden>
         <div class="tle-chat-tools-recent-toolbar">
@@ -17132,6 +17721,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     HOST_DOC.addEventListener('click', unmaskBeforeNativeEdit, { capture: true, signal: state.abort.signal });
     maskHeroSyncTabVisibility();
     maskHeroRenderPage();
+    hiddenFloorGuardStart();
     panel.addEventListener('change', event => {
       const target = event.target;
       const avatarInput = target?.closest?.('[data-mask-avatar-type]');
@@ -18914,12 +19504,28 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
 
     const chatToolsPanel = target.closest('#' + ID.chatToolsPanel);
     if (chatToolsPanel) {
+      const guardAction = target.closest('[data-hidden-guard-action]');
+      if (guardAction) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (guardAction.dataset.hiddenGuardAction === 'restore') void hiddenFloorGuardRestorePending();
+        if (guardAction.dataset.hiddenGuardAction === 'accept') void hiddenFloorGuardAcceptPending();
+        return;
+      }
       const maskAction = target.closest('[data-mask-hero-action]');
       if (maskAction) {
         event.preventDefault();
         event.stopPropagation();
         const action = maskAction.dataset.maskHeroAction;
         const index = Number(maskAction.dataset.index);
+        if (action === 'toggle-scope') {
+          const scopePanel = chatToolsPanel.querySelector('[data-mask-scope-panel]');
+          const expanded = Boolean(scopePanel?.hidden);
+          maskHeroRuntime.scopeExpanded = expanded;
+          if (scopePanel) scopePanel.hidden = !expanded;
+          maskAction.setAttribute('aria-expanded', String(expanded));
+          return;
+        }
         if (action === 'apply') void maskHeroApplyDraft().catch(error => maskHeroSetStatus(error?.message || '应用打码方案失败。'));
         if (action === 'restore') { maskHeroClearEffects(); maskHeroSetStatus('当前聊天的打码效果已卸除；原始显示已恢复。'); }
         if (action === 'save') void maskHeroSavePlan().catch(error => maskHeroSetStatus(error?.message || '保存方案失败。'));
@@ -20362,7 +20968,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.298';
+    const VERSION = '0.3.299';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -22291,6 +22897,7 @@ function createTLEGalleryHome(window, document) {
     // Stop every observer/listener before moving DOM back. Otherwise the observer can
     // see the restoration itself and immediately re-apply the engine workspace.
     state.destroyed = true;
+    hiddenFloorGuardStop();
     navEdgeSwipeAbort?.abort();
     navEdgeSwipeAbort = null;
     if (state.floorZeroClearanceFrame) HOST_WIN.cancelAnimationFrame(state.floorZeroClearanceFrame);
@@ -22379,7 +22986,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.298',
+    version: '0.3.299',
     ready: false,
     destroy,
     state,
@@ -22687,6 +23294,10 @@ function createTLEGalleryHome(window, document) {
       scan();
       syncScrollBottomElements();
       queueInfoRefresh();
+      if (chatRootChanged) {
+        hiddenFloorGuardAttachObserver();
+        hiddenFloorGuardScheduleVerify();
+      }
       if (chatRootChanged && chatFadeEnabled) scheduleChatFadeRefresh();
     });
   });
@@ -22840,5 +23451,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.298 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.299 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
