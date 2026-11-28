@@ -10,6 +10,10 @@ const sourcePath = hasWorkingSource
   : `releases/v${plan.core}/TLE.js`;
 const source = readFileSync(sourcePath, 'utf8');
 const readme = readFileSync('README.md', 'utf8');
+const coreApiStart = source.indexOf('  const api = {\n    modules: moduleKernel,');
+const coreApiEnd = source.indexOf('\n  };', coreApiStart);
+assert.ok(coreApiStart >= 0 && coreApiEnd > coreApiStart, 'Core API object must expose the Module Kernel');
+assert.match(source.slice(coreApiStart, coreApiEnd), /moduleApiVersion: moduleKernel.apiVersion/);
 const actualVersion = source.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
 const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
 const developmentOrCandidate = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') || plan.core !== stableManifest.latest_version;

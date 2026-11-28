@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { buildModuleKernelBundle } from '../scripts/build-module-kernel.mjs';
+import { buildModuleLoaderBundle } from '../scripts/build-module-loader.mjs';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const plan = JSON.parse(read('release-plan.json'));
@@ -45,7 +47,19 @@ function checkDevelopmentCore(source, version) {
   );
 }
 
-checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
+const kernelStart = '  /* TLE_MODULE_KERNEL_START */';
+const kernelEnd = '  /* TLE_MODULE_KERNEL_END */';
+const loaderStart = '  /* TLE_MODULE_LOADER_START */';
+const loaderEnd = '  /* TLE_MODULE_LOADER_END */';
+const kernelBundle = buildModuleKernelBundle(read('development/core/module-kernel.js'));
+const loaderBundle = buildModuleLoaderBundle(read('development/core/module-loader.js'));
+assert.equal(extract(developmentCore, kernelStart, kernelEnd, 'Development Kernel'),
+  extract(kernelBundle, kernelStart, kernelEnd, 'Generated Kernel'),
+  'Development Core: Module Kernel differs from its authoritative source');
+assert.equal(extract(developmentCore, loaderStart, loaderEnd, 'Development Module Loader'),
+  extract(loaderBundle, loaderStart, loaderEnd, 'Generated Module Loader'),
+  'Development Core: Module Loader differs from its authoritative source');
+checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
 assert.equal(coreVersion(developmentCore, 'Development Core'), plan.core,
   'Development Core header must match release-plan.json');
 assert.ok(stableCore.includes(avatar), 'Stable Core: HD Avatar Engine differs from its authoritative source');

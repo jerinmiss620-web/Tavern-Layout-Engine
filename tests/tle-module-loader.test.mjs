@@ -6,7 +6,7 @@ import { createModuleKernel } from '../development/core/module-kernel.js';
 import { createModuleLoader } from '../development/core/module-loader.js';
 
 const ROOT = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/';
-const MANIFEST_URL = ROOT + 'feature/core-module-kernel-v0.3.304-20261128/modules/test.json';
+const MANIFEST_URL = ROOT + 'integration/phase-2-module-system-20261129/modules/test.json';
 let databaseSequence = 0;
 
 function moduleSource(version, shouldFail = false) {

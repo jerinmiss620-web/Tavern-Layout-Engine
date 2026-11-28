@@ -4,12 +4,14 @@
 
 TLE 继续以**单份 SillyTavern Assistant JSON**作为用户安装入口。Core 内置 Module Kernel，负责模块注册、依赖解析、生命周期、事件、模块设置命名空间与更新替换回滚。模块源码与版本清单可以独立发布；Loader 在后续阶段按清单下载、校验并交给 Core 注册。
 
-本阶段先建立 Kernel，不迁移任何现有功能。当前正式 Core v0.3.304、Loader Runtime v0.3.6、Bootstrap v1.0.6 与 Stable Manifest 均保持不变。开发分支中的 Core 单体源码只增加 Kernel 入口；现有导航、会话侠、楼层侠、整理侠、兼容修复、渐隐侠、画廊、头像引擎等行为暂不拆动。
+本阶段建立 Kernel 与 Loader，并以 HD Avatar 作为受控试点；其他现有功能暂不迁移。当前正式 Core v0.3.304、Loader Runtime v0.3.6、Bootstrap v1.0.6 与 Stable Manifest 均保持不变。开发分支中的 Core 单体源码只增加 Kernel 入口；除 HD Avatar 试点外，现有导航、会话侠、楼层侠、整理侠、兼容修复、渐隐侠与 Gallery 暂不拆动。
 
 ## 当前实现
 
+统一构建入口为 `npm run build:core`；使用 `npm run build:core -- --check` 进行只读一致性核验。底层 Kernel / Loader 构建脚本由统一入口调用，不需要分别执行。
+
 - Kernel 源码：development/core/module-kernel.js
-- 嵌入构建：node scripts/build-module-kernel.mjs
+- 嵌入构建：npm run build:core
 - 嵌入位置：TLE_MODULE_KERNEL_START / TLE_MODULE_KERNEL_END
 - Core API：api.modules
 - Kernel API：1
@@ -66,7 +68,7 @@ permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript �
 ## Phase 2.2 当前实现
 
 - Module Loader 源码：development/core/module-loader.js
-- Core 嵌入构建：node scripts/build-module-loader.mjs
+- Core 嵌入构建：npm run build:core
 - Core 嵌入位置：TLE_MODULE_LOADER_START / TLE_MODULE_LOADER_END
 - Core API：api.moduleLoader（refresh / update / updateAll / enable / disable / uninstall；Kernel 仍通过 api.modules 暴露）
 - Manifest：modules/stable.json 与 modules/test.json 分通道管理

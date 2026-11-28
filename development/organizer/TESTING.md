@@ -23,6 +23,23 @@
 5. 测试版必须使用新功能分支自己的测试清单、独立 Test Loader 与独立缓存；不要修改主分支的旧兼容 `channels/test.json`。
 6. 正式发布只使用 `RELEASING.md` 规定的流程：先从权威开发源码执行 Core stage，再运行 `npm run release`；不得手工编辑生成的发布快照.
 
+## Core 模块化开发（Phase 2）
+
+- 当前开发分支从正式 main v0.3.304 创建；Stable Core、Loader Runtime、Bootstrap 与正式清单不得随模块化测试改动。
+- Core Module API 当前为 1；Kernel 源码位于 development/core/module-kernel.js，通过 npm run build:core 嵌入 development/organizer/TLE.js。
+- Core 公开 api.modules；Core destroy 必须先同步销毁已启动模块，再恢复自身原生 DOM、样式和布局。
+- Stable 模块清单 modules/stable.json 当前必须保持空，直到第一个模块完成独立源码、固定 Commit、SHA-256/字节数、依赖和回滚验收。
+- 每个模块必须有稳定 ID、独立 SemVer、API 版本、父模块、技术依赖、权限声明和设置 Schema 版本。
+- init 可以异步，但必须监听 AbortSignal；destroy 与 init 返回的 cleanup 必须同步，不能把 Core 的 DOM 恢复挂在异步清理之后。
+- Core 在异步 init 仍进行时卸载，会立即调用定义级 destroy 清理部分初始化；init 结束后再执行返回值 cleanup。定义级 destroy 必须幂等，不能假设 init 已完整结束。
+- 需要宿主页面的模块必须在 Manifest 声明 host:script-window / host:window / host:document；Kernel 只通过 Context 的受权限 getter 暴露对应引用。
+- 必须验证父子级联、技术依赖级联、错误隔离、模块事件订阅自动清理、模块设置隔离、更新失败恢复旧版本。
+- permissions 只是 Core API 能力门槛，不是 JavaScript 沙箱；模块源码必须由 Loader 通过不可变 Commit、SHA-256、字节数和来源校验。
+- 除 HD Avatar 作为受控试点外，本阶段不迁移现有导航、会话侠、楼层侠、整理侠、兼容修复、渐隐侠或 Gallery；其余模块待试点验收后再迁移。
+- 自动化通过不等于 ST/TT 实机验收；模块试点仍须覆盖 PC、移动端、ST、TT 及全局卸载。
+
+
+
 ## 记录预览功能历史验收清单（v0.3.287–v0.3.289）
 
 - 首页画廊默认仅显示有聊天记录的角色；切换显示全部角色时，未聊天角色也能正常显示。检查最近聊天合并、折叠数量、排序和详情入口。
@@ -93,7 +110,7 @@
 
 如果仍在使用旧 Organizer Branch Test Loader：
 
-1. 禁用 **TLE Organizer Branch Test Loader 0.3.0**。
+1. 禁用 **TLE Organizer Branch Test Loader 0.3.1**。
 2. 重新启用 **TLE Permanent Bootstrap 1.0.6**。
 3. 完整刷新 ST/TT 宿主页面。
 4. 在 TLE → **版本与更新** 核对 Stable 通道、Core **v0.3.304**、Loader **v0.3.6**。
@@ -103,3 +120,23 @@
 ## 旧测试分支说明
 
 旧分支 `feature/organizer-nav-worldbooks-20261125` 的测试清单与 Loader 缓存相互隔离。它可以用于追溯历史测试，但不代表当前正式版本，也不应继续承载新功能。需要新的测试环境时，从当前 `main` 创建独立测试分支，重新生成独立清单与 Test Loader；正式 `latest.json`、`loader/latest.json` 和 Bootstrap 不参与测试发布。
+
+## Phase 2.2 Module Loader
+
+- `development/core/module-loader.js` 必须与 Core 中的 `TLE_MODULE_LOADER_START/END` bundle 完全一致。
+- Stable 与 Test Manifest 必须按 Loader 通道选择，不能交叉读取。
+- 模块源码必须来自仓库 Raw HTTPS，URL 必须精确绑定完整 Commit SHA 与 source_path。
+- 必须在执行前验证 SHA-256 与 UTF-8 字节数；相同模块 SemVer 不得更换 Commit 或源码摘要。
+- IndexedDB 只把成功初始化的版本标记为 Last Known Good；下载成功不等于更新成功。
+- 候选模块 init 失败时，旧模块实例必须继续可用；独立模块的更新/停用/卸载不得影响无依赖关系的模块。
+- Core 内置 HD Avatar Engine fallback 必须保留，直到 ST/TT 实机验证通过并完成正式迁移验收。
+
+
+## Core Module Loader · Test Candidate v0.3.304
+
+1. 使用现有 Test Loader 0.3.1 的 Test 通道更新到 v0.3.304；Stable Loader 与正式 main 不参与本轮测试。
+2. Core 启动后应先启用内置 HD Avatar Engine fallback，再从 `modules/test.json` 校验并尝试加载 `avatar.hd@1.0.0`。
+3. 在模块状态中核对 `avatar.hd` 的 active version、Last Known Good、Test channel 与持久化缓存状态。
+4. 验证刷新/重进、角色切换、断网启动、错误源码回滚、模块停用/启用/卸载；独立模块不得影响无依赖关系的模块。
+5. TT 必须保持原生头像处理，不启动额外头像替换逻辑。
+6. 未完成 ST 与 TT 实机矩阵前，不合并 PR、不更新正式 main。

@@ -23,7 +23,7 @@
   const LOADER_VERSION = '0.3.1';
   const PROJECT = 'Tavern Layout Engine';
   const CHANNEL = 'test';
-  const MANIFEST_URL = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/feature/core-module-kernel-v0.3.304-20261128/channels/test.json';
+  const MANIFEST_URL = 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/integration/phase-2-module-system-20261129/channels/test.json';
   const INSTANCE_KEY = '__TAVERN_LAYOUT_ENGINE_V02__';
   const LOADER_KEY = '__TLE_REMOTE_LOADER_TEST_V1__';
   const LKG_KEY = 'tle.loader.test.lastKnownGood.v1';
@@ -225,17 +225,17 @@
     let sourceUrl;
     try { sourceUrl = new URL(release.source_url); }
     catch { throw new Error('源码 URL 无效'); }
-    const expectedPath = /^\/jerinmiss620-web\/Tavern-Layout-Engine\/[a-f0-9]{40}\/releases\/v\d+\.\d+\.\d+\/TLE\.js$/;
+    const expectedPath = /^\/jerinmiss620-web\/Tavern-Layout-Engine\/[a-f0-9]{40}\/test-releases\/v\d+\.\d+\.\d+\/TLE\.js$/;
     if (sourceUrl.protocol !== 'https:' || sourceUrl.hostname !== 'raw.githubusercontent.com' || !expectedPath.test(sourceUrl.pathname)) {
       throw new Error('源码地址不在受信任的仓库与版本路径内');
     }
-    if (!sourceUrl.pathname.includes(`/releases/v${release.version}/TLE.js`)) {
+    if (!sourceUrl.pathname.includes(`/test-releases/v${release.version}/TLE.js`)) {
       throw new Error('源码 URL 版本目录与清单版本号不一致');
     }
-    if (release.source_path !== `releases/v${release.version}/TLE.js`) {
+    if (release.source_path !== `test-releases/v${release.version}/TLE.js`) {
       throw new Error('源码路径字段与版本号不一致');
     }
-    const commitMatch = sourceUrl.pathname.match(/^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/releases\/v\d+\.\d+\.\d+\/TLE\.js$/);
+    const commitMatch = sourceUrl.pathname.match(/^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/test-releases\/v\d+\.\d+\.\d+\/TLE\.js$/);
     if (!commitMatch || (release.source_commit && release.source_commit !== commitMatch[1])) {
       throw new Error('源码 Commit 与固定下载地址不一致');
     }
