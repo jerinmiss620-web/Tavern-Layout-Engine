@@ -19,7 +19,7 @@ assert.deepEqual(stable.modules, [], 'Stable manifest must stay empty until the 
 assert.equal(test.schema_version, 1);
 assert.equal(test.project, 'Tavern Layout Engine');
 assert.equal(test.channel, 'test');
-assert.equal(test.core_api_version, 1);
+assert.equal(test.core_api_version, 2);
 assert.equal(test.modules.length, 1, 'Test manifest must contain only the HD Avatar Engine pilot.');
 const [pilot] = test.modules;
 assert.equal(pilot.id, 'avatar.hd');
