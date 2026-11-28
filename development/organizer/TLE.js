@@ -25129,7 +25129,6 @@ function createTLEGalleryHome(window, document) {
     scan();
   }, { signal: state.abort.signal });
 
-  hdAvatarEngine = createTLEHDAvatarEngine(SCRIPT_WIN, HOST_WIN, HOST_DOC);
   moduleLoader.start().catch(error => console.error('[TLE Module Loader] 启动失败。', error));
   galleryHome = createTLEGalleryHome(HOST_WIN, HOST_DOC);
   galleryHome.setEnabled(recordPreviewEnabled);
