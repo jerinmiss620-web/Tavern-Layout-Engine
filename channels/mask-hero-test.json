@@ -2,19 +2,19 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "mask-hero-test",
-  "latest_version": "0.3.296",
+  "latest_version": "0.3.297",
   "minimum_loader_version": "0.3.0",
   "recommended_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.296",
-    "source_path": "releases/v0.3.296/TLE.js",
-    "source_commit": "131150bfd17593ec65e4303cfb390aaae3801e2b",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/131150bfd17593ec65e4303cfb390aaae3801e2b/releases/v0.3.296/TLE.js",
-    "changelog_path": "releases/v0.3.296/CHANGELOG.md",
-    "sha256": "7851539eb685d64eb5a34c02756235981de83dbe90be246b65c696d99f4f6319",
-    "size_bytes": 1090737
+    "version": "0.3.297",
+    "source_path": "releases/v0.3.297/TLE.js",
+    "source_commit": "cb299c0707d5426263e2fd13a5305975ffe5df84",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/cb299c0707d5426263e2fd13a5305975ffe5df84/releases/v0.3.297/TLE.js",
+    "changelog_path": "releases/v0.3.297/CHANGELOG.md",
+    "sha256": "b1cff5934acf058bbe6d9624a784942662fda59c4c09e1c04ce9625d259a2d50",
+    "size_bytes": 1092646
   },
-  "status": "TEST v0.3.296 · 打码侠改进版。新增全部楼层 / 最新 N 层 / 指定范围批量正文替换、原生名称节点替换、最近 6 张头像历史复用与窄屏局部替换重排。独立测试通道，不影响正式版 v0.3.294。",
+  "status": "TEST v0.3.297 · 会话侠隐藏范围智能粘贴。复制单段范围后，粘贴到隐藏 / 恢复楼层的任一输入框即可自动拆分；单楼层自动填入两框；多段不连续范围不会被合并。独立测试通道，不影响正式版 v0.3.294。",
   "loader_release": {
     "version": "0.3.0",
     "source_path": "loader/TLE-Mask-Hero-Test-Loader-0.3.0.js",
