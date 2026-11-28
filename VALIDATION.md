@@ -252,5 +252,5 @@
 - Core SHA-256: `33bd97d21ec785242a47486fcc93ef792c60a2160bad5d44d8ef3ffc8f18807b`; UTF-8 size: `1,209,522` bytes.
 - Test Loader: `0.3.2`, Commit `b3fb21966e7f1c3b134621b4508798135c659a07`.
 - Loader SHA-256: `daa0c0fd2165d58e7a24b1e08f27a5a4e293a0fe632d931554699a054b60a9e3`; UTF-8 size: `39,875` bytes.
-- Test manifest requires Core API v2 and points to this Phase 3 branch. The candidate adds permission-gated `chat-context` and `resource-catalog` services; no Session / Organizer feature has been migrated yet.
+- Test manifest requires Core API v2 and points to this Phase 3 branch. It includes the auto-starting no-UI `core.services-smoke` module (Commit `20b2a0c43aba06f151a58530af3356426e1f5526`, SHA-256 `184f645c0b1866144006bd0c44a9c0f8191a9ca3f49b9700303c6253d825c038`, 2,822 UTF-8 bytes), which verifies permission-gated `chat-context` and `resource-catalog` access, immutable snapshots and AbortSignal enforcement. No Session / Organizer feature has been migrated yet.
 - ST / TT real-device validation for this new candidate is pending. Stable Core v0.3.304, Stable Loader Runtime v0.3.6, Bootstrap v1.0.6, `latest.json` and the empty Stable Module Manifest remain unchanged.
