@@ -100,7 +100,7 @@ const loader = verifyPinnedRelease(
 );
 assert.equal(loaderRelease.version, '0.3.1');
 assert.match(loader, /const LOADER_VERSION = '0\.3\.1'/);
-assert.match(loader, /integration\\/phase2-unified-modules-20261129\\/channels\\/test\\.json/);
+assert.match(loader, /integration\/phase2-unified-modules-20261129\/channels\/test\.json/);
 if (manifest.release.version === '0.3.222') {
   assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
   assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
