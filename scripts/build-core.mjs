@@ -14,39 +14,61 @@ function insertBefore(source, anchor, insertion, label) {
 }
 
 function ensureModuleMarkers(source) {
-  const markers = [
-    '/* TLE_MODULE_KERNEL_START */',
-    '/* TLE_MODULE_KERNEL_END */',
-    '/* TLE_MODULE_LOADER_START */',
-    '/* TLE_MODULE_LOADER_END */',
+  const avatarGalleryMarkers = [
     '/* TLE_AVATAR_ENGINE_START */',
     '/* TLE_AVATAR_ENGINE_END */',
     '/* TLE_GALLERY_HOME_START */',
     '/* TLE_GALLERY_HOME_END */',
   ];
-  const counts = markers.map(marker => count(source, marker));
-  if (counts.every(value => value === 0)) {
+  const avatarGalleryCounts = avatarGalleryMarkers.map(marker => count(source, marker));
+  if (avatarGalleryCounts.every(value => value === 0)) {
     source = insertBefore(
       source,
       '// TLE integrated engine, based on 桃mini「哇！头像变清晰啦！」v4.5.14.',
-      '/* TLE_AVATAR_ENGINE_START */\n',
+      '/* TLE_AVATAR_ENGINE_START */\\n',
       'Avatar start',
     );
     source = insertBefore(
       source,
       'function createTLEGalleryHome(window, document) {',
-      '/* TLE_AVATAR_ENGINE_END */\n/* TLE_GALLERY_HOME_START */\n',
+      '/* TLE_AVATAR_ENGINE_END */\\n/* TLE_GALLERY_HOME_START */\\n',
       'Avatar/Gallery boundary',
     );
     source = insertBefore(
       source,
       '  function destroy() {',
-      '/* TLE_GALLERY_HOME_END */\n',
+      '/* TLE_GALLERY_HOME_END */\\n',
       'Gallery end',
     );
   } else {
-    for (let index = 0; index < markers.length; index++) {
-      assert.equal(count(source, markers[index]), 1, 'Module marker must occur exactly once: ' + markers[index]);
+    for (const marker of avatarGalleryMarkers) {
+      assert.equal(count(source, marker), 1, 'Module marker must occur exactly once: ' + marker);
+    }
+  }
+
+  const moduleMarkers = [
+    '  /* TLE_MODULE_KERNEL_START */',
+    '  /* TLE_MODULE_KERNEL_END */',
+    '  /* TLE_MODULE_LOADER_START */',
+    '  /* TLE_MODULE_LOADER_END */',
+  ];
+  const moduleCounts = moduleMarkers.map(marker => count(source, marker));
+  if (moduleCounts.every(value => value === 0)) {
+    const placeholders = [
+      '  /* TLE_MODULE_KERNEL_START */',
+      '  /* TLE_MODULE_KERNEL_END */',
+      '  /* TLE_MODULE_LOADER_START */',
+      '  /* TLE_MODULE_LOADER_END */',
+    ].join('\\n') + '\\n';
+    source = insertBefore(
+      source,
+      '/* TLE_AVATAR_ENGINE_START */',
+      placeholders,
+      'Module Kernel/Loader markers',
+    );
+  } else {
+    for (const marker of moduleMarkers) {
+      assert.equal(count(source, marker), 1, 'Module marker must occur exactly once: ' + marker);
     }
   }
   return source;
