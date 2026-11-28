@@ -249,7 +249,7 @@ assert.ok(!nativeActionCommit.includes('range.start') && !nativeActionCommit.inc
 const runActionSection = section(source, '  async function runChatAction(', '  function updateInfoStation(');
 assert.ok(runActionSection.includes('const hiddenGuardTargets = protectHiddenChange && actionRange'));
 assert.ok(runActionSection.includes('hiddenFloorGuardCreateFingerprints(snapshot.chat)'));
-assert.ok(source.includes("executeTLESlashCommand('/hide ' + range.start + '-' + range.end"));
+assert.ok(source.includes("'/hide ' + range.start + '-' + range.end"));
 
 const restoreSection = section(
   source,
