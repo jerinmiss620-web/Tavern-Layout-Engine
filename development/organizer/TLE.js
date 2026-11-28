@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.299
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.300
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -7801,6 +7801,11 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     state.chatTools.suppressObserver = true;
     const hiddenGuard = state.chatTools.hiddenGuard;
     const protectHiddenChange = actionId === 'hide' || actionId === 'unhide';
+    const hiddenGuardTargets = protectHiddenChange && actionRange
+      ? hiddenFloorGuardCreateFingerprints(snapshot.chat)
+        .filter(item => item.index >= actionRange.start && item.index <= actionRange.end)
+        .filter(item => actionId !== 'unhide' || hiddenFloorGuardIsHidden(snapshot.chat[item.index]))
+      : [];
     if (protectHiddenChange) hiddenGuard.suppress = true;
     try {
       const result = await executeTLESlashCommand(command, snapshot.context);
@@ -7808,7 +7813,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       if (result?.isAborted || result?.isQuietlyAborted) throw new Error(result.abortReason || '命令已中止。');
       if (protectHiddenChange) {
         try {
-          await hiddenFloorGuardCommitNativeAction(actionId, actionRange, snapshot.chatKey);
+          await hiddenFloorGuardCommitNativeAction(actionId, hiddenGuardTargets, snapshot.chatKey);
         } catch (backupError) {
           hiddenGuard.status = 'error';
           hiddenGuard.error = '原生楼层操作已完成，但保护备份未能同步：' + (backupError?.message || backupError);
@@ -11572,14 +11577,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.299 · 打码侠范围折叠与隐藏楼层保护</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.300 · 隐藏楼层身份匹配加固</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.299</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.300</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -13272,49 +13277,97 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }));
   }
 
-  function hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices = new Set()) {
-    const scored = [];
+  function hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices = new Set(), reservedGenIds = new Set()) {
+    const recordGenId = String(record?.genId ?? '');
+    const recordSendDate = String(record?.sendDate ?? '');
+    const recordName = String(record?.name ?? '');
+    const recordIsUser = typeof record?.isUser === 'boolean' ? record.isUser : null;
+    const exact = [];
+    const fallback = [];
+
     for (const candidate of candidates || []) {
       if (usedIndices.has(candidate.index)) continue;
-      if (record?.genId && candidate.genId && record.genId === candidate.genId) {
-        scored.push({ candidate, score: 100, exactGeneration: true });
+      const candidateGenId = String(candidate?.genId ?? '');
+      if (!recordGenId && candidateGenId && reservedGenIds.has(candidateGenId)) continue;
+      if (recordGenId && candidateGenId) {
+        if (recordGenId !== candidateGenId) continue;
+        exact.push(candidate);
         continue;
       }
-      let score = 0;
-      if (record?.contentHash && candidate.contentHash === record.contentHash) score += 4;
-      if (record?.sendDate && candidate.sendDate === record.sendDate) score += 3;
-      if (record?.name && candidate.name === record.name) score += 2;
-      if (typeof record?.isUser === 'boolean' && candidate.isUser === record.isUser) score += 2;
-      if (record?.prevHash && candidate.prevHash === record.prevHash) score += 1;
-      if (record?.nextHash && candidate.nextHash === record.nextHash) score += 1;
-      if (score >= 6) scored.push({ candidate, score, exactGeneration: false });
+
+      const candidateSendDate = String(candidate?.sendDate ?? '');
+      const candidateName = String(candidate?.name ?? '');
+      const candidateIsUser = typeof candidate?.isUser === 'boolean' ? candidate.isUser : null;
+      if (recordSendDate && candidateSendDate && recordSendDate !== candidateSendDate) continue;
+      if (recordName && candidateName && recordName !== candidateName) continue;
+      if (recordIsUser !== null && candidateIsUser !== null && recordIsUser !== candidateIsUser) continue;
+
+      const dateMatch = Boolean(recordSendDate && candidateSendDate && recordSendDate === candidateSendDate);
+      const nameMatch = Boolean(recordName && candidateName && recordName === candidateName);
+      const senderMatch = recordIsUser !== null && candidateIsUser !== null && recordIsUser === candidateIsUser;
+      const contentMatch = Boolean(record?.contentHash && candidate?.contentHash && record.contentHash === candidate.contentHash);
+      const prevMatch = Boolean(record?.prevHash && candidate?.prevHash && record.prevHash === candidate.prevHash);
+      const nextMatch = Boolean(record?.nextHash && candidate?.nextHash && record.nextHash === candidate.nextHash);
+      const contextMatch = prevMatch || nextMatch;
+      const score = (contentMatch ? 4 : 0) + (dateMatch ? 3 : 0)
+        + (nameMatch ? 2 : 0) + (senderMatch ? 2 : 0)
+        + (prevMatch ? 1 : 0) + (nextMatch ? 1 : 0);
+      fallback.push({
+        candidate, score, dateMatch, nameMatch, senderMatch,
+        contentMatch, prevMatch, nextMatch, contextMatch,
+      });
     }
-    scored.sort((a, b) => b.score - a.score);
-    if (!scored.length) return null;
-    const exact = scored.filter(item => item.exactGeneration);
+
     if (exact.length) {
       if (exact.length !== 1) return null;
-      return { index: exact[0].candidate.index, score: 100, confidence: 'high' };
+      return { index: exact[0].index, score: 100, confidence: 'high' };
     }
-    const best = scored[0];
-    if (scored[1] && scored[1].score === best.score) return null;
-    return {
-      index: best.candidate.index,
-      score: best.score,
-      confidence: best.score >= 8 ? 'high' : 'medium',
-    };
+
+    // A matching timestamp + sender + name is strong only when the content
+    // or at least one adjacent message also agrees. If several messages share
+    // that metadata, require a unique content-and-context match.
+    const dateMatches = fallback.filter(item => item.dateMatch && item.nameMatch && item.senderMatch);
+    if (dateMatches.length === 1) {
+      const best = dateMatches[0];
+      if (!best.contentMatch && !best.contextMatch) return null;
+      return { index: best.candidate.index, score: best.score, confidence: 'high' };
+    }
+    if (dateMatches.length > 1) {
+      const disambiguated = dateMatches.filter(item => item.contentMatch && item.contextMatch);
+      const competingContext = dateMatches.some(item =>
+        item.prevMatch && item.nextMatch && !disambiguated.includes(item));
+      if (disambiguated.length !== 1 || competingContext) return null;
+      const best = disambiguated[0];
+      return { index: best.candidate.index, score: best.score, confidence: 'high' };
+    }
+
+    // Without a comparable timestamp, never rely on text alone: the sender,
+    // name, exact content hash and at least one adjacent hash must agree.
+    const fallbackMatches = fallback.filter(item =>
+      item.nameMatch && item.senderMatch && item.contentMatch && item.contextMatch);
+    if (fallbackMatches.length !== 1) return null;
+    const best = fallbackMatches[0];
+    return { index: best.candidate.index, score: best.score, confidence: 'high' };
   }
 
   function hiddenFloorGuardAnalyze(records, chat) {
     const messages = Array.isArray(chat) ? chat : [];
     const candidates = hiddenFloorGuardCreateFingerprints(messages);
+    const sourceRecords = Array.isArray(records) ? records : [];
+    const reservedGenIds = new Set(sourceRecords
+      .map(record => String(record?.genId ?? ''))
+      .filter(Boolean));
+    // Match records with stable generation IDs first so a weaker fallback
+    // record cannot claim the candidate belonging to an exact-ID record.
+    const orderedRecords = sourceRecords.slice().sort((a, b) =>
+      Number(Boolean(b?.genId)) - Number(Boolean(a?.genId)));
     const usedIndices = new Set();
     const stillHidden = [];
     const lost = [];
     const missing = [];
-    for (const record of Array.isArray(records) ? records : []) {
-      const match = hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices);
-      if (!match) {
+    for (const record of orderedRecords) {
+      const match = hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices, reservedGenIds);
+      if (!match || match.confidence !== 'high') {
         missing.push(record);
         continue;
       }
@@ -13641,7 +13694,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     guard.dbPromise = null;
   }
 
-  async function hiddenFloorGuardCommitNativeAction(actionId, range, expectedChatKey) {
+  async function hiddenFloorGuardCommitNativeAction(actionId, targetFingerprints, expectedChatKey) {
     await hiddenFloorGuardAfterPaint();
     const snapshot = getActiveChatActionContext();
     if (!snapshot || snapshot.chatKey !== expectedChatKey) return;
@@ -13649,13 +13702,40 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     let records = Array.isArray(saved?.records) ? saved.records : [];
     if (actionId === 'unhide') {
       const candidates = hiddenFloorGuardCreateFingerprints(snapshot.chat);
+      const targets = Array.isArray(targetFingerprints) ? targetFingerprints : [];
+      const targetGenIds = new Set(targets
+        .map(item => String(item?.genId ?? ''))
+        .filter(Boolean));
+      const targetIndices = new Set();
+      const usedTargetIndices = new Set();
+      const orderedTargets = targets.slice().sort((a, b) =>
+        Number(Boolean(b?.genId)) - Number(Boolean(a?.genId)));
+      for (const target of orderedTargets) {
+        const match = hiddenFloorGuardMatchFingerprint(
+          target, candidates, usedTargetIndices, targetGenIds,
+        );
+        if (!match || match.confidence !== 'high') continue;
+        usedTargetIndices.add(match.index);
+        if (!hiddenFloorGuardIsHidden(snapshot.chat[match.index])) targetIndices.add(match.index);
+      }
+
+      const recordGenIds = new Set(records
+        .map(record => String(record?.genId ?? ''))
+        .filter(Boolean));
+      const orderedRecords = records.slice().sort((a, b) =>
+        Number(Boolean(b?.genId)) - Number(Boolean(a?.genId)));
+      const usedRecordIndices = new Set();
       const removeIds = new Set();
-      const usedIndices = new Set();
-      for (const record of records) {
-        const match = hiddenFloorGuardMatchFingerprint(record, candidates, usedIndices);
-        if (match && match.index >= range.start && match.index <= range.end && record.recordId) {
+      for (const record of orderedRecords) {
+        const match = hiddenFloorGuardMatchFingerprint(
+          record, candidates, usedRecordIndices, recordGenIds,
+        );
+        if (!match || match.confidence !== 'high') continue;
+        usedRecordIndices.add(match.index);
+        if (targetIndices.has(match.index)
+          && !hiddenFloorGuardIsHidden(snapshot.chat[match.index])
+          && record.recordId) {
           removeIds.add(record.recordId);
-          usedIndices.add(match.index);
         }
       }
       records = records.filter(record => !removeIds.has(record.recordId));
@@ -20968,7 +21048,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.299';
+    const VERSION = '0.3.300';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -22986,7 +23066,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.299',
+    version: '0.3.300',
     ready: false,
     destroy,
     state,
@@ -23451,5 +23531,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.299 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.300 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
