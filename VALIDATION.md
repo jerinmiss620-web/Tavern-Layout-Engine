@@ -4,6 +4,7 @@
 
 - 在 Core v0.3.304 中嵌入 Module Kernel 与 Module Loader；保持单份酒馆助手 JSON 的导入方式。
 - 测试候选不可变 Commit：`3fe748e26fa5f95d782f3d37808d2f2c5aac3618`；SHA-256：`29fabe84fa594061d913cfc81cebb73b4223323b7e1b8f7cced2178b4f3979bb`；UTF-8 字节数：`1205116`。
+- 分支专用 Test Loader：`0.3.1`；固定到本功能分支的 `channels/test.json`，不读取或修改 `main/channels/test.json`。
 - 模块源码按固定 Commit、SHA-256 与 UTF-8 字节数校验；IndexedDB 缓存成功版本，初始化成功后才推进 Last Known Good。
 - HD Avatar Engine 1.0.0 进入 Test Manifest；原内置 4.5.14 作为离线/失败回退。Stable Manifest 保持空清单。
 - 自动化覆盖 Manifest 校验、独立更新、父子依赖、停用/卸载、失败回滚、离线 LKG 与 TT 原生绕过。
