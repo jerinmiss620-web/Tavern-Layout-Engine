@@ -4,5 +4,5 @@
   "channel": "stable",
   "core_api_version": 1,
   "modules": [],
-  "notes": "Empty by design until the first independently packaged module passes the pilot lifecycle and rollback tests."
+  "notes": "Intentionally empty. The HD Avatar Engine Test pilot passed ST/TT device validation on 2026-11-29, but remains Test-only until a separate Stable promotion is explicitly approved."
 }
