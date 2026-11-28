@@ -15,11 +15,17 @@ function insertBefore(source, anchor, insertion, label) {
 
 function placeMarkerAfter(source, marker, anchor, label) {
   assert.ok(count(source, marker) <= 1, label + ': marker must not be duplicated');
-  if (count(source, marker) === 1) source = source.replace(marker, '');
+  if (count(source, marker) === 1) {
+    const markerIndex = source.indexOf(marker);
+    const before = source.slice(0, markerIndex).replace(/\n+$/, '');
+    const after = source.slice(markerIndex + marker.length).replace(/^\n+/, '');
+    source = before + '\n' + after;
+  }
   assert.equal(count(source, anchor), 1, label + ': expected exactly one function-end anchor');
-  return source.replace(anchor, anchor + '\n' + marker);
+  const anchorEnd = source.indexOf(anchor) + anchor.length;
+  const afterAnchor = source.slice(anchorEnd).replace(/^\n+/, '');
+  return source.slice(0, anchorEnd) + '\n' + marker + '\n\n' + afterAnchor;
 }
-
 function ensureModuleMarkers(source) {
   const markers = [
     '/* TLE_AVATAR_ENGINE_START */',
