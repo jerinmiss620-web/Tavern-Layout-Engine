@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 
@@ -23,7 +24,14 @@ assert.deepEqual(stable.modules, [], 'Stable manifest must remain empty until th
 assert.equal(test.channel, 'test');
 assert.equal(test.modules.length, 1);
 assert.equal(test.modules[0].id, 'avatar.hd');
-assert.equal(test.modules[0].source_commit, 'd1d01046bea1a6cd7259ab0a3c9bc3b83526c47b');
+const pilot = test.modules[0];
+assert.match(pilot.source_commit, /^[a-f0-9]{40}$/);
+assert.equal(pilot.source_path, 'modules/src/hd-avatar-engine.js');
+assert.equal(pilot.source_url,
+  'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/' +
+  pilot.source_commit + '/' + pilot.source_path);
+assert.equal(pilot.sha256, createHash('sha256').update(moduleSource, 'utf8').digest('hex'));
+assert.equal(pilot.size_bytes, Buffer.byteLength(moduleSource, 'utf8'));
 
 const namespace = await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(moduleSource));
 assert.equal(typeof namespace.default, 'function');

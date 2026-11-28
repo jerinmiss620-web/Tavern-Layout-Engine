@@ -59,7 +59,7 @@ assert.equal(extract(developmentCore, kernelStart, kernelEnd, 'Development Kerne
 assert.equal(extract(developmentCore, loaderStart, loaderEnd, 'Development Module Loader'),
   extract(loaderBundle, loaderStart, loaderEnd, 'Generated Module Loader'),
   'Development Core: Module Loader differs from its authoritative source');
-checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
+checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
 assert.equal(coreVersion(developmentCore, 'Development Core'), plan.core,
   'Development Core header must match release-plan.json');
 assert.ok(stableCore.includes(avatar), 'Stable Core: HD Avatar Engine differs from its authoritative source');

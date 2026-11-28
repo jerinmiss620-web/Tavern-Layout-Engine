@@ -27,7 +27,6 @@ assert.equal(pilot.version, '1.0.0');
 assert.equal(pilot.api_version, 1);
 assert.equal(pilot.settings_schema_version, 1);
 assert.match(pilot.source_commit, /^[a-f0-9]{40}$/);
-assert.equal(pilot.source_commit, 'd1d01046bea1a6cd7259ab0a3c9bc3b83526c47b');
 assert.equal(pilot.source_path, 'modules/src/hd-avatar-engine.js');
 assert.equal(pilot.source_url,
   'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/' +

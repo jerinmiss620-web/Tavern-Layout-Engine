@@ -34,6 +34,10 @@ try {
   const required = [
     'scripts/release.mjs',
     'scripts/build-core.mjs',
+    'scripts/build-module-kernel.mjs',
+    'scripts/build-module-loader.mjs',
+    'development/core/module-kernel.js',
+    'development/core/module-loader.js',
     'development/organizer/TLE.js',
     'development/organizer/batch',
     'development/avatar-engine/avatar-engine.js',
