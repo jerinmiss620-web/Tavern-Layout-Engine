@@ -2,19 +2,19 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "mask-hero-test",
-  "latest_version": "0.3.299",
+  "latest_version": "0.3.300",
   "minimum_loader_version": "0.3.0",
   "recommended_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.299",
-    "source_path": "releases/v0.3.299/TLE.js",
-    "source_commit": "dbb8ceba1d09fee7879d7615f66a753633559d23",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/dbb8ceba1d09fee7879d7615f66a753633559d23/releases/v0.3.299/TLE.js",
-    "changelog_path": "releases/v0.3.299/CHANGELOG.md",
-    "sha256": "56369941956314149bdbeb21f48d689b552c361e3711fda42cfcacc601188bc8",
-    "size_bytes": 1124348
+    "version": "0.3.300",
+    "source_path": "releases/v0.3.300/TLE.js",
+    "source_commit": "c941ff7e104c93e75738153a9b6c8cf0a003a60c",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/c941ff7e104c93e75738153a9b6c8cf0a003a60c/releases/v0.3.300/TLE.js",
+    "changelog_path": "releases/v0.3.300/CHANGELOG.md",
+    "sha256": "35be2637603c20c6cc3a2907e87c9d4192bb20b9edec22355df4bb1998846a15",
+    "size_bytes": 1128850
   },
-  "status": "TEST v0.3.299 · 打码侠应用范围设置默认收起并调整操作区顺序；新增按聊天隔离的隐藏楼层备份与核验。外部解除隐藏时提示用户选择恢复或接受，不自动重隐藏。独立测试通道，不影响正式版 v0.3.294。",
+  "status": "TEST v0.3.300 · 打码侠应用范围面板默认收起；隐藏楼层身份匹配加固，TLE 恢复隐藏按操作前目标身份同步备份。独立测试通道，不影响正式版 v0.3.294。",
   "loader_release": {
     "version": "0.3.0",
     "source_path": "loader/TLE-Mask-Hero-Test-Loader-0.3.0.js",
