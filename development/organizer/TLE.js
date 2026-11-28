@@ -2772,6 +2772,7 @@ var TLEBatchLibrary = (() => {
     const coreVersion = String(options.coreVersion || '0.0.0');
     const AbortControllerCtor = options.AbortController || (typeof AbortController === 'function' ? AbortController : null);
     const storage = options.storage || null;
+    const host = options.host && typeof options.host === 'object' ? options.host : Object.create(null);
     const onError = typeof options.onError === 'function' ? options.onError : () => {};
     const modules = new Map();
     const listeners = new Map();
@@ -3046,6 +3047,20 @@ var TLEBatchLibrary = (() => {
         coreVersion,
         apiVersion: API_VERSION,
         signal: record.controller.signal,
+        host: Object.freeze({
+          get scriptWindow() {
+            requirePermission(record, 'host:script-window');
+            return host.scriptWindow || null;
+          },
+          get window() {
+            requirePermission(record, 'host:window');
+            return host.window || null;
+          },
+          get document() {
+            requirePermission(record, 'host:document');
+            return host.document || null;
+          },
+        }),
         permissions: Object.freeze([...record.definition.permissions]),
         hasPermission(permission) {
           return record.definition.permissions.includes(permission);
@@ -23751,6 +23766,7 @@ function createTLEGalleryHome(window, document) {
   const moduleKernel = TLEModuleKernelBundle.createModuleKernel({
     coreVersion: '0.3.304',
     AbortController: HOST_WIN.AbortController,
+    host: { scriptWindow: SCRIPT_WIN, window: HOST_WIN, document: HOST_DOC },
     storage: (() => { try { return HOST_WIN.localStorage; } catch { return null; } })(),
     onError(error, details = {}) {
       rememberDiagnosticError('module-' + (details.type || 'runtime'), error?.message || error, details.id || 'module-kernel');

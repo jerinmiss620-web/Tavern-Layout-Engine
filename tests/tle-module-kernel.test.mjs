@@ -136,6 +136,34 @@ test('module settings persist in an ID- and schema-version-scoped namespace', as
   kernel.destroy();
 });
 
+test('host references are explicitly permission-gated in module context', async () => {
+  const scriptWindow = { kind: 'script-window' };
+  const hostWindow = { kind: 'host-window' };
+  const hostDocument = { kind: 'host-document' };
+  const kernel = makeKernel({ host: { scriptWindow, window: hostWindow, document: hostDocument } });
+  let context;
+  kernel.register({
+    id: 'host-enabled', version: '1.0.0',
+    permissions: ['host:script-window', 'host:window', 'host:document'],
+    init(value) {
+      context = value;
+      assert.equal(value.host.scriptWindow, scriptWindow);
+      assert.equal(value.host.window, hostWindow);
+      assert.equal(value.host.document, hostDocument);
+      return {};
+    },
+  });
+  kernel.register({
+    id: 'host-denied', version: '1.0.0',
+    init(value) { return { api: { readHost: () => value.host.window } }; },
+  });
+  await kernel.start('host-enabled');
+  await kernel.start('host-denied');
+  assert.throws(() => kernel.getAPI('host-denied').readHost(), /未声明所需权限：host:window/);
+  assert.equal(Object.isFrozen(context.host), true);
+  kernel.destroy();
+});
+
 test('undeclared settings and event permissions are rejected', async () => {
   const kernel = makeKernel();
   kernel.register({
@@ -257,4 +285,5 @@ test('Core embeds the exact current kernel source and exposes its lifecycle API'
   assert.match(coreSource, /const moduleKernel = TLEModuleKernelBundle\.createModuleKernel/);
   assert.match(coreSource, /modules: moduleKernel/);
   assert.match(coreSource, /moduleKernel\.destroy\(\)/);
+  assert.match(coreSource, /host: \{ scriptWindow: SCRIPT_WIN, window: HOST_WIN, document: HOST_DOC \}/);
 });

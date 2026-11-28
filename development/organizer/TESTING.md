@@ -31,6 +31,7 @@
 - Stable 模块清单 modules/stable.json 当前必须保持空，直到第一个模块完成独立源码、固定 Commit、SHA-256/字节数、依赖和回滚验收。
 - 每个模块必须有稳定 ID、独立 SemVer、API 版本、父模块、技术依赖、权限声明和设置 Schema 版本。
 - init 可以异步，但必须监听 AbortSignal；destroy 与 init 返回的 cleanup 必须同步，不能把 Core 的 DOM 恢复挂在异步清理之后。
+- 需要宿主页面的模块必须在 Manifest 声明 host:script-window / host:window / host:document；Kernel 只通过 Context 的受权限 getter 暴露对应引用。
 - 必须验证父子级联、技术依赖级联、错误隔离、模块事件订阅自动清理、模块设置隔离、更新失败恢复旧版本。
 - permissions 只是 Core API 能力门槛，不是 JavaScript 沙箱；模块源码必须由 Loader 通过不可变 Commit、SHA-256、字节数和来源校验。
 - 本阶段不迁移现有导航、会话侠、楼层侠、整理侠、兼容修复、渐隐侠、画廊或头像引擎；先验证 Kernel，再决定低耦合试点模块。

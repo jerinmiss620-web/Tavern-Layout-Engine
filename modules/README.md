@@ -51,6 +51,7 @@ parentId 表示层级归属，不等同于技术依赖。比如会话侠可以�
 模块初始化时接收冻结的 Context：
 
 - signal：模块生命周期 AbortSignal。
+- host.scriptWindow / host.window / host.document：分别要求 host:script-window、host:window、host:document 权限；用于兼容现有组件的宿主访问。该能力声明仍不是沙箱。
 - events.on/emit：事件订阅和发布，分别要求 events:subscribe、events:emit 权限；模块停止时自动移除订阅。
 - settings.get/set/remove/clear：按模块 ID 与设置 Schema 版本隔离的 JSON 存储；分别要求 settings:read、settings:write 权限。
 - modules.getAPI(id)：仅可读取已声明为直接父模块或直接依赖、且当前处于 active 状态的模块 API。

@@ -4,6 +4,7 @@ export function createModuleKernel(options = {}) {
   const coreVersion = String(options.coreVersion || '0.0.0');
   const AbortControllerCtor = options.AbortController || (typeof AbortController === 'function' ? AbortController : null);
   const storage = options.storage || null;
+  const host = options.host && typeof options.host === 'object' ? options.host : Object.create(null);
   const onError = typeof options.onError === 'function' ? options.onError : () => {};
   const modules = new Map();
   const listeners = new Map();
@@ -278,6 +279,20 @@ export function createModuleKernel(options = {}) {
       coreVersion,
       apiVersion: API_VERSION,
       signal: record.controller.signal,
+      host: Object.freeze({
+        get scriptWindow() {
+          requirePermission(record, 'host:script-window');
+          return host.scriptWindow || null;
+        },
+        get window() {
+          requirePermission(record, 'host:window');
+          return host.window || null;
+        },
+        get document() {
+          requirePermission(record, 'host:document');
+          return host.document || null;
+        },
+      }),
       permissions: Object.freeze([...record.definition.permissions]),
       hasPermission(permission) {
         return record.definition.permissions.includes(permission);
