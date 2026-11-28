@@ -74,14 +74,14 @@ assert.equal(manifest.channel, 'test');
 assert.equal(manifest.latest_version, manifest.release?.version);
 
 const release = manifest.release;
-assert.equal(release.source_path, `releases/v${release.version}/TLE.js`);
+assert.equal(release.source_path, `test-releases/v${release.version}/TLE.js`);
 checkPinnedUrl(release.source_url, release.source_commit, release.source_path, 'TLE release');
 const tleBytes = checkLocalSource(release.source_path, release.sha256, release.size_bytes, 'TLE release');
 new Function(tleBytes.toString('utf8'));
 
 const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease, 'loader_release is required');
-assert.equal(loaderRelease.source_path, 'loader/TLE-Remote-Loader-Test-0.3.0.js');
+assert.equal(loaderRelease.source_path, 'loader/TLE-Remote-Loader-Test-0.3.1.js');
 checkPinnedUrl(loaderRelease.source_url, loaderRelease.source_commit, loaderRelease.source_path, 'Loader release');
 const loaderBytes = checkLocalSource(loaderRelease.source_path, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
 const loaderSource = loaderBytes.toString('utf8');
@@ -106,7 +106,10 @@ assert.ok(loaderSource.includes('release.source_commit && release.source_commit 
 // Diagnostic-button regression contract. This is a static guard, not a substitute
 // for an actual ST/TT/iPhone interaction test.
 const tleSource = tleBytes.toString('utf8');
-assert.ok(tleSource.includes(`const api = {\n    version: '${release.version}',`), 'TLE runtime API version must match manifest release.version');
+const coreApiStart = tleSource.indexOf('  const api = {');
+const coreApiEnd = tleSource.indexOf('\n  };', coreApiStart);
+assert.ok(coreApiStart >= 0 && coreApiEnd > coreApiStart, 'TLE runtime API object must exist');
+assert.ok(tleSource.slice(coreApiStart, coreApiEnd).includes(`version: '${release.version}'`), 'TLE runtime API version must match manifest release.version');
 const diagStart = tleSource.indexOf('/* Diagnostic escape hatch:');
 const diagEnd = tleSource.indexOf('/* Core panel layer:', diagStart);
 assert.ok(diagStart >= 0 && diagEnd > diagStart, 'Diagnostic CSS block must remain identifiable');

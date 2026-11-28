@@ -6,13 +6,17 @@ import { JSDOM } from 'jsdom';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const manifest = JSON.parse(read('latest.json'));
 const moduleSource = read('development/avatar-engine/avatar-engine.js');
-const core = read(manifest.release.source_path);
+const stableCore = read(manifest.release.source_path);
+const developmentCore = read('development/organizer/TLE.js');
 
 assert.match(manifest.release.version, /^\d+\.\d+\.\d+$/, 'Stable Core version must be valid semantic versioning');
-assert.ok(core.includes(`version: '${manifest.release.version}',`), 'Core API version must match the stable manifest');
-assert.ok(core.includes(moduleSource), 'Core must embed the maintained avatar engine byte-for-byte');
-assert.match(core, /hdAvatarEngine = createTLEHDAvatarEngine\(SCRIPT_WIN, HOST_WIN, HOST_DOC\)/);
-assert.match(core, /hdAvatarEngine\?\.stop\?\.\(\)/);
+assert.ok(stableCore.includes(`version: '${manifest.release.version}',`), 'Stable Core API version must match the stable manifest');
+assert.ok(stableCore.includes(moduleSource), 'Stable Core must embed the maintained avatar engine byte-for-byte');
+assert.ok(developmentCore.includes(moduleSource), 'Development Core must embed the maintained avatar engine byte-for-byte');
+assert.match(developmentCore, /fallbackModules:\s*\[\{\s*id: 'avatar\.hd'/);
+assert.match(developmentCore, /init\(context\)\s*\{\s*const engine = createTLEHDAvatarEngine\(context\.host\.scriptWindow, context\.host\.window, context\.host\.document\)/);
+assert.match(developmentCore, /moduleLoader\.start\(\)/);
+assert.match(developmentCore, /moduleLoader\.destroy\(\)/);
 assert.match(moduleSource, /const VERSION = '4\.5\.14'/);
 for (const selector of [
   '.mesAvatarWrapper img',
@@ -28,7 +32,8 @@ assert.doesNotMatch(moduleSource, /window\.fetch\s*=|createElement\(['"]canvas|s
 assert.match(moduleSource, /new WIN\.MutationObserver/);
 assert.match(moduleSource, /requestAnimationFrame/);
 new vm.Script(moduleSource, { filename: 'development/avatar-engine/avatar-engine.js' });
-new vm.Script(core, { filename: manifest.release.source_path });
+new vm.Script(stableCore, { filename: manifest.release.source_path });
+new vm.Script(developmentCore, { filename: 'development/organizer/TLE.js' });
 
 function makeDom(body, head = '') {
   const dom = new JSDOM('<!doctype html><html><head>' + head + '</head><body>' + body + '</body></html>', {

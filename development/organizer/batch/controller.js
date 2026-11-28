@@ -7,7 +7,7 @@ import { describeResource, resolveScope } from './catalog.js';
 // resource-row factory, filters and resource-selection state.
 export class OrganizerContent {
     constructor(host) {
-        this.h = host; this.mode = 'name'; this.scope = 'all'; this.nameQuery = host.search.value;
+        this.h = host; this.mode = 'content'; this.scope = 'all';
         this.rules = [{ find: '', replace: '' }]; this.excluded = new Set(); this.rows = []; this.groups = [];
         this.revision = 0; this.busy = false; this.loaded = false; this.combinations = {};
         this.store = host.store || new BatchConfigStore({ indexedDB: host.window.indexedDB, legacy: () => host.window.localStorage });
@@ -31,29 +31,25 @@ export class OrganizerContent {
     mount() {
         const n = this.node;
         this.searchRow = n('div', 'tle-content-search-row flex-container');
-        this.target = n('label', 'checkbox_label');
-        this.modeToggle = n('input', 'checkbox'); this.modeToggle.type = 'checkbox'; this.modeToggle.checked = this.active;
-        this.modeToggle.setAttribute('aria-label', '查找和替换');
-        this.modeToggle.addEventListener('change', () => { void this.run(() => this.setMode(this.modeToggle.checked ? 'content' : 'name')); });
-        this.target.append(this.modeToggle, n('span', '', '查找和替换'));
-        this.replace = n('input', 'text_pole flex1'); this.replace.type = 'text'; this.replace.size = 1; this.replace.placeholder = '留空删除匹配文本'; this.replace.setAttribute('aria-label', '替换为'); this.replace.hidden = true;
+        this.replace = n('input', 'text_pole flex1'); this.replace.type = 'text'; this.replace.size = 1; this.replace.placeholder = '留空删除匹配文本'; this.replace.setAttribute('aria-label', '替换为');
         this.replace.addEventListener('input', () => { this.rules[0].replace = this.replace.value; this.invalidate(); void this.persist().catch(() => {}); });
         this.findRow = n('div', 'tle-content-find-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px');
         this.h.searchWrap.classList.add('flex1');
-        this.replaceRow = n('div', 'tle-content-replace-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px'); this.replaceRow.hidden = true;
-        this.controls = n('div', 'tle-content-controls flex-container flexFlowColumn'); this.controls.hidden = true;
+        this.replaceRow = n('div', 'tle-content-replace-row flex-container flexnowrap alignItemsCenter flexGrow flexBasis200px');
+        this.controls = n('div', 'tle-content-controls flex-container flexFlowColumn');
         const actions = n('div', 'tle-content-action-row flex-container flexWrap alignItemsCenter');
         this.scopeSelect = n('select', 'text_pole flex1 tle-content-scope-select'); this.scopeSelect.setAttribute('aria-label', '内容搜索范围');
         for (const [value, label] of [['all', '全部支持资源'], ['filtered', '当前筛选范围'], ['selected', '已选资源']]) { const o = n('option', '', label); o.value = value; this.scopeSelect.append(o); }
         this.scopeSelect.addEventListener('change', () => { this.scope = this.scopeSelect.value; this.invalidate(); });
-        this.findButton = this.button('查找', () => this.scan()); this.findButton.hidden = true;
+        this.findButton = this.button('查找', () => this.scan());
         this.previewButton = this.button('预览替换', () => this.preview()); this.previewButton.disabled = true;
         this.findRow.append(this.h.searchWrap, this.findButton);
         const replaceLabel = n('label', 'tle-content-replace-label flex-container flexnowrap alignItemsCenter flex1'); replaceLabel.append(n('span', '', '替换为'), this.replace);
         this.replaceRow.append(replaceLabel, this.previewButton);
-        if (this.h.heading) this.h.heading.append(this.target);
-        else this.searchRow.append(this.target);
         this.searchRow.append(this.findRow, this.replaceRow);
+        this.h.search.placeholder = '查找内容（普通文本）…';
+        this.h.search.setAttribute('aria-label', '查找内容');
+        this.h.search.addEventListener('input', () => this.onInput());
         this.cancelButton = this.h.button('取消扫描', () => { this.cancelled = true; if (this.jobId) void this.api('cancel', { id: this.jobId }).catch(e => this.message(e.message)); }); this.cancelButton.hidden = true;
         this.backupButton = this.button('备份与恢复', () => this.backups());
         this.backupButton.classList.add('tle-content-backup-button');
@@ -96,24 +92,13 @@ export class OrganizerContent {
         this.controls.append(actions, this.ruleDetails, this.binding, this.selectionTools, this.confirm);
         this.renderCombinations(); this.syncScope();
     }
-    async setMode(mode) {
-        if (this.busy) return;
-        if (this.active) this.rules[0].find = this.h.search.value; else this.nameQuery = this.h.search.value;
-        this.mode = mode === 'content' ? 'content' : 'name';
-        this.modeToggle.checked = this.active;
-        this.controls.hidden = this.replace.hidden = this.replaceRow.hidden = this.findButton.hidden = !this.active;
-        this.h.setContentMode(this.active);
-        this.h.search.value = this.active ? this.rules[0].find : this.nameQuery;
-        this.h.search.placeholder = this.active ? '查找内容（普通文本）…' : this.h.namePlaceholder;
-        this.h.search.setAttribute('aria-label', this.active ? '查找内容' : this.h.namePlaceholder);
-        this.h.render();
-        if (this.active && !this.loaded) {
-            this.lock(true);
-            try { await this.loadConfig(); if (this.active) { this.syncInputs(); this.h.render(); } }
-            finally { this.lock(false); }
-        }
+    async activate() {
+        if (this.loaded || this.disposed) return;
+        this.lock(true);
+        try { await this.loadConfig(); if (this.active) { this.syncInputs(); this.h.render(); } }
+        finally { this.lock(false); }
     }
-    onInput() { if (!this.active) { this.nameQuery = this.h.search.value; return; } this.rules[0].find = this.h.search.value; this.invalidate(); void this.persist().catch(() => {}); }
+    onInput() { this.rules[0].find = this.h.search.value; this.invalidate(); void this.persist().catch(() => {}); }
     async loadConfig() {
         const account = this.context().accountStorage;
         if (!account) throw Error('酒馆账号接口未就绪，无法读取规则组合。');
@@ -166,9 +151,14 @@ export class OrganizerContent {
     }
     lock(value) {
         this.busy = value; this.h.lock(value);
-        for (const el of [...this.target.querySelectorAll('input'), ...this.searchRow.querySelectorAll('input,select,button'), ...this.controls.querySelectorAll('input,select,textarea,button')]) {
-            if (value) { el.dataset.contentDisabled = String(el.disabled); el.disabled = true; }
-            else { el.disabled = el.dataset.contentDisabled === 'true'; delete el.dataset.contentDisabled; }
+        for (const el of [...this.searchRow.querySelectorAll('input,select,button'), ...this.controls.querySelectorAll('input,select,textarea,button')]) {
+            if (value) {
+                if (el.dataset.contentDisabled === undefined) el.dataset.contentDisabled = String(el.disabled);
+                el.disabled = true;
+            } else if (el.dataset.contentDisabled !== undefined) {
+                el.disabled = el.dataset.contentDisabled === 'true';
+                delete el.dataset.contentDisabled;
+            }
         }
         this.cancelButton.hidden = !value || this.writing || !this.loaded; this.cancelButton.disabled = false;
         if (!value) { this.previewButton.disabled = !this.snapshot || !this.rows.some(r => !this.excluded.has(r.id)); this.syncScope(); }
