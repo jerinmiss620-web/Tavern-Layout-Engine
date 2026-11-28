@@ -11,18 +11,11 @@ const sourcePath = hasWorkingSource
 const source = readFileSync(sourcePath, 'utf8');
 const readme = readFileSync('README.md', 'utf8');
 const actualVersion = source.match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
-const featureBranch = /^refs\/heads\/feature\//.test(process.env.GITHUB_REF || '') ||
-  /^feature\//.test(process.env.GITHUB_HEAD_REF || '') ||
-  process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
-let expectedVersion = plan.core;
-if (featureBranch) {
-  try { expectedVersion = JSON.parse(readFileSync('channels/mask-hero-test.json', 'utf8')).release.version || expectedVersion; } catch {}
-}
+const expectedVersion = stableManifest.release.version || plan.core;
 
 assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
-assert.equal(actualVersion, expectedVersion, featureBranch
-  ? 'development source must match the dedicated feature test channel'
-  : 'development source must match the stable release plan');
+assert.equal(actualVersion, expectedVersion,
+  'development source must match the current stable release');
 new vm.Script(source, { filename: sourcePath });
 
 const managerStart = source.indexOf('function openQuickGroupManager(');
