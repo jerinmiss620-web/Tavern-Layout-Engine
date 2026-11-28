@@ -1,5 +1,9 @@
 # TLE Core Module System · Phase 2
 
+## Phase 3 现有功能盘点
+
+现有功能的源码边界、跨模块依赖、会话侠父子模块设计及迁移顺序见 [PHASE-3-INVENTORY.md](./PHASE-3-INVENTORY.md)。该文件是架构审计与计划记录；未获独立验收前，不代表已迁移或已进入 Stable。
+
 ## 目标与交付边界
 
 TLE 继续以**单份 SillyTavern Assistant JSON**作为用户安装入口。Core 内置 Module Kernel，负责模块注册、依赖解析、生命周期、事件、模块设置命名空间与更新替换回滚。模块源码与版本清单可以独立发布；Loader 在后续阶段按清单下载、校验并交给 Core 注册。
