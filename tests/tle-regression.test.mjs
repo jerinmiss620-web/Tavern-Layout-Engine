@@ -95,12 +95,12 @@ const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
 const loader = verifyPinnedRelease(
   loaderRelease,
-  'loader/TLE-Remote-Loader-Test-0.3.1.js',
+  'loader/TLE-Remote-Loader-Test-0.3.2.js',
   /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/loader\/TLE-Remote-Loader-Test-(\d+\.\d+\.\d+)\.js$/
 );
-assert.equal(loaderRelease.version, '0.3.1');
-assert.match(loader, /const LOADER_VERSION = '0\.3\.1'/);
-assert.match(loader, /integration\/phase-2-module-system-20261129\/channels\/test\.json/);
+assert.equal(loaderRelease.version, '0.3.2');
+assert.ok(loader.includes("const LOADER_VERSION = '0.3.2'"));
+assert.ok(loader.includes('integration/phase-3-core-services-20261129/channels/test.json'));
 if (manifest.release.version === '0.3.222') {
   assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
   assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
