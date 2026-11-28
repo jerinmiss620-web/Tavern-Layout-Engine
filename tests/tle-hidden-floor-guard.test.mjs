@@ -175,10 +175,10 @@ const shiftedBatch = api.hiddenFloorGuardSelectRecoveryBatch(
   restoreRecords, shiftedRestoreChat, ['restore-record-1', 'restore-record-2'],
 );
 assert.equal(shiftedBatch.ok, true);
-assert.deepEqual(shiftedBatch.range, { start: 2, end: 3 },
+assert.equal(JSON.stringify(shiftedBatch.range), JSON.stringify({ start: 2, end: 3 }),
   'recovery must calculate the current range from message identities after an insertion');
-assert.deepEqual(shiftedBatch.entries.map(item => item.recordId),
-  ['restore-record-1', 'restore-record-2']);
+assert.equal(JSON.stringify(shiftedBatch.entries.map(item => item.recordId)),
+  JSON.stringify(['restore-record-1', 'restore-record-2']));
 
 const splitRestoreChat = [
   currentlyUnhidden[0],
@@ -191,9 +191,10 @@ const firstSplitBatch = api.hiddenFloorGuardSelectRecoveryBatch(
   restoreRecords, splitRestoreChat, ['restore-record-1', 'restore-record-2'],
 );
 assert.equal(firstSplitBatch.ok, true);
-assert.deepEqual(firstSplitBatch.range, { start: 1, end: 1 },
+assert.equal(JSON.stringify(firstSplitBatch.range), JSON.stringify({ start: 1, end: 1 }),
   'recovery must not span an unrelated message between target identities');
-assert.deepEqual(firstSplitBatch.entries.map(item => item.recordId), ['restore-record-1']);
+assert.equal(JSON.stringify(firstSplitBatch.entries.map(item => item.recordId)),
+  JSON.stringify(['restore-record-1']));
 
 const afterFirstSplitRestore = splitRestoreChat.map(item =>
   item.extra.gen_id === 'restore-1' ? { ...item, is_system: true } : item);
@@ -201,9 +202,10 @@ const secondSplitBatch = api.hiddenFloorGuardSelectRecoveryBatch(
   restoreRecords, afterFirstSplitRestore, ['restore-record-1', 'restore-record-2'],
 );
 assert.equal(secondSplitBatch.ok, true);
-assert.deepEqual(secondSplitBatch.completedIds, ['restore-record-1']);
-assert.deepEqual(secondSplitBatch.range, { start: 3, end: 3 });
-assert.deepEqual(secondSplitBatch.entries.map(item => item.recordId), ['restore-record-2']);
+assert.equal(JSON.stringify(secondSplitBatch.completedIds), JSON.stringify(['restore-record-1']));
+assert.equal(JSON.stringify(secondSplitBatch.range), JSON.stringify({ start: 3, end: 3 }));
+assert.equal(JSON.stringify(secondSplitBatch.entries.map(item => item.recordId)),
+  JSON.stringify(['restore-record-2']));
 
 const missingRestoreBatch = api.hiddenFloorGuardSelectRecoveryBatch(
   restoreRecords,
@@ -211,7 +213,7 @@ const missingRestoreBatch = api.hiddenFloorGuardSelectRecoveryBatch(
   ['restore-record-1', 'restore-record-2'],
 );
 assert.equal(missingRestoreBatch.ok, false);
-assert.deepEqual(missingRestoreBatch.missingIds, ['restore-record-2'],
+assert.equal(JSON.stringify(missingRestoreBatch.missingIds), JSON.stringify(['restore-record-2']),
   'a target identity that cannot be located must stop recovery instead of reusing its old floor');
 
 const ambiguous = { ...fallbackFingerprint, genId: '', sendDate: '', prevHash: '', nextHash: '' };
