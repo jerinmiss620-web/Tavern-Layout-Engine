@@ -1,6 +1,6 @@
 export function createModuleKernel(options = {}) {
-  const KERNEL_VERSION = '1.0.0';
-  const API_VERSION = 1;
+  const KERNEL_VERSION = '1.1.0';
+  const API_VERSION = 2;
   const coreVersion = String(options.coreVersion || '0.0.0');
   const AbortControllerCtor = options.AbortController || (typeof AbortController === 'function' ? AbortController : null);
   const storage = options.storage || null;
@@ -18,6 +18,20 @@ export function createModuleKernel(options = {}) {
   const permissionPattern = /^[a-z][a-z0-9-]*(?::[a-z][a-z0-9-]*){0,2}$/;
   const settingKeyPattern = /^[A-Za-z0-9._-]{1,128}$/;
   const eventPattern = /^[a-z][a-z0-9:._-]{0,127}$/;
+  const servicePattern = /^[a-z][a-z0-9-]{0,63}$/;
+  const configuredServices = options.services;
+  if (configuredServices !== undefined && (!configuredServices || typeof configuredServices !== 'object' || Array.isArray(configuredServices))) {
+    throw makeError('Core services 必须是对象。');
+  }
+  const services = Object.create(null);
+  for (const [id, service] of Object.entries(configuredServices || {})) {
+    if (!servicePattern.test(id)) throw makeError('无效 Core service ID：' + id);
+    if (!service || typeof service !== 'object' || Array.isArray(service)) {
+      throw makeError('Core service 必须是对象：' + id);
+    }
+    services[id] = Object.isFrozen(service) ? service : Object.freeze(service);
+  }
+  Object.freeze(services);
 
   function makeError(message, cause) {
     const error = new Error('[TLE Module Kernel] ' + message);
@@ -291,6 +305,16 @@ export function createModuleKernel(options = {}) {
         get document() {
           requirePermission(record, 'host:document');
           return host.document || null;
+        },
+      }),
+      services: Object.freeze({
+        get(name) {
+          const id = String(name || '');
+          if (!servicePattern.test(id)) throw makeError('无效 Core service ID：' + id);
+          requirePermission(record, 'services:' + id);
+          const service = services[id];
+          if (!service) throw makeError('Core service 不存在：' + id);
+          return service;
         },
       }),
       permissions: Object.freeze([...record.definition.permissions]),

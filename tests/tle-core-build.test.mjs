@@ -7,6 +7,8 @@ import { buildModuleLoaderBundle } from '../scripts/build-module-loader.mjs';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const plan = JSON.parse(read('release-plan.json'));
 const stable = JSON.parse(read('latest.json'));
+const testManifest = JSON.parse(read('channels/test.json'));
+const testVersion = testManifest.release.version;
 const avatar = read('development/avatar-engine/avatar-engine.js').trimEnd();
 const gallerySource = read('development/gallery-home/gallery-home.js');
 const developmentCore = read('development/organizer/TLE.js');
@@ -60,10 +62,10 @@ assert.equal(extract(developmentCore, loaderStart, loaderEnd, 'Development Modul
   extract(loaderBundle, loaderStart, loaderEnd, 'Generated Module Loader'),
   'Development Core: Module Loader differs from its authoritative source');
 checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
-assert.equal(coreVersion(developmentCore, 'Development Core'), plan.core,
-  'Development Core header must match release-plan.json');
+assert.equal(coreVersion(developmentCore, 'Development Core'), testVersion,
+  'Development Core header must match the Test channel candidate version');
 
-const testManifest = JSON.parse(read('channels/test.json'));
+
 const testCore = read(testManifest.release.source_path);
 assert.equal(testCore, developmentCore,
   'The pinned Test candidate must be an exact snapshot of the assembled development Core');

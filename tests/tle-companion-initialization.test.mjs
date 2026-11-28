@@ -6,15 +6,17 @@ import vm from 'node:vm';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const manifest = JSON.parse(read('latest.json'));
 const plan = JSON.parse(read('release-plan.json'));
+const testManifest = JSON.parse(read('channels/test.json'));
+const testVersion = testManifest.release.version;
 const source = read('development/organizer/TLE.js');
 const previous = read('tests/fixtures/legacy/core-v0.3.260.js');
 const release = read(manifest.release.source_path);
 // The archived Mask Hero test manifest intentionally remains on v0.3.302;
-// the stable manifest is the source of truth for the promoted Core.
+// the stable manifest is the source of truth for the promoted Core; the Test manifest tracks the development candidate.
 const developmentVersion = source.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
-assert.equal(developmentVersion, plan.core, 'development Core header must match release-plan.json');
+assert.equal(developmentVersion, testVersion, 'development Core header must match the Test channel candidate version');
 assert.equal(installer.content, release, 'the disabled stable backup package must contain the exact pinned stable source');
 if (plan.core === manifest.latest_version) {
   if (!isNonMainBranch() && process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE !== '1') {

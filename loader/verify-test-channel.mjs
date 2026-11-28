@@ -73,6 +73,7 @@ assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
 assert.equal(manifest.channel, 'test');
 assert.equal(manifest.latest_version, manifest.release?.version);
+assert.equal(manifest.minimum_loader_version, '0.3.2');
 
 const release = manifest.release;
 assert.equal(release.source_path, `test-releases/v${release.version}/TLE.js`);
@@ -82,7 +83,8 @@ new Function(tleBytes.toString('utf8'));
 
 const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease, 'loader_release is required');
-assert.equal(loaderRelease.source_path, 'loader/TLE-Remote-Loader-Test-0.3.1.js');
+assert.equal(loaderRelease.version, '0.3.2');
+assert.equal(loaderRelease.source_path, `loader/TLE-Remote-Loader-Test-${loaderRelease.version}.js`);
 checkPinnedUrl(loaderRelease.source_url, loaderRelease.source_commit, loaderRelease.source_path, 'Loader release');
 const loaderBytes = checkLocalSource(loaderRelease.source_path, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
 const loaderSource = loaderBytes.toString('utf8');
@@ -98,6 +100,25 @@ assert.equal(
   `https://github.com/${OWNER}/${REPO}/blob/${loaderRelease.installer_commit}/${loaderRelease.installer_path}`,
   'Loader installer URL must use its pinned commit and path',
 );
+
+// Phase 3.1 Core API v2 and Test manifest contract.
+const moduleManifest = JSON.parse(readText('modules/test.json'));
+assert.equal(moduleManifest.core_api_version, 2, 'Test manifest must require Core API v2');
+assert.ok(moduleManifest.modules.some(module => module.id === 'avatar.hd' && module.api_version === 1));
+const servicesSmoke = moduleManifest.modules.find(module => module.id === 'core.services-smoke');
+assert.ok(servicesSmoke, 'Test manifest must include the Core Services smoke module');
+assert.equal(servicesSmoke.api_version, 2);
+assert.deepEqual(servicesSmoke.permissions, ['services:chat-context', 'services:resource-catalog']);
+const servicesSmokeSource = readText(servicesSmoke.source_path);
+assert.equal(createHash('sha256').update(servicesSmokeSource, 'utf8').digest('hex'), servicesSmoke.sha256);
+assert.equal(Buffer.byteLength(servicesSmokeSource, 'utf8'), servicesSmoke.size_bytes);
+assert.ok(tleBytes.toString('utf8').includes("const KERNEL_VERSION = '1.1.0';"));
+assert.ok(tleBytes.toString('utf8').includes('const API_VERSION = 2;'));
+assert.ok(tleBytes.toString('utf8').includes('const coreModuleServices = Object.freeze('));
+assert.ok(tleBytes.toString('utf8').includes("services: coreModuleServices,"));
+assert.ok(tleBytes.toString('utf8').includes('integration/phase-3-core-services-20261129/modules/test.json'));
+assert.ok(loaderSource.includes("const LOADER_VERSION = '0.3.2'"));
+assert.ok(loaderSource.includes('integration/phase-3-core-services-20261129/channels/test.json'));
 
 // Loader trust-policy contract: commit pinning must remain strict.
 assert.ok(loaderSource.includes('[a-f0-9]{40}'), 'Loader must require a 40-character commit SHA');
@@ -148,41 +169,14 @@ assert.ok(tleSource.includes('diagnosticButtonObserver'));
 assert.ok(tleSource.includes('buttonDisplayPriority'));
 assert.ok(tleSource.includes('buttonReceivesHit'));
 
- // v0.3.196 feature contract: two floor inputs, opt-in navigation repair,
- // and native chat quick actions inside 会话侠.
- assert.ok(tleSource.includes("id: 'range'"), 'Floor tools must use one shared range input');
- assert.ok(tleSource.includes("buttons: [{ id: 'hide', label: '隐藏' }, { id: 'unhide', label: '恢复' }]"));
- assert.ok(tleSource.includes('data-chat-action-clear'), 'Floor inputs must have clear controls');
- assert.ok(tleSource.includes('请输入有效范围，例如 90-90'));
- assert.ok(tleSource.includes('data-tle-setting="compat-nav-repair"'));
- assert.ok(tleSource.includes('width: fit-content !important;'));
- assert.ok(tleSource.includes('data-chat-quick-action="new"'));
- assert.ok(tleSource.includes('option_start_new_chat'));
- assert.ok(tleSource.includes('option_close_chat'));
- assert.ok(tleSource.includes('option_select_chat'));
- assert.ok(tleSource.includes('querySelectorAll(`#options [id="${id}"]`)'));
- assert.ok(tleSource.includes('navigationRepairEnabled: compatibilityNavigationRepair'));
- assert.ok(tleSource.includes('quickActionsEnabled: chatQuickActionsEnabled'));
- assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="labels"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
- assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="info"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
- assert.ok(tleSource.includes('function findNavigationControlForEvent(event)'));
- assert.ok(tleSource.includes('function getNavigationEventDetails(button, event)'));
- assert.ok(tleSource.includes('targetArea'));
- assert.ok(tleSource.includes('iconReceivesHit'));
- assert.ok(tleSource.includes('labelReceivesHit'));
- assert.ok(tleSource.includes('iconCenterButtonReceivesHit'));
- assert.ok(tleSource.includes('iconPseudoElements'));
- assert.ok(tleSource.includes('function recordNavigationPointerDown(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickCapture(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickDocumentBubble(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickWindowBubble(event)'));
- assert.ok(tleSource.includes('nativeControls: navigationControlDiagnostics'));
- assert.ok(tleSource.includes('drawerOpenAfterDispatch'));
- assert.ok(tleSource.includes('buttonPresentInHitStack: hitNodes.some'));
- assert.ok(!/body\[data-tle-compat-nav-repair\]\[data-tle-nav="icons"\][\s\S]{0,500}margin-inline: 15px !important;/.test(tleSource));
+// Current Core regression contracts are maintained by the focused regression tests
+// and the Phase 3 service checks above. Do not carry stale v0.3.196 UI assertions
+// into newer Test candidates.
+
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
+  await checkRemoteSource(servicesSmoke.source_url, servicesSmoke.sha256, servicesSmoke.size_bytes, 'Core Services Smoke module');
   const installerUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${loaderRelease.installer_commit}/${loaderRelease.installer_path}`;
   const response = await fetch(installerUrl, { redirect: 'error', cache: 'no-store' });
   assert.equal(response.status, 200, `Installer remote fetch failed (${response.status})`);

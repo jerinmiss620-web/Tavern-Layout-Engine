@@ -22,9 +22,10 @@ assert.match(core, /permissions: \['host:script-window', 'host:window', 'host:do
 assert.match(core, /moduleLoader\.start\(\)/);
 assert.deepEqual(stable.modules, [], 'Stable manifest must remain empty until the pilot passes real-host validation');
 assert.equal(test.channel, 'test');
-assert.equal(test.modules.length, 1);
+assert.equal(test.modules.length, 2);
 assert.equal(test.modules[0].id, 'avatar.hd');
-const pilot = test.modules[0];
+const pilot = test.modules.find(module => module.id === 'avatar.hd');
+assert.ok(test.modules.some(module => module.id === 'core.services-smoke' && module.api_version === 2));
 assert.match(pilot.source_commit, /^[a-f0-9]{40}$/);
 assert.equal(pilot.source_path, 'modules/src/hd-avatar-engine.js');
 assert.equal(pilot.source_url,

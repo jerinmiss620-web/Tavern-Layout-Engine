@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "core_api_version": 1,
+  "core_api_version": 2,
   "modules": [
     {
       "id": "avatar.hd",
@@ -23,7 +23,26 @@
         "host:document"
       ],
       "enabled_by_default": true
+    },
+    {
+      "id": "core.services-smoke",
+      "name": "Core Services Smoke Test",
+      "version": "1.0.0",
+      "api_version": 2,
+      "settings_schema_version": 1,
+      "source_commit": "20b2a0c43aba06f151a58530af3356426e1f5526",
+      "source_path": "modules/src/core-services-smoke.js",
+      "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/20b2a0c43aba06f151a58530af3356426e1f5526/modules/src/core-services-smoke.js",
+      "sha256": "184f645c0b1866144006bd0c44a9c0f8191a9ca3f49b9700303c6253d825c038",
+      "size_bytes": 2822,
+      "parent_id": null,
+      "dependencies": [],
+      "permissions": [
+        "services:chat-context",
+        "services:resource-catalog"
+      ],
+      "enabled_by_default": true
     }
   ],
-  "notes": "Test-only HD Avatar Engine pilot. Module version 1.0.0 packages the audited 桃mini engine 4.5.14. ST/TT real-device validation passed on 2026-11-29; keep Test-only until a separate Stable promotion is explicitly approved."
+  "notes": "Test-only Core API v2 candidate. The HD Avatar Engine 1.0.0 pilot remains Test-only. The auto-starting core.services-smoke module checks permission-gated chat-context/resource-catalog access, immutable snapshots and AbortSignal enforcement without creating UI or mutating chat state. ST/TT validation of this v0.3.305 candidate is pending."
 }

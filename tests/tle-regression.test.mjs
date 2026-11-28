@@ -95,12 +95,12 @@ const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease);
 const loader = verifyPinnedRelease(
   loaderRelease,
-  'loader/TLE-Remote-Loader-Test-0.3.1.js',
+  'loader/TLE-Remote-Loader-Test-0.3.2.js',
   /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/loader\/TLE-Remote-Loader-Test-(\d+\.\d+\.\d+)\.js$/
 );
-assert.equal(loaderRelease.version, '0.3.1');
-assert.match(loader, /const LOADER_VERSION = '0\.3\.1'/);
-assert.match(loader, /integration\/phase-2-module-system-20261129\/channels\/test\.json/);
+assert.equal(loaderRelease.version, '0.3.2');
+assert.ok(loader.includes("const LOADER_VERSION = '0.3.2'"));
+assert.ok(loader.includes('integration/phase-3-core-services-20261129/channels/test.json'));
 if (manifest.release.version === '0.3.222') {
   assert.match(loader, /feature\/organizer-nav-worldbooks-20261125\/channels\/test\.json/);
   assert.match(loader, /TLE_Organizer_Branch_Test_Cache/);
@@ -163,20 +163,14 @@ if (process.argv.includes('--current')) {
   assert.doesNotMatch(navIconRule, /closedIcon/);
   assert.doesNotMatch(tle, /drawer-icon:not\(\.closedIcon\)/);
   const developmentSource = read('development/organizer/TLE.js');
-  const currentReleasePath = 'releases/v' + plan.core + '/TLE.js';
-  const currentReleaseSource = read(currentReleasePath);
-  const developmentVersion = developmentSource.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
-  assert.equal(developmentVersion, plan.core, 'Development Core header must match release-plan.json');
-  if (plan.core === stableManifest.latest_version) {
-    assert.equal(currentReleaseSource, read(stableManifest.release.source_path), 'The current stable release pointer must remain on its immutable source');
-    if (!isNonMainBranch() && process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE !== '1') {
-      assert.equal(normalizeCoreSource(developmentSource), normalizeCoreSource(currentReleaseSource),
-        'Main development Core must preserve the stable implementation apart from explicit module-build additions and formatting');
-    }
-  } else {
-    assert.equal(developmentSource, currentReleaseSource, 'A staged Core candidate must match the authoritative development source byte-for-byte');
-    assert.equal(read(stableManifest.release.source_path), read('releases/v' + stableManifest.latest_version + '/TLE.js'),
-      'Staging a candidate must not modify the currently published stable source');
+  const stableCoreSource = read(stableManifest.release.source_path);
+  const developmentVersion = developmentSource.split('Host Diagnostics 2.0 · v')[1]?.split('\n')[0];
+  assert.equal(developmentVersion, manifest.release.version, 'Development Core header must match the Test channel candidate version');
+  assert.equal(stableCoreSource, read('releases/v' + stableManifest.latest_version + '/TLE.js'),
+    'The Stable Core pointer must remain on its immutable source');
+  if (!isNonMainBranch() && process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE !== '1') {
+    assert.equal(normalizeCoreSource(developmentSource), normalizeCoreSource(stableCoreSource),
+      'Development Core must preserve the Stable implementation apart from explicitly normalized module-build additions and version markers');
   }
 }assert.ok(tle.includes('opacity: var(--tle-nav-icon-opacity, 0.7) !important;'));
 assert.doesNotMatch(tle, /body\[data-tle-nav\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle > \.drawer-icon \{\s*opacity:/);

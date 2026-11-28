@@ -1,5 +1,9 @@
 # TLE Core Module System · Phase 2
 
+## Phase 3 现有功能盘点
+
+现有功能的源码边界、跨模块依赖、会话侠父子模块设计及迁移顺序见 [PHASE-3-INVENTORY.md](./PHASE-3-INVENTORY.md)。该文件是架构审计与计划记录；未获独立验收前，不代表已迁移或已进入 Stable。
+
 ## 目标与交付边界
 
 TLE 继续以**单份 SillyTavern Assistant JSON**作为用户安装入口。Core 内置 Module Kernel，负责模块注册、依赖解析、生命周期、事件、模块设置命名空间与更新替换回滚。模块源码与版本清单可以独立发布；Loader 在后续阶段按清单下载、校验并交给 Core 注册。
@@ -14,8 +18,8 @@ TLE 继续以**单份 SillyTavern Assistant JSON**作为用户安装入口。Cor
 - 嵌入构建：npm run build:core
 - 嵌入位置：TLE_MODULE_KERNEL_START / TLE_MODULE_KERNEL_END
 - Core API：api.modules
-- Kernel API：1
-- Kernel 版本：1.0.0
+- Kernel API：2
+- Kernel 版本：1.1.0
 - Stable 模块清单：modules/stable.json
 - 清单 Schema：modules/manifest.schema.json
 - 回归：tests/tle-module-kernel.test.mjs、tests/tle-module-manifest.test.mjs
@@ -58,6 +62,7 @@ parentId 表示层级归属，不等同于技术依赖。比如会话侠可以�
 - settings.get/set/remove/clear：按模块 ID 与设置 Schema 版本隔离的 JSON 存储；分别要求 settings:read、settings:write 权限。
 - modules.getAPI(id)：仅可读取已声明为直接父模块或直接依赖、且当前处于 active 状态的模块 API。
 - hasPermission/requirePermission：能力声明检查。
+- services.get(id)：读取 Core 提供的冻结服务对象；必须声明对应的 `services:<id>` 权限。当前服务：`chat-context`（只读聊天快照、当前角色、生成状态、按聊天标识校验后执行原生命令）与 `resource-catalog`（统一目录、管理目录和快切；所有异步方法必须传入模块自己的 AbortSignal）。
 
 模块 destroy 与 init 返回的 cleanup 必须同步完成，不能依赖异步清理。异步初始化应监听 context.signal；若 Core 在初始化完成前卸载，Kernel 会立即调用定义级 destroy 清理部分初始化，再在异步结果返回后执行返回值 cleanup。定义级 destroy 必须可重复调用且能安全处理部分初始化状态；Kernel 会避免对同一个定义级 destroy 重复调用。
 
@@ -91,3 +96,12 @@ permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript �
 - 实机通过只代表试点运行链验收完成，不自动构成正式推广决定。`modules/stable.json` 继续保持空，`avatar.hd@1.0.0` 暂留 `modules/test.json`；只有单独完成 Stable promotion 审查与正式发布后，才考虑加入 Stable Manifest。
 - Core 内置 HD Avatar Engine 4.5.14 fallback 继续保留，确保离线与模块加载失败时仍有可用头像处理。
 - Gallery Home、会话侠、楼层侠及其他模块暂不迁移；后续按模块边界单独规划、开发和验收。
+
+
+## Phase 3.1 Core Services Smoke
+
+- Test-only module: `core.services-smoke@1.0.0`.
+- Requires Core API v2 and declares `services:chat-context` plus `services:resource-catalog`.
+- Starts automatically in the Test channel, creates no UI, and does not mutate chat state.
+- Verifies immutable chat/role snapshots, generation-state access, service method availability and mandatory module AbortSignal enforcement.
+- Logs `[TLE Core Services Smoke] PASS` when the service contract is available. It must remain out of `modules/stable.json`.

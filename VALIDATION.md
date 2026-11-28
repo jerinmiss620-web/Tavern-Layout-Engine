@@ -245,3 +245,12 @@
 - iPhone TT（iOS 18.7）用户确认：v0.3.215 在原生控件不可读取时阻止滑屏；v0.3.216 恢复滑屏，手动切换原生手势后同步；v0.3.217 无需手动切换即可正常工作。
 - 正式 Core 与 v0.3.217 真机验证源码一致，仅调整版本说明。新增自动回归覆盖原生复选框、宿主设置接口、延迟加载、恢复、明确冲突、重试上限及卸载清理。
 - 本轮未额外验证安卓真机、其他 TT 版本或所有 ST 宿主；保持既有兼容性说明。
+
+## Phase 3.1 · Core Services API v2 Test candidate
+
+- Test Core: `v0.3.305`, Commit `f191d73f154b55e8d31651dbb6e91f545da76150`.
+- Core SHA-256: `33bd97d21ec785242a47486fcc93ef792c60a2160bad5d44d8ef3ffc8f18807b`; UTF-8 size: `1,209,522` bytes.
+- Test Loader: `0.3.2`, Commit `b3fb21966e7f1c3b134621b4508798135c659a07`.
+- Loader SHA-256: `daa0c0fd2165d58e7a24b1e08f27a5a4e293a0fe632d931554699a054b60a9e3`; UTF-8 size: `39,875` bytes.
+- Test manifest requires Core API v2 and points to this Phase 3 branch. It includes the auto-starting no-UI `core.services-smoke` module (Commit `20b2a0c43aba06f151a58530af3356426e1f5526`, SHA-256 `184f645c0b1866144006bd0c44a9c0f8191a9ca3f49b9700303c6253d825c038`, 2,822 UTF-8 bytes), which verifies permission-gated `chat-context` and `resource-catalog` access, immutable snapshots and AbortSignal enforcement. No Session / Organizer feature has been migrated yet.
+- ST / TT real-device validation for this new candidate is pending. Stable Core v0.3.304, Stable Loader Runtime v0.3.6, Bootstrap v1.0.6, `latest.json` and the empty Stable Module Manifest remain unchanged.

@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.304
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.305
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -2767,8 +2767,8 @@ var TLEBatchLibrary = (() => {
   /* TLE_MODULE_KERNEL_START */
   const TLEModuleKernelBundle = (() => {
   function createModuleKernel(options = {}) {
-    const KERNEL_VERSION = '1.0.0';
-    const API_VERSION = 1;
+    const KERNEL_VERSION = '1.1.0';
+    const API_VERSION = 2;
     const coreVersion = String(options.coreVersion || '0.0.0');
     const AbortControllerCtor = options.AbortController || (typeof AbortController === 'function' ? AbortController : null);
     const storage = options.storage || null;
@@ -2786,6 +2786,20 @@ var TLEBatchLibrary = (() => {
     const permissionPattern = /^[a-z][a-z0-9-]*(?::[a-z][a-z0-9-]*){0,2}$/;
     const settingKeyPattern = /^[A-Za-z0-9._-]{1,128}$/;
     const eventPattern = /^[a-z][a-z0-9:._-]{0,127}$/;
+    const servicePattern = /^[a-z][a-z0-9-]{0,63}$/;
+    const configuredServices = options.services;
+    if (configuredServices !== undefined && (!configuredServices || typeof configuredServices !== 'object' || Array.isArray(configuredServices))) {
+      throw makeError('Core services 必须是对象。');
+    }
+    const services = Object.create(null);
+    for (const [id, service] of Object.entries(configuredServices || {})) {
+      if (!servicePattern.test(id)) throw makeError('无效 Core service ID：' + id);
+      if (!service || typeof service !== 'object' || Array.isArray(service)) {
+        throw makeError('Core service 必须是对象：' + id);
+      }
+      services[id] = Object.isFrozen(service) ? service : Object.freeze(service);
+    }
+    Object.freeze(services);
   
     function makeError(message, cause) {
       const error = new Error('[TLE Module Kernel] ' + message);
@@ -3059,6 +3073,16 @@ var TLEBatchLibrary = (() => {
           get document() {
             requirePermission(record, 'host:document');
             return host.document || null;
+          },
+        }),
+        services: Object.freeze({
+          get(name) {
+            const id = String(name || '');
+            if (!servicePattern.test(id)) throw makeError('无效 Core service ID：' + id);
+            requirePermission(record, 'services:' + id);
+            const service = services[id];
+            if (!service) throw makeError('Core service 不存在：' + id);
+            return service;
           },
         }),
         permissions: Object.freeze([...record.definition.permissions]),
@@ -13225,14 +13249,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.304 · 打码侠与隐藏楼层保护</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.305 · 打码侠与隐藏楼层保护</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.304</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.305</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -22803,7 +22827,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.304';
+    const VERSION = '0.3.305';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -24723,10 +24747,78 @@ function createTLEGalleryHome(window, document) {
 }
 /* TLE_GALLERY_HOME_END */
 
+  const coreModuleServices = Object.freeze({
+    'chat-context': Object.freeze({
+      getActive() {
+        const snapshot = getActiveChatActionContext();
+        if (!snapshot) return null;
+        const chat = snapshot.chat.map(message => {
+          const extra = message?.extra && typeof message.extra === 'object' ? message.extra : {};
+          const genId = extra.gen_id ?? message?.gen_id ?? '';
+          const sendDate = message?.send_date ?? message?.sendDate ?? extra.send_date ?? '';
+          return Object.freeze({
+            is_system: message?.is_system,
+            is_user: message?.is_user,
+            mes: message?.mes ?? message?.message ?? '',
+            message: message?.message ?? '',
+            name: message?.name ?? message?.name2 ?? '',
+            name2: message?.name2 ?? '',
+            send_date: sendDate,
+            sendDate: message?.sendDate ?? '',
+            gen_id: genId,
+            extra: Object.freeze({ gen_id: genId, send_date: sendDate }),
+          });
+        });
+        return Object.freeze({
+          chatKey: snapshot.chatKey,
+          lastMessageId: snapshot.lastMessageId,
+          chat: Object.freeze(chat),
+        });
+      },
+      getCurrentRole() {
+        const role = companionCurrentRole();
+        return role ? Object.freeze({ ...role }) : null;
+      },
+      isGenerating() {
+        return isNativeGenerationVisible();
+      },
+      executeSlashCommand(command, expectedChatKey) {
+        const snapshot = getActiveChatActionContext();
+        if (!snapshot) throw new Error('请先进入一个角色或群聊。');
+        if (expectedChatKey && snapshot.chatKey !== expectedChatKey) {
+          throw new Error('聊天已切换，已取消操作。');
+        }
+        return executeTLESlashCommand(String(command || ''), snapshot.context);
+      },
+    }),
+    'resource-catalog': Object.freeze({
+      list(id, options = {}) {
+        const signal = options?.signal;
+        if (!signal || typeof signal.aborted !== 'boolean') {
+          throw new Error('Resource Catalog 必须接收模块 AbortSignal。');
+        }
+        return quickCatalog(String(id || ''), options?.mount !== false, signal);
+      },
+      listForManagement(id, signal) {
+        if (!signal || typeof signal.aborted !== 'boolean') {
+          throw new Error('Resource Catalog 必须接收模块 AbortSignal。');
+        }
+        return quickManagerCatalog(String(id || ''), signal);
+      },
+      applyChoice(id, item, signal) {
+        if (!signal || typeof signal.aborted !== 'boolean') {
+          throw new Error('Resource Catalog 必须接收模块 AbortSignal。');
+        }
+        return applyQuickChoice(String(id || ''), item, signal);
+      },
+    }),
+  });
+
   const moduleKernel = TLEModuleKernelBundle.createModuleKernel({
-    coreVersion: '0.3.304',
+    coreVersion: '0.3.305',
     AbortController: HOST_WIN.AbortController,
     host: { scriptWindow: SCRIPT_WIN, window: HOST_WIN, document: HOST_DOC },
+    services: coreModuleServices,
     storage: (() => { try { return HOST_WIN.localStorage; } catch { return null; } })(),
     onError(error, details = {}) {
       rememberDiagnosticError('module-' + (details.type || 'runtime'), error?.message || error, details.id || 'module-kernel');
@@ -24735,7 +24827,7 @@ function createTLEGalleryHome(window, document) {
 
   const moduleChannel = HOST_WIN.__TLE_REMOTE_LOADER_DIAGNOSTICS__?.channel === 'test' ? 'test' : 'stable';
   const moduleManifestUrl = moduleChannel === 'test'
-    ? 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/integration/phase-2-module-system-20261129/modules/test.json'
+    ? 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/integration/phase-3-core-services-20261129/modules/test.json'
     : 'https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/main/modules/stable.json';
   const moduleLoader = TLEModuleLoaderBundle.createModuleLoader({
     kernel: moduleKernel,
@@ -24881,7 +24973,7 @@ function createTLEGalleryHome(window, document) {
     modules: moduleKernel,
     moduleLoader,
     moduleApiVersion: moduleKernel.apiVersion,
-    version: '0.3.304',
+    version: '0.3.305',
     ready: false,
     destroy,
     state,
@@ -25346,5 +25438,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.304 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.305 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
