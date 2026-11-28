@@ -159,7 +159,7 @@ assert.match(source, /body\.append\(resourcePage, findReplacePage\)/,
 assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) minmax\(168px, \.92fr\) minmax\(360px, 2\.3fr\)/);
 assert.match(source, /\.tle-quick-manager \.tle-quick-filter-item\s*\{[^}]*width:\s*100%/s);
 assert.match(source, /\.tle-quick-manager \.tle-quick-filter-select\s*\{[^}]*flex:\s*0 0 28px/s);
-assert.match(source, /el\.dataset\.contentDisabled === undefined/);
+assert.match(source, /el\.dataset\.contentDisabled === (?:undefined|void 0)/);
 assert.match(source, /el\.dataset\.contentLockDisabled === undefined/);
 assert.match(source, /\.tle-quick-manager \.tle-organizer-pane-title\s*\{\s*display:\s*block;\s*flex:\s*0 0 auto;\s*width:\s*100%;\s*min-width:\s*0;\s*box-sizing:\s*border-box;\s*\}/,
   'Both Organizer pane titles must fill the width of their own pane');
