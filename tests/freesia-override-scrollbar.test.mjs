@@ -59,6 +59,6 @@ assert.ok(css["scroll-global-width"].includes("@media (hover: hover) and (pointe
 assert.ok(css["scroll-global-gutter"].includes(desktopTouchMedia), "global gutter must match desktop and touch devices");
 assert.ok(!css["scroll-global-width"].includes("pointer: coarse"), "global scrollbar behavior must remain unchanged");
 assert.ok(css["scroll-global-gutter"].includes("scrollbar-gutter: stable both-edges !important;"));
-assert.doesNotMatch(css["scroll-global-gutter"], /#chat\\s+\\*/);
+assert.doesNotMatch(css["scroll-global-gutter"], /#chat\s+\*/);
 
 console.log("Freesia Override scrollbar scope and device tests passed.");
