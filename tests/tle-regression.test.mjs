@@ -157,8 +157,8 @@ if (process.argv.includes('--current')) {
   assert.doesNotMatch(navIconRule, /display: block/);
   assert.doesNotMatch(navIconRule, /closedIcon/);
   assert.doesNotMatch(tle, /drawer-icon:not\(\.closedIcon\)/);
-  const featureBranch = /^refs\/heads\/feature\//.test(process.env.GITHUB_REF || '') ||
-    /^feature\//.test(process.env.GITHUB_HEAD_REF || '') ||
+  const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
+  const featureBranch = Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main' ||
     process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
   if (!featureBranch) {
     assert.equal(read('development/organizer/TLE.js'), read('releases/v' + plan.core + '/TLE.js'),

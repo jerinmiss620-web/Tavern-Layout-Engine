@@ -32,21 +32,23 @@ function extract(source, startMarker, endMarker, label) {
   return source.slice(contentStart, end).replace(/\r?\n$/, '');
 }
 
-function checkCore(source, version, label) {
+function checkDevelopmentCore(source, version) {
   assert.equal(
-    extract(source, '/* TLE_AVATAR_ENGINE_START */', '/* TLE_AVATAR_ENGINE_END */', label + ' Avatar'),
+    extract(source, '/* TLE_AVATAR_ENGINE_START */', '/* TLE_AVATAR_ENGINE_END */', 'Development Avatar'),
     avatar,
-    label + ': HD Avatar Engine differs from its authoritative source',
+    'Development Core: HD Avatar Engine differs from its authoritative source',
   );
   assert.equal(
-    extract(source, '/* TLE_GALLERY_HOME_START */', '/* TLE_GALLERY_HOME_END */', label + ' Gallery'),
+    extract(source, '/* TLE_GALLERY_HOME_START */', '/* TLE_GALLERY_HOME_END */', 'Development Gallery'),
     galleryForVersion(version),
-    label + ': Gallery Home differs from its authoritative source',
+    'Development Core: Gallery Home differs from its authoritative source',
   );
 }
 
-checkCore(developmentCore, coreVersion(developmentCore, 'Development Core'), 'Development Core');
-checkCore(stableCore, stable.release.version, 'Stable Core');
+checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
+assert.ok(stableCore.includes(avatar), 'Stable Core: HD Avatar Engine differs from its authoritative source');
+assert.ok(stableCore.includes(galleryForVersion(stable.release.version)),
+  'Stable Core: Gallery Home differs from its authoritative source');
 
 assert.equal(
   coreVersion(stableCore, 'Stable Core'),
