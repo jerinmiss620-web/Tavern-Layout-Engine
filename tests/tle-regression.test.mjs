@@ -54,7 +54,10 @@ const pinnedTle = verifyPinnedRelease(
   tlePath,
   /^\/jerinmiss620-web\/Tavern-Layout-Engine\/([a-f0-9]{40})\/releases\/v(\d+\.\d+\.\d+)\/TLE\.js$/
 );
-assert.ok(pinnedTle.includes(`const api = {\n    version: '${manifest.release.version}',`), 'Runtime instance API version must match the release manifest');
+const coreApiStart = pinnedTle.indexOf('  const api = {');
+const coreApiEnd = pinnedTle.indexOf('\n  };', coreApiStart);
+assert.ok(coreApiStart >= 0 && coreApiEnd > coreApiStart, 'Runtime instance API object must exist');
+assert.ok(pinnedTle.slice(coreApiStart, coreApiEnd).includes(`version: '${manifest.release.version}'`), 'Runtime instance API version must match the release manifest');
 
 const plan = JSON.parse(read('release-plan.json'));
 // The pinned test channel is validated above; feature regressions target the current stable Core.
