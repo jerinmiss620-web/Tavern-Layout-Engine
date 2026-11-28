@@ -10,7 +10,7 @@
     "source_commit": "a8e9c7682d97ed2753c06a2f3be585490e00e099",
     "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/a8e9c7682d97ed2753c06a2f3be585490e00e099/releases/v0.3.303/TLE.js",
     "changelog_path": "releases/v0.3.303/CHANGELOG.md",
-    "sha256": "0373c6e71df9a66d550d77b9cefc1d4dcecf967bcaa6e32b19fb3488f1f30595",
+    "sha256": "0e4c6195afeb2366c1160b9d35952cc50ec15dddd25ed2b84979bdde7859f77f",
     "size_bytes": 1133400
   },
   "notes": "Verified full-source runtime simulation; real ST/TT device validation remains outstanding. See VALIDATION.md."
