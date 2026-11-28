@@ -2,19 +2,19 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "mask-hero-test",
-  "latest_version": "0.3.301",
+  "latest_version": "0.3.302",
   "minimum_loader_version": "0.3.0",
   "recommended_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.301",
-    "source_path": "releases/v0.3.301/TLE.js",
-    "source_commit": "8dd26c3c124c20f9652bd0815b31af688058fad9",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/8dd26c3c124c20f9652bd0815b31af688058fad9/releases/v0.3.301/TLE.js",
-    "changelog_path": "releases/v0.3.301/CHANGELOG.md",
-    "sha256": "7ca5c30c8cb092315306b8363f75683147bf0c4ceaf09c7c1bd14cbf67b815e8",
-    "size_bytes": 1133256
+    "version": "0.3.302",
+    "source_path": "releases/v0.3.302/TLE.js",
+    "source_commit": "3042a0f08773091b7bdb735b5540efe3de29d707",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/3042a0f08773091b7bdb735b5540efe3de29d707/releases/v0.3.302/TLE.js",
+    "changelog_path": "releases/v0.3.302/CHANGELOG.md",
+    "sha256": "393cd940957d9d5c20673b5198e44415eb21fc712bc7e8cc76058f19017808d5",
+    "size_bytes": 1133247
   },
-  "status": "TEST v0.3.301 · 手动恢复按消息身份动态重定位；每段原生恢复前重新计算范围，执行后核验身份。独立测试通道，不影响正式版 v0.3.294。",
+  "status": "TEST v0.3.302 · 操作区按钮为「应用 / 卸除 / 保存方案 / 删除方案 / 应用范围」；应用范围默认折叠；楼层恢复按消息身份动态重定位。独立测试通道，不影响正式版 v0.3.294。",
   "loader_release": {
     "version": "0.3.0",
     "source_path": "loader/TLE-Mask-Hero-Test-Loader-0.3.0.js",
