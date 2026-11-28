@@ -143,12 +143,14 @@ else if (command === 'verify') await verify({ remote: process.argv.includes('--r
 else if (command === 'stage') {
   assert.ok(['core','loader'].includes(arg), 'Usage: stage core|loader X.Y.Z notes.md');
   assert.match(version || '', versionRE); assert.ok(compare(version, plan[arg]) > 0);
-  const target = sourcePath(arg, version); assert.ok(!existsSync(target), 'Never overwrite a version directory');
+  const target = sourcePath(arg, version);
+  const targetDirectory = target.slice(0, target.lastIndexOf('/'));
+  assert.ok(!existsSync(targetDirectory), 'Never reuse or overwrite an existing version directory');
   const notes = read(notesPath); assert.ok(notes.trim());
   if (arg === 'core') execFileSync(process.execPath, ['scripts/build-core.mjs'], { stdio: 'inherit' });
   const authoritativeSourcePath = arg === 'core' ? 'development/organizer/TLE.js' : sourcePath(arg);
   const source = read(authoritativeSourcePath).replaceAll(plan[arg], version);
-  mkdirSync(target.slice(0, target.lastIndexOf('/')), { recursive: true });
+  mkdirSync(targetDirectory, { recursive: true });
   writeFileSync(target, source);
   if (arg === 'core') writeFileSync('development/organizer/TLE.js', source);
   writeFileSync(target.replace(/[^/]+$/, 'CHANGELOG.md'), `# v${version}\n\n${notes}\n`);

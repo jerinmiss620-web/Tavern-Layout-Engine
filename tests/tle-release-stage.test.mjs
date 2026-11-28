@@ -60,6 +60,24 @@ try {
   const bootstrapPackageBefore = read(temp, bootstrapPackagePath);
   const stableManifestBefore = read(temp, 'latest.json');
 
+  const collisionDirectory = join(temp, 'releases/v' + candidateVersion);
+  mkdirSync(collisionDirectory, { recursive: true });
+  writeFileSync(join(collisionDirectory, 'KEEP.txt'), 'existing directory must remain untouched');
+  let collisionError;
+  try {
+    execFileSync(process.execPath, [
+      'scripts/release.mjs', 'stage', 'core', candidateVersion, 'notes.md',
+    ], { cwd: temp, encoding: 'utf8', stdio: 'pipe' });
+  } catch (error) {
+    collisionError = error;
+  }
+  assert.ok(collisionError, 'staging must reject an already-existing version directory');
+  assert.match(String(collisionError.stderr), /Never reuse or overwrite an existing version directory/);
+  assert.equal(read(temp, 'releases/v' + candidateVersion + '/KEEP.txt'),
+    'existing directory must remain untouched');
+  assert.equal(existsSync(join(collisionDirectory, 'TLE.js')), false);
+  rmSync(collisionDirectory, { recursive: true, force: true });
+
   execFileSync(process.execPath, [
     'scripts/release.mjs', 'stage', 'core', candidateVersion, 'notes.md',
   ], { cwd: temp, encoding: 'utf8', stdio: 'pipe' });
