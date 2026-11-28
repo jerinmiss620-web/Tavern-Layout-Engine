@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { isNonMainBranch, normalizeCoreSource } from './helpers/core-test-context.mjs';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
@@ -13,16 +14,17 @@ const release = read(manifest.release.source_path);
 const developmentVersion = source.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
-const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
-const featureBranch = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') ||
-  plan.core !== manifest.latest_version || process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
 assert.equal(developmentVersion, plan.core, 'development Core header must match release-plan.json');
-if (!featureBranch) {
-  assert.equal(release, source, 'the pinned stable source must match the working source on stable branches');
-} else {
-  assert.equal(installer.content, release, 'feature work must not mutate the disabled stable backup package');
-}
 assert.equal(installer.content, release, 'the disabled stable backup package must contain the exact pinned stable source');
+if (plan.core === manifest.latest_version) {
+  if (!isNonMainBranch() && process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE !== '1') {
+    assert.equal(normalizeCoreSource(source), normalizeCoreSource(release),
+      'Main development Core must preserve the stable implementation apart from explicit module-build formatting');
+  }
+} else {
+  assert.equal(source, read('releases/v' + plan.core + '/TLE.js'),
+    'A staged Core candidate must match the authoritative development source byte-for-byte');
+}
 new vm.Script(source, { filename: `TLE v${developmentVersion}` });
 
 function section(text, startMarker, endMarker) {

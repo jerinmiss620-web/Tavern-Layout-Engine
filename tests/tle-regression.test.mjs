@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { isNonMainBranch, normalizeCoreSource } from './helpers/core-test-context.mjs';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -157,17 +158,23 @@ if (process.argv.includes('--current')) {
   assert.doesNotMatch(navIconRule, /display: block/);
   assert.doesNotMatch(navIconRule, /closedIcon/);
   assert.doesNotMatch(tle, /drawer-icon:not\(\.closedIcon\)/);
-  const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
-  const featureBranch = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') ||
-    plan.core !== stableManifest.latest_version || process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
-  const developmentVersion = read('development/organizer/TLE.js').match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
+  const developmentSource = read('development/organizer/TLE.js');
+  const currentReleasePath = 'releases/v' + plan.core + '/TLE.js';
+  const currentReleaseSource = read(currentReleasePath);
+  const developmentVersion = developmentSource.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
   assert.equal(developmentVersion, plan.core, 'Development Core header must match release-plan.json');
-  if (!featureBranch) {
-    assert.equal(read('development/organizer/TLE.js'), read('releases/v' + plan.core + '/TLE.js'),
-      'Development Core and current immutable release source must match byte-for-byte on stable branches');
+  if (plan.core === stableManifest.latest_version) {
+    assert.equal(currentReleaseSource, read(stableManifest.release.source_path),
+      'The current stable release pointer must remain on its immutable source');
+    if (!isNonMainBranch() && process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE !== '1') {
+      assert.equal(normalizeCoreSource(developmentSource), normalizeCoreSource(currentReleaseSource),
+        'Main development Core must preserve the stable implementation apart from explicit module-build formatting');
+    }
   } else {
-    assert.equal(read('releases/v' + plan.core + '/TLE.js'), read(stableManifest.release.source_path),
-      'feature work must leave the current stable immutable release artifact untouched');
+    assert.equal(developmentSource, currentReleaseSource,
+      'A staged Core candidate must match the authoritative development source byte-for-byte');
+    assert.equal(read(stableManifest.release.source_path), read('releases/v' + stableManifest.latest_version + '/TLE.js'),
+      'Staging a candidate must not modify the currently published stable source');
   }
 }assert.ok(tle.includes('opacity: var(--tle-nav-icon-opacity, 0.7) !important;'));
 assert.doesNotMatch(tle, /body\[data-tle-nav\] #top-settings-holder#top-settings-holder > \.drawer > \.drawer-toggle > \.drawer-icon \{\s*opacity:/);

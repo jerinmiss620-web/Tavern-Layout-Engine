@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { isNonMainBranch, normalizeCoreSource } from './helpers/core-test-context.mjs';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
@@ -28,11 +29,17 @@ assert.equal(manifest.channel, 'mask-hero-test');
 assert.equal(manifest.latest_version, '0.3.302');
 assert.equal(manifest.release.version, manifest.latest_version);
 assert.equal(manifest.minimum_loader_version, '0.3.0');
-const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
-const developmentOrCandidate = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') || plan.core !== stable.latest_version;
 const developmentVersion = development.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
 assert.equal(developmentVersion, plan.core, 'development Core must match the current release plan');
-if (!developmentOrCandidate) assert.equal(stableCore, development, 'the stable release artifact must match the development Core exactly');
+if (plan.core === stable.latest_version) {
+  if (!isNonMainBranch() && process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE !== '1') {
+    assert.equal(normalizeCoreSource(development), normalizeCoreSource(stableCore),
+      'Main development Core must preserve the stable implementation apart from explicit module-build formatting');
+  }
+} else {
+  assert.equal(development, read('releases/v' + plan.core + '/TLE.js'),
+    'A staged Core candidate must match the authoritative development source byte-for-byte');
+}
 assert.notEqual(core, stableCore, 'the archived test channel must remain separate from the current stable release');
 assert.equal(sha256(core), manifest.release.sha256, 'the test Core SHA-256 must match its manifest');
 assert.equal(Buffer.byteLength(core, 'utf8'), manifest.release.size_bytes, 'the test Core byte count must match its manifest');
@@ -54,7 +61,13 @@ assert.equal(manifest.loader_release.source_commit, manifest.loader_release.inst
 assert.ok(manifest.loader_release.installer_url.includes(manifest.loader_release.installer_commit));
 assert.equal(stable.latest_version, '0.3.304', 'the stable channel must point to the promoted Mask Hero release');
 assert.equal(stable.release.source_path, 'releases/v0.3.304/TLE.js');
-assert.equal(plan.core, '0.3.304', 'the stable release plan must match the promoted Core');
+const compareVersions = (left, right) => {
+  const a = left.split('.').map(Number), b = right.split('.').map(Number);
+  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+};
+assert.ok(compareVersions(plan.core, stable.latest_version) >= 0,
+  'the release plan must not fall behind the published stable Core');
 assert.ok(manifest.status.startsWith('ARCHIVED'), 'the old Mask Hero test channel must be explicitly archived');
 
 console.log('TLE Mask Hero test channel passed: immutable Core/Loader hashes, dedicated channel, disabled installer and stable-channel isolation.');
