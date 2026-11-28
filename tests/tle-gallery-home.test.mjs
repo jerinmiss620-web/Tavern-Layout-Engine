@@ -15,8 +15,8 @@ assert.match(core, /#\$\{ID\.nav\} > button \{\s*position: relative;\s*display: 
   'nav button positioning must live in the base rule');
 assert.doesNotMatch(core, /#\$\{ID\.nav\} > button \{ position: relative; \}/,
   'no late one-property nav override may remain');
-assert.match(core, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="plans"\] \{ height: min\(80dvh, 700px\); \}/,
-  'identical chat-tools page heights must share one rule');
+assert.match(core, /#\$\{ID\.chatToolsPanel\}\[data-page="recent"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="plans"\],\s*#\$\{ID\.chatToolsPanel\}\[data-page="mask"\] \{ height: min\(80dvh, 700px\); \}/,
+  'identical recent, plans and Mask Hero page heights must share one rule');
 assert.match(core, /#\$\{ID\.presetSettings\}, #\$\{ID\.presetPrompts\} \{\s*display: block;\s*min-width: 0;/,
   'preset display must be merged into its base rule');
 const characterListRuleStart = core.indexOf('body:not(.charListGrid) #right-nav-panel #rm_print_characters_block > .character_select {');
