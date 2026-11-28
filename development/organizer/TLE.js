@@ -3,7 +3,7 @@
   // 简介：TLE 永久远程更新链。使用方式：仅导入并启用 Bootstrap，由它管理 Loader 与 Core。
   // 注意事项：首次迁移禁用旧独立脚本；首次安装需要联网，自动更新可在原有折叠区域关闭。作者：小松鼠 & ChatGPT（小松7）。
 
-  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.296
+  // Tavern Layout Engine · Host Diagnostics 2.0 · v0.3.297
   // Created collaboratively by 小松鼠 & ChatGPT（小松7）.
   const SCRIPT_WIN = window;
   let HOST_WIN;
@@ -7537,6 +7537,54 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     }
   }
 
+  function parseChatActionRangePaste(value) {
+    const text = String(value ?? '').trim();
+    if (!text) return null;
+
+    let match = text.match(/^(\d+)$/);
+    if (match) {
+      const floor = Number(match[1]);
+      if (!Number.isSafeInteger(floor)) return { error: '楼层编号超出有效范围。' };
+      return { start: String(floor), end: String(floor) };
+    }
+
+    match = text.match(/^(\d+)\s*[-‐‑‒–—―－−]\s*(\d+)$/u);
+    if (match) {
+      const start = Number(match[1]);
+      const end = Number(match[2]);
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {
+        return { error: '楼层编号超出有效范围。' };
+      }
+      if (start > end) return { error: '起始楼层不能大于结束楼层。' };
+      return { start: String(start), end: String(end) };
+    }
+
+    const compact = text.replace(/\s+/g, '');
+    if (/^\d+(?:[-‐‑‒–—―－−]\d+)?(?:[,，;；]\d+(?:[-‐‑‒–—―－−]\d+)?)+$/u.test(compact)) {
+      return { error: '复制内容包含多个不连续范围；当前输入框一次只能处理一段，请逐段输入。' };
+    }
+    return null;
+  }
+
+  function bindChatActionRangePaste(targetInput, startInput, endInput) {
+    targetInput.addEventListener('paste', event => {
+      const text = event.clipboardData?.getData('text/plain') ?? '';
+      const parsed = parseChatActionRangePaste(text);
+      if (!parsed) return;
+
+      event.preventDefault();
+      if (parsed.error) {
+        chatActionNotify('info', parsed.error);
+        return;
+      }
+
+      startInput.value = parsed.start;
+      endInput.value = parsed.end;
+      startInput.dispatchEvent(new HOST_WIN.Event('input', { bubbles: true }));
+      endInput.dispatchEvent(new HOST_WIN.Event('input', { bubbles: true }));
+    });
+  }
+
   function syncChatActionClearButton(input, button) {
     if (button) button.hidden = !String(input?.value || '').length;
   }
@@ -7591,6 +7639,8 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
     if (action.id === 'range') {
       const start = makeChatActionInput(action, 'start');
       const end = makeChatActionInput(action, 'end');
+      bindChatActionRangePaste(start.input, start.input, end.input);
+      bindChatActionRangePaste(end.input, start.input, end.input);
       const inputs = HOST_DOC.createElement('div');
       inputs.className = 'tle-chat-tools-range-inputs';
       const separator = HOST_DOC.createElement('span');
@@ -7632,7 +7682,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
       const hint = HOST_DOC.createElement('small');
       hint.id = 'tle-chat-tools-range-hint';
       hint.className = 'tle-chat-tools-range-help';
-      hint.textContent = '两框均输入数字；只隐藏或恢复 1 层时，两框填同一个数字（例如 90 - 90）。';
+      hint.textContent = '复制的单段范围可粘贴到任一框自动拆分；单层范围自动填入两框。';
       row.appendChild(hint);
       row.querySelectorAll('[data-chat-action-input]').forEach(item => {
         item.setAttribute('aria-describedby', hint.id);
@@ -11490,14 +11540,14 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
           <div class="inline-drawer-toggle inline-drawer-header interactable" tabindex="0" role="button" aria-expanded="false">
             <span class="tle-update-heading">
               <b>版本与更新</b>
-              <span class="tle-update-summary" data-tle-update-summary>v0.3.296 · 角色专属预设条目方案与世界书多选</span>
+              <span class="tle-update-summary" data-tle-update-summary>v0.3.297 · 隐藏范围智能粘贴</span>
               <span class="tle-update-alert" data-tle-update-alert hidden>可更新</span>
             </span>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down interactable" aria-hidden="true"></div>
           </div>
           <div class="inline-drawer-content" style="display:none;">
             <div class="tle-update-content">
-          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.296</strong></div>
+          <div class="tle-row"><span>当前版本</span><strong data-tle-runtime-version>v0.3.297</strong></div>
           <div class="tle-row"><span>远程版本</span><span data-tle-available-version>等待检查</span></div>
           <div class="tle-row"><span>更新通道</span><span data-tle-update-channel>正在连接 Loader</span></div>
           <div class="tle-row"><span>Loader 最新版本</span><span data-tle-loader-available-version>等待检查</span></div>
@@ -20228,7 +20278,7 @@ function createTLEGalleryHome(window, document) {
     'use strict';
 
     const GLOBAL_NAME = 'FreesiaGalleryHome';
-    const VERSION = '0.3.296';
+    const VERSION = '0.3.297';
     const STYLE_ID = 'freesia-gallery-home-style';
     const ACTIVE_CLASS = 'freesia-gallery-active';
     const NATIVE_CLASS = 'freesia-gallery-native';
@@ -22245,7 +22295,7 @@ function createTLEGalleryHome(window, document) {
   }
 
   const api = {
-    version: '0.3.296',
+    version: '0.3.297',
     ready: false,
     destroy,
     state,
@@ -22706,5 +22756,5 @@ function createTLEGalleryHome(window, document) {
   SCRIPT_WIN.addEventListener('beforeunload', destroy, { once: true, signal: state.abort.signal });
 
   api.ready = true;
-  console.info('[Tavern Layout Engine] Core v0.3.296 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
+  console.info('[Tavern Layout Engine] Core v0.3.297 · Host Diagnostics 2.0 已启动 · 作者：小松鼠 & ChatGPT（小松7）。');
 })();
