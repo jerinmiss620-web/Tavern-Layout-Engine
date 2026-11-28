@@ -20,7 +20,9 @@ test('register validates stable IDs, semantic versions, API compatibility and du
   assert.throws(() => kernel.register(valid), /ID 已注册/);
   assert.throws(() => kernel.register({ id: 'Bad ID', version: '1.0.0', init() {} }), /无效模块 ID/);
   assert.throws(() => kernel.register({ id: 'broken-version', version: '1', init() {} }), /有效 SemVer/);
-  assert.throws(() => kernel.register({ id: 'future-api', version: '1.0.0', apiVersion: 2, init() {} }), /不受支持/);
+  assert.equal(kernel.apiVersion, 2);
+  assert.equal(kernel.version, '1.1.0');
+  assert.throws(() => kernel.register({ id: 'future-api', version: '1.0.0', apiVersion: 3, init() {} }), /不受支持/);
   assert.throws(() => kernel.register({ id: 'missing-parent', version: '1.0.0', parentId: 'unknown', init() {} }), /父模块尚未注册/);
   kernel.destroy();
 });
@@ -277,6 +279,42 @@ test('destroy aborts an in-flight init and disposes its late result exactly once
   assert.equal(kernel.get('slow-module').status, 'destroyed');
 });
 
+
+test('Core services are permission-gated, immutable and isolated from undeclared modules', async () => {
+  const sampleService = Object.freeze({ ping: () => 'pong' });
+  const kernel = makeKernel({ services: { 'sample-service': sampleService } });
+  let allowedContext;
+  kernel.register({
+    id: 'service-consumer', version: '1.0.0',
+    permissions: ['services:sample-service'],
+    init(context) {
+      allowedContext = context;
+      const service = context.services.get('sample-service');
+      assert.equal(service.ping(), 'pong');
+      return { api: { ping: () => service.ping() } };
+    },
+  });
+  kernel.register({
+    id: 'service-denied', version: '1.0.0',
+    init(context) {
+      return { api: { get: () => context.services.get('sample-service') } };
+    },
+  });
+  await kernel.start('service-consumer');
+  await kernel.start('service-denied');
+  assert.equal(kernel.getAPI('service-consumer').ping(), 'pong');
+  assert.throws(() => kernel.getAPI('service-denied').get(), /未声明所需权限：services:sample-service/);
+  assert.equal(Object.isFrozen(allowedContext.services), true);
+  assert.equal(Object.isFrozen(sampleService), true);
+  kernel.destroy();
+});
+
+test('Core service registry rejects invalid IDs and non-object services', () => {
+  assert.throws(() => makeKernel({ services: { 'Bad ID': {} } }), /无效 Core service ID/);
+  assert.throws(() => makeKernel({ services: { 'invalid-service': null } }), /Core service 必须是对象/);
+  assert.throws(() => makeKernel({ services: [] }), /Core services 必须是对象/);
+});
+
 test('Core embeds the exact current kernel source and exposes its lifecycle API', () => {
   const moduleSource = read('development/core/module-kernel.js');
   const coreSource = read('development/organizer/TLE.js');
@@ -288,6 +326,10 @@ test('Core embeds the exact current kernel source and exposes its lifecycle API'
   assert.equal(coreSource.slice(start, end + endMarker.length), expected);
   assert.match(coreSource, /const moduleKernel = TLEModuleKernelBundle\.createModuleKernel/);
   assert.match(coreSource, /modules: moduleKernel/);
+  assert.match(coreSource, /const coreModuleServices = Object\\.freeze/);
+  assert.match(coreSource, /'chat-context': Object\\.freeze/);
+  assert.match(coreSource, /'resource-catalog': Object\\.freeze/);
+  assert.match(coreSource, /services: coreModuleServices/);
   assert.match(coreSource, /moduleKernel\.destroy\(\)/);
   assert.match(coreSource, /host: \{ scriptWindow: SCRIPT_WIN, window: HOST_WIN, document: HOST_DOC \}/);
 });
