@@ -1,6 +1,6 @@
 # Phase 3 · TLE 现有功能模块盘点与迁移边界
 
-> 状态：第一轮源码盘点完成；本文件只记录架构审计与迁移方案，不包含运行时代码修改。
+> 状态：第一轮源码盘点已完成；Phase 3.1 Core Services API v2 已在 Draft PR #35 实现并通过自动化 / 远程校验，ST / TT 实机验收待完成；业务模块尚未迁移。
 >
 > 唯一基线：`main@cb4f241a54a5890f11e0b0f8ac1bbc5f12fb9330`（2026-11-29）。
 >
@@ -10,7 +10,7 @@
 
 当前 TLE 已经具备可用的 Module Kernel、Module Loader、独立 Manifest、模块级更新/回滚和父子生命周期能力，但**绝大多数业务功能仍集中在完整 Core 单体源码中**。
 
-- `development/organizer/TLE.js`：25,351 行，Git Blob 文件大小 1,205,541 bytes。
+- `development/organizer/TLE.js`：25,443 行，UTF-8 文件大小 1,209,522 bytes（Test Core v0.3.305；Stable Core v0.3.304 未修改）。
 - 当前 Core 里已经有明确的生成边界：Organizer Batch、Module Kernel、Module Loader、HD Avatar、Gallery Home。
 - 其中 Batch、Avatar、Gallery 已有独立权威源码；Kernel / Loader 也由独立源码构建。
 - 但除 `avatar.hd@1.0.0` 的 Test-only 试点外，其余组件仍随 Core 一起交付，并不是可由 Manifest 独立更新的远程模块。
@@ -23,18 +23,18 @@
 | Core 区域 | 当前行范围 | 现状 / 权威来源 |
 |---|---:|---|
 | Organizer Batch bundle | 21–2766 | 由 `development/organizer/batch/controller.js` 及其依赖打包生成，嵌入 `TLE_CONTENT_BUNDLE` |
-| Module Kernel bundle | 2767–3460 | 由 `development/core/module-kernel.js` 生成 |
-| Module Loader bundle | 3462–4412 | 由 `development/core/module-loader.js` 生成 |
-| Core 业务单体 | 4413–22503 | 导航、设置、信息站、资源快切、整理侠、渐隐侠、隐藏楼层保护、配套侠、打码侠、会话侠、诊断、全局搜索、工作区布局等 |
-| HD Avatar | 22504–22800 | 由 `development/avatar-engine/avatar-engine.js` 生成；另有远程 Test 模块源码 |
-| Gallery Home | 22801–24780 | 由 `development/gallery-home/gallery-home.js` 生成 |
-| Core 销毁与启动接线 | 24781–25351 | 全局事件、Observer、模块启动、功能清理和 Core destroy |
+| Module Kernel bundle | 2767–3484 | 由 `development/core/module-kernel.js` 生成 |
+| Module Loader bundle | 3486–4436 | 由 `development/core/module-loader.js` 生成 |
+| Core 业务单体 | 4437–22527 | 导航、设置、信息站、资源快切、整理侠、渐隐侠、隐藏楼层保护、配套侠、打码侠、会话侠、诊断、全局搜索、工作区布局等 |
+| HD Avatar | 22528–22824 | 由 `development/avatar-engine/avatar-engine.js` 生成；另有远程 Test 模块源码 |
+| Gallery Home | 22825–24748 | 由 `development/gallery-home/gallery-home.js` 生成 |
+| Core Services registry / 销毁与启动接线 | 24749–25443 | 全局事件、Observer、模块启动、功能清理和 Core destroy |
 
 ### 现有独立源码目录
 
 | 源码 | 文件大小（Git Blob） | 当前用途 |
 |---|---:|---|
-| `development/core/module-kernel.js` | 26,986 bytes | 模块注册、依赖、生命周期、Context、事件与设置 |
+| `development/core/module-kernel.js` | 28,148 bytes | 模块注册、依赖、生命周期、Context、事件与设置 |
 | `development/core/module-loader.js` | 38,491 bytes | Manifest、固定 Commit、SHA-256、字节数、IndexedDB、LKG、回滚 |
 | `development/organizer/batch/controller.js` | 34,746 bytes | Organizer 内容查找与替换控制器，使用宿主注入接口 |
 | `development/organizer/batch/batch-engine.js` | 6,019 bytes | 纯文本规则、匹配、预览与替换算法 |
@@ -45,6 +45,7 @@
 | `development/organizer/batch/catalog.js` | 3,447 bytes | 资源身份到 Organizer 目录的映射 |
 | `development/avatar-engine/avatar-engine.js` | 13,261 bytes | Core 内置 HD Avatar fallback |
 | `modules/src/hd-avatar-engine.js` | 13,717 bytes | Test-only 远程模块 `avatar.hd@1.0.0` |
+| `modules/src/core-services-smoke.js` | 2,822 bytes | Test-only `core.services-smoke@1.0.0`，无 UI 服务契约冒烟模块 |
 | `development/gallery-home/gallery-home.js` | 107,819 bytes | Gallery Home 独立工厂，具有 start / stop 生命周期 |
 
 `scripts/build-core.mjs` 是唯一正式 Core 构建入口。它负责装配 Kernel、Loader、Batch、Avatar 和 Gallery。生成区必须继续由 `npm run build:core` 管理，不得手工编辑嵌入后的副本。
@@ -195,26 +196,27 @@ organizer                       整理侠父模块 / 原生抽屉
 
 ## 5. Phase 3 需要先建立的 Core service 契约
 
-第一轮功能提取前，至少要有以下稳定接口。名称为设计概念，尚未写入正式 API：
+第一轮业务功能提取前，Core service 契约状态如下：
 
-1. **Host Context**：当前角色 / 群聊 / 聊天快照、聊天唯一标识、User Persona、生成状态、ST / TT eventSource、原生 slash command、toast。
-2. **Session Page Registry**：子模块注册 / 注销页面、标签、顺序、挂载点；父模块负责唯一浮窗和 Tab 切换。
-3. **Settings Registry**：模块向现有 TLE 控制面板注册设置区 / 控件；设置数据使用模块独立命名空间。
-4. **Resource Catalog / Quick Picker**：为信息站、配套侠和整理侠提供统一目录与选择接口，不复制三套资源读取逻辑。
-5. **Navigation Registry**：需要导航入口的模块通过 Core 注册；导航 DOM 和 ST / TT Drawer 仍由 Core 唯一管理。
-6. **Style Ownership**：模块专属样式由模块创建和清理；Core 样式保留在 Core。
-7. **Lifecycle Helpers**：Observer、事件、计时器、RAF、Object URL、DB 连接必须能由模块 AbortSignal / destroy 完整释放。
+1. **Host Context / `chat-context`：已实现 API v2**。提供冻结聊天 / 消息快照、当前角色快照、生成状态，以及通过预期 `chatKey` 校验后执行原生 slash command。User Persona、完整 eventSource 订阅与 toast 仍需按模块迁移需求补齐。
+2. **Session Page Registry：待实现**。子模块注册 / 注销页面、标签、顺序、挂载点；父模块负责唯一浮窗和 Tab 切换。
+3. **Settings Registry：待实现**。模块向现有 TLE 控制面板注册设置区 / 控件；设置数据使用模块独立命名空间。
+4. **Resource Catalog / `resource-catalog`：已实现 API v2**。提供统一目录、管理目录与快切接口；异步调用必须传入模块自己的 AbortSignal。后续迁移仍须验证旧 UI 与原生资源适配语义不变。
+5. **Navigation Registry：待实现**。需要导航入口的模块通过 Core 注册；导航 DOM 和 ST / TT Drawer 仍由 Core 唯一管理。
+6. **Style Ownership：待实现**。模块专属样式由模块创建和清理；Core 样式保留在 Core。
+7. **Lifecycle Helpers：部分具备**。Kernel 已提供模块 AbortSignal 与同步 destroy/cleanup 机制；Observer、计时器、RAF、Object URL、DB 连接的便捷注册器仍待补齐。
 
-Kernel Context API 已升级到 v2：除 `signal`、权限化 host 引用、事件订阅和模块设置命名空间外，已增加权限门控的 `context.services.get(id)`。Core 当前提供 `chat-context` 与 `resource-catalog` 两项共享服务；Session Page Registry、Settings Registry、Navigation Registry 和模块样式注册仍待后续实现。
+Kernel Context API v2 已在 Draft PR #35 实现：除 `signal`、权限化 host 引用、事件订阅和模块设置命名空间外，增加权限门控的 `context.services.get(id)`。Core 提供 `chat-context` 与 `resource-catalog`；Test Manifest 中的 `core.services-smoke` 自动检查权限、冻结快照和 AbortSignal 契约。该候选已通过 CI 与远程 Commit / SHA-256 / 字节数校验，ST / TT 实机验收仍待完成。Session Page Registry、Settings Registry、Navigation Registry 和模块样式注册仍待后续实现。
 
 ## 6. 建议迁移顺序
 
-### Phase 3.1 · Core service 与父容器接口
+### Phase 3.1 · Core Services API v2 与测试候选
 
-- 只建立 Host Context、Session Page Registry、Settings Registry 和样式归属机制。
-- 保持所有现有功能仍由 Core 启动；先让旧实现能够通过新接口工作。
-- 不改变 UI、功能开关默认值和用户数据格式。
-- 为新接口增加契约测试和 ST / TT 回归。
+- 已实现 `chat-context` 与 `resource-catalog` 两项权限门控共享服务，Kernel API v2 / 1.1.0。
+- 已建立 Test Core v0.3.305、Test Loader 0.3.2 和自动启动的 `core.services-smoke`；CI、main 基线与远程固定源码校验通过。
+- 当前等待 ST / TT 实机验证；通过前不合并 PR #35、不提升 Stable Manifest。
+- Session Page Registry、Settings Registry、Navigation Registry 与 Style Ownership 仍是下一轮待实现接口。
+- 所有业务功能仍由 Core 启动；本阶段没有迁移任何用户功能，不改变 UI、开关默认值和数据格式。
 
 ### Phase 3.2 · 会话侠父模块 + 楼层侠
 
@@ -278,9 +280,9 @@ Kernel Context API 已升级到 v2：除 `signal`、权限化 host 引用、事�
 
 ## 9. 当前阶段结论
 
-**首个应实施的代码任务是 Phase 3.1：Core service 契约与 Session Page Registry，而不是立即把 2,185 行配套侠或 1,167 行打码侠剪切到新文件。**
+**Core Services API v2 的代码与自动化验收已经完成；当前首要门槛是 ST / TT 实机验证 Test Core v0.3.305。**
 
-先让父模块可以稳定挂载子页面、共享聊天上下文、注册原生设置、独立管理样式和清理资源，再迁移子模块。这样才能确保以后只更新指定模块时，不需要重新改动其他模块，也不会破坏现有 ST / TT 行为。
+实机通过后，下一项代码任务是建立 Session Page Registry 与唯一父容器接口，再迁移 `session` 父模块和 `session.floor`。之后才处理打码侠与配套侠。必须保留：关闭会话侠入口只影响面板可见性，不得停止配套侠后台自动套用；父子级联卸载也不能直接替代现有用户设置语义。
 
 
 ## Phase 3.1 device smoke check
