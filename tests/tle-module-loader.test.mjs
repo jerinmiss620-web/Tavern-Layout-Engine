@@ -310,4 +310,57 @@ test('same SemVer cannot silently point to a different immutable source after LK
   second.kernel.destroy();
 });
 
+
+test('manual refresh discovers a new module release and updates only the selected module', async () => {
+  const dbName = 'tle-module-manual-update-' + (++databaseSequence);
+  const sourceA1 = moduleSource('1.0.0');
+  const sourceB1 = moduleSource('1.0.0');
+  const entryA1 = makeEntry('module.a', '1.0.0', sourceA1, '9'.repeat(40));
+  const entryB1 = makeEntry('module.b', '1.0.0', sourceB1, '8'.repeat(40));
+  const responses = new Map([
+    [MANIFEST_URL, makeManifest([entryA1, entryB1])],
+    [entryA1.source_url, sourceA1],
+    [entryB1.source_url, sourceB1],
+  ]);
+  const kernel = createModuleKernel({ coreVersion: '0.3.304' });
+  const loader = createModuleLoader({
+    kernel,
+    channel: 'test',
+    manifestUrl: MANIFEST_URL,
+    fetch: async url => responses.has(url)
+      ? { ok: true, status: 200, text: async () => responses.get(url) }
+      : { ok: false, status: 404, text: async () => '' },
+    indexedDB,
+    dbName,
+    importModule(source) {
+      return import('data:text/javascript;charset=utf-8,' + encodeURIComponent(source));
+    },
+    crypto: {},
+  });
+
+  await loader.start();
+  assert.equal(kernel.get('module.a').version, '1.0.0');
+  assert.equal(kernel.get('module.b').version, '1.0.0');
+
+  const sourceA2 = moduleSource('1.1.0');
+  const entryA2 = makeEntry('module.a', '1.1.0', sourceA2, 'a'.repeat(40));
+  responses.set(MANIFEST_URL, makeManifest([entryA2, entryB1]));
+  responses.set(entryA2.source_url, sourceA2);
+
+  const refreshed = await loader.refresh();
+  const refreshedA = refreshed.find(item => item.id === 'module.a');
+  assert.equal(refreshedA.version, '1.0.0', 'refresh must not execute or replace a module');
+  assert.equal(refreshedA.availableVersion, '1.1.0');
+
+  await loader.update('module.a');
+  assert.equal(kernel.get('module.a').version, '1.1.0');
+  assert.equal(kernel.getAPI('module.a').version, '1.1.0');
+  assert.equal(kernel.get('module.b').status, 'active');
+  assert.equal(kernel.get('module.b').version, '1.0.0');
+  assert.equal(kernel.getAPI('module.b').version, '1.0.0');
+
+  loader.destroy();
+  kernel.destroy();
+});
+
 console.log('TLE Module Loader: manifest validation, immutable source verification, IndexedDB LKG, independent lifecycle and rollback isolation passed.');

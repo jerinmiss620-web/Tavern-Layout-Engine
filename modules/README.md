@@ -68,7 +68,7 @@ permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript �
 - Module Loader 源码：development/core/module-loader.js
 - Core 嵌入构建：node scripts/build-module-loader.mjs
 - Core 嵌入位置：TLE_MODULE_LOADER_START / TLE_MODULE_LOADER_END
-- Core API：api.moduleLoader（Kernel 仍通过 api.modules 暴露）
+- Core API：api.moduleLoader（refresh / update / updateAll / enable / disable / uninstall；Kernel 仍通过 api.modules 暴露）
 - Manifest：modules/stable.json 与 modules/test.json 分通道管理
 - 缓存：IndexedDB，分别保存模块源码、Manifest 与模块安装状态
 - LKG：仅在模块成功初始化后推进；失败候选不会覆盖 Last Known Good

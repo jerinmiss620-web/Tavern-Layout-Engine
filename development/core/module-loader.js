@@ -683,15 +683,17 @@ export function createModuleLoader(options = {}) {
     return list();
   }
 
-  async function updateInternal(id) {
+  async function updateInternal(id, refreshManifest = true) {
     assertAlive();
-    if (!currentManifest) await loadManifest();
+    if (refreshManifest || !currentManifest) await loadManifest();
     const entry = currentManifest?.byId.get(String(id));
     if (!entry) throw new Error('当前 Manifest 中不存在模块：' + id);
     const state = await readState(entry.id);
     if (state.installed === false) throw new Error('模块尚未安装，请先启用：' + id);
-    const record = await downloadModule(entry);
     const current = kernel.get(entry.id);
+    if (current?.status === 'active' && current.version === entry.version &&
+        state.lastKnownGoodVersion === entry.version) return current;
+    const record = await downloadModule(entry);
     if (state.disabled || current?.status !== 'active') {
       await writeState(entry.id, { installed: true, pendingVersion: entry.version });
       return { pending: true, id: entry.id, version: entry.version };
@@ -701,9 +703,7 @@ export function createModuleLoader(options = {}) {
 
   async function enableInternal(id) {
     assertAlive();
-    if (!currentManifest) {
-      try { await loadManifest(); } catch {}
-    }
+    try { await loadManifest(); } catch {}
     const normalizedId = String(id);
     const state = await readState(normalizedId);
     await writeState(normalizedId, { installed: true, disabled: false });
@@ -765,12 +765,12 @@ export function createModuleLoader(options = {}) {
 
   async function updateAllInternal() {
     assertAlive();
-    if (!currentManifest) await loadManifest();
+    await loadManifest();
     const results = [];
     for (const entry of currentManifest.order) {
       const state = await readState(entry.id);
       if (state.installed === false || state.disabled) continue;
-      try { results.push({ id: entry.id, result: await updateInternal(entry.id) }); }
+      try { results.push({ id: entry.id, result: await updateInternal(entry.id, false) }); }
       catch (error) {
         report(error, { type: 'module-update-all', id: entry.id });
         results.push({ id: entry.id, error: String(error.message || error) });
@@ -828,8 +828,15 @@ export function createModuleLoader(options = {}) {
     return startPromise;
   }
 
+  function refresh() {
+    return enqueue(async () => {
+      await loadManifest();
+      return list();
+    });
+  }
+
   function update(id) {
-    return enqueue(() => updateInternal(id));
+    return enqueue(() => updateInternal(id, true));
   }
 
   function updateAll() {
@@ -869,6 +876,7 @@ export function createModuleLoader(options = {}) {
   return Object.freeze({
     channel,
     start,
+    refresh,
     update,
     updateAll,
     enable,
