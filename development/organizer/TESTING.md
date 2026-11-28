@@ -17,11 +17,11 @@
 ## 新功能开发流程
 
 1. 从当前 `main` 创建新的功能分支；不要从 v0.3.239、v0.3.259、v0.3.263、v0.3.264 或旧测试分支创建。
-2. 修改完整 Core 开发源码及对应的独立组件源码；`development/organizer/TLE.js` 当前仍是完整 Core 单体文件，`releases/v0.3.304/TLE.js` 只作为不可变发布快照。
-3. 修改 Organizer 内容引擎时，运行 `node scripts/build-organizer-content.mjs`，将控制器重新打包进 Core 标记区。
+2. 修改权威开发源码：`development/organizer/TLE.js` 是完整 Core；Batch、Avatar、Gallery 分别维护在各自独立源码目录。`releases/v0.3.304/TLE.js` 只作为不可变发布快照，禁止直接编辑。
+3. 运行 `npm run build:core`，统一装配 Organizer Batch、HD Avatar Engine 与 Gallery Home；需要只核对而不写入时运行 `npm run build:core -- --check`。
 4. 同步更新专项回归测试；运行 `npm ci`、`npm test`，再按需运行真实 ST/TT 验收。
 5. 测试版必须使用新功能分支自己的测试清单、独立 Test Loader 与独立缓存；不要修改主分支的旧兼容 `channels/test.json`。
-6. 正式发布只使用 `RELEASING.md` 规定的 `npm run release` 流程；不复用旧版手动 stage/package 脚本。
+6. 正式发布只使用 `RELEASING.md` 规定的流程：先从权威开发源码执行 Core stage，再运行 `npm run release`；不得手工编辑生成的发布快照.
 
 ## 记录预览功能历史验收清单（v0.3.287–v0.3.289）
 
@@ -96,7 +96,7 @@
 1. 禁用 **TLE Organizer Branch Test Loader 0.3.0**。
 2. 重新启用 **TLE Permanent Bootstrap 1.0.6**。
 3. 完整刷新 ST/TT 宿主页面。
-4. 在 TLE → **版本与更新** 核对 Stable 通道、Core **v0.3.289**、Loader **v0.3.6**。
+4. 在 TLE → **版本与更新** 核对 Stable 通道、Core **v0.3.304**、Loader **v0.3.6**。
 
 不要再以旧测试 Loader 或旧 Stable Core 作为新开发入口。旧脚本只保留为禁用回滚备份。
 

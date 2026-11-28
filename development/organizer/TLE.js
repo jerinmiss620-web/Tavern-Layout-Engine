@@ -20855,6 +20855,7 @@ body.big-avatars #HotSwapWrapper .avatars_inline:has(.avatar) { min-height: calc
   let galleryHome = null;
   let hdAvatarEngine = null;
 
+/* TLE_AVATAR_ENGINE_START */
 // TLE integrated engine, based on 桃mini「哇！头像变清晰啦！」v4.5.14.
 // Original avatar-loading technique by 桃mini, integrated with the author's permission.
 // TLE host adaptation and compatibility handling: 小松鼠 & ChatGPT（小松7）.
@@ -21152,6 +21153,8 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
 }
 
 
+/* TLE_AVATAR_ENGINE_END */
+/* TLE_GALLERY_HOME_START */
 function createTLEGalleryHome(window, document) {
     'use strict';
 
@@ -23075,6 +23078,7 @@ function createTLEGalleryHome(window, document) {
     return api;
 }
 
+/* TLE_GALLERY_HOME_END */
   function destroy() {
     if (state.destroyed) return;
     try { galleryHome?.stop(); } catch (error) { console.warn('[TLE Gallery] 卸载画廊失败', error); }

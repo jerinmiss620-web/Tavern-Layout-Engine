@@ -86,6 +86,12 @@ async function verify({ remote = false, candidate = false } = {}) {
         kind === 'core' ? manifest.minimum_loader_version : manifest.minimum_bootstrap_version) >= 0);
     }
     const item = candidate ? release(kind, 'a'.repeat(40)) : manifest.release;
+    if (kind === 'core' && plan.core !== json('latest.json').latest_version) {
+      const stableVersion = json('latest.json').latest_version;
+      const expectedSource = read('development/organizer/TLE.js').replaceAll(stableVersion, plan.core);
+      assert.equal(read(sourcePath('core')), expectedSource,
+        'Staged Core must be generated from the authoritative development source. Rebuild and stage again.');
+    }
     assert.equal(item.version, plan[kind], 'Release plan and manifest differ: the update pointer was not advanced');
     assert.equal(item.source_path, sourcePath(kind));
     assert.match(item.source_commit, /^[a-f0-9]{40}$/);
@@ -139,7 +145,9 @@ else if (command === 'stage') {
   assert.match(version || '', versionRE); assert.ok(compare(version, plan[arg]) > 0);
   const target = sourcePath(arg, version); assert.ok(!existsSync(target), 'Never overwrite a version directory');
   const notes = read(notesPath); assert.ok(notes.trim());
-  const source = read(sourcePath(arg)).replaceAll(plan[arg], version);
+  if (arg === 'core') execFileSync(process.execPath, ['scripts/build-core.mjs'], { stdio: 'inherit' });
+  const authoritativeSourcePath = arg === 'core' ? 'development/organizer/TLE.js' : sourcePath(arg);
+  const source = read(authoritativeSourcePath).replaceAll(plan[arg], version);
   mkdirSync(target.slice(0, target.lastIndexOf('/')), { recursive: true });
   writeFileSync(target, source);
   writeFileSync(target.replace(/[^/]+$/, 'CHANGELOG.md'), `# v${version}\n\n${notes}\n`);

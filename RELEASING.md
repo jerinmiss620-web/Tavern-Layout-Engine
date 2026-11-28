@@ -3,10 +3,11 @@
 使用 Node 24 和有仓库写权限的 Git 凭据。保持独立的 main 发布工作副本，开始时 HEAD 必须等于 origin/main。
 
 1. `npm ci`。
-2. 在仓库内准备变更日志文件。运行 `node scripts/release.mjs stage core 0.3.207 notes.md` 或 `node scripts/release.mjs stage loader 0.3.5 notes.md`，生成递增版本源码及日志，更新 release-plan.json。版本号是示例；必须高于当前版本，目录必须尚不存在。
-3. 修改该新版本目录中的源码。不要修改已发布的版本目录。正常发布沿用现有 Bootstrap。
-4. 运行 `npm run release`。该命令生成匹配源码的安装包、校验候选版本、运行全部测试、提交不可变产物、取得真实 Commit、计算两份清单中的真实 UTF-8 长度与 SHA-256、再次运行完整测试，最后将产物提交和清单提交在同一次 fast-forward push 中发布到 main。
-5. 发布命令随后核验 GitHub 两份远程清单、Commit 固定地址、安装包和源码，并用远程发布字节重放更新链模拟。远程核验失败时命令失败，不宣告发布成功。
+2. **只修改权威开发源码**：完整 Core 位于 `development/organizer/TLE.js`；独立组件分别位于 `development/organizer/batch/`、`development/avatar-engine/avatar-engine.js`、`development/gallery-home/gallery-home.js`。不要直接编辑 `releases/v*/` 中的发布快照。
+3. 运行 `npm run build:core`。统一构建器会从 Batch、Avatar、Gallery 三份组件源码重新装配 Core，并保持可重复、幂等；`npm run build:core -- --check` 只检查、不写入。旧命令 `node scripts/build-organizer-content.mjs` 仅作为兼容别名，实际调用统一构建器。
+4. 准备变更日志文件，再运行 `node scripts/release.mjs stage core 0.3.305 notes.md` 或 `node scripts/release.mjs stage loader 0.3.7 notes.md`。版本号仅为示例，必须高于当前版本且目录不存在。Core stage 会再次运行统一构建器，从 `development/organizer/TLE.js` 生成新发布源码并更新 `release-plan.json`；**生成后不要再手工修改发布目录**。
+5. 运行 `npm run release`。发布前会逐字节核对候选 Core 是否由当前权威开发源码生成，再生成匹配安装包、校验候选版本、运行全部测试、提交不可变产物、取得真实 Commit、计算两份清单中的真实 UTF-8 长度与 SHA-256、再次运行完整测试，最后将产物提交和清单提交在同一次 fast-forward push 中发布到 main。
+6. 发布命令随后核验 GitHub 两份远程清单、Commit 固定地址、安装包和源码，并用远程发布字节重放更新链模拟。远程核验失败时命令失败，不宣告发布成功.
 
 两个清单在同一最终提交中激活。已有版本保留原 Commit pin；只有增加版本号的新源码可以获得新 pin。任何缺失清单更新、源码/安装包不匹配、未推进 release-plan、哈希/字节数错误、缺失日志都会使校验失败。发布期间远端 main 有变化时 Git 拒绝非 fast-forward 推送，需整合后重新运行。
 
@@ -23,9 +24,11 @@ CI 对 main 和 PR 运行全部测试与清单守卫；main 还核验 GitHub 远
 ## 模块化前的源码边界
 
 - `development/organizer/TLE.js` 当前是完整 TLE Core 单体源码，不是 Organizer 单独模块；模块化前不得按目录名推断它只包含整理侠。
-- `development/organizer/batch/` 是整理侠批量处理引擎的独立源码，由 `scripts/build-organizer-content.mjs` 打包进 Core 标记区。
-- `development/avatar-engine/avatar-engine.js` 与 `development/gallery-home/gallery-home.js` 是已有的独立组件源码；各自版本号属于组件版本，不等同于 Core 版本。对应测试负责核验组件源码与 Core 内嵌代码的同步关系。
-- 后续模块化必须把源码构建、模块清单、版本与哈希校验纳入统一流程；不得手工维护两份互不校验的同名实现。
+- `development/organizer/batch/`、`development/avatar-engine/avatar-engine.js` 与 `development/gallery-home/gallery-home.js` 是独立权威组件源码；Core 中的嵌入区由 `scripts/build-core.mjs` 统一生成。
+- `npm run build:core` 是唯一正式构建入口，负责 Batch 打包、Avatar/Gallery 源码装配与版本适配；`--check` 模式不写文件。旧 Organizer 构建命令只保留兼容转发。
+- Gallery 源码的组件版本号与 Core 发布版本不是同一概念；构建时只把内嵌副本的 `VERSION` 调整为开发 Core 版本，独立组件源码不被改写。
+- `tests/tle-core-build.test.mjs` 对开发 Core、正式 Core 与组件权威源码进行逐字节核验；发布 stage 还会核对候选发布源码是否由开发 Core 生成。
+- 后续模块化必须把源码构建、模块清单、版本与哈希校验纳入统一流程；不得手工维护两份互不校验的同名实现.
 
 ## 固定 Bootstrap 的紧急修复
 
