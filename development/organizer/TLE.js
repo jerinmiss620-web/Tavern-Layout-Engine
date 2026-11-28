@@ -2767,8 +2767,8 @@ var TLEBatchLibrary = (() => {
   /* TLE_MODULE_KERNEL_START */
   const TLEModuleKernelBundle = (() => {
   function createModuleKernel(options = {}) {
-    const KERNEL_VERSION = '1.0.0';
-    const API_VERSION = 1;
+    const KERNEL_VERSION = '1.1.0';
+    const API_VERSION = 2;
     const coreVersion = String(options.coreVersion || '0.0.0');
     const AbortControllerCtor = options.AbortController || (typeof AbortController === 'function' ? AbortController : null);
     const storage = options.storage || null;
@@ -2786,6 +2786,20 @@ var TLEBatchLibrary = (() => {
     const permissionPattern = /^[a-z][a-z0-9-]*(?::[a-z][a-z0-9-]*){0,2}$/;
     const settingKeyPattern = /^[A-Za-z0-9._-]{1,128}$/;
     const eventPattern = /^[a-z][a-z0-9:._-]{0,127}$/;
+    const servicePattern = /^[a-z][a-z0-9-]{0,63}$/;
+    const configuredServices = options.services;
+    if (configuredServices !== undefined && (!configuredServices || typeof configuredServices !== 'object' || Array.isArray(configuredServices))) {
+      throw makeError('Core services 必须是对象。');
+    }
+    const services = Object.create(null);
+    for (const [id, service] of Object.entries(configuredServices || {})) {
+      if (!servicePattern.test(id)) throw makeError('无效 Core service ID：' + id);
+      if (!service || typeof service !== 'object' || Array.isArray(service)) {
+        throw makeError('Core service 必须是对象：' + id);
+      }
+      services[id] = Object.isFrozen(service) ? service : Object.freeze(service);
+    }
+    Object.freeze(services);
   
     function makeError(message, cause) {
       const error = new Error('[TLE Module Kernel] ' + message);
@@ -3059,6 +3073,16 @@ var TLEBatchLibrary = (() => {
           get document() {
             requirePermission(record, 'host:document');
             return host.document || null;
+          },
+        }),
+        services: Object.freeze({
+          get(name) {
+            const id = String(name || '');
+            if (!servicePattern.test(id)) throw makeError('无效 Core service ID：' + id);
+            requirePermission(record, 'services:' + id);
+            const service = services[id];
+            if (!service) throw makeError('Core service 不存在：' + id);
+            return service;
           },
         }),
         permissions: Object.freeze([...record.definition.permissions]),
@@ -24723,10 +24747,78 @@ function createTLEGalleryHome(window, document) {
 }
 /* TLE_GALLERY_HOME_END */
 
+  const coreModuleServices = Object.freeze({
+    'chat-context': Object.freeze({
+      getActive() {
+        const snapshot = getActiveChatActionContext();
+        if (!snapshot) return null;
+        const chat = snapshot.chat.map(message => {
+          const extra = message?.extra && typeof message.extra === 'object' ? message.extra : {};
+          const genId = extra.gen_id ?? message?.gen_id ?? '';
+          const sendDate = message?.send_date ?? message?.sendDate ?? extra.send_date ?? '';
+          return Object.freeze({
+            is_system: message?.is_system,
+            is_user: message?.is_user,
+            mes: message?.mes ?? message?.message ?? '',
+            message: message?.message ?? '',
+            name: message?.name ?? message?.name2 ?? '',
+            name2: message?.name2 ?? '',
+            send_date: sendDate,
+            sendDate: message?.sendDate ?? '',
+            gen_id: genId,
+            extra: Object.freeze({ gen_id: genId, send_date: sendDate }),
+          });
+        });
+        return Object.freeze({
+          chatKey: snapshot.chatKey,
+          lastMessageId: snapshot.lastMessageId,
+          chat: Object.freeze(chat),
+        });
+      },
+      getCurrentRole() {
+        const role = companionCurrentRole();
+        return role ? Object.freeze({ ...role }) : null;
+      },
+      isGenerating() {
+        return isNativeGenerationVisible();
+      },
+      executeSlashCommand(command, expectedChatKey) {
+        const snapshot = getActiveChatActionContext();
+        if (!snapshot) throw new Error('请先进入一个角色或群聊。');
+        if (expectedChatKey && snapshot.chatKey !== expectedChatKey) {
+          throw new Error('聊天已切换，已取消操作。');
+        }
+        return executeTLESlashCommand(String(command || ''), snapshot.context);
+      },
+    }),
+    'resource-catalog': Object.freeze({
+      list(id, options = {}) {
+        const signal = options?.signal;
+        if (!signal || typeof signal.aborted !== 'boolean') {
+          throw new Error('Resource Catalog 必须接收模块 AbortSignal。');
+        }
+        return quickCatalog(String(id || ''), options?.mount !== false, signal);
+      },
+      listForManagement(id, signal) {
+        if (!signal || typeof signal.aborted !== 'boolean') {
+          throw new Error('Resource Catalog 必须接收模块 AbortSignal。');
+        }
+        return quickManagerCatalog(String(id || ''), signal);
+      },
+      applyChoice(id, item, signal) {
+        if (!signal || typeof signal.aborted !== 'boolean') {
+          throw new Error('Resource Catalog 必须接收模块 AbortSignal。');
+        }
+        return applyQuickChoice(String(id || ''), item, signal);
+      },
+    }),
+  });
+
   const moduleKernel = TLEModuleKernelBundle.createModuleKernel({
     coreVersion: '0.3.304',
     AbortController: HOST_WIN.AbortController,
     host: { scriptWindow: SCRIPT_WIN, window: HOST_WIN, document: HOST_DOC },
+    services: coreModuleServices,
     storage: (() => { try { return HOST_WIN.localStorage; } catch { return null; } })(),
     onError(error, details = {}) {
       rememberDiagnosticError('module-' + (details.type || 'runtime'), error?.message || error, details.id || 'module-kernel');
