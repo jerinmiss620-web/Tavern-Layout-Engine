@@ -73,6 +73,7 @@ assert.equal(manifest.schema_version, 1);
 assert.equal(manifest.project, 'Tavern Layout Engine');
 assert.equal(manifest.channel, 'test');
 assert.equal(manifest.latest_version, manifest.release?.version);
+assert.equal(manifest.minimum_loader_version, '0.3.2');
 
 const release = manifest.release;
 assert.equal(release.source_path, `test-releases/v${release.version}/TLE.js`);
@@ -82,7 +83,8 @@ new Function(tleBytes.toString('utf8'));
 
 const loaderRelease = manifest.loader_release;
 assert.ok(loaderRelease, 'loader_release is required');
-assert.equal(loaderRelease.source_path, 'loader/TLE-Remote-Loader-Test-0.3.1.js');
+assert.equal(loaderRelease.version, '0.3.2');
+assert.equal(loaderRelease.source_path, `loader/TLE-Remote-Loader-Test-${loaderRelease.version}.js`);
 checkPinnedUrl(loaderRelease.source_url, loaderRelease.source_commit, loaderRelease.source_path, 'Loader release');
 const loaderBytes = checkLocalSource(loaderRelease.source_path, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
 const loaderSource = loaderBytes.toString('utf8');
@@ -98,6 +100,18 @@ assert.equal(
   `https://github.com/${OWNER}/${REPO}/blob/${loaderRelease.installer_commit}/${loaderRelease.installer_path}`,
   'Loader installer URL must use its pinned commit and path',
 );
+
+// Phase 3.1 Core API v2 and Test manifest contract.
+const moduleManifest = JSON.parse(readText('modules/test.json'));
+assert.equal(moduleManifest.core_api_version, 2, 'Test manifest must require Core API v2');
+assert.ok(moduleManifest.modules.some(module => module.id === 'avatar.hd' && module.api_version === 1));
+assert.ok(tleBytes.toString('utf8').includes("const KERNEL_VERSION = '1.1.0';"));
+assert.ok(tleBytes.toString('utf8').includes('const API_VERSION = 2;'));
+assert.ok(tleBytes.toString('utf8').includes('const coreModuleServices = Object.freeze('));
+assert.ok(tleBytes.toString('utf8').includes("services: coreModuleServices,"));
+assert.ok(tleBytes.toString('utf8').includes('integration/phase-3-core-services-20261129/modules/test.json'));
+assert.ok(loaderSource.includes("const LOADER_VERSION = '0.3.2'"));
+assert.ok(loaderSource.includes('integration/phase-3-core-services-20261129/channels/test.json'));
 
 // Loader trust-policy contract: commit pinning must remain strict.
 assert.ok(loaderSource.includes('[a-f0-9]{40}'), 'Loader must require a 40-character commit SHA');
