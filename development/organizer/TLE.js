@@ -21151,8 +21151,6 @@ function createTLEHDAvatarEngine(SCRIPT_WIN, WIN, DOC) {
   console.log('[TLE HD Avatar] 桃mini 4.5.14 引擎已接管 ST 头像区域。');
   return api;
 }
-
-
 /* TLE_AVATAR_ENGINE_END */
 /* TLE_GALLERY_HOME_START */
 function createTLEGalleryHome(window, document) {
@@ -23077,7 +23075,6 @@ function createTLEGalleryHome(window, document) {
     window[GLOBAL_NAME] = api;
     return api;
 }
-
 /* TLE_GALLERY_HOME_END */
   function destroy() {
     if (state.destroyed) return;

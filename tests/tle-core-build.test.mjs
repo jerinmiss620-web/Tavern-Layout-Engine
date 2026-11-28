@@ -29,7 +29,7 @@ function extract(source, startMarker, endMarker, label) {
   const contentStart = source.indexOf('\n', start) + 1;
   const end = source.indexOf(endMarker, contentStart);
   assert.ok(contentStart > start && end > contentStart, label + ': invalid marker order');
-  return source.slice(contentStart, end).replace(/\r?\n$/, '');
+  return source.slice(contentStart, end).trimEnd();
 }
 
 function checkDevelopmentCore(source, version) {
