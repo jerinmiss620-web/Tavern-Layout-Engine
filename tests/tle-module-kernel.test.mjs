@@ -281,7 +281,7 @@ test('destroy aborts an in-flight init and disposes its late result exactly once
 
 
 test('Core services are permission-gated, immutable and isolated from undeclared modules', async () => {
-  const sampleService = Object.freeze({ ping: () => 'pong' });
+  const sampleService = { ping: () => 'pong' };
   const kernel = makeKernel({ services: { 'sample-service': sampleService } });
   let allowedContext;
   kernel.register({
@@ -326,10 +326,10 @@ test('Core embeds the exact current kernel source and exposes its lifecycle API'
   assert.equal(coreSource.slice(start, end + endMarker.length), expected);
   assert.match(coreSource, /const moduleKernel = TLEModuleKernelBundle\.createModuleKernel/);
   assert.match(coreSource, /modules: moduleKernel/);
-  assert.match(coreSource, /const coreModuleServices = Object\\.freeze/);
-  assert.match(coreSource, /'chat-context': Object\\.freeze/);
-  assert.match(coreSource, /'resource-catalog': Object\\.freeze/);
-  assert.match(coreSource, /services: coreModuleServices/);
+  assert.ok(coreSource.includes('const coreModuleServices = Object.freeze('));
+  assert.ok(coreSource.includes("'chat-context': Object.freeze("));
+  assert.ok(coreSource.includes("'resource-catalog': Object.freeze("));
+  assert.ok(coreSource.includes('services: coreModuleServices,'));
   assert.match(coreSource, /moduleKernel\.destroy\(\)/);
   assert.match(coreSource, /host: \{ scriptWindow: SCRIPT_WIN, window: HOST_WIN, document: HOST_DOC \}/);
 });
