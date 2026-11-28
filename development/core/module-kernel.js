@@ -292,6 +292,9 @@ export function createModuleKernel(options = {}) {
         },
         emit(name, payload) {
           requirePermission(record, 'events:emit');
+          if (record.status !== 'starting' && record.status !== 'active') {
+            throw makeError('模块 ' + record.definition.id + ' 当前不能发布事件。');
+          }
           return emitEvent(String(name), payload, record.definition.id);
         },
       }),
@@ -407,6 +410,7 @@ export function createModuleKernel(options = {}) {
     if (previousStatus === 'starting') {
       record.stopRequested = true;
       try { record.controller?.abort(); } catch {}
+      clearSubscriptions(record);
       record.status = 'stopping';
       return;
     }
@@ -447,11 +451,11 @@ export function createModuleKernel(options = {}) {
         if (record.status === 'starting' || record.status === 'stopping') {
           throw makeError('模块正处于生命周期转换中：' + currentId);
         }
+        if (!AbortControllerCtor) throw makeError('当前宿主不支持 AbortController，无法安全启动模块。');
         record.status = 'starting';
         record.error = null;
         record.stopRequested = false;
         record.initCleanupDone = false;
-        if (!AbortControllerCtor) throw makeError('当前宿主不支持 AbortController，无法安全启动模块。');
         record.controller = new AbortControllerCtor();
         record.context = createContext(record);
         emitEvent('module:starting', snapshot(record), currentId);
