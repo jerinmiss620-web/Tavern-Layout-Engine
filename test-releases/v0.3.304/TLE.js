@@ -24723,6 +24723,7 @@ function createTLEGalleryHome(window, document) {
     window[GLOBAL_NAME] = api;
     return api;
 }
+/* TLE_GALLERY_HOME_END */
 
   const moduleKernel = TLEModuleKernelBundle.createModuleKernel({
     coreVersion: '0.3.304',
@@ -24778,7 +24779,7 @@ function createTLEGalleryHome(window, document) {
     }],
   });
 
-/* TLE_GALLERY_HOME_END */
+
   function destroy() {
     if (state.destroyed) return;
     try { moduleLoader.destroy(); } catch (error) { console.error('[TLE Module Loader] 卸载模块加载器失败。', error); }

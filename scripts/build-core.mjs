@@ -13,6 +13,13 @@ function insertBefore(source, anchor, insertion, label) {
   return source.replace(anchor, insertion + anchor);
 }
 
+function placeMarkerAfter(source, marker, anchor, label) {
+  assert.ok(count(source, marker) <= 1, label + ': marker must not be duplicated');
+  if (count(source, marker) === 1) source = source.replace(marker, '');
+  assert.equal(count(source, anchor), 1, label + ': expected exactly one function-end anchor');
+  return source.replace(anchor, anchor + '\n' + marker);
+}
+
 function ensureModuleMarkers(source) {
   const markers = [
     '/* TLE_AVATAR_ENGINE_START */',
@@ -34,17 +41,20 @@ function ensureModuleMarkers(source) {
       '/* TLE_AVATAR_ENGINE_END */\n/* TLE_GALLERY_HOME_START */\n',
       'Avatar/Gallery boundary',
     );
-    source = insertBefore(
-      source,
-      '  function destroy() {\n    if (state.destroyed) return;',
-      '/* TLE_GALLERY_HOME_END */\n',
-      'Gallery end',
-    );
   } else {
     for (let index = 0; index < markers.length; index++) {
       assert.equal(count(source, markers[index]), 1, 'Module marker must occur exactly once: ' + markers[index]);
     }
   }
+
+  // The Gallery factory ends here. Core.destroy() is later, after module startup.
+  // Never use Core.destroy() as the Gallery boundary: that would absorb Kernel/Loader initialization.
+  source = placeMarkerAfter(
+    source,
+    markers[3],
+    '    window[GLOBAL_NAME] = api;\n    return api;\n}',
+    'Gallery end',
+  );
   return source;
 }
 

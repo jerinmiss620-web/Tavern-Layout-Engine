@@ -62,6 +62,15 @@ assert.equal(extract(developmentCore, loaderStart, loaderEnd, 'Development Modul
 checkDevelopmentCore(developmentCore, coreVersion(developmentCore, 'Development Core'));
 assert.equal(coreVersion(developmentCore, 'Development Core'), plan.core,
   'Development Core header must match release-plan.json');
+
+const testManifest = JSON.parse(read('channels/test.json'));
+const testCore = read(testManifest.release.source_path);
+assert.equal(testCore, developmentCore,
+  'The pinned Test candidate must be an exact snapshot of the assembled development Core');
+const galleryEndIndex = developmentCore.indexOf('/* TLE_GALLERY_HOME_END */');
+const moduleKernelIndex = developmentCore.indexOf('const moduleKernel = TLEModuleKernelBundle.createModuleKernel(');
+assert.ok(galleryEndIndex >= 0 && moduleKernelIndex > galleryEndIndex,
+  'Module runtime initialization must remain outside the Gallery Home bundle region');
 assert.ok(stableCore.includes(avatar), 'Stable Core: HD Avatar Engine differs from its authoritative source');
 assert.ok(stableCore.includes(galleryForVersion(stable.release.version)),
   'Stable Core: Gallery Home differs from its authoritative source');
