@@ -103,3 +103,15 @@
 ## 旧测试分支说明
 
 旧分支 `feature/organizer-nav-worldbooks-20261125` 的测试清单与 Loader 缓存相互隔离。它可以用于追溯历史测试，但不代表当前正式版本，也不应继续承载新功能。需要新的测试环境时，从当前 `main` 创建独立测试分支，重新生成独立清单与 Test Loader；正式 `latest.json`、`loader/latest.json` 和 Bootstrap 不参与测试发布。
+
+
+## Phase 2 · Core Module System integration
+
+- Module Kernel source: `development/core/module-kernel.js`; Module Loader source: `development/core/module-loader.js`.
+- Both are assembled only through `npm run build:core`; do not run the individual helper scripts as a separate development workflow.
+- `api.modules` exposes the Kernel; `api.moduleLoader` exposes refresh/update/enable/disable/uninstall operations.
+- Parent-child ownership and technical dependencies remain separate. Parent shutdown cascades to owned children; dependency edges are resolved independently.
+- Stable Manifest remains empty until the first module passes ST and TT device validation, immutable source verification, lifecycle cleanup, offline LKG and failed-update rollback.
+- The current HD Avatar Engine remains a built-in fallback while the remote `avatar.hd` pilot is tested. TT keeps its native avatar handling.
+- Module errors are lifecycle-isolated, not sandbox-isolated. Permission declarations gate the Core Context API; they do not prevent trusted same-page JavaScript from accessing the host.
+- Do not migrate 会话侠, 楼层侠, 配套侠, 打码侠 or other existing modules until the HD Avatar pilot has passed the full device matrix.

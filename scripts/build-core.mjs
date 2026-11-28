@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { build } from 'esbuild';
+import { buildModuleKernelBundle } from './build-module-kernel.mjs';
+import { buildModuleLoaderBundle } from './build-module-loader.mjs';
 
 const CORE_PATH = 'development/organizer/TLE.js';
 const read = path => readFileSync(path, 'utf8');
@@ -13,6 +15,10 @@ function insertBefore(source, anchor, insertion, label) {
 
 function ensureModuleMarkers(source) {
   const markers = [
+    '/* TLE_MODULE_KERNEL_START */',
+    '/* TLE_MODULE_KERNEL_END */',
+    '/* TLE_MODULE_LOADER_START */',
+    '/* TLE_MODULE_LOADER_END */',
     '/* TLE_AVATAR_ENGINE_START */',
     '/* TLE_AVATAR_ENGINE_END */',
     '/* TLE_GALLERY_HOME_START */',
@@ -79,6 +85,22 @@ source = replaceRegion(
   batch.outputFiles[0].text,
 );
 
+const kernelSource = read('development/core/module-kernel.js');
+source = replaceRegion(
+  source,
+  '  /* TLE_MODULE_KERNEL_START */',
+  '  /* TLE_MODULE_KERNEL_END */',
+  buildModuleKernelBundle(kernelSource),
+);
+
+const moduleLoaderSource = read('development/core/module-loader.js');
+source = replaceRegion(
+  source,
+  '  /* TLE_MODULE_LOADER_START */',
+  '  /* TLE_MODULE_LOADER_END */',
+  buildModuleLoaderBundle(moduleLoaderSource),
+);
+
 const avatar = read('development/avatar-engine/avatar-engine.js');
 assert.match(avatar, /^\/\/ TLE integrated engine,/);
 assert.match(avatar, /function createTLEHDAvatarEngine\(/);
@@ -110,7 +132,7 @@ source = replaceRegion(
 if (checkOnly) {
   assert.equal(source, read(outputPath),
     'Core source is not assembled from its authoritative modules. Run npm run build:core.');
-  console.log('TLE Core build check passed: Organizer Batch, HD Avatar Engine and Gallery Home are synchronized.');
+  console.log('TLE Core build check passed: Organizer Batch, Module Kernel, Module Loader, HD Avatar Engine and Gallery Home are synchronized.');
 } else if (outputIndex >= 0) {
   writeFileSync(outputPath, source);
   console.log('Generated assembled TLE Core at ' + outputPath + '.');
@@ -119,5 +141,5 @@ if (checkOnly) {
   if (source !== previous) writeFileSync(CORE_PATH, source);
   console.log(source === previous
     ? 'TLE Core is already synchronized; no file changes were necessary.'
-    : 'TLE Core rebuilt from Organizer Batch, HD Avatar Engine and Gallery Home.');
+    : 'TLE Core rebuilt from Organizer Batch, Module Kernel, Module Loader, HD Avatar Engine and Gallery Home.');
 }

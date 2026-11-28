@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { buildModuleKernelBundle } from '../scripts/build-module-kernel.mjs';
+import { buildModuleLoaderBundle } from '../scripts/build-module-loader.mjs';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const plan = JSON.parse(read('release-plan.json'));
 const stable = JSON.parse(read('latest.json'));
 const avatar = read('development/avatar-engine/avatar-engine.js').trimEnd();
 const gallerySource = read('development/gallery-home/gallery-home.js');
+const kernelSource = read('development/core/module-kernel.js');
+const moduleLoaderSource = read('development/core/module-loader.js');
 const developmentCore = read('development/organizer/TLE.js');
 const stableCore = read(stable.release.source_path);
 
@@ -33,6 +37,10 @@ function extract(source, startMarker, endMarker, label) {
 }
 
 function checkDevelopmentCore(source, version) {
+  assert.ok(source.includes(buildModuleKernelBundle(kernelSource)),
+    'Development Core: Module Kernel differs from its authoritative source');
+  assert.ok(source.includes(buildModuleLoaderBundle(moduleLoaderSource)),
+    'Development Core: Module Loader differs from its authoritative source');
   assert.equal(
     extract(source, '/* TLE_AVATAR_ENGINE_START */', '/* TLE_AVATAR_ENGINE_END */', 'Development Avatar'),
     avatar,
