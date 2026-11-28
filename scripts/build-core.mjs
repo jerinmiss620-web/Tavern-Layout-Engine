@@ -73,13 +73,70 @@ function replaceRegion(source, startMarker, endMarker, replacement) {
   return source.slice(0, start) + '\n' + replacement.trimEnd() + '\n' + source.slice(end);
 }
 
+const versionIndex = process.argv.indexOf('--version');
+const requestedVersion = versionIndex >= 0 ? process.argv[versionIndex + 1] : null;
+if (versionIndex >= 0) assert.match(requestedVersion || '', /^\d+\.\d+\.\d+$/, '--version requires X.Y.Z');
+function replaceExactly(source, needle, replacement, label) {
+  assert.equal(count(source, needle), 1, label + ': expected exactly one version anchor');
+  return source.replace(needle, replacement);
+}
+
+function applyCoreVersion(source, nextVersion) {
+  const header = source.match(/(\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v)(\d+\.\d+\.\d+)/);
+  assert.ok(header, 'Cannot determine the current Core version');
+  const currentVersion = header[2];
+  if (currentVersion === nextVersion) return source;
+
+  source = replaceExactly(source, header[0], header[1] + nextVersion, 'Core version header');
+  source = replaceExactly(
+    source,
+    'data-tle-update-summary>v' + currentVersion + ' ·',
+    'data-tle-update-summary>v' + nextVersion + ' ·',
+    'Update summary version',
+  );
+  source = replaceExactly(
+    source,
+    'data-tle-runtime-version>v' + currentVersion + '</strong>',
+    'data-tle-runtime-version>v' + nextVersion + '</strong>',
+    'Runtime version label',
+  );
+  source = replaceExactly(
+    source,
+    "coreVersion: '" + currentVersion + "',",
+    "coreVersion: '" + nextVersion + "',",
+    'Module Kernel Core version',
+  );
+
+  const apiStart = source.indexOf('  const api = {\n    modules: moduleKernel,');
+  const apiEnd = source.indexOf('\n  };', apiStart);
+  assert.ok(apiStart >= 0 && apiEnd > apiStart, 'Core public API object must be found');
+  const api = source.slice(apiStart, apiEnd);
+  const updatedApi = replaceExactly(
+    api,
+    "version: '" + currentVersion + "',",
+    "version: '" + nextVersion + "',",
+    'Core public API version',
+  );
+  source = source.slice(0, apiStart) + updatedApi + source.slice(apiEnd);
+
+  source = replaceExactly(
+    source,
+    'Core v' + currentVersion + ' ·',
+    'Core v' + nextVersion + ' ·',
+    'Core startup diagnostic version',
+  );
+  return source;
+}
+
 const checkOnly = process.argv.includes('--check');
 const outputIndex = process.argv.indexOf('--output');
 const outputPath = outputIndex >= 0 ? process.argv[outputIndex + 1] : CORE_PATH;
 assert.ok(outputPath, '--output requires a destination path');
 assert.ok(!(checkOnly && outputIndex >= 0), '--check and --output cannot be combined');
+assert.ok(!(checkOnly && requestedVersion), '--check and --version cannot be combined');
 let source = read(CORE_PATH);
 source = ensureModuleMarkers(source);
+if (requestedVersion) source = applyCoreVersion(source, requestedVersion);
 
 const moduleMarkers = [
   '  /* TLE_MODULE_KERNEL_START */',

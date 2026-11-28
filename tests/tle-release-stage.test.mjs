@@ -100,6 +100,16 @@ try {
   assert.match(development, new RegExp('Host Diagnostics 2\\.0 · v' + candidateVersion));
   assert.ok(development.includes("const VERSION = '" + candidateVersion + "';"),
     'the embedded Gallery version must advance with the Core');
+  assert.ok(development.includes("coreVersion: '" + candidateVersion + "',"),
+    'the Module Kernel must receive the staged Core version');
+  assert.ok(development.includes("version: '" + candidateVersion + "',"),
+    'the public Core API must report the staged Core version');
+  assert.ok(development.includes('data-tle-runtime-version>v' + candidateVersion + '</strong>'),
+    'the runtime version label must match the staged Core');
+  assert.ok(development.includes('feature/core-module-kernel-v0.3.304-20261128/modules/test.json'),
+    'the pinned Test module-manifest branch must remain unchanged during Core versioning');
+  assert.ok(!development.includes('feature/core-module-kernel-v' + candidateVersion + '-20261128/modules/test.json'),
+    'Core versioning must not rewrite a pinned branch name');
   assert.equal(installer.content, candidate, 'the disabled candidate backup installer must embed the exact Core');
   assert.equal(installer.enabled, false, 'candidate backup installers must remain disabled');
   assert.ok(read(temp, candidatePath.replace(/[^/]+$/, 'CHANGELOG.md')).includes('v' + candidateVersion));

@@ -147,9 +147,11 @@ else if (command === 'stage') {
   const targetDirectory = target.slice(0, target.lastIndexOf('/'));
   assert.ok(!existsSync(targetDirectory), 'Never reuse or overwrite an existing version directory');
   const notes = read(notesPath); assert.ok(notes.trim());
-  if (arg === 'core') execFileSync(process.execPath, ['scripts/build-core.mjs'], { stdio: 'inherit' });
+  if (arg === 'core') execFileSync(process.execPath, ['scripts/build-core.mjs', '--version', version], { stdio: 'inherit' });
   const authoritativeSourcePath = arg === 'core' ? 'development/organizer/TLE.js' : sourcePath(arg);
-  const source = read(authoritativeSourcePath).replaceAll(plan[arg], version);
+  const source = arg === 'core'
+    ? read(authoritativeSourcePath)
+    : read(authoritativeSourcePath).replaceAll(plan[arg], version);
   mkdirSync(targetDirectory, { recursive: true });
   writeFileSync(target, source);
   if (arg === 'core') writeFileSync('development/organizer/TLE.js', source);

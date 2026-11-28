@@ -87,6 +87,10 @@ assert.match(releaseScript, /if \(arg === 'core'\) writeFileSync\('development\/
 assert.match(releaseScript, /const authoritativeSourcePath = arg === 'core' \? 'development\/organizer\/TLE\.js' : sourcePath\(arg\)/,
   'Core staging must originate from the development source');
 assert.match(releaseScript, /Staged Core must be generated from the authoritative development source/);
+assert.match(releaseScript, /build-core\.mjs', '--version', version/,
+  'Core staging must use explicit version anchors rather than global string replacement');
+assert.doesNotMatch(releaseScript, /read\(authoritativeSourcePath\)\.replaceAll\(plan\[arg\], version\)/,
+  'Core staging must not rewrite unrelated pinned module URLs');
 
 execFileSync(process.execPath, ['scripts/build-core.mjs', '--check'], { stdio: 'inherit' });
 
