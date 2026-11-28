@@ -143,8 +143,8 @@ export function createModuleLoader(options = {}) {
         url.username || url.password || url.search || url.hash) {
       throw new Error('Manifest URL 必须来自受信任的 GitHub Raw HTTPS 地址。');
     }
-    const match = /^\/jerinmiss620-web\/Tavern-Layout-Engine\/(main|[a-f0-9]{40}|feature\/[A-Za-z0-9._-]+)\/modules\/(stable|test)\.json$/.exec(url.pathname);
-    if (!match || match[2] !== channel) throw new Error('Manifest URL 路径与仓库或更新通道不匹配。');
+    const match = /^\/jerinmiss620-web\/Tavern-Layout-Engine\/(main|[a-f0-9]{40}|feature\/[A-Za-z0-9._-]+|integration\/[A-Za-z0-9._-]+)\/modules\/(stable|test)\.json$/.exec(url.pathname);
+    if (!match || match[2] !== channel || (match[1].startsWith('integration/') && channel !== 'test')) throw new Error('Manifest URL 路径与仓库或更新通道不匹配。');
     return url.href;
   }
 

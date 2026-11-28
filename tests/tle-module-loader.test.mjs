@@ -101,6 +101,15 @@ function createHarness({
   return { kernel, loader };
 }
 
+test('integration branch manifests are accepted only by the Test channel', () => {
+  const kernel = createModuleKernel({ coreVersion: '0.3.304' });
+  assert.throws(
+    () => createModuleLoader({ kernel, channel: 'stable', manifestUrl: MANIFEST_URL }),
+    /Manifest URL/,
+  );
+  kernel.destroy();
+});
+
 test('verified manifest source replaces the fallback and becomes Last Known Good', async () => {
   const source = moduleSource('1.0.0');
   const entry = makeEntry('avatar.hd', '1.0.0', source);
