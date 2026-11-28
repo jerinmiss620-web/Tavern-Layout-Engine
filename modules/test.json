@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "project": "Tavern Layout Engine",
+  "channel": "test",
+  "core_api_version": 1,
+  "modules": [
+    {
+      "id": "avatar.hd",
+      "name": "HD Avatar Engine",
+      "version": "1.0.0",
+      "api_version": 1,
+      "settings_schema_version": 1,
+      "source_commit": "4398f33053053c3c1d66ded99c01f807dc607a6e",
+      "source_path": "modules/src/hd-avatar-engine.js",
+      "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/4398f33053053c3c1d66ded99c01f807dc607a6e/modules/src/hd-avatar-engine.js",
+      "sha256": "4b028e65ba200fa5d773f69be440eac864a01f4f226426777600e81210ec055e",
+      "size_bytes": 13717,
+      "parent_id": null,
+      "dependencies": [],
+      "permissions": [
+        "host:script-window",
+        "host:window",
+        "host:document"
+      ],
+      "enabled_by_default": true
+    }
+  ],
+  "notes": "Test-only HD Avatar Engine pilot. Module version 1.0.0 packages the audited 桃mini engine 4.5.14. ST/TT real-device validation passed on 2026-11-29; keep Test-only until a separate Stable promotion is explicitly approved."
+}

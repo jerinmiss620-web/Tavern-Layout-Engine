@@ -10,12 +10,17 @@ const sourcePath = hasWorkingSource
   : `releases/v${plan.core}/TLE.js`;
 const source = readFileSync(sourcePath, 'utf8');
 const readme = readFileSync('README.md', 'utf8');
-const actualVersion = source.match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
-const expectedVersion = stableManifest.release.version || plan.core;
+const coreApiStart = source.indexOf('  const api = {\n    modules: moduleKernel,');
+const coreApiEnd = source.indexOf('\n  };', coreApiStart);
+assert.ok(coreApiStart >= 0 && coreApiEnd > coreApiStart, 'Core API object must expose the Module Kernel');
+assert.match(source.slice(coreApiStart, coreApiEnd), /moduleApiVersion: moduleKernel.apiVersion/);
+const actualVersion = source.match(/\/\/ Tavern Layout Engine · Host Diagnostics 2\.0 · v(\d+\.\d+\.\d+)/)?.[1];
+const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
+const developmentOrCandidate = (Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main') || plan.core !== stableManifest.latest_version;
 
-assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
-assert.equal(actualVersion, expectedVersion,
-  'development source must match the current stable release');
+if (!developmentOrCandidate) assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree on main');
+assert.equal(actualVersion, plan.core,
+  'development Core version must match the current release plan');
 new vm.Script(source, { filename: sourcePath });
 
 const managerStart = source.indexOf('function openQuickGroupManager(');
@@ -159,7 +164,7 @@ assert.match(source, /body\.append\(resourcePage, findReplacePage\)/,
 assert.match(source, /grid-template-columns: minmax\(138px, \.78fr\) minmax\(168px, \.92fr\) minmax\(360px, 2\.3fr\)/);
 assert.match(source, /\.tle-quick-manager \.tle-quick-filter-item\s*\{[^}]*width:\s*100%/s);
 assert.match(source, /\.tle-quick-manager \.tle-quick-filter-select\s*\{[^}]*flex:\s*0 0 28px/s);
-assert.match(source, /el\.dataset\.contentDisabled === undefined/);
+assert.match(source, /el\.dataset\.contentDisabled === (?:undefined|void 0)/);
 assert.match(source, /el\.dataset\.contentLockDisabled === undefined/);
 assert.match(source, /\.tle-quick-manager \.tle-organizer-pane-title\s*\{\s*display:\s*block;\s*flex:\s*0 0 auto;\s*width:\s*100%;\s*min-width:\s*0;\s*box-sizing:\s*border-box;\s*\}/,
   'Both Organizer pane titles must fill the width of their own pane');

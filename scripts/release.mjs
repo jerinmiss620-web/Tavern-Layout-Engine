@@ -86,6 +86,12 @@ async function verify({ remote = false, candidate = false } = {}) {
         kind === 'core' ? manifest.minimum_loader_version : manifest.minimum_bootstrap_version) >= 0);
     }
     const item = candidate ? release(kind, 'a'.repeat(40)) : manifest.release;
+    if (kind === 'core' && plan.core !== json('latest.json').latest_version) {
+      const stableVersion = json('latest.json').latest_version;
+      const expectedSource = read('development/organizer/TLE.js').replaceAll(stableVersion, plan.core);
+      assert.equal(read(sourcePath('core')), expectedSource,
+        'Staged Core must be generated from the authoritative development source. Rebuild and stage again.');
+    }
     assert.equal(item.version, plan[kind], 'Release plan and manifest differ: the update pointer was not advanced');
     assert.equal(item.source_path, sourcePath(kind));
     assert.match(item.source_commit, /^[a-f0-9]{40}$/);
@@ -137,14 +143,21 @@ else if (command === 'verify') await verify({ remote: process.argv.includes('--r
 else if (command === 'stage') {
   assert.ok(['core','loader'].includes(arg), 'Usage: stage core|loader X.Y.Z notes.md');
   assert.match(version || '', versionRE); assert.ok(compare(version, plan[arg]) > 0);
-  const target = sourcePath(arg, version); assert.ok(!existsSync(target), 'Never overwrite a version directory');
+  const target = sourcePath(arg, version);
+  const targetDirectory = target.slice(0, target.lastIndexOf('/'));
+  assert.ok(!existsSync(targetDirectory), 'Never reuse or overwrite an existing version directory');
   const notes = read(notesPath); assert.ok(notes.trim());
-  const source = read(sourcePath(arg)).replaceAll(plan[arg], version);
-  mkdirSync(target.slice(0, target.lastIndexOf('/')), { recursive: true });
+  if (arg === 'core') execFileSync(process.execPath, ['scripts/build-core.mjs', '--version', version], { stdio: 'inherit' });
+  const authoritativeSourcePath = arg === 'core' ? 'development/organizer/TLE.js' : sourcePath(arg);
+  const source = arg === 'core'
+    ? read(authoritativeSourcePath)
+    : read(authoritativeSourcePath).replaceAll(plan[arg], version);
+  mkdirSync(targetDirectory, { recursive: true });
   writeFileSync(target, source);
+  if (arg === 'core') writeFileSync('development/organizer/TLE.js', source);
   writeFileSync(target.replace(/[^/]+$/, 'CHANGELOG.md'), `# v${version}\n\n${notes}\n`);
   plan[arg] = version; write('release-plan.json', plan); prepare();
-  console.log(`Staged ${arg} v${version}. Edit its source, then run npm run release in a dedicated main checkout.`);
+  console.log(`Staged ${arg} v${version}. Generated sources are immutable; review them, run npm test, then publish from a dedicated main checkout.`);
 } else if (command === 'publish') {
   assert.equal(git('branch','--show-current'), 'main', 'Publish from a dedicated main checkout');
   assert.equal(git('remote','get-url','origin').replace(/\.git$/, ''), `https://github.com/${repo}`);

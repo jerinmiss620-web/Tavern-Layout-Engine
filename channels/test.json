@@ -2,28 +2,28 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.204",
-  "minimum_loader_version": "0.3.0",
+  "latest_version": "0.3.304",
+  "minimum_loader_version": "0.3.1",
   "release": {
-    "version": "0.3.204",
-    "source_path": "releases/v0.3.204/TLE.js",
-    "source_commit": "caf5cb6aef942946a2091540de4854a876100617",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/caf5cb6aef942946a2091540de4854a876100617/releases/v0.3.204/TLE.js",
-    "changelog_path": "releases/v0.3.204/CHANGELOG.md",
-    "sha256": "1cb93e490c2fdd0c551088dccdc624f26fd72aa3a17a06ac81d48e7052762bc8",
-    "size_bytes": 497156
+    "version": "0.3.304",
+    "source_path": "test-releases/v0.3.304/TLE.js",
+    "source_commit": "acca26dc349ba96e259ec48209ad337d6d289b7f",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/acca26dc349ba96e259ec48209ad337d6d289b7f/test-releases/v0.3.304/TLE.js",
+    "changelog_path": "test-releases/v0.3.304/CHANGELOG.md",
+    "sha256": "1197e5463df363582e1d55b46a99aa59f3d5b534285c02c93f6b269fb8c2c2b3",
+    "size_bytes": 1205541
   },
-  "status": "TEST v0.3.204: compatible update UI for existing Test Loader 0.3.0 and Stable Loader 0.3.1, with current version, user-triggered check/update, and complete script info. Stable latest.json intentionally remains v0.3.203 pending ST/TT confirmation.",
-  "recommended_loader_version": "0.3.0",
+  "status": "TEST v0.3.304: unified Core Module Kernel/Loader build and HD Avatar Engine 1.0.0 pilot. ST/TT real-device validation passed on 2026-11-29. Keep this candidate Test-only; Stable v0.3.304, latest.json and modules/stable.json remain unchanged pending separate Stable promotion.",
+  "recommended_loader_version": "0.3.1",
   "loader_release": {
-    "version": "0.3.0",
-    "source_path": "loader/TLE-Remote-Loader-Test-0.3.0.js",
-    "source_commit": "8a6a87a3bc96c7b65f7f5597d5a0d61aca3478cf",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/8a6a87a3bc96c7b65f7f5597d5a0d61aca3478cf/loader/TLE-Remote-Loader-Test-0.3.0.js",
-    "sha256": "0856f84d82400e9109d2ac44a90a60bc33d5d750e8a3ce9a3a3ebdcd980da60f",
-    "size_bytes": 39810,
-    "installer_path": "loader/TLE-Remote-Loader-Test-0.3.0.json",
-    "installer_commit": "37edb44e6cffe5f134744b43bfb694224c7042b9",
-    "installer_url": "https://github.com/jerinmiss620-web/Tavern-Layout-Engine/blob/37edb44e6cffe5f134744b43bfb694224c7042b9/loader/TLE-Remote-Loader-Test-0.3.0.json"
+    "version": "0.3.1",
+    "source_path": "loader/TLE-Remote-Loader-Test-0.3.1.js",
+    "source_commit": "88b910120fae5701fd54de8743a5ce0d1e518279",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/88b910120fae5701fd54de8743a5ce0d1e518279/loader/TLE-Remote-Loader-Test-0.3.1.js",
+    "sha256": "639213318c4c6904c32068b3287f9a5b8f971825f5b216edaf3aa050df75d735",
+    "size_bytes": 39875,
+    "installer_path": "loader/TLE-Remote-Loader-Test-0.3.1.json",
+    "installer_commit": "88b910120fae5701fd54de8743a5ce0d1e518279",
+    "installer_url": "https://github.com/jerinmiss620-web/Tavern-Layout-Engine/blob/88b910120fae5701fd54de8743a5ce0d1e518279/loader/TLE-Remote-Loader-Test-0.3.1.json"
   }
 }

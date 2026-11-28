@@ -42,20 +42,19 @@ function fixture(t, Service = BatchService) {
     const state = { module: 'character', entries: [{ key: 'A.json', value: 'A.json', label: 'Card A' }], selected: new Set(['A.json']) }; state.filtered = state.entries;
     let saved = { combinations: { legacy: [{ find: 'old', replace: '' }] }, targets: ['preserve-old-selection'], mode: 'local' }, reloaded = false, resume;
     const h = { window: dom.window, search: d.querySelector('input'), searchWrap: d.querySelector('#search'), list: d.querySelector('#list'), status: d.querySelector('#status'), node, button,
-        namePlaceholder: '资源名称', context: () => ({ accountStorage: { getItem: () => 'account', setItem() {} } }),
+        context: () => ({ accountStorage: { getItem: () => 'account', setItem() {} } }),
         store: { async get() { return structuredClone(saved); }, async set(key, value) { saved = structuredClone(value); } }, createClient: async () => client,
-        scopeState: () => state, render: () => c.renderList(), setContentMode() {}, lock(v) { h.list.inert = v; }, saveResume(value) { resume = value; }, reload() { reloaded = true; }, reloading: () => reloaded,
+        scopeState: () => state, render: () => c.renderList(), lock(v) { h.list.inert = v; }, saveResume(value) { resume = value; }, reload() { reloaded = true; }, reloading: () => reloaded,
         resourceRow(entry, s) { const summary = node('summary', 'tle-quick-item'); const check = node('input', 'tle-quick-item-check'); check.type = 'checkbox'; check.checked = s.checked; check.indeterminate = s.indeterminate; check.addEventListener('change', () => s.onSelect(check.checked)); summary.append(check,node('span','tle-quick-item-title',entry.label)); return summary; },
     };
     const c = new OrganizerContent(h); d.querySelector('main').prepend(c.searchRow, c.controls);
-    const ready = async (replace = 'new') => { await c.setMode('content'); c.rules = [{ find: 'old', replace }]; c.syncInputs(); };
+    const ready = async (replace = 'new') => { await c.activate(); c.rules = [{ find: 'old', replace }]; c.syncInputs(); };
     return { root, read, write, service, c, h, state, client, calls, ready, saved: () => saved, reloaded: () => reloaded, resume: () => resume, d };
 }
 
-test('one shared search and list; independent mode queries; legacy combination namespace survives', async t => {
-    const f = fixture(t); f.h.search.value = 'Card'; await f.ready();
-    await f.c.setMode('name'); assert.equal(f.h.search.value, 'Card');
-    await f.c.setMode('content'); assert.equal(f.h.search.value, 'old');
+test('content search and list stay within the separate find/replace page; legacy combination namespace survives', async t => {
+    const f = fixture(t); await f.ready();
+    assert.equal(f.h.search.value, 'old'); assert.equal(f.c.active, true);
     assert.equal(f.d.querySelectorAll('input[type=search]').length, 1);
     assert.equal(f.d.querySelectorAll('#list').length, 1); assert.equal(f.d.querySelectorAll('dialog,iframe').length, 0);
     assert.equal(f.c.replace.classList.contains('tle-search-field'), false);
@@ -111,10 +110,10 @@ test('conflict between search and preview requires a new search; execute recheck
     assert.equal(f.c.confirm.hidden,true); await f.c.scan(); await f.c.preview(); f.write('characters/A.json',{data:{description:'old concurrent'}});
     await f.c.apply(); assert.match(f.read('characters/A.json'),/old concurrent/); assert.match(f.resume(),/失败/);
 });
-test('changing rules or scoped organizer filters clears stale preview and changing mode does not delete resources',async t=>{
+test('changing rules or scoped organizer filters clears stale preview without changing resource selection',async t=>{
     const f=fixture(t); await f.ready(); f.c.scope='selected'; await f.c.scan(); await f.c.preview();
     f.c.contextChanged(); assert.equal(f.c.snapshot,null); await assert.rejects(f.c.apply(),/预览/);
-    await f.c.setMode('name'); assert.equal(f.c.active,false); assert.deepEqual([...f.state.selected],['A.json']); assert.equal(f.calls.includes('apply'),false);
+    assert.equal(f.c.active,true); assert.deepEqual([...f.state.selected],['A.json']); assert.equal(f.calls.includes('apply'),false);
 });
 test('paged selections beyond 100 matches preserve exclusions through preview and execution', async t=>{
     const f=fixture(t); f.write('characters/A.json',{data:{description:Array(205).fill('old').join(' ')}});
@@ -150,17 +149,17 @@ test('upstream compatibility detects changed preview context, and original serve
     await f.c.scan();await f.c.preview();f.write('characters/A.json',{data:{description:'concurrent value'}});
     await f.c.apply();assert.match(f.read('characters/A.json'),/concurrent value/);assert.match(f.resume(),/失败/);
 });
-test('native content-search checkbox and adjacent controls retain one shared search field', t => {
+test('content controller does not recreate the retired inline mode checkbox', t => {
     const f = fixture(t);
-    assert.match(f.c.target.textContent,/查找和替换/);
-    assert.equal(f.c.target.tagName,'LABEL');
-    assert.ok(f.c.target.classList.contains('checkbox_label'));
-    assert.equal(f.c.modeToggle.type,'checkbox');
-    assert.equal(f.c.modeToggle.parentElement,f.c.target);
-    assert.equal(f.c.findButton.parentElement,f.c.findRow);
-    assert.equal(f.h.searchWrap.parentElement,f.c.findRow);
-    assert.equal(f.c.previewButton.parentElement,f.c.replaceRow);
+    assert.equal(f.c.active, true);
+    assert.equal(f.c.mode, 'content');
+    assert.equal(f.c.target, undefined);
+    assert.equal(f.c.modeToggle, undefined);
+    assert.equal(f.c.findButton.parentElement, f.c.findRow);
+    assert.equal(f.h.searchWrap.parentElement, f.c.findRow);
+    assert.equal(f.c.previewButton.parentElement, f.c.replaceRow);
     assert.equal(f.d.querySelectorAll('input[type=search]').length,1);
+    assert.equal(f.d.querySelectorAll('input[type=checkbox]').length,0);
 });
 test('rule combinations use two compact toolbars; only the JSON path editor spans the full row', t => {
     const f = fixture(t), c = f.c;
