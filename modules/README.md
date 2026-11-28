@@ -18,8 +18,8 @@ TLE 继续以**单份 SillyTavern Assistant JSON**作为用户安装入口。Cor
 - 嵌入构建：npm run build:core
 - 嵌入位置：TLE_MODULE_KERNEL_START / TLE_MODULE_KERNEL_END
 - Core API：api.modules
-- Kernel API：1
-- Kernel 版本：1.0.0
+- Kernel API：2
+- Kernel 版本：1.1.0
 - Stable 模块清单：modules/stable.json
 - 清单 Schema：modules/manifest.schema.json
 - 回归：tests/tle-module-kernel.test.mjs、tests/tle-module-manifest.test.mjs
@@ -62,6 +62,7 @@ parentId 表示层级归属，不等同于技术依赖。比如会话侠可以�
 - settings.get/set/remove/clear：按模块 ID 与设置 Schema 版本隔离的 JSON 存储；分别要求 settings:read、settings:write 权限。
 - modules.getAPI(id)：仅可读取已声明为直接父模块或直接依赖、且当前处于 active 状态的模块 API。
 - hasPermission/requirePermission：能力声明检查。
+- services.get(id)：读取 Core 提供的冻结服务对象；必须声明对应的 `services:<id>` 权限。当前服务：`chat-context`（只读聊天快照、当前角色、生成状态、按聊天标识校验后执行原生命令）与 `resource-catalog`（统一目录、管理目录和快切；所有异步方法必须传入模块自己的 AbortSignal）。
 
 模块 destroy 与 init 返回的 cleanup 必须同步完成，不能依赖异步清理。异步初始化应监听 context.signal；若 Core 在初始化完成前卸载，Kernel 会立即调用定义级 destroy 清理部分初始化，再在异步结果返回后执行返回值 cleanup。定义级 destroy 必须可重复调用且能安全处理部分初始化状态；Kernel 会避免对同一个定义级 destroy 重复调用。
 
