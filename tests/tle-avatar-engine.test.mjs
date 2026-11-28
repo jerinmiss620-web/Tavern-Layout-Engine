@@ -11,8 +11,10 @@ const core = read(manifest.release.source_path);
 assert.match(manifest.release.version, /^\d+\.\d+\.\d+$/, 'Stable Core version must be valid semantic versioning');
 assert.ok(core.includes(`version: '${manifest.release.version}',`), 'Core API version must match the stable manifest');
 assert.ok(core.includes(moduleSource), 'Core must embed the maintained avatar engine byte-for-byte');
-assert.match(core, /hdAvatarEngine = createTLEHDAvatarEngine\(SCRIPT_WIN, HOST_WIN, HOST_DOC\)/);
-assert.match(core, /hdAvatarEngine\?\.stop\?\.\(\)/);
+assert.match(core, /fallbackModules:\s*\[\{\s*id: 'avatar\.hd'/);
+assert.match(core, /init\(context\)\s*\{\s*const engine = createTLEHDAvatarEngine\(context\.host\.scriptWindow, context\.host\.window, context\.host\.document\)/);
+assert.match(core, /moduleLoader\.start\(\)/);
+assert.match(core, /moduleLoader\.destroy\(\)/);
 assert.match(moduleSource, /const VERSION = '4\.5\.14'/);
 for (const selector of [
   '.mesAvatarWrapper img',
