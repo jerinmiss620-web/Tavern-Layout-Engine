@@ -118,3 +118,14 @@
 ## 旧测试分支说明
 
 旧分支 `feature/organizer-nav-worldbooks-20261125` 的测试清单与 Loader 缓存相互隔离。它可以用于追溯历史测试，但不代表当前正式版本，也不应继续承载新功能。需要新的测试环境时，从当前 `main` 创建独立测试分支，重新生成独立清单与 Test Loader；正式 `latest.json`、`loader/latest.json` 和 Bootstrap 不参与测试发布。
+
+
+## Phase 2.2 Module Loader
+
+- `development/core/module-loader.js` 必须与 Core 中的 `TLE_MODULE_LOADER_START/END` bundle 完全一致。
+- Stable 与 Test Manifest 必须按 Loader 通道选择，不能交叉读取。
+- 模块源码必须来自仓库 Raw HTTPS，URL 必须精确绑定完整 Commit SHA 与 source_path。
+- 必须在执行前验证 SHA-256 与 UTF-8 字节数；相同模块 SemVer 不得更换 Commit 或源码摘要。
+- IndexedDB 只把成功初始化的版本标记为 Last Known Good；下载成功不等于更新成功。
+- 候选模块 init 失败时，旧模块实例必须继续可用；独立模块的更新/停用/卸载不得影响无依赖关系的模块。
+- Core 内置 HD Avatar Engine fallback 必须保留，直到 ST/TT 实机验证通过并完成正式迁移验收。

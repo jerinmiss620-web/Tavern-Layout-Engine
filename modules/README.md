@@ -63,11 +63,24 @@ parentId 表示层级归属，不等同于技术依赖。比如会话侠可以�
 
 permissions 是 Core API 的能力声明与调用门槛，**不是 JavaScript 沙箱**。模块脚本与 TLE 在同一宿主页面执行；恶意或被篡改的脚本仍可能直接访问页面全局对象。因此安全更新必须依赖不可变 Commit URL、SHA-256、字节数、来源校验与 Loader 的已验证加载链。不能把权限数组宣传为浏览器级隔离。
 
-## 尚未实现（后续阶段）
+## Phase 2.2 当前实现
 
-1. Manifest 下载器：获取 Stable/Test 清单，校验 Schema、Core API 兼容性、依赖图、来源、Commit、SHA-256 和字节数。
-2. 模块源码加载器：只执行通过校验的固定源码；避免重复加载、并发更新和跨通道污染。
-3. 模块版本缓存：模块级 Last Known Good、previous version、候选隔离与失败回滚。
-4. Engine Hub：展示模块版本、状态、依赖、更新/停用入口；继续继承酒馆原生 UI，不另造一套管理系统。
-5. 试点迁移：选择一个依赖少、边界清楚的现有功能；通过 ST/TT 实机验证后再迁移会话侠/楼层侠等父子模块。
-6. 全量迁移与旧代码清理：只有模块独立启停、独立更新、失败隔离、全局卸载和回滚全部通过后才逐项执行。
+- Module Loader 源码：development/core/module-loader.js
+- Core 嵌入构建：node scripts/build-module-loader.mjs
+- Core 嵌入位置：TLE_MODULE_LOADER_START / TLE_MODULE_LOADER_END
+- Core API：api.moduleLoader（Kernel 仍通过 api.modules 暴露）
+- Manifest：modules/stable.json 与 modules/test.json 分通道管理
+- 缓存：IndexedDB，分别保存模块源码、Manifest 与模块安装状态
+- LKG：仅在模块成功初始化后推进；失败候选不会覆盖 Last Known Good
+- 模块源码：必须绑定完整 Commit SHA、仓库内路径、SHA-256 与 UTF-8 字节数；相同 SemVer 不允许更换源码摘要
+- 加载方式：只对校验后的源码创建 Blob ESM URL，不使用 eval / new Function；模块源码必须自包含，不允许静态 import
+- 回退：Core 内置 HD Avatar Engine 4.5.14 作为离线 fallback；远程候选失败时保留或恢复可用版本
+- 试点：avatar.hd，模块自身版本独立于引擎显示版本；TT 保留原生绕过
+
+## 后续验收门槛
+
+1. 在 ST 与 TT 实机验证 Manifest 获取、Blob 模块加载、头像区域、切换/卸载与错误恢复。
+2. 验证断网、超时、错误哈希、错误字节数、候选初始化失败、缓存损坏及 Core 卸载时的行为。
+3. 验证停用/卸载状态跨刷新保留，且不会影响其他独立模块。
+4. 只有实机测试通过后，才把 HD Avatar Engine 写入 Stable Manifest；在此之前 modules/stable.json 必须保持空。
+5. Gallery Home、会话侠、楼层侠及其他模块暂不迁移。

@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "project": "Tavern Layout Engine",
+  "channel": "test",
+  "core_api_version": 1,
+  "modules": [],
+  "notes": "Test-only module manifest. Entries must use immutable source commits and pass the ST/TT pilot gate before promotion to Stable."
+}
