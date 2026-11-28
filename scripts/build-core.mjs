@@ -74,6 +74,12 @@ function ensureModuleMarkers(source) {
   return source;
 }
 
+function moduleBundleBody(bundle, startMarker, endMarker, label) {
+  assert.ok(bundle.startsWith(startMarker + '\\n'), label + ': invalid bundle start marker');
+  assert.ok(bundle.endsWith('\\n' + endMarker), label + ': invalid bundle end marker');
+  return bundle.slice(startMarker.length + 1, bundle.length - endMarker.length - 1);
+}
+
 function replaceRegion(source, startMarker, endMarker, replacement) {
   assert.equal(count(source, startMarker), 1, 'Missing or duplicate start marker: ' + startMarker);
   assert.equal(count(source, endMarker), 1, 'Missing or duplicate end marker: ' + endMarker);
@@ -112,7 +118,12 @@ source = replaceRegion(
   source,
   '  /* TLE_MODULE_KERNEL_START */',
   '  /* TLE_MODULE_KERNEL_END */',
-  buildModuleKernelBundle(kernelSource),
+  moduleBundleBody(
+    buildModuleKernelBundle(kernelSource),
+    '  /* TLE_MODULE_KERNEL_START */',
+    '  /* TLE_MODULE_KERNEL_END */',
+    'Module Kernel',
+  ),
 );
 
 const moduleLoaderSource = read('development/core/module-loader.js');
@@ -120,7 +131,12 @@ source = replaceRegion(
   source,
   '  /* TLE_MODULE_LOADER_START */',
   '  /* TLE_MODULE_LOADER_END */',
-  buildModuleLoaderBundle(moduleLoaderSource),
+  moduleBundleBody(
+    buildModuleLoaderBundle(moduleLoaderSource),
+    '  /* TLE_MODULE_LOADER_START */',
+    '  /* TLE_MODULE_LOADER_END */',
+    'Module Loader',
+  ),
 );
 
 const avatar = read('development/avatar-engine/avatar-engine.js');
