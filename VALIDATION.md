@@ -1,4 +1,15 @@
-# 自动更新验证记录 — 2026-11-28
+# 自动更新验证记录 — 2026-11-29
+
+## 2026-11-29 · Phase 2 统一构建与 Core 模块化试点整合
+
+- 整合基线：正式 `main@46bbf0f` 与统一 Core 构建 PR #32 的 `6f41edb`；独立工作分支：`integration/phase-2-module-system-20261129`。
+- PR #31 的 Module Kernel、Module Loader、Manifest、HD Avatar Engine 1.0.0 试点已迁入统一构建入口；权威源码分别保留在 `development/core/`、`modules/src/`，由 `npm run build:core` 自动装配进单文件 Core。
+- Test Core 候选固定在 `test-releases/v0.3.304/TLE.js`；不可变 Commit：`4398f33053053c3c1d66ded99c01f807dc607a6e`；SHA-256：`5c5a230ad8f096e6fff00a021403f24219d9932b2d9733a30352eff465ef8fa4`；UTF-8 字节数：`1205450`。
+- Test Loader 0.3.1 固定在 Commit：`88b910120fae5701fd54de8743a5ce0d1e518279`；SHA-256：`639213318c4c6904c32068b3287f9a5b8f971825f5b216edaf3aa050df75d735`；UTF-8 字节数：`39875`。其 Test Manifest URL 固定指向本整合分支，不读取旧主分支测试清单。
+- 分支专用 `channels/test.json` 现在指向 `test-releases/v0.3.304/TLE.js`；模块清单中的 HD Avatar Engine 源码则固定到独立 Commit，并校验 SHA-256 与 UTF-8 字节数。Stable Manifest 仍为空。
+- 正式 `latest.json`、`release-plan.json`、`releases/v0.3.304/TLE.js`、Bootstrap 1.0.6、Stable Loader Runtime 0.3.6 均与 `main` 的 Git Blob 完全一致；本分支不推进正式版本、不改正式安装链。
+- 自动化测试覆盖 Kernel 生命周期、模块下载与完整性校验、IndexedDB Last Known Good、候选 init 失败回滚、离线恢复、父子模块级联、独立模块更新、HD Avatar 单实例接管、TT 原生绕过、旧 Test Loader 兼容及统一构建/发布保护。
+- 本次整合尚待 GitHub Actions 全量回归及 ST/TT 实机验收；自动化通过不等同于宿主实测。PR #31/#32 均保持独立，尚未合并。
 
 当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.304。
 
