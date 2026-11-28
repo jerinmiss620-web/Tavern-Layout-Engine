@@ -10,7 +10,10 @@ const sourcePath = hasWorkingSource
   : `releases/v${plan.core}/TLE.js`;
 const source = readFileSync(sourcePath, 'utf8');
 const readme = readFileSync('README.md', 'utf8');
-const actualVersion = source.match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
+const coreApiStart = source.indexOf('  const api = {\n    modules: moduleKernel,');
+const coreApiEnd = source.indexOf('\n  };', coreApiStart);
+assert.ok(coreApiStart >= 0 && coreApiEnd > coreApiStart, 'Core API object must expose the Kernel');
+const actualVersion = source.slice(coreApiStart, coreApiEnd).match(/version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'/)?.[1];
 const expectedVersion = stableManifest.release.version || plan.core;
 
 assert.equal(stableManifest.latest_version, plan.core, 'stable manifest and release plan must agree');
