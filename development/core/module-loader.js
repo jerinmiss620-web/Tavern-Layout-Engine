@@ -43,7 +43,7 @@ export function createModuleLoader(options = {}) {
 
   const manifestUrl = String(options.manifestUrl || (
     channel === 'test'
-      ? ROOT + 'feature/core-module-kernel-v0.3.304-20261128/modules/test.json'
+      ? ROOT + 'integration/phase2-unified-modules-20261129/modules/test.json'
       : ROOT + 'main/modules/stable.json'
   ));
 
