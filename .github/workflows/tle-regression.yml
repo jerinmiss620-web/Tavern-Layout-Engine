@@ -17,6 +17,20 @@ jobs:
       - run: npm ci
       - name: Full-source update simulation, compatibility and publication guards
         run: npm test
+      - name: Capture assembled Core inputs when regression fails
+        if: failure()
+        run: |
+          mkdir -p /tmp/tle-core-diagnostic
+          node scripts/build-core.mjs --output /tmp/tle-core-diagnostic/generated-TLE.js
+          cp development/organizer/TLE.js /tmp/tle-core-diagnostic/current-TLE.js
+      - name: Upload assembled Core diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tle-core-build-diagnostic-${{ github.sha }}
+          path: /tmp/tle-core-diagnostic/
+          if-no-files-found: error
+          retention-days: 1
       - name: Verify Organizer branch test channel and pinned installer
         if: github.ref == 'refs/heads/feature/organizer-nav-worldbooks-20261125'
         run: node loader/verify-test-channel.mjs --remote

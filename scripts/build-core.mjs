@@ -56,6 +56,10 @@ function replaceRegion(source, startMarker, endMarker, replacement) {
 }
 
 const checkOnly = process.argv.includes('--check');
+const outputIndex = process.argv.indexOf('--output');
+const outputPath = outputIndex >= 0 ? process.argv[outputIndex + 1] : CORE_PATH;
+assert.ok(outputPath, '--output requires a destination path');
+assert.ok(!(checkOnly && outputIndex >= 0), '--check and --output cannot be combined');
 let source = read(CORE_PATH);
 source = ensureModuleMarkers(source);
 
@@ -104,9 +108,12 @@ source = replaceRegion(
 );
 
 if (checkOnly) {
-  assert.equal(source, read(CORE_PATH),
+  assert.equal(source, read(outputPath),
     'Core source is not assembled from its authoritative modules. Run npm run build:core.');
   console.log('TLE Core build check passed: Organizer Batch, HD Avatar Engine and Gallery Home are synchronized.');
+} else if (outputIndex >= 0) {
+  writeFileSync(outputPath, source);
+  console.log('Generated assembled TLE Core at ' + outputPath + '.');
 } else {
   const previous = read(CORE_PATH);
   if (source !== previous) writeFileSync(CORE_PATH, source);
