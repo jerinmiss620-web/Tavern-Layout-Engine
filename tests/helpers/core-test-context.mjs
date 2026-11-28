@@ -60,6 +60,12 @@ export function normalizeCoreSource(source) {
   normalized = normalized.replace(/\/\* TLE_AVATAR_ENGINE_END \*\/\n?/g, '');
   normalized = normalized.replace(/\/\* TLE_GALLERY_HOME_START \*\/\n?/g, '');
   normalized = normalized.replace(/\/\* TLE_GALLERY_HOME_END \*\/\n?/g, '');
+  // Removing the Avatar/Gallery build markers collapses one source-only blank line.
+  // Normalize this exact formatting boundary; executable code remains compared byte-for-byte.
+  normalized = normalized.replace(
+    '  return api;\n}\nfunction createTLEGalleryHome(window, document) {',
+    '  return api;\n}\n\nfunction createTLEGalleryHome(window, document) {',
+  );
   normalized = normalized.replace(/(?<!\\)(?:\\\\)*\\u([0-9a-fA-F]{4})/g, (_match, hex) => String.fromCharCode(parseInt(hex, 16)));
   normalized = normalized.replace(/([=!]==?)\s*void 0/g, '$1 undefined');
   normalized = normalized.replace(/\n{2,}/g, '\n\n');
