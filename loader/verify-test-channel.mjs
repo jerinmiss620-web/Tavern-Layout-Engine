@@ -162,38 +162,10 @@ assert.ok(tleSource.includes('diagnosticButtonObserver'));
 assert.ok(tleSource.includes('buttonDisplayPriority'));
 assert.ok(tleSource.includes('buttonReceivesHit'));
 
- // v0.3.196 feature contract: two floor inputs, opt-in navigation repair,
- // and native chat quick actions inside 会话侠.
- assert.ok(tleSource.includes("id: 'range'"), 'Floor tools must use one shared range input');
- assert.ok(tleSource.includes("buttons: [{ id: 'hide', label: '隐藏' }, { id: 'unhide', label: '恢复' }]"));
- assert.ok(tleSource.includes('data-chat-action-clear'), 'Floor inputs must have clear controls');
- assert.ok(tleSource.includes('请输入有效范围，例如 90-90'));
- assert.ok(tleSource.includes('data-tle-setting="compat-nav-repair"'));
- assert.ok(tleSource.includes('width: fit-content !important;'));
- assert.ok(tleSource.includes('data-chat-quick-action="new"'));
- assert.ok(tleSource.includes('option_start_new_chat'));
- assert.ok(tleSource.includes('option_close_chat'));
- assert.ok(tleSource.includes('option_select_chat'));
- assert.ok(tleSource.includes('querySelectorAll(`#options [id="${id}"]`)'));
- assert.ok(tleSource.includes('navigationRepairEnabled: compatibilityNavigationRepair'));
- assert.ok(tleSource.includes('quickActionsEnabled: chatQuickActionsEnabled'));
- assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="labels"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
- assert.ok(/body\[data-tle-compat-nav-repair\]\[data-tle-nav="info"\][\s\S]*?margin-inline: 15px !important;/.test(tleSource));
- assert.ok(tleSource.includes('function findNavigationControlForEvent(event)'));
- assert.ok(tleSource.includes('function getNavigationEventDetails(button, event)'));
- assert.ok(tleSource.includes('targetArea'));
- assert.ok(tleSource.includes('iconReceivesHit'));
- assert.ok(tleSource.includes('labelReceivesHit'));
- assert.ok(tleSource.includes('iconCenterButtonReceivesHit'));
- assert.ok(tleSource.includes('iconPseudoElements'));
- assert.ok(tleSource.includes('function recordNavigationPointerDown(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickCapture(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickDocumentBubble(event)'));
- assert.ok(tleSource.includes('function recordNavigationClickWindowBubble(event)'));
- assert.ok(tleSource.includes('nativeControls: navigationControlDiagnostics'));
- assert.ok(tleSource.includes('drawerOpenAfterDispatch'));
- assert.ok(tleSource.includes('buttonPresentInHitStack: hitNodes.some'));
- assert.ok(!/body\[data-tle-compat-nav-repair\]\[data-tle-nav="icons"\][\s\S]{0,500}margin-inline: 15px !important;/.test(tleSource));
+// Current Core regression contracts are maintained by the focused regression tests
+// and the Phase 3 service checks above. Do not carry stale v0.3.196 UI assertions
+// into newer Test candidates.
+
 if (REMOTE) {
   await checkRemoteSource(release.source_url, release.sha256, release.size_bytes, 'TLE release');
   await checkRemoteSource(loaderRelease.source_url, loaderRelease.sha256, loaderRelease.size_bytes, 'Loader release');
