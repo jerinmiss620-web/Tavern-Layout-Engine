@@ -127,7 +127,10 @@ assert.match(tle, /buttons: \[\{ id: 'hide', label: '隐藏' \}, \{ id: 'unhide'
 assert.match(tle, /data-chat-action-clear/);
 assert.ok(tle.includes("makeChatActionInput(action, 'start')"));
 assert.ok(tle.includes("makeChatActionInput(action, 'end')"));
-assert.ok(tle.includes('两框均输入数字；只隐藏或恢复 1 层时'));
+assert.ok(tle.includes('function parseChatActionRangePaste(value)'));
+assert.ok(tle.includes('function bindChatActionRangePaste(targetInput, startInput, endInput)'));
+assert.ok(tle.includes("targetInput.addEventListener('paste', event =>"));
+assert.ok(tle.includes('复制内容包含多个不连续范围'));
 assert.ok(tle.includes('const endRaw = endInput?.value.trim()'));
 assert.doesNotMatch(tle, /请输入有效范围，例如 90-90/);
 assert.match(tle, /data-tle-setting="compat-nav-repair"/);
