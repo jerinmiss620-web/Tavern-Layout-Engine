@@ -70,6 +70,8 @@ export function normalizeCoreSource(source) {
   // esbuild emits void 0 for the same undefined checks used in the stable bundle.
   normalized = normalized.replace(/([=!]==?)\s*void 0/g, '$1 undefined');
 
+  normalized = normalized.replace(/\n{2,}(?=\/\/ TLE integrated engine,)/g, '\n');
+
   // Module markers are inserted at these two exact function boundaries.
   normalized = normalized.replace(/\n{2,}(?=function createTLEGalleryHome\()/g, '\n');
   normalized = normalized.replace(/\n{2,}(?=  function destroy\()/g, '\n');
