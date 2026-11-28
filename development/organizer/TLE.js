@@ -3182,8 +3182,8 @@ var TLEBatchLibrary = (() => {
       const cleanup = typeof result === 'function'
         ? result
         : (result && typeof result.destroy === 'function' ? result.destroy : null);
-      if (cleanup) invokeSync(cleanup, result, [], details);
-      if (record.definition.destroy && record.definition.destroy !== cleanup) {
+      if (cleanup && !(record.initCleanupDone && cleanup === record.definition.destroy)) invokeSync(cleanup, result, [], details);
+      if (record.definition.destroy && record.definition.destroy !== cleanup && !record.initCleanupDone) {
         invokeSync(record.definition.destroy, result, [record.context], details);
       }
     }
@@ -3194,6 +3194,12 @@ var TLEBatchLibrary = (() => {
         record.stopRequested = true;
         try { record.controller?.abort(); } catch {}
         clearSubscriptions(record);
+        if (record.definition.destroy && !record.initCleanupDone) {
+          invokeSync(record.definition.destroy, null, [record.context, makeError('模块初始化期间收到停止请求。')], {
+            type: 'module-init-stop', id: record.definition.id,
+          });
+          record.initCleanupDone = true;
+        }
         record.status = 'stopping';
         return;
       }
@@ -3249,7 +3255,7 @@ var TLEBatchLibrary = (() => {
             const cancelled = destroyed || record.controller.signal.aborted || record.stopRequested;
             clearSubscriptions(record);
             try { record.controller?.abort(); } catch {}
-            if (record.definition.destroy) {
+            if (record.definition.destroy && !record.initCleanupDone) {
               invokeSync(record.definition.destroy, null, [record.context, error], {
                 type: 'module-init-rollback', id: currentId,
               });

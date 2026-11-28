@@ -57,7 +57,7 @@ parentId 表示层级归属，不等同于技术依赖。比如会话侠可以�
 - modules.getAPI(id)：仅可读取已声明为直接父模块或直接依赖、且当前处于 active 状态的模块 API。
 - hasPermission/requirePermission：能力声明检查。
 
-模块 destroy 与 init 返回的 cleanup 必须同步完成，不能依赖异步清理。异步初始化应监听 context.signal；若 Core 在初始化完成前卸载，Kernel 会中止初始化，并在异步结果返回后立即执行其同步 cleanup。
+模块 destroy 与 init 返回的 cleanup 必须同步完成，不能依赖异步清理。异步初始化应监听 context.signal；若 Core 在初始化完成前卸载，Kernel 会立即调用定义级 destroy 清理部分初始化，再在异步结果返回后执行返回值 cleanup。定义级 destroy 必须可重复调用且能安全处理部分初始化状态；Kernel 会避免对同一个定义级 destroy 重复调用。
 
 ## 权限边界说明
 

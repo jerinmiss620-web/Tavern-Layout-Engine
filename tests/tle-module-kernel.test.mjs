@@ -253,10 +253,12 @@ test('destroy aborts an in-flight init and disposes its late result exactly once
   let enter;
   let release;
   let cleanupCount = 0;
+  let definitionCleanupCount = 0;
   const entered = new Promise(resolve => { enter = resolve; });
   const pending = new Promise(resolve => { release = resolve; });
   kernel.register({
     id: 'slow-module', version: '1.0.0',
+    destroy() { definitionCleanupCount++; },
     async init(context) {
       signal = context.signal;
       enter();
@@ -267,9 +269,11 @@ test('destroy aborts an in-flight init and disposes its late result exactly once
   await entered;
   kernel.destroy();
   assert.equal(signal.aborted, true);
+  assert.equal(definitionCleanupCount, 1, 'definition destroy must clean partial setup immediately');
   release({ destroy() { cleanupCount++; } });
   await assert.rejects(startPromise, /初始化已取消/);
-  assert.equal(cleanupCount, 1);
+  assert.equal(cleanupCount, 1, 'late init result cleanup must run once');
+  assert.equal(definitionCleanupCount, 1, 'definition destroy must not run twice');
   assert.equal(kernel.get('slow-module').status, 'destroyed');
 });
 
