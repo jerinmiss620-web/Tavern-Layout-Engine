@@ -9,7 +9,11 @@
 - 分支专用 `channels/test.json` 现在指向 `test-releases/v0.3.304/TLE.js`；模块清单中的 HD Avatar Engine 源码则固定到独立 Commit，并校验 SHA-256 与 UTF-8 字节数。Stable Manifest 仍为空。
 - 正式 `latest.json`、`release-plan.json`、`releases/v0.3.304/TLE.js`、Bootstrap 1.0.6、Stable Loader Runtime 0.3.6 均与 `main` 的 Git Blob 完全一致；本分支不推进正式版本、不改正式安装链。
 - 自动化测试覆盖 Kernel 生命周期、模块下载与完整性校验、IndexedDB Last Known Good、候选 init 失败回滚、离线恢复、父子模块级联、独立模块更新、HD Avatar 单实例接管、TT 原生绕过、旧 Test Loader 兼容及统一构建/发布保护。
-- 本次整合尚待 GitHub Actions 全量回归及 ST/TT 实机验收；自动化通过不等同于宿主实测。PR #31/#32 均保持独立，尚未合并。
+- ST 与 TT 实机验收已于 2026-11-29 全部通过（用户确认）：HD Avatar Engine `avatar.hd@1.0.0` 加载、Last Known Good 记录、刷新/重进恢复、断网恢复、错误源码/哈希/初始化失败回滚、模块停用/启用/卸载、TT 原生头像绕过，以及完整卸载 TLE 后的模块资源清理。
+- 实机验收使用的 Test Core v0.3.304 固定 Commit：`acca26dc349ba96e259ec48209ad337d6d289b7f`；SHA-256：`1197e5463df363582e1d55b46a99aa59f3d5b534285c02c93f6b269fb8c2c2b3`；UTF-8 字节数：`1205541`。Test Loader 0.3.1 固定 Commit：`88b910120fae5701fd54de8743a5ce0d1e518279`；SHA-256：`639213318c4c6904c32068b3287f9a5b8f971825f5b216edaf3aa050df75d735`；UTF-8 字节数：`39875`。
+- GitHub Actions 整合分支 Run `46178475376` 在 Commit `630fc936d9f2d7fa997ae7d1e046333b4094814d` 全量成功；后续构建器/版本同步修正没有改动上述固定 Test Core 与 Test Loader 源码。
+- PR #31/#32 仍未合并。PR #31 的旧分支会改动正式 `latest.json` 与 `releases/v0.3.304/TLE.js`，不可直接合并；PR #32 的统一构建器已进入本整合分支并继续修正。正式集成应以本分支为唯一候选。
+- 本次实机通过只完成模块运行时试点验收，不自动授权正式推广：`modules/stable.json` 继续保持空，`avatar.hd` 暂留 Test Manifest，待单独审议 Stable promotion。
 
 当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.304。
 
