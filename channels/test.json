@@ -2,18 +2,18 @@
   "schema_version": 1,
   "project": "Tavern Layout Engine",
   "channel": "test",
-  "latest_version": "0.3.204",
+  "latest_version": "0.3.304",
   "minimum_loader_version": "0.3.0",
   "release": {
-    "version": "0.3.204",
-    "source_path": "releases/v0.3.204/TLE.js",
-    "source_commit": "caf5cb6aef942946a2091540de4854a876100617",
-    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/caf5cb6aef942946a2091540de4854a876100617/releases/v0.3.204/TLE.js",
-    "changelog_path": "releases/v0.3.204/CHANGELOG.md",
-    "sha256": "1cb93e490c2fdd0c551088dccdc624f26fd72aa3a17a06ac81d48e7052762bc8",
-    "size_bytes": 497156
+    "version": "0.3.304",
+    "source_path": "releases/v0.3.304/TLE.js",
+    "source_commit": "3fe748e26fa5f95d782f3d37808d2f2c5aac3618",
+    "source_url": "https://raw.githubusercontent.com/jerinmiss620-web/Tavern-Layout-Engine/3fe748e26fa5f95d782f3d37808d2f2c5aac3618/releases/v0.3.304/TLE.js",
+    "changelog_path": "releases/v0.3.304/CHANGELOG.md",
+    "sha256": "c064a73bd175559c269b20fb14614f32dd0940105262d809bc87fafd115c74e2",
+    "size_bytes": 1205116
   },
-  "status": "TEST v0.3.204: compatible update UI for existing Test Loader 0.3.0 and Stable Loader 0.3.1, with current version, user-triggered check/update, and complete script info. Stable latest.json intentionally remains v0.3.203 pending ST/TT confirmation.",
+  "status": "TEST v0.3.304: Core Module Loader, verified Manifest/IndexedDB/LKG lifecycle and HD Avatar Engine 1.0.0 Test-only pilot. Stable Manifest remains empty. Validate on ST and TT; this PR remains Draft.",
   "recommended_loader_version": "0.3.0",
   "loader_release": {
     "version": "0.3.0",

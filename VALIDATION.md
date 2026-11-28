@@ -1,5 +1,14 @@
 # 自动更新验证记录 — 2026-11-28
 
+## 2026-11-28 · Core Module Loader 与 HD Avatar Engine 独立模块试点
+
+- 在 Core v0.3.304 中嵌入 Module Kernel 与 Module Loader；保持单份酒馆助手 JSON 的导入方式。
+- 测试候选不可变 Commit：`3fe748e26fa5f95d782f3d37808d2f2c5aac3618`；SHA-256：`c064a73bd175559c269b20fb14614f32dd0940105262d809bc87fafd115c74e2`；UTF-8 字节数：`1205116`。
+- 模块源码按固定 Commit、SHA-256 与 UTF-8 字节数校验；IndexedDB 缓存成功版本，初始化成功后才推进 Last Known Good。
+- HD Avatar Engine 1.0.0 进入 Test Manifest；原内置 4.5.14 作为离线/失败回退。Stable Manifest 保持空清单。
+- 自动化覆盖 Manifest 校验、独立更新、父子依赖、停用/卸载、失败回滚、离线 LKG 与 TT 原生绕过。
+- Test Loader 0.3.0 可通过测试通道加载本候选；真实 ST/TT 设备验收仍待用户执行，PR 保持 Draft，不合并、不发布。
+
 当前正式发布组合：Bootstrap 1.0.6 / Loader Runtime 0.3.6 / Core v0.3.304。
 
 `npm test` 运行历史兼容性回归、新 Core 的同组诊断/布局回归、安装包/发布元数据检查，以及完整源码运行模拟。
