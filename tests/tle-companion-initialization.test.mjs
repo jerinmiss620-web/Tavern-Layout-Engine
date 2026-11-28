@@ -12,8 +12,8 @@ const release = read(manifest.release.source_path);
 const developmentVersion = manifest.release.version;
 const installer = JSON.parse(read(`releases/v${manifest.release.version}/TLE-${manifest.release.version}-import.json`));
 
-const featureBranch = /^refs\/heads\/feature\//.test(process.env.GITHUB_REF || '') ||
-  /^feature\//.test(process.env.GITHUB_HEAD_REF || '') ||
+const branchRef = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF || '';
+const featureBranch = Boolean(branchRef) && branchRef !== 'main' && branchRef !== 'refs/heads/main' ||
   process.env.TLE_ALLOW_DEV_SOURCE_DIVERGENCE === '1';
 if (!featureBranch) {
   assert.equal(release, source, 'the pinned stable source must match the working source on stable branches');
