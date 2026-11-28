@@ -89,13 +89,13 @@ assert.deepEqual(
   'non-contiguous recovery floors must become separate native command ranges',
 );
 
-assert.match(source, /indexedDB\\.open\\(HIDDEN_FLOOR_GUARD_DB, 1\\)/);
-assert.match(source, /new HOST_WIN\\.MutationObserver\\(records => \\{/);
-assert.match(source, /attributeFilter: \\['is_system'\\]/);
-assert.match(source, /data-hidden-guard-action=\"restore\"/);
-assert.match(source, /data-hidden-guard-action=\"accept\"/);
-assert.match(source, /hiddenFloorGuardCommitNativeAction\\(actionId, actionRange, snapshot\\.chatKey\\)/);
-assert.match(source, /executeTLESlashCommand\\('\\/hide ' \\+ range\\.start \\+ '-' \\+ range\\.end/);
+assert.ok(source.includes("indexedDB.open(HIDDEN_FLOOR_GUARD_DB, 1)"));
+assert.ok(source.includes("new HOST_WIN.MutationObserver(records => {"));
+assert.ok(source.includes("attributeFilter: ['is_system']"));
+assert.ok(source.includes('data-hidden-guard-action="restore"'));
+assert.ok(source.includes('data-hidden-guard-action="accept"'));
+assert.ok(source.includes("hiddenFloorGuardCommitNativeAction(actionId, actionRange, snapshot.chatKey)"));
+assert.ok(source.includes("executeTLESlashCommand('/hide ' + range.start + '-' + range.end"));
 
 const verification = section(
   source,
